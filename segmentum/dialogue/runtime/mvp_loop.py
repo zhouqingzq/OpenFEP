@@ -48,6 +48,12 @@ from segmentum.user_personality import (
     build_step_extractor_prompt,
     run_m12_1_tick,
 )
+from segmentum.reciprocal_role import (
+    M122RuntimeConfig,
+    M122RuntimeState,
+    build_extractor_prompt as build_m12_2_extractor_prompt,
+    run_m12_2_tick,
+)
 
 
 SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
@@ -98,6 +104,11 @@ SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
         "latest_reports_by_user": {},
         "run_records_by_user": {},
         "consecutive_step1_insufficient_by_user": {},
+    },
+    "m12_2_reciprocal_role_enabled": False,
+    "m12_2_reciprocal_role": {
+        "models_by_user": {},
+        "run_records_by_user": {},
     },
     "social_sharing_policy": {
         "regret_bias": 0.0,
@@ -3104,6 +3115,21 @@ def _m12_1_enabled_for_state(state: Mapping[str, Any]) -> bool:
     return bool(state.get("m12_1_personality_enabled", False))
 
 
+def _load_m12_2_state(state: Mapping[str, Any]) -> M122RuntimeState:
+    payload = _mapping(state.get("m12_2_reciprocal_role"))
+    if not payload:
+        return M122RuntimeState.clean()
+    return M122RuntimeState.from_dict(payload)
+
+
+def _save_m12_2_state(state: dict[str, Any], *, m12_2_state: M122RuntimeState) -> None:
+    state["m12_2_reciprocal_role"] = m12_2_state.to_dict()
+
+
+def _m12_2_enabled_for_state(state: Mapping[str, Any]) -> bool:
+    return bool(state.get("m12_2_reciprocal_role_enabled", False))
+
+
 def _should_default_enable_m12_for_persona_init(state: Mapping[str, Any]) -> bool:
     temporal = _mapping(state.get("temporal_state"))
     if temporal.get("last_turn_at") is not None:
@@ -3338,6 +3364,40 @@ def _merge_m12_1_into_memory_guidance(
         "latest_report_status": str(report.get("report_status", "")),
         "compact_profile_sections": _compact_m12_1_profile_sections(report),
         "permitted_surface": "internal_thinking_material",
+    }
+    memory_dynamics["control_guidance"] = control
+
+
+def _merge_m12_2_into_memory_guidance(
+    memory_dynamics: dict[str, Any],
+    *,
+    m12_2_result: Mapping[str, Any] | None,
+) -> None:
+    if not m12_2_result or not m12_2_result.get("enabled"):
+        return
+    cards = [
+        dict(item)
+        for item in m12_2_result.get("prompt_safe_evidence_cards", [])
+        if isinstance(item, Mapping)
+    ]
+    hints = [
+        dict(item)
+        for item in m12_2_result.get("reply_policy_hints", [])
+        if isinstance(item, Mapping)
+    ]
+    if not cards and not hints:
+        return
+    control = _mapping(memory_dynamics.get("control_guidance"))
+    contract = _mapping(control.get("reply_contract"))
+    contract["m12_2_reciprocal_role"] = {
+        "prompt_safe_evidence_cards": cards,
+        "reply_policy_hints": hints,
+        "permitted_surface": "compact_advisory_only",
+    }
+    control["reply_contract"] = contract
+    control["m12_2_reciprocal_role"] = {
+        "prompt_safe_evidence_cards": cards,
+        "reply_policy_hints": hints,
     }
     memory_dynamics["control_guidance"] = control
 
@@ -3787,6 +3847,62 @@ class MVPDialogueRuntime:
                 m12_1_result=m12_1_result_dict,
             )
 
+        m12_2_result_dict: dict[str, Any] = {}
+        if _m12_2_enabled_for_state(state):
+            m12_2_state = _load_m12_2_state(state)
+
+            def _extract_m12_2(name: str):
+                def _extract(snapshot: Mapping[str, object]) -> Mapping[str, object]:
+                    system_prompt, user_prompt = build_m12_2_extractor_prompt(name, snapshot)
+                    try:
+                        return self.llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+                    except Exception:
+                        if name == "first_order":
+                            return {
+                                "persona_about_user_claims": [],
+                                "claim_group_updates": [],
+                                "unresolved_uncertainty_points": [],
+                                "high_gain_candidates": [],
+                                "insufficient_evidence": True,
+                            }
+                        return {
+                            "user_about_persona_claims": [],
+                            "claim_group_updates": [],
+                            "inferred_user_uncertainties_about_persona": [],
+                            "clarifying_reply_candidates": [],
+                            "insufficient_evidence": True,
+                        }
+
+                return _extract
+
+            m12_2_state, m12_2_turn = run_m12_2_tick(
+                m12_2_state,
+                user_id=user_id,
+                turn_id=turn_key,
+                turn_index=turn_index + 1,
+                hour_bucket=now // 3600,
+                user_text=user_text,
+                current_turn_quotes={"q_current": user_text},
+                transcript_quote_refs=(),
+                m11_readonly_summary={
+                    "m11_evidence_cards": list(m11_result_dict.get("prompt_safe_evidence_cards", [])),
+                },
+                m12_readonly_summary=m12_pre_result or {},
+                m121_readonly_summary=m12_1_result_dict,
+                extractors={"first_order": _extract_m12_2("first_order"), "second_order": _extract_m12_2("second_order")},
+                config=M122RuntimeConfig(m12_2_reciprocal_role_enabled=True, persona_kind="ui_chat"),
+                session_id=str(self.store.root.resolve()),
+                persona_id=self.persona_name or "default",
+                cycle=turn_index,
+                event_sequence_index=2,
+            )
+            _save_m12_2_state(state, m12_2_state=m12_2_state)
+            m12_2_result_dict = m12_2_turn.to_dict()
+            _merge_m12_2_into_memory_guidance(
+                memory_dynamics,
+                m12_2_result=m12_2_result_dict,
+            )
+
         thinking_system, thinking_user = build_thinking_prompt(
             state=_prompt_safe_state(state),
             user_text=user_text,
@@ -3958,6 +4074,7 @@ class MVPDialogueRuntime:
             "memory_dynamics": memory_dynamics,
             "m11_user_model": m11_result_dict,
             "m12_1_personality": m12_1_result_dict,
+            "m12_2_reciprocal_role": m12_2_result_dict,
             "current_interlocutor": {
                 "display_name": display_name,
                 "user_id": user_id,

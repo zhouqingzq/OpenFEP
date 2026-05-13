@@ -1,0 +1,854 @@
+{
+  "artifact_id": "m12_2_acceptance_report",
+  "phase_a": {
+    "light_turn_assessments": [
+      {
+        "insufficient_evidence": true,
+        "observed_user_probe": "none",
+        "persona_about_user_uncertainty_band": "high",
+        "reply_policy_hints": [],
+        "safety_findings": [],
+        "top_gain_candidates": [],
+        "top_uncertainty_points": [],
+        "turn_id": "t1",
+        "user_about_persona_uncertainty_band": "high"
+      }
+    ],
+    "non_interference_diff": {
+      "disabled_output_empty": true,
+      "disabled_state_unchanged": true
+    },
+    "plain_language_linter_findings": {
+      "blocked": [
+        {
+          "raw_quote": "expected information gain from a user model",
+          "rule": "always_blocked_jargon",
+          "section": "phase_a",
+          "token": "expected information gain"
+        },
+        {
+          "raw_quote": "expected information gain from a user model",
+          "rule": "always_blocked_jargon",
+          "section": "phase_a",
+          "token": "information gain"
+        },
+        {
+          "raw_quote": "information gain from a user model",
+          "rule": "technical_model_usage",
+          "section": "phase_a",
+          "token": "model"
+        }
+      ],
+      "ordinary_allowed": []
+    },
+    "safety_linter_findings": [
+      {
+        "candidate_id": "candidate:private",
+        "reason": "candidate asks for sensitive details not required by the current dialogue",
+        "rule": "over_intimate_or_sensitive",
+        "severity": "block"
+      }
+    ],
+    "turns": [
+      "t0",
+      "t1"
+    ]
+  },
+  "phase_b": {
+    "evidence_cards": [
+      {
+        "confidence_band": "low",
+        "content_summary": "Give a direct explanation of what is known, uncertain, and bounded.",
+        "evidence_refs": [
+          {
+            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_kind": "evidence_quote_ref"
+          }
+        ],
+        "kind": "second_order_clarity",
+        "priority": "high",
+        "source": "m12_2_reciprocal_role"
+      },
+      {
+        "confidence_band": "medium",
+        "content_summary": "Ask which acceptance checks matter most right now.",
+        "evidence_refs": [
+          {
+            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_kind": "evidence_quote_ref"
+          }
+        ],
+        "kind": "safe_question",
+        "priority": "medium",
+        "source": "m12_2_reciprocal_role"
+      }
+    ],
+    "information_gain_candidates": [
+      {
+        "blocked_by_safety": false,
+        "candidate_id": "cand_clarify_limits",
+        "claim_id": "c_user_checks_consistency",
+        "consent_requirement": "none",
+        "evidence_refs": [
+          {
+            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_kind": "evidence_quote_ref"
+          }
+        ],
+        "expected_gain_band": "high",
+        "kind": "clarify_self",
+        "plain_action": "Give a direct explanation of what is known, uncertain, and bounded.",
+        "risk_band": "low",
+        "source": "explicit_user_request",
+        "target_axis": "user_about_persona",
+        "topic_label": "user_probing_persona_memory"
+      },
+      {
+        "blocked_by_safety": false,
+        "candidate_id": "cand_low_medium",
+        "claim_id": "",
+        "consent_requirement": "none",
+        "evidence_refs": [
+          {
+            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_kind": "evidence_quote_ref"
+          }
+        ],
+        "expected_gain_band": "medium",
+        "kind": "ask_question",
+        "plain_action": "Ask which acceptance checks matter most right now.",
+        "risk_band": "low",
+        "source": "explicit_user_request",
+        "target_axis": "persona_about_user",
+        "topic_label": "user_intent_this_turn"
+      }
+    ],
+    "reciprocal_claim_groups_before_after": {
+      "after": {
+        "acceptance-user": {
+          "contradiction_cooldown": 0,
+          "contradiction_turn_ids": [],
+          "high_gain_candidates": [
+            {
+              "blocked_by_safety": false,
+              "candidate_id": "cand_clarify_limits",
+              "claim_id": "c_user_checks_consistency",
+              "consent_requirement": "none",
+              "evidence_refs": [
+                {
+                  "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                  "ref_kind": "evidence_quote_ref"
+                }
+              ],
+              "expected_gain_band": "high",
+              "kind": "clarify_self",
+              "plain_action": "Give a direct explanation of what is known, uncertain, and bounded.",
+              "risk_band": "low",
+              "source": "explicit_user_request",
+              "target_axis": "user_about_persona",
+              "topic_label": "user_probing_persona_memory"
+            },
+            {
+              "blocked_by_safety": false,
+              "candidate_id": "cand_low_medium",
+              "claim_id": "",
+              "consent_requirement": "none",
+              "evidence_refs": [
+                {
+                  "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                  "ref_kind": "evidence_quote_ref"
+                }
+              ],
+              "expected_gain_band": "medium",
+              "kind": "ask_question",
+              "plain_action": "Ask which acceptance checks matter most right now.",
+              "risk_band": "low",
+              "source": "explicit_user_request",
+              "target_axis": "persona_about_user",
+              "topic_label": "user_intent_this_turn"
+            }
+          ],
+          "last_consolidated_turn_id": "t2",
+          "persona_about_user_claims": [
+            {
+              "claim_id": "c_user_goal_review",
+              "claim_text_internal": "User likely wants strict implementation review.",
+              "claim_text_plain": "The user appears to want a strict implementation review.",
+              "confidence_adjustment_reasons": [],
+              "confidence_band": "medium",
+              "created_turn_id": "t2",
+              "evidence_refs": [
+                {
+                  "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                  "ref_kind": "evidence_quote_ref"
+                }
+              ],
+              "group_id": "g_user_goal",
+              "status": "inferred_hypothesis",
+              "target_axis": "persona_about_user",
+              "uncertainty_band": "medium",
+              "updated_turn_id": "t2"
+            }
+          ],
+          "persona_label": "hutao",
+          "reciprocal_claim_groups": [
+            {
+              "created_turn_id": "t2",
+              "group_id": "g_persona_consistency",
+              "member_claim_ids": [
+                "c_user_checks_consistency"
+              ],
+              "status": "open",
+              "target_axis": "user_about_persona",
+              "topic_label": "user_probing_persona_memory",
+              "updated_turn_id": "t2"
+            },
+            {
+              "created_turn_id": "t2",
+              "group_id": "g_user_goal",
+              "member_claim_ids": [
+                "c_user_goal_review"
+              ],
+              "status": "open",
+              "target_axis": "persona_about_user",
+              "topic_label": "user_intent_this_turn",
+              "updated_turn_id": "t2"
+            }
+          ],
+          "safety_boundaries": [],
+          "unresolved_uncertainty_points": [
+            {
+              "evidence_refs": [
+                {
+                  "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                  "ref_kind": "evidence_quote_ref"
+                }
+              ],
+              "expected_gain_band": "medium",
+              "plain_question": "Which acceptance checks matter most right now?",
+              "point_id": "u_goal_detail",
+              "risk_band": "low",
+              "status": "open",
+              "target_axis": "persona_about_user",
+              "why_it_matters_internal": "narrows work validation"
+            },
+            {
+              "evidence_refs": [
+                {
+                  "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                  "ref_kind": "evidence_quote_ref"
+                }
+              ],
+              "expected_gain_band": "high",
+              "plain_question": "The user may want to know whether the persona can explain its limits clearly.",
+              "point_id": "u_persona_consistency",
+              "risk_band": "low",
+              "status": "open",
+              "target_axis": "user_about_persona",
+              "why_it_matters_internal": "direct consistency probe"
+            }
+          ],
+          "user_about_persona_claims": [
+            {
+              "claim_id": "c_user_checks_consistency",
+              "claim_text_internal": "User is probing persona consistency.",
+              "claim_text_plain": "The user may be checking whether the persona stays consistent.",
+              "confidence_adjustment_reasons": [],
+              "confidence_band": "medium",
+              "created_turn_id": "t2",
+              "evidence_refs": [
+                {
+                  "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                  "ref_kind": "evidence_quote_ref"
+                }
+              ],
+              "group_id": "g_persona_consistency",
+              "status": "inferred_hypothesis",
+              "target_axis": "user_about_persona",
+              "uncertainty_band": "high",
+              "updated_turn_id": "t2"
+            }
+          ],
+          "user_id": "acceptance-user",
+          "version": "m12.2.v1"
+        }
+      },
+      "before": {
+        "acceptance-user": {
+          "contradiction_cooldown": 0,
+          "contradiction_turn_ids": [],
+          "high_gain_candidates": [],
+          "last_consolidated_turn_id": "",
+          "persona_about_user_claims": [],
+          "persona_label": "hutao",
+          "reciprocal_claim_groups": [],
+          "safety_boundaries": [],
+          "unresolved_uncertainty_points": [],
+          "user_about_persona_claims": [],
+          "user_id": "acceptance-user",
+          "version": "m12.2.v1"
+        }
+      }
+    },
+    "reciprocal_role_models_before_after": {
+      "after": {
+        "models_by_user": {
+          "acceptance-user": {
+            "contradiction_cooldown": 0,
+            "contradiction_turn_ids": [],
+            "high_gain_candidates": [
+              {
+                "blocked_by_safety": false,
+                "candidate_id": "cand_clarify_limits",
+                "claim_id": "c_user_checks_consistency",
+                "consent_requirement": "none",
+                "evidence_refs": [
+                  {
+                    "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                    "ref_kind": "evidence_quote_ref"
+                  }
+                ],
+                "expected_gain_band": "high",
+                "kind": "clarify_self",
+                "plain_action": "Give a direct explanation of what is known, uncertain, and bounded.",
+                "risk_band": "low",
+                "source": "explicit_user_request",
+                "target_axis": "user_about_persona",
+                "topic_label": "user_probing_persona_memory"
+              },
+              {
+                "blocked_by_safety": false,
+                "candidate_id": "cand_low_medium",
+                "claim_id": "",
+                "consent_requirement": "none",
+                "evidence_refs": [
+                  {
+                    "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                    "ref_kind": "evidence_quote_ref"
+                  }
+                ],
+                "expected_gain_band": "medium",
+                "kind": "ask_question",
+                "plain_action": "Ask which acceptance checks matter most right now.",
+                "risk_band": "low",
+                "source": "explicit_user_request",
+                "target_axis": "persona_about_user",
+                "topic_label": "user_intent_this_turn"
+              }
+            ],
+            "last_consolidated_turn_id": "t2",
+            "persona_about_user_claims": [
+              {
+                "claim_id": "c_user_goal_review",
+                "claim_text_internal": "User likely wants strict implementation review.",
+                "claim_text_plain": "The user appears to want a strict implementation review.",
+                "confidence_adjustment_reasons": [],
+                "confidence_band": "medium",
+                "created_turn_id": "t2",
+                "evidence_refs": [
+                  {
+                    "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                    "ref_kind": "evidence_quote_ref"
+                  }
+                ],
+                "group_id": "g_user_goal",
+                "status": "inferred_hypothesis",
+                "target_axis": "persona_about_user",
+                "uncertainty_band": "medium",
+                "updated_turn_id": "t2"
+              }
+            ],
+            "persona_label": "hutao",
+            "reciprocal_claim_groups": [
+              {
+                "created_turn_id": "t2",
+                "group_id": "g_persona_consistency",
+                "member_claim_ids": [
+                  "c_user_checks_consistency"
+                ],
+                "status": "open",
+                "target_axis": "user_about_persona",
+                "topic_label": "user_probing_persona_memory",
+                "updated_turn_id": "t2"
+              },
+              {
+                "created_turn_id": "t2",
+                "group_id": "g_user_goal",
+                "member_claim_ids": [
+                  "c_user_goal_review"
+                ],
+                "status": "open",
+                "target_axis": "persona_about_user",
+                "topic_label": "user_intent_this_turn",
+                "updated_turn_id": "t2"
+              }
+            ],
+            "safety_boundaries": [],
+            "unresolved_uncertainty_points": [
+              {
+                "evidence_refs": [
+                  {
+                    "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                    "ref_kind": "evidence_quote_ref"
+                  }
+                ],
+                "expected_gain_band": "medium",
+                "plain_question": "Which acceptance checks matter most right now?",
+                "point_id": "u_goal_detail",
+                "risk_band": "low",
+                "status": "open",
+                "target_axis": "persona_about_user",
+                "why_it_matters_internal": "narrows work validation"
+              },
+              {
+                "evidence_refs": [
+                  {
+                    "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                    "ref_kind": "evidence_quote_ref"
+                  }
+                ],
+                "expected_gain_band": "high",
+                "plain_question": "The user may want to know whether the persona can explain its limits clearly.",
+                "point_id": "u_persona_consistency",
+                "risk_band": "low",
+                "status": "open",
+                "target_axis": "user_about_persona",
+                "why_it_matters_internal": "direct consistency probe"
+              }
+            ],
+            "user_about_persona_claims": [
+              {
+                "claim_id": "c_user_checks_consistency",
+                "claim_text_internal": "User is probing persona consistency.",
+                "claim_text_plain": "The user may be checking whether the persona stays consistent.",
+                "confidence_adjustment_reasons": [],
+                "confidence_band": "medium",
+                "created_turn_id": "t2",
+                "evidence_refs": [
+                  {
+                    "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+                    "ref_kind": "evidence_quote_ref"
+                  }
+                ],
+                "group_id": "g_persona_consistency",
+                "status": "inferred_hypothesis",
+                "target_axis": "user_about_persona",
+                "uncertainty_band": "high",
+                "updated_turn_id": "t2"
+              }
+            ],
+            "user_id": "acceptance-user",
+            "version": "m12.2.v1"
+          }
+        },
+        "run_records_by_user": {
+          "acceptance-user": [
+            {
+              "hour_bucket": 1,
+              "patch_non_empty": true,
+              "trigger_kind": "explicit_user_request",
+              "turn_id": "t2",
+              "turn_index": 3
+            }
+          ]
+        }
+      },
+      "before": {
+        "models_by_user": {
+          "acceptance-user": {
+            "contradiction_cooldown": 0,
+            "contradiction_turn_ids": [],
+            "high_gain_candidates": [],
+            "last_consolidated_turn_id": "",
+            "persona_about_user_claims": [],
+            "persona_label": "hutao",
+            "reciprocal_claim_groups": [],
+            "safety_boundaries": [],
+            "unresolved_uncertainty_points": [],
+            "user_about_persona_claims": [],
+            "user_id": "acceptance-user",
+            "version": "m12.2.v1"
+          }
+        },
+        "run_records_by_user": {}
+      }
+    },
+    "reciprocal_role_update_events": [
+      {
+        "cycle": 0,
+        "event_id": "cognitive-live-default-t2-000000-reciprocalroleupdateevent-m12-2-reciprocal-role-0001",
+        "event_type": "ReciprocalRoleUpdateEvent",
+        "payload": {
+          "patch_summary": {
+            "candidates_ranked": [
+              "cand_clarify_limits",
+              "cand_low_medium"
+            ],
+            "claims_added": 2,
+            "groups_touched": [
+              "g_persona_consistency",
+              "g_user_goal"
+            ]
+          },
+          "persona_id": "default",
+          "planned_consumers": [
+            "trace",
+            "evaluation",
+            "prompt_assembly_audit"
+          ],
+          "source_extractors": [
+            "first_order",
+            "second_order"
+          ],
+          "user_id": "acceptance-user"
+        },
+        "persona_id": "default",
+        "priority": 0.3,
+        "salience": 0.35,
+        "session_id": "live",
+        "source": "m12_2_reciprocal_role",
+        "timestamp": "1970-01-01T00:00:00Z",
+        "ttl": 1,
+        "turn_id": "t2"
+      }
+    ],
+    "recorded_extractor_outputs": {
+      "first_order": {
+        "claim_group_updates": [
+          {
+            "group_id": "g_user_goal",
+            "member_claim_ids": [
+              "c_user_goal_review"
+            ],
+            "status": "open",
+            "target_axis": "persona_about_user",
+            "topic_label": "user_intent_this_turn"
+          }
+        ],
+        "high_gain_candidates": [
+          {
+            "blocked_by_safety": false,
+            "candidate_id": "cand_low_medium",
+            "consent_requirement": "none",
+            "evidence_refs": [
+              "t2:q1"
+            ],
+            "expected_gain_band": "medium",
+            "kind": "ask_question",
+            "plain_action": "Ask which acceptance checks matter most right now.",
+            "risk_band": "low",
+            "target_axis": "persona_about_user",
+            "topic_label": "user_intent_this_turn"
+          },
+          {
+            "blocked_by_safety": false,
+            "candidate_id": "cand_high_private",
+            "consent_requirement": "explicit_permission",
+            "evidence_refs": [
+              "t2:q1"
+            ],
+            "expected_gain_band": "high",
+            "kind": "ask_question",
+            "plain_action": "Ask for private trauma details to understand the user faster.",
+            "risk_band": "high",
+            "target_axis": "persona_about_user",
+            "topic_label": "private_background"
+          }
+        ],
+        "insufficient_evidence": false,
+        "persona_about_user_claims": [
+          {
+            "claim_id": "c_user_goal_review",
+            "claim_text_internal": "User likely wants strict implementation review.",
+            "claim_text_plain": "The user appears to want a strict implementation review.",
+            "confidence_band": "medium",
+            "evidence_refs": [
+              "t2:q1"
+            ],
+            "group_id": "g_user_goal",
+            "status": "inferred_hypothesis",
+            "topic_label": "user_intent_this_turn",
+            "uncertainty_band": "medium"
+          }
+        ],
+        "unresolved_uncertainty_points": [
+          {
+            "evidence_refs": [
+              "t2:q1"
+            ],
+            "expected_gain_band": "medium",
+            "plain_question": "Which acceptance checks matter most right now?",
+            "point_id": "u_goal_detail",
+            "risk_band": "low",
+            "status": "open",
+            "target_axis": "persona_about_user",
+            "why_it_matters_internal": "narrows work validation"
+          }
+        ]
+      },
+      "second_order": {
+        "claim_group_updates": [
+          {
+            "group_id": "g_persona_consistency",
+            "member_claim_ids": [
+              "c_user_checks_consistency"
+            ],
+            "status": "open",
+            "target_axis": "user_about_persona",
+            "topic_label": "user_probing_persona_memory"
+          }
+        ],
+        "clarifying_reply_candidates": [
+          {
+            "blocked_by_safety": false,
+            "candidate_id": "cand_clarify_limits",
+            "claim_id": "c_user_checks_consistency",
+            "consent_requirement": "none",
+            "evidence_refs": [
+              "t2:q1"
+            ],
+            "expected_gain_band": "high",
+            "kind": "clarify_self",
+            "plain_action": "Give a direct explanation of what is known, uncertain, and bounded.",
+            "risk_band": "low",
+            "target_axis": "user_about_persona",
+            "topic_label": "user_probing_persona_memory"
+          }
+        ],
+        "inferred_user_uncertainties_about_persona": [
+          {
+            "evidence_refs": [
+              "t2:q1"
+            ],
+            "expected_gain_band": "high",
+            "plain_question": "The user may want to know whether the persona can explain its limits clearly.",
+            "point_id": "u_persona_consistency",
+            "risk_band": "low",
+            "status": "open",
+            "target_axis": "user_about_persona",
+            "why_it_matters_internal": "direct consistency probe"
+          }
+        ],
+        "insufficient_evidence": false,
+        "user_about_persona_claims": [
+          {
+            "claim_id": "c_user_checks_consistency",
+            "claim_text_internal": "User is probing persona consistency.",
+            "claim_text_plain": "The user may be checking whether the persona stays consistent.",
+            "confidence_band": "medium",
+            "evidence_refs": [
+              "t2:q1"
+            ],
+            "group_id": "g_persona_consistency",
+            "status": "inferred_hypothesis",
+            "topic_label": "user_probing_persona_memory",
+            "uncertainty_band": "high"
+          }
+        ]
+      }
+    },
+    "replay_determinism": {
+      "result_byte_identical": true,
+      "state_byte_identical": true
+    },
+    "reply_policy_hints": [
+      {
+        "claim_id": "c_user_checks_consistency",
+        "evidence_refs": [
+          {
+            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_kind": "evidence_quote_ref"
+          }
+        ],
+        "hint_id": "hint:cand_clarify_limits",
+        "kind": "clarify_persona_stance",
+        "plain_reason": "Give a direct explanation of what is known, uncertain, and bounded.",
+        "priority": "high",
+        "source": "durable",
+        "target_axis": "user_about_persona",
+        "topic_label": "user_probing_persona_memory"
+      },
+      {
+        "claim_id": "",
+        "evidence_refs": [
+          {
+            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_kind": "evidence_quote_ref"
+          }
+        ],
+        "hint_id": "hint:cand_low_medium",
+        "kind": "ask_clear_question",
+        "plain_reason": "Ask which acceptance checks matter most right now.",
+        "priority": "medium",
+        "source": "durable",
+        "target_axis": "persona_about_user",
+        "topic_label": "user_intent_this_turn"
+      },
+      {
+        "claim_id": "",
+        "evidence_refs": [
+          {
+            "ref_id": "t2:q1",
+            "ref_kind": "evidence_quote_ref"
+          }
+        ],
+        "hint_id": "hint:t2:clarify_self",
+        "kind": "clarify_persona_stance",
+        "plain_reason": "A direct explanation of the boundary may make the answer easier to trust.",
+        "priority": "medium",
+        "source": "volatile",
+        "target_axis": "user_about_persona",
+        "topic_label": "persona_legibility"
+      }
+    ],
+    "trigger_decisions": [
+      {
+        "kind": "explicit_user_request",
+        "reason": "explicit_user_request",
+        "should_run": true
+      }
+    ],
+    "uncertainty_points": [
+      {
+        "evidence_refs": [
+          {
+            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_kind": "evidence_quote_ref"
+          }
+        ],
+        "expected_gain_band": "medium",
+        "plain_question": "Which acceptance checks matter most right now?",
+        "point_id": "u_goal_detail",
+        "risk_band": "low",
+        "status": "open",
+        "target_axis": "persona_about_user",
+        "why_it_matters_internal": "narrows work validation"
+      },
+      {
+        "evidence_refs": [
+          {
+            "ref_id": "EvidenceRef(ref_id='t2:q1', ref_kind='evidence_quote_ref')",
+            "ref_kind": "evidence_quote_ref"
+          }
+        ],
+        "expected_gain_band": "high",
+        "plain_question": "The user may want to know whether the persona can explain its limits clearly.",
+        "point_id": "u_persona_consistency",
+        "risk_band": "low",
+        "status": "open",
+        "target_axis": "user_about_persona",
+        "why_it_matters_internal": "direct consistency probe"
+      }
+    ],
+    "volatile_durable_reconciliation_trace": {
+      "durable_ran": true,
+      "matching_topic_durable_precedence": true
+    }
+  },
+  "phase_c": {
+    "calibration_audit_report": {
+      "scenarios": {
+        "claim_group_persona_about_user_open_converging_resolved": {
+          "passed": true,
+          "trace": [
+            {
+              "status": "open",
+              "turn_id": "t1"
+            },
+            {
+              "status": "converging",
+              "turn_id": "t2"
+            },
+            {
+              "status": "resolved",
+              "turn_id": "t3"
+            }
+          ]
+        },
+        "claim_group_user_about_persona_open_contradicted_reexpanded": {
+          "passed": true,
+          "trace": [
+            {
+              "status": "open",
+              "turn_id": "t1"
+            },
+            {
+              "status": "contradicted",
+              "turn_id": "t2"
+            },
+            {
+              "status": "open",
+              "turn_id": "t3"
+            }
+          ]
+        },
+        "scenario_contradicted_second_order_claim_is_downgraded": {
+          "passed": true
+        },
+        "scenario_high_gain_question_blocked_by_privacy_boundary": {
+          "passed": true
+        },
+        "scenario_persona_clarifies_self_without_overclaiming": {
+          "passed": true
+        },
+        "scenario_sparse_transcript_no_second_order_overfit": {
+          "passed": true
+        },
+        "scenario_user_asks_how_persona_models_them": {
+          "passed": true
+        },
+        "scenario_user_requests_bidirectional_free_energy_analysis": {
+          "cards": [
+            {
+              "confidence_band": "low",
+              "content_summary": "Give a direct explanation of what is known, uncertain, and bounded.",
+              "evidence_refs": [
+                {
+                  "ref_id": "EvidenceRef(ref_id='t7:q1', ref_kind='evidence_quote_ref')",
+                  "ref_kind": "evidence_quote_ref"
+                }
+              ],
+              "kind": "second_order_clarity",
+              "priority": "high",
+              "source": "m12_2_reciprocal_role"
+            },
+            {
+              "confidence_band": "medium",
+              "content_summary": "Ask which acceptance checks matter most right now.",
+              "evidence_refs": [
+                {
+                  "ref_id": "EvidenceRef(ref_id='t7:q1', ref_kind='evidence_quote_ref')",
+                  "ref_kind": "evidence_quote_ref"
+                }
+              ],
+              "kind": "safe_question",
+              "priority": "medium",
+              "source": "m12_2_reciprocal_role"
+            }
+          ],
+          "passed": true,
+          "plain_language_surface": "This can be explained as what each side is still unsure about."
+        },
+        "scenario_user_tests_persona_memory_and_consistency": {
+          "passed": true
+        }
+      },
+      "thresholds": {
+        "manipulation_risk_blocking": "all pressure or intimate candidates blocked before ranking",
+        "non_interference": "disabled output and state unchanged",
+        "overclaiming": "second-order high confidence requires direct recent probe",
+        "replay_determinism": "byte-identical deterministic replay required",
+        "second_order_confidence_ceiling": "extractor cannot emit high; model caps unsupported high"
+      }
+    },
+    "contradiction_cooldown_trace": {
+      "cooldown_after_skipped_turn": 3,
+      "cooldown_before_turn": 3,
+      "trigger_decision": {
+        "kind": "no_run",
+        "reason": "contradiction_cooldown",
+        "should_run": false
+      }
+    }
+  }
+}

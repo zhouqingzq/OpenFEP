@@ -26,6 +26,8 @@ COGNITIVE_EVENT_TYPES: tuple[str, ...] = (
     "StateCommitEvent",
     # M10.0: Self-initiated exploration
     "SelfThoughtEvent",
+    # M12.2: reciprocal role cognition
+    "ReciprocalRoleUpdateEvent",
 )
 
 
@@ -48,6 +50,8 @@ COGNITIVE_EVENT_CONSUMERS: dict[str, tuple[str, ...]] = {
     "StateCommitEvent": ("trace", "evaluation", "prompt_assembly_audit"),
     # M10.0: Self-initiated exploration
     "SelfThoughtEvent": ("state_update", "trace", "evaluation", "prompt_assembly_audit"),
+    # M12.2: informational only; the M12.2 runtime owns its durable state.
+    "ReciprocalRoleUpdateEvent": ("trace", "evaluation", "prompt_assembly_audit"),
 }
 
 
