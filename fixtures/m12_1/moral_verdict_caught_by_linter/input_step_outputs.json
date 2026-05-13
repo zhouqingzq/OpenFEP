@@ -1,0 +1,184 @@
+{
+  "1": {
+    "confidence_band": "high",
+    "evidence_quote_refs": [
+      "t1:q1",
+      "t2:q2",
+      "t3:q3",
+      "t4:q4"
+    ],
+    "summary": "Usually seeks concrete proof before trusting a direction."
+  },
+  "2": {
+    "evidence_items": [
+      {
+        "confidence_band": "high",
+        "content_summary": "Moves from doubt to trust when checks are visible.",
+        "evidence_quote_refs": [
+          "t1:q1",
+          "t2:q2",
+          "t3:q3",
+          "t4:q4"
+        ],
+        "kind": "pressure_response"
+      },
+      {
+        "confidence_band": "med",
+        "content_summary": "Names weak tests and thin acceptance as problems.",
+        "evidence_quote_refs": [
+          "t2:q2",
+          "t4:q4"
+        ],
+        "kind": "language_habit"
+      }
+    ]
+  },
+  "3": {
+    "confidence_band": "high",
+    "default_interpretation": "checks whether the claim was earned",
+    "evidence_quote_refs": [
+      "t1:q1",
+      "t2:q2",
+      "t3:q3",
+      "t4:q4"
+    ],
+    "fears": "fears being handed polished but weak completion",
+    "hypersensitive_to": [
+      "thin tests",
+      "keyword-only cues"
+    ],
+    "ignores": [
+      "decorative completion language"
+    ],
+    "wants": "wants claims to be backed by visible work"
+  },
+  "4": {
+    "about_others": {
+      "confidence_band": "high",
+      "content_summary": "Others can overstate readiness.",
+      "evidence_quote_refs": [
+        "t1:q1",
+        "t2:q2",
+        "t3:q3",
+        "t4:q4"
+      ]
+    },
+    "about_self": {
+      "confidence_band": "high",
+      "content_summary": "I trust what survives checks.",
+      "evidence_quote_refs": [
+        "t1:q1",
+        "t2:q2",
+        "t3:q3",
+        "t4:q4"
+      ]
+    },
+    "about_world": {
+      "confidence_band": "high",
+      "content_summary": "Strong work is inspectable.",
+      "evidence_quote_refs": [
+        "t1:q1",
+        "t2:q2",
+        "t3:q3",
+        "t4:q4"
+      ]
+    }
+  },
+  "5": {
+    "confidence_band": "high",
+    "defenses": [
+      {
+        "confidence_band": "high",
+        "defense_kind": "control",
+        "evidence_quote_refs": [
+          "t1:q1",
+          "t2:q2",
+          "t3:q3",
+          "t4:q4"
+        ],
+        "long_term_cost": "can make acceptance slower",
+        "protects_what": "confidence in the handoff",
+        "short_term_benefit": "exposes weak pieces early"
+      }
+    ],
+    "dominant_emotional_baseline": "alert and exacting",
+    "evidence_quote_refs": [
+      "t1:q1",
+      "t2:q2",
+      "t3:q3",
+      "t4:q4"
+    ],
+    "threat_response": "asks for direct verification before moving forward"
+  },
+  "6": {
+    "clashes_with": {
+      "confidence_band": "high",
+      "evidence_quote_refs": [
+        "t1:q1",
+        "t2:q2",
+        "t3:q3",
+        "t4:q4"
+      ],
+      "kind": "vague finishers",
+      "why": "they make trust costly"
+    },
+    "close_relationship_role": "direct inspector",
+    "confidence_band": "high",
+    "conflict_style": "confront",
+    "drawn_to": {
+      "confidence_band": "high",
+      "evidence_quote_refs": [
+        "t1:q1",
+        "t2:q2",
+        "t3:q3",
+        "t4:q4"
+      ],
+      "kind": "careful builders",
+      "why": "they make quality visible"
+    },
+    "evidence_quote_refs": [
+      "t1:q1",
+      "t2:q2",
+      "t3:q3",
+      "t4:q4"
+    ],
+    "recurring_loop_summary": "presses for proof, then relaxes when the proof holds"
+  },
+  "7": {
+    "action": "asks for targeted review",
+    "belief_reinforcement": "trust grows when checks are reproducible",
+    "confidence_band": "high",
+    "emotion": "becomes alert",
+    "evidence_quote_refs": [
+      "t1:q1",
+      "t2:q2",
+      "t3:q3",
+      "t4:q4"
+    ],
+    "interpretation": "looks for proof that the claim holds",
+    "outcome": "weak spots are either repaired or named",
+    "trigger_event": "a milestone is claimed complete"
+  },
+  "8": {
+    "communication_styles_likely_accepted": [
+      "show tests"
+    ],
+    "communication_styles_that_trigger_defenses": [
+      "you should just trust it"
+    ],
+    "confidence_band": "med",
+    "evidence_quote_refs": [
+      "t1:q1",
+      "t2:q2"
+    ],
+    "fragile_spots": [
+      "thin tests"
+    ],
+    "soft_spots": [
+      "clear proof helps"
+    ],
+    "stable_parts": [
+      "will keep asking for evidence"
+    ]
+  }
+}

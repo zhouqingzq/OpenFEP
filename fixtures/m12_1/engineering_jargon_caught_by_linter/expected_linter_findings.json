@@ -1,0 +1,14 @@
+[
+  {
+    "raw_quote": "This predictive system checks comple",
+    "rule": "engineering_jargon",
+    "section": "step_1.summary",
+    "token": "predict"
+  },
+  {
+    "raw_quote": "This predictive system checks completion.",
+    "rule": "engineering_jargon",
+    "section": "step_1.summary",
+    "token": "predictive system"
+  }
+]

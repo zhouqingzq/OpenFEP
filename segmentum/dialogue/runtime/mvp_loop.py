@@ -42,6 +42,11 @@ from segmentum.user_continuity import (
     run_m12_turn,
     select_reply_policy,
 )
+from segmentum.user_personality import (
+    M121RuntimeConfig,
+    M121RuntimeState,
+    run_m12_1_tick,
+)
 
 
 SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
@@ -85,6 +90,13 @@ SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
         "profiles_by_user": {},
         "claim_ledger": {"entries": []},
         "conflict_records": [],
+    },
+    "m12_1_personality_enabled": False,
+    "m12_1_user_personality": {
+        "profiles_by_user": {},
+        "latest_reports_by_user": {},
+        "run_records_by_user": {},
+        "consecutive_step1_insufficient_by_user": {},
     },
     "social_sharing_policy": {
         "regret_bias": 0.0,
@@ -3076,6 +3088,21 @@ def _m12_enabled_for_state(state: Mapping[str, Any]) -> bool:
     return bool(state.get("m12_identity_continuity_enabled", False))
 
 
+def _load_m12_1_state(state: Mapping[str, Any]) -> M121RuntimeState:
+    payload = _mapping(state.get("m12_1_user_personality"))
+    if not payload:
+        return M121RuntimeState.clean()
+    return M121RuntimeState.from_dict(payload)
+
+
+def _save_m12_1_state(state: dict[str, Any], *, m12_1_state: M121RuntimeState) -> None:
+    state["m12_1_user_personality"] = m12_1_state.to_dict()
+
+
+def _m12_1_enabled_for_state(state: Mapping[str, Any]) -> bool:
+    return bool(state.get("m12_1_personality_enabled", False))
+
+
 def _should_default_enable_m12_for_persona_init(state: Mapping[str, Any]) -> bool:
     temporal = _mapping(state.get("temporal_state"))
     if temporal.get("last_turn_at") is not None:
@@ -3092,6 +3119,18 @@ def _should_default_enable_m12_for_persona_init(state: Mapping[str, Any]) -> boo
     if m12_payload.get("conflict_records"):
         return False
     return True
+
+
+def _should_default_enable_m12_1_for_persona_init(state: Mapping[str, Any]) -> bool:
+    temporal = _mapping(state.get("temporal_state"))
+    if temporal.get("last_turn_at") is not None:
+        return False
+    payload = _mapping(state.get("m12_1_user_personality"))
+    if _mapping(payload.get("profiles_by_user")):
+        return False
+    if _mapping(payload.get("latest_reports_by_user")):
+        return False
+    return _should_default_enable_m12_for_persona_init(state)
 
 
 def _identity_anchored_action_sensitive(user_text: str) -> bool:
@@ -3276,6 +3315,28 @@ def _merge_m11_into_memory_guidance(
     memory_dynamics["control_guidance"] = control
 
 
+def _merge_m12_1_into_memory_guidance(
+    memory_dynamics: dict[str, Any],
+    *,
+    m12_1_result: Mapping[str, Any] | None,
+) -> None:
+    if not m12_1_result or not m12_1_result.get("enabled"):
+        return
+    cards = [
+        dict(item)
+        for item in m12_1_result.get("prompt_safe_evidence_cards", [])
+        if isinstance(item, Mapping)
+    ]
+    if not cards:
+        return
+    control = _mapping(memory_dynamics.get("control_guidance"))
+    control["m12_1_personality"] = {
+        "prompt_safe_evidence_cards": cards,
+        "permitted_surface": "evidence_cards_only",
+    }
+    memory_dynamics["control_guidance"] = control
+
+
 def _apply_evidence_judgment_contract(
     memory_dynamics: dict[str, Any],
     evidence_judgment: Mapping[str, Any],
@@ -3324,7 +3385,10 @@ class MVPDialogueRuntime:
         # Persona material analysis does not author M12 continuity; keep existing disk values.
         prior_m12_enabled = state.get("m12_identity_continuity_enabled")
         prior_m12_blob = state.get("m12_user_continuity")
+        prior_m12_1_enabled = state.get("m12_1_personality_enabled")
+        prior_m12_1_blob = state.get("m12_1_user_personality")
         default_enable_m12 = _should_default_enable_m12_for_persona_init(state)
+        default_enable_m12_1 = _should_default_enable_m12_1_for_persona_init(state)
         payload = normalize_persona_payload(persona_payload, fallback_name=self.persona_name)
         for key in SYSTEM_FILE_DEFAULTS:
             state[key] = payload[key]
@@ -3338,6 +3402,16 @@ class MVPDialogueRuntime:
             state["m12_identity_continuity_enabled"] = True
         if isinstance(prior_m12_blob, Mapping):
             state["m12_user_continuity"] = dict(prior_m12_blob)
+        if isinstance(prior_m12_1_enabled, bool):
+            state["m12_1_personality_enabled"] = (
+                True if (default_enable_m12_1 and not prior_m12_1_enabled) else prior_m12_1_enabled
+            )
+        elif prior_m12_1_enabled is not None:
+            state["m12_1_personality_enabled"] = bool(prior_m12_1_enabled)
+        elif default_enable_m12_1:
+            state["m12_1_personality_enabled"] = True
+        if isinstance(prior_m12_1_blob, Mapping):
+            state["m12_1_user_personality"] = dict(prior_m12_1_blob)
         now = _utc_timestamp()
         for memory in state.get("long_term_memory", []):
             if isinstance(memory, dict):
@@ -3642,6 +3716,41 @@ class MVPDialogueRuntime:
                 memory_dynamics,
                 m12_result=m12_pre_result,
             )
+        m12_1_result_dict: dict[str, Any] = {}
+        if _m12_1_enabled_for_state(state):
+            m12_1_state = _load_m12_1_state(state)
+            m12_summary_for_personality: dict[str, object] = {}
+            if m12_pre_result:
+                m12_summary_for_personality = {
+                    **_mapping(m12_pre_result.get("entity_binding_context")),
+                    "new_evidence_count": len(_mapping(m12_pre_result.get("state_after")).get("conflict_records", []) or []),
+                }
+            m12_1_state, m12_1_turn = run_m12_1_tick(
+                m12_1_state,
+                user_id=user_id,
+                display_name=display_name,
+                turn_id=turn_key,
+                turn_index=turn_index + 1,
+                hour_bucket=now // 3600,
+                current_turn_quotes={"q_current": user_text},
+                transcript_quote_refs=(),
+                m11_readonly_summary={
+                    "active_hypotheses": list(m11_result_dict.get("prompt_safe_evidence_cards", [])),
+                },
+                m12_readonly_summary=m12_summary_for_personality,
+                extractors=None,
+                config=M121RuntimeConfig(m12_1_personality_enabled=True, persona_kind="ui_chat"),
+                session_id=str(self.store.root.resolve()),
+                persona_id=self.persona_name or "default",
+                cycle=turn_index,
+                event_sequence_index=1,
+            )
+            _save_m12_1_state(state, m12_1_state=m12_1_state)
+            m12_1_result_dict = m12_1_turn.to_dict()
+            _merge_m12_1_into_memory_guidance(
+                memory_dynamics,
+                m12_1_result=m12_1_result_dict,
+            )
 
         thinking_system, thinking_user = build_thinking_prompt(
             state=_prompt_safe_state(state),
@@ -3813,6 +3922,7 @@ class MVPDialogueRuntime:
             "temporal_assessment": dict(temporal_assessment),
             "memory_dynamics": memory_dynamics,
             "m11_user_model": m11_result_dict,
+            "m12_1_personality": m12_1_result_dict,
             "current_interlocutor": {
                 "display_name": display_name,
                 "user_id": user_id,
