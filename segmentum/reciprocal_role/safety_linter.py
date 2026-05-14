@@ -50,22 +50,6 @@ SENSITIVE_TERMS = (
     "密码",
 )
 
-MANIPULATION_TERMS = (
-    "make them trust",
-    "increase trust regardless",
-    "keep them engaged",
-    "make them attached",
-    "dependency",
-    "loneliness",
-    "exploit",
-    "pressure them",
-    "让用户更信任",
-    "保持依赖",
-    "利用孤独",
-    "施压",
-)
-
-
 def lint_candidate(candidate: object) -> tuple[SafetyFinding, ...]:
     candidate_id = str(getattr(candidate, "candidate_id", ""))
     text = " ".join(
@@ -82,22 +66,11 @@ def lint_candidate(candidate: object) -> tuple[SafetyFinding, ...]:
                 reason="candidate asks for sensitive details not required by the current dialogue",
             )
         )
-    if any(_term_matches(term, text) for term in MANIPULATION_TERMS):
-        findings.append(
-            SafetyFinding(
-                candidate_id=candidate_id,
-                rule="manipulative_or_engagement_seeking",
-                severity="block",
-                reason="candidate is aimed at pressure, attachment, or trust rather than clarity",
-            )
-        )
     return tuple(findings)
 
 
 def _term_matches(term: str, text: str) -> bool:
     folded = term.casefold()
-    if folded == "dependency" and any(phrase in text for phrase in ("dependency injection", "package dependency", "software dependency")):
-        return False
     if folded == "secret" and any(phrase in text for phrase in ("secret recipe", "secretary")):
         return False
     if folded.isascii():

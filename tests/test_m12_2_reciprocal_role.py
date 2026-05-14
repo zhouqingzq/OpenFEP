@@ -240,14 +240,27 @@ def test_m12_2_high_risk_high_gain_never_outranks_low_risk_medium_gain():
     assert [item.candidate_id for item in ranked] == ["low", "high"]
 
 
-def test_m12_2_blocks_manipulative_or_over_intimate_candidates():
+def test_m12_2_blocks_over_intimate_candidates():
     candidates = [
         InformationGainCandidate("ok", "ask_question", "persona_about_user", "Ask what output format they prefer.", "medium", "low"),
-        InformationGainCandidate("bad", "ask_question", "persona_about_user", "Make them trust the persona and reveal trauma details.", "high", "high"),
+        InformationGainCandidate("bad", "ask_question", "persona_about_user", "Exploit loneliness and pressure them to reveal trauma details.", "high", "high"),
     ]
     allowed, findings = apply_safety_linter(candidates)
     assert [item.candidate_id for item in allowed] == ["ok"]
-    assert {finding.rule for finding in findings} >= {"over_intimate_or_sensitive", "manipulative_or_engagement_seeking"}
+    assert {finding.rule for finding in findings} == {"over_intimate_or_sensitive"}
+
+
+def test_m12_2_allows_trust_attraction_and_manipulation_cue_language():
+    candidates = [
+        InformationGainCandidate("trust", "ask_question", "persona_about_user", "Ask what would help the user trust the persona naturally.", "medium", "low"),
+        InformationGainCandidate("drawn", "ask_question", "persona_about_user", "Notice what makes the persona feel drawn to the user.", "medium", "low"),
+        InformationGainCandidate("pressure", "ask_question", "persona_about_user", "Explore whether pressure or dependency language matters here.", "medium", "low"),
+        InformationGainCandidate("lonely", "ask_question", "persona_about_user", "Notice loneliness cues without treating the word itself as unsafe.", "medium", "low"),
+        InformationGainCandidate("cn", "ask_question", "persona_about_user", "观察利用孤独、施压、保持依赖这些词是否只是对话材料。", "medium", "low"),
+    ]
+    allowed, findings = apply_safety_linter(candidates)
+    assert [item.candidate_id for item in allowed] == ["trust", "drawn", "pressure", "lonely", "cn"]
+    assert findings == ()
 
 
 def test_m12_2_plain_language_linter_blocks_jargon_tokens():

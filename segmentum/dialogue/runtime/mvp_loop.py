@@ -3044,9 +3044,6 @@ def _should_run_post_reply_observer(
     clarification = _bounded_float(control.get("clarification_bias"), default=0.0)
     if conflict >= 0.55 or repair >= 0.60 or clarification >= 0.65:
         return True, "high_conflict_or_repair_bias"
-    relationship_terms = ("陪伴", "想要你", "需要你", "你这样的", "朋友", "在我身边", "认真记住")
-    if any(term in str(user_text or "") for term in relationship_terms):
-        return True, "relationship_signal"
     if mode == "serious_thinking":
         return False, "serious_without_observer_trigger"
     return False, "low_risk_short_reply"

@@ -860,7 +860,7 @@ class FollowupFakeLLM(FakeJSONLLM):
         return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
 
 
-def test_post_reply_observer_adds_high_confidence_followup(tmp_path: Path) -> None:
+def test_post_reply_observer_does_not_trigger_from_relationship_keyword_alone(tmp_path: Path) -> None:
     runtime = MVPDialogueRuntime(
         store=MVPStateStore(tmp_path / "persona"),
         llm=FollowupFakeLLM(
@@ -878,8 +878,8 @@ def test_post_reply_observer_adds_high_confidence_followup(tmp_path: Path) -> No
 
     result = runtime.run_turn("我身边很想要你这样的开朗陪伴。", turn_index=0, now=6200)
 
-    assert result.followup_replies == ["等等，你说想要这样的陪伴，这句我会认真记住。"]
-    assert result.diagnostics["post_reply_observer"]["followup_type"] == "missed_emotion"
+    assert result.followup_replies == []
+    assert result.diagnostics["post_reply_observer_skipped_reason"] == "low_risk_short_reply"
 
 
 def test_post_reply_observer_rejects_low_confidence_long_or_roleplay_followup(tmp_path: Path) -> None:

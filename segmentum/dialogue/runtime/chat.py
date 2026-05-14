@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field
 import json
 import shutil
@@ -563,6 +564,18 @@ class ChatInterface:
     def latest_response_diagnostics(self) -> dict[str, object]:
         self._ensure_runtime_fields()
         return dict(self._last_response_diagnostics)
+
+    def read_mvp_state_dict(self) -> dict[str, object] | None:
+        self._ensure_runtime_fields()
+        runtime = self._mvp_runtime
+        store = getattr(runtime, "store", None) if runtime is not None else None
+        if store is None:
+            return None
+        try:
+            state = store.load()
+        except Exception:
+            return None
+        return copy.deepcopy(state) if isinstance(state, dict) else None
 
     # ── Internal ──────────────────────────────────────────────────────
 

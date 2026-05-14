@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+from collections.abc import Mapping
 import hashlib
 import json
 import shutil
@@ -1753,6 +1754,294 @@ def render_inner_world() -> None:
     st.markdown(markdown)
 
 
+def _safe_current_user_id(name: str) -> str:
+    text = str(name or "").strip() or "default_user"
+    safe = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in text)
+    return safe.strip("_") or "default_user"
+
+
+def _as_dict(value: object) -> dict[str, object]:
+    return dict(value) if isinstance(value, Mapping) else {}
+
+
+def _dict_rows(value: object) -> list[dict[str, object]]:
+    if not isinstance(value, list):
+        return []
+    return [dict(item) for item in value if isinstance(item, Mapping)]
+
+
+def _get_user_bucket(
+    rows_by_user: object,
+    *,
+    speaker_name: str,
+) -> tuple[dict[str, object], str]:
+    rows = _as_dict(rows_by_user)
+    if not rows:
+        return {}, ""
+    preferred = [
+        _safe_current_user_id(speaker_name),
+        str(speaker_name or "").strip(),
+        "default_user",
+    ]
+    for key in preferred:
+        value = rows.get(key)
+        if isinstance(value, Mapping):
+            return dict(value), key
+    for key, value in sorted(rows.items(), key=lambda item: str(item[0])):
+        if isinstance(value, Mapping):
+            return dict(value), str(key)
+    return {}, ""
+
+
+def _mvp_substate_from_diagnostics(
+    diagnostics: Mapping[str, object],
+    key: str,
+    state_key: str,
+) -> dict[str, object]:
+    section = _as_dict(diagnostics.get(key))
+    state_after = _as_dict(section.get("state_after"))
+    return state_after if state_after else _as_dict(section.get(state_key))
+
+
+def _mvp_observation_sources(
+    chat_iface: ChatInterface,
+) -> tuple[dict[str, object], dict[str, object], dict[str, object], str]:
+    diagnostics = chat_iface.latest_response_diagnostics()
+    m121_state = _mvp_substate_from_diagnostics(
+        diagnostics,
+        "m12_1_personality",
+        "m12_1_user_personality",
+    )
+    m122_state = _mvp_substate_from_diagnostics(
+        diagnostics,
+        "m12_2_reciprocal_role",
+        "m12_2_reciprocal_role",
+    )
+    source = "diagnostics" if (m121_state or m122_state) else ""
+
+    if not (m121_state and m122_state):
+        state = chat_iface.read_mvp_state_dict()
+        if isinstance(state, dict):
+            if not m121_state:
+                m121_state = _as_dict(state.get("m12_1_user_personality"))
+            if not m122_state:
+                m122_state = _as_dict(state.get("m12_2_reciprocal_role"))
+            if not source and (m121_state or m122_state):
+                source = "system_files"
+    return diagnostics, m121_state, m122_state, source
+
+
+def _evidence_ref_text(value: object) -> str:
+    refs: list[str] = []
+    for ref in value if isinstance(value, list) else []:
+        if isinstance(ref, Mapping):
+            ref_id = str(ref.get("ref_id") or "").strip()
+            turn_id = str(ref.get("turn_id") or "").strip()
+            quote_id = str(ref.get("quote_id") or "").strip()
+            refs.append(ref_id or f"{turn_id}:{quote_id}".strip(":"))
+        else:
+            refs.append(str(ref))
+    return ", ".join(item for item in refs if item) or "无"
+
+
+def _claim_table_rows(claims: object, *, limit: int = 8) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for claim in _dict_rows(claims)[-limit:]:
+        text = str(claim.get("claim_text_plain") or claim.get("claim_text_internal") or "").strip()
+        if not text:
+            continue
+        rows.append(
+            {
+                "判断": text,
+                "置信": str(claim.get("confidence_band") or ""),
+                "不确定性": str(claim.get("uncertainty_band") or ""),
+                "状态": str(claim.get("status") or ""),
+                "证据": _evidence_ref_text(claim.get("evidence_refs")),
+            }
+        )
+    return rows
+
+
+def _candidate_table_rows(candidates: object, *, limit: int = 6) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for item in _dict_rows(candidates)[-limit:]:
+        action = str(item.get("plain_action") or item.get("plain_question") or "").strip()
+        if not action:
+            continue
+        rows.append(
+            {
+                "待观察点": action,
+                "收益": str(item.get("expected_gain_band") or ""),
+                "风险": str(item.get("risk_band") or ""),
+                "状态": str(item.get("status") or ("blocked" if item.get("blocked_by_safety") else "open")),
+            }
+        )
+    return rows
+
+
+def _profile_notes(profile: Mapping[str, object]) -> list[tuple[str, str]]:
+    notes: list[tuple[str, str]] = []
+    summary = _as_dict(profile.get("step_1_summary"))
+    if summary.get("summary"):
+        notes.append(("整体印象", str(summary.get("summary"))))
+    prediction = _as_dict(profile.get("step_3_prediction_system_account"))
+    pred_bits = [
+        str(prediction.get("wants") or "").strip(),
+        str(prediction.get("fears") or "").strip(),
+        str(prediction.get("default_interpretation") or "").strip(),
+    ]
+    pred_text = " / ".join(bit for bit in pred_bits if bit)
+    if pred_text:
+        notes.append(("预测系统", pred_text))
+    emotion = _as_dict(profile.get("step_5_emotion_and_defenses"))
+    emotion_bits = [
+        str(emotion.get("dominant_emotional_baseline") or "").strip(),
+        str(emotion.get("threat_response") or "").strip(),
+    ]
+    emotion_text = " / ".join(bit for bit in emotion_bits if bit)
+    if emotion_text:
+        notes.append(("情绪与防御", emotion_text))
+    relationship = _as_dict(profile.get("step_6_relationship_patterns"))
+    rel_bits = [
+        str(relationship.get("close_relationship_role") or "").strip(),
+        str(relationship.get("recurring_loop_summary") or "").strip(),
+        str(relationship.get("conflict_style") or "").strip(),
+    ]
+    rel_text = " / ".join(bit for bit in rel_bits if bit)
+    if rel_text:
+        notes.append(("关系模式", rel_text))
+    return notes
+
+
+def _free_energy_metrics(diagnostics: Mapping[str, object]) -> dict[str, object]:
+    memory_dynamics = _as_dict(diagnostics.get("memory_dynamics"))
+    control = _as_dict(memory_dynamics.get("control_guidance"))
+    sharing = _as_dict(control.get("sharing_policy"))
+    if not sharing:
+        sharing = _as_dict(memory_dynamics.get("sharing_policy"))
+    keys = (
+        "current_free_energy",
+        "expected_free_energy_after",
+        "expected_free_energy_reduction",
+        "net_free_energy_reduction",
+        "risk_cost",
+        "boundary_cost",
+    )
+    return {key: sharing[key] for key in keys if key in sharing}
+
+
+def _mvp_observation_status(
+    diagnostics: Mapping[str, object],
+    mvp_state: Mapping[str, object] | None,
+) -> dict[str, object]:
+    m121_diag = _as_dict(diagnostics.get("m12_1_personality"))
+    m122_diag = _as_dict(diagnostics.get("m12_2_reciprocal_role"))
+    state = _as_dict(mvp_state)
+    return {
+        "has_state": bool(state or m121_diag or m122_diag),
+        "m12_1_enabled": bool(
+            m121_diag.get("enabled", state.get("m12_1_personality_enabled", False))
+        ),
+        "m12_2_enabled": bool(
+            m122_diag.get("enabled", state.get("m12_2_reciprocal_role_enabled", False))
+        ),
+    }
+
+
+def _metric_text(value: object) -> str:
+    try:
+        return f"{float(value):.3f}"
+    except (TypeError, ValueError):
+        return str(value or "无")
+
+
+def render_current_person_judgment() -> None:
+    st.header("当前人物判断")
+    chat_iface: ChatInterface = st.session_state.chat_iface
+
+    if not chat_iface.has_agent():
+        st.info("Load a persona to observe its current person judgments.")
+        return
+
+    speaker_name = str(st.session_state.get("current_speaker_name") or "").strip() or "测试用户"
+    diagnostics, m121_state, m122_state, source = _mvp_observation_sources(chat_iface)
+    mvp_state = chat_iface.read_mvp_state_dict()
+    status = _mvp_observation_status(diagnostics, mvp_state)
+    profile, profile_user_id = _get_user_bucket(
+        _as_dict(m121_state).get("profiles_by_user"),
+        speaker_name=speaker_name,
+    )
+    role_model, role_user_id = _get_user_bucket(
+        _as_dict(m122_state).get("models_by_user"),
+        speaker_name=speaker_name,
+    )
+    source_label = {"diagnostics": "最近一轮 diagnostics", "system_files": "MVP system files"}.get(source, "")
+    st.caption(
+        f"当前对话者：{speaker_name}"
+        + (f" ｜ 观测来源：{source_label}" if source_label else "")
+        + (f" ｜ 桶：{profile_user_id or role_user_id}" if (profile_user_id or role_user_id) else "")
+    )
+
+    persona_claims = _claim_table_rows(role_model.get("persona_about_user_claims"))
+    user_about_persona_claims = _claim_table_rows(role_model.get("user_about_persona_claims"))
+    profile_notes = _profile_notes(profile)
+    free_energy = _free_energy_metrics(diagnostics)
+    uncertainty_rows = _candidate_table_rows(role_model.get("unresolved_uncertainty_points"))
+    candidate_rows = _candidate_table_rows(role_model.get("high_gain_candidates"))
+
+    if not any([profile_notes, persona_claims, user_about_persona_claims, free_energy, uncertainty_rows, candidate_rows]):
+        if status.get("has_state") and not (
+            status.get("m12_1_enabled") or status.get("m12_2_enabled")
+        ):
+            st.info("当前人物判断模块未开启：M12.1 人物画像与 M12.2 相互判断都处于关闭状态。")
+            st.caption("打开后需要至少一轮对话，才会生成可观察记录。")
+            return
+        if status.get("m12_1_enabled") or status.get("m12_2_enabled"):
+            st.info("当前人物判断模块已开启，暂无可展示记录。")
+            st.caption("请继续发送一轮消息，胡桃会在下一轮对话后写入新的观察判断。")
+            return
+        st.info("暂无观测记录")
+        return
+
+    st.subheader("自由能判断")
+    if free_energy:
+        cols = st.columns(min(4, len(free_energy)))
+        labels = {
+            "current_free_energy": "当前自由能",
+            "expected_free_energy_after": "预期之后",
+            "expected_free_energy_reduction": "预期降低",
+            "net_free_energy_reduction": "净降低",
+            "risk_cost": "风险成本",
+            "boundary_cost": "边界成本",
+        }
+        for idx, (key, value) in enumerate(free_energy.items()):
+            cols[idx % len(cols)].metric(labels.get(key, key), _metric_text(value))
+    else:
+        st.caption("暂无自由能数值记录；下面只展示已有判断。")
+
+    left, right = st.columns(2)
+    with left:
+        st.subheader("胡桃对当前人物")
+        if profile_notes:
+            for title, text in profile_notes:
+                st.markdown(f"**{title}**  \n{text}")
+        if persona_claims:
+            st.dataframe(pd.DataFrame(persona_claims), use_container_width=True, hide_index=True)
+        elif not profile_notes:
+            st.caption("暂无胡桃对当前人物的判断。")
+
+    with right:
+        st.subheader("胡桃猜测对方对自己")
+        if user_about_persona_claims:
+            st.dataframe(pd.DataFrame(user_about_persona_claims), use_container_width=True, hide_index=True)
+        else:
+            st.caption("暂无对方如何判断胡桃的记录。")
+        if uncertainty_rows or candidate_rows:
+            st.subheader("下一步可观察点")
+            rows = uncertainty_rows or candidate_rows
+            st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+
+
 def main() -> None:
     ensure_dialogue_client_id()
     init_session()
@@ -1774,13 +2063,15 @@ def main() -> None:
 
     render_sidebar()
 
-    chat_tab, dashboard_tab, inner_tab = st.tabs(["Chat", "Dashboard", "内心观察"])
+    chat_tab, dashboard_tab, inner_tab, judgment_tab = st.tabs(["Chat", "Dashboard", "内心观察", "当前人物判断"])
     with chat_tab:
         render_chat()
     with dashboard_tab:
         render_dashboard()
     with inner_tab:
         render_inner_world()
+    with judgment_tab:
+        render_current_person_judgment()
 
 
 if __name__ == "__main__":
