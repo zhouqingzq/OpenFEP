@@ -114,6 +114,9 @@ SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
         "regret_bias": 0.0,
         "learned_boundaries": [],
     },
+    "relationship_value_memories": {
+        "by_user": {},
+    },
 }
 
 SYSTEM_FILE_NAMES: dict[str, str] = {
@@ -1050,6 +1053,7 @@ def build_thinking_prompt(
 表达习惯先验是逐渐形成的说话倾向，不是工程硬性字数限制；例如“避免冗长”应影响轻重和展开程度，但不要机械裁字数。
 记忆动力学指导是程序层压缩出的倾向和证据边界，不是角色台词；不要把它表演成“我被奖励/惩罚了”。如果指导要求修正、澄清或降低断言强度，要自然体现在回复策略里。
 跨人复述默认是人类式社交行为，但它不是额外奖励系统：分享欲来自“我说出来，对方会如何反应”的认知预期。sharing_policy 用同一个自由能尺度判断：未验证预期带来较高自由能，复述可能通过观察对方反应降低它；已验证预期自由能较低；无法解释的反应先尝试解释，解释不了再触发自我认知重构。若来源用户声明了秘密或边界，sharing_policy 优先；soft 边界只做抽象化表达，hard 边界不要转述。
+relationship_value_constraints 是当前用户关系上下文里的价值记忆和预测约束，优先级高于人格一致性和普通 conversation_habits。它们不是要说出口的设定说明，而是生成前的行为约束；不要把它们降格成词表替换，也不要用同义口癖或同类表演绕过约束。
 LLM 思考结果只写可审阅的结论摘要：你如何理解用户意图、用了哪些状态或记忆、为什么选择当前回复动作、哪些不确定性需要保留。
 不要输出完整推理链，不要写舞台动作，不要把角色设定词堆成解释。
 reply 字段只能包含会直接显示给用户的自然对话文本；禁止把 llm_thinking_result、conscious_plan、diagnostics、memory_dynamics、JSON 片段或调试字段混进 reply。
@@ -2763,7 +2767,211 @@ def _response_style_prior(
     }
 
 
-def _apply_habit_updates(state: dict[str, Any], thinking: Mapping[str, Any]) -> list[dict[str, Any]]:
+RELATIONSHIP_VALUE_PRIORITY = (
+    "relationship_value_memory > user_comfort_prediction > persona_consistency > conversation_habits"
+)
+
+
+def _relationship_value_store(state: dict[str, Any]) -> dict[str, Any]:
+    store = state.setdefault("relationship_value_memories", {})
+    if not isinstance(store, dict):
+        store = {"by_user": {}}
+        state["relationship_value_memories"] = store
+    by_user = store.setdefault("by_user", {})
+    if not isinstance(by_user, dict):
+        by_user = {}
+        store["by_user"] = by_user
+    return store
+
+
+def _relationship_value_rows(state: Mapping[str, Any], user_id: str) -> list[dict[str, Any]]:
+    store = _mapping(state.get("relationship_value_memories"))
+    by_user = _mapping(store.get("by_user"))
+    rows = by_user.get(str(user_id or "").strip(), [])
+    if not isinstance(rows, list):
+        return []
+    normalized: list[dict[str, Any]] = []
+    for item in rows:
+        if not isinstance(item, Mapping):
+            continue
+        summary = str(item.get("summary", "")).strip()
+        prediction = str(item.get("prediction_constraint", "")).strip()
+        if not summary or not prediction:
+            continue
+        confidence = _bounded_float(item.get("confidence"), default=0.0)
+        if confidence < 0.60:
+            continue
+        priority = str(item.get("priority", "medium")).strip() or "medium"
+        if priority not in {"high", "medium"}:
+            continue
+        normalized.append(
+            {
+                "id": str(item.get("id", "")).strip(),
+                "summary": summary[:240],
+                "prediction_constraint": prediction[:360],
+                "priority": priority,
+                "confidence": round(confidence, 6),
+                "source": str(item.get("source", "")).strip(),
+            }
+        )
+    normalized.sort(key=lambda row: (row["priority"] == "high", row["confidence"]), reverse=True)
+    return normalized[:6]
+
+
+def resolve_relationship_value_context(
+    state: Mapping[str, Any],
+    user_id: str,
+    current_turn: str,
+) -> dict[str, Any]:
+    del current_turn
+    current_user_id = str(user_id or "").strip()
+    active = _relationship_value_rows(state, current_user_id) if current_user_id else []
+    if not active:
+        return {
+            "current_user_id": current_user_id,
+            "active_relationship_value_memories": [],
+            "reply_contract_patch": {},
+        }
+    constraints = [
+        {
+            "summary": item["summary"],
+            "prediction_constraint": item["prediction_constraint"],
+            "priority": item["priority"],
+            "confidence": item["confidence"],
+            "source": item.get("source", ""),
+        }
+        for item in active
+    ]
+    return {
+        "current_user_id": current_user_id,
+        "active_relationship_value_memories": active,
+        "reply_contract_patch": {
+            "relationship_context_user_id": current_user_id,
+            "relationship_value_memory_active": True,
+            "relationship_value_constraints": constraints,
+            "relationship_constraint_priority": RELATIONSHIP_VALUE_PRIORITY,
+            "value_memory_priority": "higher_than_persona_consistency",
+        },
+    }
+
+
+def _apply_relationship_value_context_to_memory_dynamics(
+    memory_dynamics: dict[str, Any],
+    relationship_value_context: Mapping[str, Any],
+) -> None:
+    patch = _mapping(relationship_value_context.get("reply_contract_patch"))
+    if not patch:
+        return
+    control = _mapping(memory_dynamics.get("control_guidance"))
+    contract = _mapping(control.get("reply_contract"))
+    existing = [
+        item
+        for item in contract.get("relationship_value_constraints", []) or []
+        if isinstance(item, Mapping)
+    ]
+    incoming = [
+        item
+        for item in patch.get("relationship_value_constraints", []) or []
+        if isinstance(item, Mapping)
+    ]
+    merged_constraints: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for item in [*existing, *incoming]:
+        summary = str(item.get("summary", "")).strip()
+        prediction = str(item.get("prediction_constraint", "")).strip()
+        if not summary or not prediction:
+            continue
+        key = f"{summary}\n{prediction}".casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        merged_constraints.append(dict(item))
+    contract.update({key: value for key, value in patch.items() if key != "relationship_value_constraints"})
+    contract["relationship_value_constraints"] = merged_constraints[:8]
+    control["reply_contract"] = contract
+    control["relationship_value_context"] = {
+        "current_user_id": relationship_value_context.get("current_user_id", ""),
+        "active_count": len(_string_list([item.get("summary") for item in merged_constraints], limit=16)),
+        "priority": RELATIONSHIP_VALUE_PRIORITY,
+    }
+    memory_dynamics["control_guidance"] = control
+
+
+def _abstract_relationship_constraint_from_feedback(content: str, evidence: str) -> tuple[str, str] | None:
+    text = f"{content} {evidence}"
+    if not text.strip():
+        return None
+    performance_markers = ("口癖", "嘿嘿", "哎嘿", "嘻", "角色", "表演", "本堂主", "可爱", "装", "演")
+    pacing_markers = ("太长", "啰嗦", "罗嗦", "短一点", "简短", "分开", "一长串", "一句话", "冗长")
+    if any(marker in text for marker in performance_markers):
+        return (
+            "This user is more comfortable when ordinary chat uses plain, low-performance warmth instead of persona-maintenance verbal tics or roleplay flourishes.",
+            "When persona consistency conflicts with this user's comfort, reducing performative persona markers lowers relationship friction.",
+        )
+    if any(marker in text for marker in pacing_markers):
+        return (
+            "This user prefers casual replies to be concise, turn-by-turn, and not overloaded with empathy, performance, advice, and questions in one bubble.",
+            "Shorter ordinary replies with fewer stacked response moves reduce interaction friction for this user.",
+        )
+    return (
+        "This user gave feedback that response style should adapt to relationship comfort rather than preserve persona consistency mechanically.",
+        "When similar style tension appears, prioritize the user's comfort prediction over default persona expression habits.",
+    )
+
+
+def _append_relationship_value_memory(
+    state: dict[str, Any],
+    *,
+    user_id: str,
+    summary: str,
+    prediction_constraint: str,
+    evidence: str,
+    source: str,
+    confidence: float,
+    created_at: int | None = None,
+) -> dict[str, Any] | None:
+    clean_user = str(user_id or "").strip()
+    clean_summary = str(summary or "").strip()
+    clean_prediction = str(prediction_constraint or "").strip()
+    if not clean_user or not clean_summary or not clean_prediction:
+        return None
+    store = _relationship_value_store(state)
+    by_user = store["by_user"]
+    rows = by_user.setdefault(clean_user, [])
+    if not isinstance(rows, list):
+        rows = []
+        by_user[clean_user] = rows
+    existing = {
+        f"{str(item.get('summary', '')).strip()}\n{str(item.get('prediction_constraint', '')).strip()}".casefold()
+        for item in rows
+        if isinstance(item, Mapping)
+    }
+    key = f"{clean_summary}\n{clean_prediction}".casefold()
+    if key in existing:
+        return None
+    now = _utc_timestamp() if created_at is None else int(created_at)
+    row = {
+        "id": f"rvm_{clean_user}_{now}_{len(rows)}",
+        "summary": clean_summary[:240],
+        "prediction_constraint": clean_prediction[:360],
+        "priority": "high",
+        "confidence": round(_bounded_float(confidence, default=0.75), 6),
+        "evidence": str(evidence or "").strip()[:240],
+        "source": str(source or "feedback").strip(),
+        "created_at": now,
+    }
+    rows.append(row)
+    by_user[clean_user] = rows[-24:]
+    return row
+
+
+def _apply_habit_updates(
+    state: dict[str, Any],
+    thinking: Mapping[str, Any],
+    *,
+    user_id: str = "",
+    now: int | None = None,
+) -> list[dict[str, Any]]:
     updates = thinking.get("habit_updates")
     if not isinstance(updates, list):
         return []
@@ -2797,6 +3005,18 @@ def _apply_habit_updates(state: dict[str, Any], thinking: Mapping[str, Any]) -> 
         target.append(row)
         existing.add(content)
         applied.append(row)
+        abstract = _abstract_relationship_constraint_from_feedback(content, evidence)
+        if abstract is not None:
+            _append_relationship_value_memory(
+                state,
+                user_id=user_id,
+                summary=abstract[0],
+                prediction_constraint=abstract[1],
+                evidence=evidence,
+                source="thinking_habit_feedback",
+                confidence=confidence,
+                created_at=now,
+            )
     return applied
 
 
@@ -3909,6 +4129,16 @@ class MVPDialogueRuntime:
                 m12_2_result=m12_2_result_dict,
             )
 
+        relationship_value_context = resolve_relationship_value_context(
+            state,
+            user_id,
+            user_text,
+        )
+        _apply_relationship_value_context_to_memory_dynamics(
+            memory_dynamics,
+            relationship_value_context,
+        )
+
         thinking_system, thinking_user = build_thinking_prompt(
             state=_prompt_safe_state(state),
             user_text=user_text,
@@ -3964,7 +4194,12 @@ class MVPDialogueRuntime:
                 else ""
             ),
         )
-        habit_updates_applied = _apply_habit_updates(state, thinking)
+        habit_updates_applied = _apply_habit_updates(
+            state,
+            thinking,
+            user_id=user_id,
+            now=now,
+        )
 
         raw_reply = str(thinking.get("reply") or "").strip()
         if not raw_reply:
@@ -4026,6 +4261,8 @@ class MVPDialogueRuntime:
         pacing_feedback_habits_applied = self._apply_pacing_feedback_habit(
             state,
             user_text=user_text,
+            user_id=user_id,
+            now=now,
         )
         visible_reply = "\n".join([reply, *followup_replies])
         sharing_policy = _mapping(control_guidance.get("sharing_policy"))
@@ -4081,6 +4318,7 @@ class MVPDialogueRuntime:
             "m11_user_model": m11_result_dict,
             "m12_1_personality": m12_1_result_dict,
             "m12_2_reciprocal_role": m12_2_result_dict,
+            "relationship_value_context": relationship_value_context,
             "current_interlocutor": {
                 "display_name": display_name,
                 "user_id": user_id,
@@ -4254,6 +4492,18 @@ class MVPDialogueRuntime:
                 )
                 target.append(row)
                 applied.append(row)
+                abstract = _abstract_relationship_constraint_from_feedback(content, evidence)
+                if abstract is not None:
+                    _append_relationship_value_memory(
+                        state,
+                        user_id=user_id,
+                        summary=abstract[0],
+                        prediction_constraint=abstract[1],
+                        evidence=evidence,
+                        source="post_reply_observer",
+                        confidence=confidence,
+                        created_at=now,
+                    )
                 continue
             row = {
                 "id": f"stm_post_reply_{now}_{len(applied)}",
@@ -4294,6 +4544,8 @@ class MVPDialogueRuntime:
         state: dict[str, Any],
         *,
         user_text: str,
+        user_id: str = "",
+        now: int | None = None,
     ) -> list[dict[str, Any]]:
         if not _has_any_marker(user_text, _BREVITY_FEEDBACK_MARKERS):
             return []
@@ -4316,6 +4568,18 @@ class MVPDialogueRuntime:
             "source": "pacing_feedback",
         }
         target.append(row)
+        abstract = _abstract_relationship_constraint_from_feedback(content, str(user_text))
+        if abstract is not None:
+            _append_relationship_value_memory(
+                state,
+                user_id=user_id,
+                summary=abstract[0],
+                prediction_constraint=abstract[1],
+                evidence=str(user_text).strip()[:240],
+                source="pacing_feedback",
+                confidence=0.82,
+                created_at=now,
+            )
         return [row]
 
     def _apply_sharing_regret_feedback(

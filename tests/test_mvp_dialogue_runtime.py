@@ -17,6 +17,7 @@ from segmentum.dialogue.runtime.mvp_loop import (
     lexical_recall_short_term_candidates,
     retrieve_memories,
     retrieve_memories_for_guidance,
+    resolve_relationship_value_context,
     validate_visible_reply,
 )
 from segmentum.user_model import SocialSharingCandidate, decide_social_sharing
@@ -983,6 +984,127 @@ def test_brevity_feedback_becomes_learned_habit_and_affects_next_pacing(tmp_path
     thinking_prompt = _latest_prompt_for(llm, "思考与回复模块")
     assert '"reply_pacing": "casual_fast"' in thinking_prompt
     assert '"max_chars": 45' in thinking_prompt
+    assert '"relationship_value_constraints"' in thinking_prompt
+    assert "relationship_value_memory > user_comfort_prediction > persona_consistency > conversation_habits" in thinking_prompt
+
+
+def test_relationship_value_memory_injects_for_current_user_without_keyword_cue(tmp_path: Path) -> None:
+    llm = FakeJSONLLM()
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=llm,
+        persona_name="测试人格",
+    )
+    state = runtime.store.load()
+    state["relationship_value_memories"] = {
+        "by_user": {
+            "zq": [
+                {
+                    "id": "rvm_zq_plain",
+                    "summary": "zq 更接受低表演、直接温暖的普通聊天。",
+                    "prediction_constraint": "面对 zq 时，朴素连续的表达比机械维持人格口癖更能降低关系摩擦。",
+                    "priority": "high",
+                    "confidence": 0.86,
+                    "evidence": "历史反馈",
+                    "source": "test",
+                    "created_at": 1,
+                }
+            ]
+        }
+    }
+    runtime.store.save(state)
+
+    result = runtime.run_turn("嗯。", speaker_name="zq", turn_index=0, now=6600)
+
+    contract = result.diagnostics["reply_contract"]
+    assert contract["relationship_context_user_id"] == "zq"
+    assert contract["relationship_value_memory_active"] is True
+    assert contract["relationship_value_constraints"][0]["summary"].startswith("zq 更接受")
+    thinking_prompt = _latest_prompt_for(llm, "思考与回复模块")
+    assert "relationship_value_constraints" in thinking_prompt
+
+
+def test_relationship_value_memory_is_scoped_by_user_id(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=FakeJSONLLM(),
+        persona_name="测试人格",
+    )
+    state = runtime.store.load()
+    state["relationship_value_memories"] = {
+        "by_user": {
+            "zq": [
+                {
+                    "id": "rvm_zq_only",
+                    "summary": "zq 的关系价值记忆。",
+                    "prediction_constraint": "只应在 zq 当前对话中作为预测约束。",
+                    "priority": "high",
+                    "confidence": 0.9,
+                    "evidence": "历史反馈",
+                    "source": "test",
+                    "created_at": 1,
+                }
+            ]
+        }
+    }
+
+    zq_context = resolve_relationship_value_context(state, "zq", "普通输入")
+    alice_context = resolve_relationship_value_context(state, "Alice", "普通输入")
+
+    assert zq_context["active_relationship_value_memories"]
+    assert alice_context["active_relationship_value_memories"] == []
+    assert alice_context["reply_contract_patch"] == {}
+
+
+class HabitFeedbackLLM(FakeJSONLLM):
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        if "思考与回复模块" in system_prompt:
+            return {
+                "thought_type": "short",
+                "llm_thinking_result": {
+                    "user_intent_read": "用户在反馈表达方式。",
+                    "state_or_memory_used": [],
+                    "response_choice": "承认并调整表达。",
+                    "uncertainty": "",
+                    "debug_summary": "记录关系表达偏好。",
+                },
+                "reply": "好，我收一下这种表达。",
+                "reply_action": "answer",
+                "disclosure_action": "none",
+                "new_expectations": [],
+                "memory_writes": [],
+                "self_cognition_patch": {"apply": False},
+                "open_item_writes": [],
+                "habit_updates": [
+                    {
+                        "content": "用户不喜欢嘿嘿这类口癖式表达。",
+                        "evidence": "别嘿嘿了。",
+                        "confidence": 0.86,
+                    }
+                ],
+                "memory_dynamics_note": "",
+            }
+        return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+
+def test_negative_expression_feedback_writes_abstract_relationship_value_memory(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=HabitFeedbackLLM(),
+        persona_name="测试人格",
+    )
+
+    runtime.run_turn("别嘿嘿了。", speaker_name="zq", turn_index=0, now=6700)
+    saved = runtime.store.load()
+    rows = saved["relationship_value_memories"]["by_user"]["zq"]
+
+    assert rows
+    payload = json.dumps(rows, ensure_ascii=False)
+    assert "avoid_phrases" not in payload
+    assert "别嘿嘿" in payload
+    assert "低表演" in rows[0]["summary"] or "low-performance" in rows[0]["summary"]
+    assert "嘿嘿" not in rows[0]["summary"]
+    assert "嘿嘿" not in rows[0]["prediction_constraint"]
 
 
 def test_chat_response_carries_followup_replies_to_transcript(tmp_path: Path) -> None:
