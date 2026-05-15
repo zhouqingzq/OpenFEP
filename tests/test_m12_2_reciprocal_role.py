@@ -1,6 +1,7 @@
 import importlib
 import json
 from pathlib import Path
+from typing import Mapping
 
 import pytest
 
@@ -458,6 +459,112 @@ def test_m12_2_emits_no_action_instead_of_low_quality_hint():
     )
     assert state.models_by_user["u1"].high_gain_candidates[0].kind == "no_action"
     assert any(hint.kind == "no_action" for hint in result.reply_policy_hints)
+
+
+def test_m12_2_relationship_value_memory_produces_assessment_without_keyword_cue():
+    _state, result = run_m12_2_tick(
+        M122RuntimeState.clean(),
+        user_id="zq",
+        turn_id="t1",
+        turn_index=1,
+        hour_bucket=1,
+        user_text="ok",
+        relationship_value_memories=[
+            {
+                "id": "rvm_zq_plain",
+                "summary": "zq is more comfortable with plain, low-performance warmth in ordinary chat.",
+                "prediction_constraint": "Plain direct warmth is predicted to reduce relationship friction for zq.",
+                "priority": "high",
+                "confidence": 0.91,
+                "source": "test",
+                "evidence": "raw feedback must not be forwarded",
+            }
+        ],
+        config=M122RuntimeConfig(m12_2_reciprocal_role_enabled=True),
+    )
+
+    assessment = result.relationship_value_assessment
+    assert assessment is not None
+    payload = assessment.to_dict()
+    assert payload["persona_about_user"]
+    assert payload["user_about_persona"]
+    assert payload["user_comfort_pressure_band"] == "high"
+    assert payload["predicted_conflict_band"] == "high"
+    assert payload["preferred_policy"] == "adapt_to_relationship_value"
+    assert "avoid_phrases" not in json.dumps(payload, ensure_ascii=False)
+    assert "raw feedback" not in json.dumps(payload, ensure_ascii=False)
+    hint = next(hint for hint in result.reply_policy_hints if hint.source == "relationship_value_memory")
+    assert hint.kind == "apply_relationship_value_constraint"
+    assert hint.priority == "high"
+
+
+def test_m12_2_relationship_value_hint_is_not_lowered_by_reconciliation():
+    relationship_hint = ReplyPolicyHint(
+        "hint:relationship",
+        "apply_relationship_value_constraint",
+        "Prefer plain direct warmth for this relationship context.",
+        "user_about_persona",
+        priority="high",
+        source="relationship_value_memory",
+        topic_label="relationship_value_context",
+    )
+    ordinary_hint = ReplyPolicyHint(
+        "hint:ordinary",
+        "ask_clear_question",
+        "Ask a normal clarifying question.",
+        "persona_about_user",
+        priority="high",
+        topic_label="ordinary",
+    )
+
+    merged = reconcile_hints([relationship_hint, ordinary_hint], [], durable_ran=True)
+
+    by_id = {hint.hint_id: hint for hint in merged}
+    assert by_id["hint:relationship"].priority == "high"
+    assert by_id["hint:ordinary"].priority == "medium"
+
+
+def test_m12_2_extractor_snapshot_includes_prompt_safe_relationship_value_context():
+    captured: dict[str, Mapping[str, object]] = {}
+
+    def first(snapshot: Mapping[str, object]) -> Mapping[str, object]:
+        captured["first"] = snapshot
+        return _first_output()
+
+    def second(snapshot: Mapping[str, object]) -> Mapping[str, object]:
+        captured["second"] = snapshot
+        return _second_output()
+
+    run_m12_2_tick(
+        M122RuntimeState(models_by_user={"u1": ReciprocalRoleModel.empty(user_id="u1")}),
+        user_id="u1",
+        turn_id="t1",
+        turn_index=3,
+        hour_bucket=1,
+        user_text="Can you explain yourself?",
+        current_turn_quotes={"q1": "Can you explain yourself?"},
+        transcript_quote_refs=[{"turn_id": "t1", "quote_id": "q1"}],
+        relationship_value_memories=[
+            {
+                "id": "rvm",
+                "summary": "This user prefers low-performance directness.",
+                "prediction_constraint": "Direct low-performance replies reduce relationship friction.",
+                "priority": "high",
+                "confidence": 0.88,
+                "source": "test",
+                "evidence": "raw evidence should stay out",
+            }
+        ],
+        extractors={"first_order": first, "second_order": second},
+        trigger_input=_trigger(),
+        config=M122RuntimeConfig(m12_2_reciprocal_role_enabled=True),
+    )
+
+    context = captured["first"]["relationship_value_context"]
+    encoded = json.dumps(context, ensure_ascii=False)
+    assert "active_memories" in context
+    assert "prediction_constraint" in encoded
+    assert "raw evidence should stay out" not in encoded
 
 
 def test_m12_2_reciprocal_role_update_event_published_on_durable_patch():

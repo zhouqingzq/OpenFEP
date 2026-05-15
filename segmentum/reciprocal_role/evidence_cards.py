@@ -141,6 +141,9 @@ def reconcile_hints(
     }
     merged = list(durable_hints)
     for hint in volatile_hints:
+        if _is_relationship_value_hint(hint):
+            merged.append(hint)
+            continue
         keys = {key for key in ((hint.claim_id and f"claim:{hint.claim_id}"), (hint.topic_label and f"topic:{hint.topic_label}")) if key}
         if keys & durable_keys:
             continue
@@ -176,11 +179,17 @@ def reconcile_candidates(
 
 
 def _lower_hint_priority(hint: ReplyPolicyHint) -> ReplyPolicyHint | None:
+    if _is_relationship_value_hint(hint):
+        return hint
     if hint.priority == "high":
         return replace(hint, priority="medium")
     if hint.priority == "medium":
         return replace(hint, priority="low")
     return None
+
+
+def _is_relationship_value_hint(hint: ReplyPolicyHint) -> bool:
+    return hint.source == "relationship_value_memory" or hint.kind == "apply_relationship_value_constraint"
 
 
 def _confidence_for_candidate(candidate: InformationGainCandidate, *, model: ReciprocalRoleModel | None) -> str:

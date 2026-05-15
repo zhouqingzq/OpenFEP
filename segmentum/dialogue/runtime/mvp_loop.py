@@ -3602,19 +3602,39 @@ def _merge_m12_2_into_memory_guidance(
         for item in m12_2_result.get("reply_policy_hints", [])
         if isinstance(item, Mapping)
     ]
-    if not cards and not hints:
+    relationship_assessment = _mapping(m12_2_result.get("relationship_value_assessment"))
+    if not cards and not hints and not relationship_assessment:
         return
     control = _mapping(memory_dynamics.get("control_guidance"))
     contract = _mapping(control.get("reply_contract"))
     contract["m12_2_reciprocal_role"] = {
         "prompt_safe_evidence_cards": cards,
         "reply_policy_hints": hints,
+        "relationship_value_assessment": relationship_assessment,
         "permitted_surface": "compact_advisory_only",
     }
+    constraints = [
+        dict(item)
+        for item in relationship_assessment.get("relationship_value_constraints", [])
+        if isinstance(item, Mapping)
+    ]
+    if constraints:
+        contract["relationship_context_user_id"] = str(relationship_assessment.get("user_id", ""))
+        contract["relationship_value_memory_active"] = True
+        contract["relationship_value_constraints"] = constraints[:8]
+        contract["relationship_constraint_priority"] = RELATIONSHIP_VALUE_PRIORITY
+        contract["relationship_value_free_energy"] = {
+            "persona_consistency_pressure_band": str(relationship_assessment.get("persona_consistency_pressure_band", "")),
+            "user_comfort_pressure_band": str(relationship_assessment.get("user_comfort_pressure_band", "")),
+            "predicted_conflict_band": str(relationship_assessment.get("predicted_conflict_band", "")),
+            "preferred_policy": str(relationship_assessment.get("preferred_policy", "")),
+            "source": "m12_2_reciprocal_role",
+        }
     control["reply_contract"] = contract
     control["m12_2_reciprocal_role"] = {
         "prompt_safe_evidence_cards": cards,
         "reply_policy_hints": hints,
+        "relationship_value_assessment": relationship_assessment,
     }
     memory_dynamics["control_guidance"] = control
 
@@ -4064,8 +4084,14 @@ class MVPDialogueRuntime:
                 m12_1_result=m12_1_result_dict,
             )
 
+        relationship_value_context = resolve_relationship_value_context(
+            state,
+            user_id,
+            user_text,
+        )
         m12_2_result_dict: dict[str, Any] = {}
-        if _m12_2_enabled_for_state(state):
+        m12_2_enabled = _m12_2_enabled_for_state(state)
+        if m12_2_enabled:
             m12_2_state = _load_m12_2_state(state)
 
             def _extract_m12_2(name: str):
@@ -4107,6 +4133,7 @@ class MVPDialogueRuntime:
                 },
                 m12_readonly_summary=m12_pre_result or {},
                 m121_readonly_summary=m12_1_result_dict,
+                relationship_value_memories=relationship_value_context.get("active_relationship_value_memories", []),
                 extractors={"first_order": _extract_m12_2("first_order"), "second_order": _extract_m12_2("second_order")},
                 config=M122RuntimeConfig(m12_2_reciprocal_role_enabled=True, persona_kind="ui_chat"),
                 session_id=str(self.store.root.resolve()),
@@ -4129,15 +4156,11 @@ class MVPDialogueRuntime:
                 m12_2_result=m12_2_result_dict,
             )
 
-        relationship_value_context = resolve_relationship_value_context(
-            state,
-            user_id,
-            user_text,
-        )
-        _apply_relationship_value_context_to_memory_dynamics(
-            memory_dynamics,
-            relationship_value_context,
-        )
+        if not m12_2_enabled:
+            _apply_relationship_value_context_to_memory_dynamics(
+                memory_dynamics,
+                relationship_value_context,
+            )
 
         thinking_system, thinking_user = build_thinking_prompt(
             state=_prompt_safe_state(state),

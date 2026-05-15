@@ -9,7 +9,7 @@ from .evidence_cards import (
 )
 from .hyperparams import DEFAULT_HYPERPARAMS, M122Hyperparams
 from .information_gain import no_action_candidate, rank_information_gain_candidates, rank_or_no_action
-from .m12_2_runtime import M122RuntimeConfig, M122RuntimeState, M122TurnResult, run_m12_2_tick
+from .m12_2_runtime import RelationshipValueAssessment, M122RuntimeConfig, M122RuntimeState, M122TurnResult, run_m12_2_tick
 from .plain_language_linter import PlainLanguageFinding, PlainLanguageObserver, lint_text, lint_user_facing_fields, passes_plain_language
 from .reciprocal_model import (
     EvidenceRef,
@@ -43,6 +43,7 @@ __all__ = [
     "M122TurnResult",
     "PlainLanguageFinding",
     "PlainLanguageObserver",
+    "RelationshipValueAssessment",
     "ReciprocalClaim",
     "ReciprocalClaimGroup",
     "ReciprocalEvidenceCard",

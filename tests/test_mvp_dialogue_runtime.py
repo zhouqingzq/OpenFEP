@@ -1024,6 +1024,49 @@ def test_relationship_value_memory_injects_for_current_user_without_keyword_cue(
     assert "relationship_value_constraints" in thinking_prompt
 
 
+def test_relationship_value_memory_flows_through_m12_2_when_enabled(tmp_path: Path) -> None:
+    llm = FakeJSONLLM()
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=llm,
+        persona_name="test persona",
+    )
+    state = runtime.store.load()
+    state["m12_2_reciprocal_role_enabled"] = True
+    state["relationship_value_memories"] = {
+        "by_user": {
+            "zq": [
+                {
+                    "id": "rvm_zq_plain",
+                    "summary": "zq is more comfortable with plain, low-performance warmth in ordinary chat.",
+                    "prediction_constraint": "Plain direct warmth is predicted to reduce relationship friction for zq.",
+                    "priority": "high",
+                    "confidence": 0.9,
+                    "evidence": "raw evidence should not enter m12.2",
+                    "source": "test",
+                    "created_at": 1,
+                }
+            ]
+        }
+    }
+    runtime.store.save(state)
+
+    result = runtime.run_turn("ok", speaker_name="zq", turn_index=0, now=6610)
+
+    m12_2 = result.diagnostics["m12_2_reciprocal_role"]
+    assessment = m12_2["relationship_value_assessment"]
+    contract = result.diagnostics["reply_contract"]
+    assert assessment["preferred_policy"] == "adapt_to_relationship_value"
+    assert assessment["predicted_conflict_band"] == "high"
+    assert contract["relationship_value_constraints"][0]["summary"].startswith("zq is more comfortable")
+    assert contract["relationship_value_free_energy"]["source"] == "m12_2_reciprocal_role"
+    assert any(
+        hint["kind"] == "apply_relationship_value_constraint"
+        and hint["source"] == "relationship_value_memory"
+        for hint in m12_2["reply_policy_hints"]
+    )
+
+
 def test_relationship_value_memory_is_scoped_by_user_id(tmp_path: Path) -> None:
     runtime = MVPDialogueRuntime(
         store=MVPStateStore(tmp_path / "persona"),

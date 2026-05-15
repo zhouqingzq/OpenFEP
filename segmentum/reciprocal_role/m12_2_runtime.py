@@ -110,6 +110,40 @@ class M122RuntimeState:
 
 
 @dataclass(frozen=True)
+class RelationshipValueAssessment:
+    user_id: str
+    active_memories: tuple[dict[str, object], ...]
+    persona_about_user: str
+    user_about_persona: str
+    persona_consistency_pressure_band: str
+    user_comfort_pressure_band: str
+    predicted_conflict_band: str
+    preferred_policy: str = "adapt_to_relationship_value"
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "user_id": self.user_id,
+            "active_memories": [dict(item) for item in self.active_memories],
+            "persona_about_user": self.persona_about_user,
+            "user_about_persona": self.user_about_persona,
+            "persona_consistency_pressure_band": self.persona_consistency_pressure_band,
+            "user_comfort_pressure_band": self.user_comfort_pressure_band,
+            "predicted_conflict_band": self.predicted_conflict_band,
+            "preferred_policy": self.preferred_policy,
+            "relationship_value_constraints": [
+                {
+                    "summary": str(item.get("summary", "")),
+                    "prediction_constraint": str(item.get("prediction_constraint", "")),
+                    "priority": str(item.get("priority", "medium")),
+                    "confidence": item.get("confidence", 0.0),
+                    "source": str(item.get("source", "")),
+                }
+                for item in self.active_memories
+            ],
+        }
+
+
+@dataclass(frozen=True)
 class M122TurnResult:
     enabled: bool
     trigger_decision: TriggerDecision
@@ -119,6 +153,7 @@ class M122TurnResult:
     evidence_cards: tuple[ReciprocalEvidenceCard, ...]
     prompt_safe_evidence_cards: tuple[dict[str, object], ...]
     reply_policy_hints: tuple[ReplyPolicyHint, ...]
+    relationship_value_assessment: RelationshipValueAssessment | None = None
     safety_linter_findings: tuple[Mapping[str, object], ...] = ()
     recorded_extractor_outputs: dict[str, object] = field(default_factory=dict)
     published_event_ids: tuple[str, ...] = ()
@@ -133,10 +168,69 @@ class M122TurnResult:
             "evidence_cards": [card.to_dict() for card in self.evidence_cards],
             "prompt_safe_evidence_cards": list(self.prompt_safe_evidence_cards),
             "reply_policy_hints": [hint.to_dict() for hint in self.reply_policy_hints],
+            "relationship_value_assessment": self.relationship_value_assessment.to_dict() if self.relationship_value_assessment else None,
             "safety_linter_findings": [dict(item) for item in self.safety_linter_findings],
             "recorded_extractor_outputs": _json_safe(self.recorded_extractor_outputs),
             "published_event_ids": list(self.published_event_ids),
         }
+
+
+def assess_relationship_value_memories(
+    *,
+    user_id: str,
+    memories: Sequence[Mapping[str, object]],
+) -> RelationshipValueAssessment | None:
+    active = tuple(_prompt_safe_relationship_memory(item) for item in memories)
+    active = tuple(item for item in active if item)
+    if not active:
+        return None
+    strongest = _strongest_relationship_band(active)
+    top = active[0]
+    summary = str(top.get("summary", ""))
+    prediction = str(top.get("prediction_constraint", ""))
+    return RelationshipValueAssessment(
+        user_id=str(user_id or ""),
+        active_memories=active[:6],
+        persona_about_user=(
+            summary
+            or "This user is more comfortable when the persona adapts to relationship comfort instead of preserving default style mechanically."
+        ),
+        user_about_persona=(
+            prediction
+            or "This user may experience mechanical persona consistency as relationship friction when it conflicts with prior comfort feedback."
+        ),
+        persona_consistency_pressure_band="medium" if strongest in {"high", "medium"} else "low",
+        user_comfort_pressure_band=strongest,
+        predicted_conflict_band=strongest,
+    )
+
+
+def relationship_value_hints(
+    assessment: RelationshipValueAssessment | None,
+    *,
+    turn_id: str,
+) -> tuple[ReplyPolicyHint, ...]:
+    if assessment is None:
+        return ()
+    hints: list[ReplyPolicyHint] = []
+    for idx, memory in enumerate(assessment.active_memories[:3]):
+        prediction = str(memory.get("prediction_constraint", "")).strip()
+        summary = str(memory.get("summary", "")).strip()
+        reason = prediction or summary
+        if not reason:
+            continue
+        hints.append(
+            ReplyPolicyHint(
+                hint_id=f"hint:{turn_id}:relationship_value:{idx}",
+                kind="apply_relationship_value_constraint",
+                plain_reason=reason[:260],
+                target_axis="user_about_persona",
+                priority="high" if assessment.predicted_conflict_band == "high" else "medium",
+                source="relationship_value_memory",
+                topic_label="relationship_value_context",
+            )
+        )
+    return tuple(hints)
 
 
 def run_m12_2_tick(
@@ -152,6 +246,7 @@ def run_m12_2_tick(
     m11_readonly_summary: Mapping[str, object] | None = None,
     m12_readonly_summary: Mapping[str, object] | None = None,
     m121_readonly_summary: Mapping[str, object] | None = None,
+    relationship_value_memories: Sequence[Mapping[str, object]] = (),
     extractors: Mapping[str, Extractor] | None = None,
     trigger_input: TriggerPolicyInput | None = None,
     config: M122RuntimeConfig | None = None,
@@ -176,6 +271,11 @@ def run_m12_2_tick(
     )
     quotes = current_turn_quotes or ({"q_current": user_text} if user_text else {})
     assessment = assess_turn_light(turn_id=turn_id, user_text=user_text, current_turn_quotes=quotes)
+    relationship_assessment = assess_relationship_value_memories(
+        user_id=user_id,
+        memories=relationship_value_memories,
+    )
+    relationship_hints = relationship_value_hints(relationship_assessment, turn_id=turn_id)
     trigger = trigger_input or _default_trigger_input(
         bootstrapped,
         model=model,
@@ -201,6 +301,7 @@ def run_m12_2_tick(
             m11_readonly_summary=m11_readonly_summary,
             m12_readonly_summary=m12_readonly_summary,
             m121_readonly_summary=m121_readonly_summary,
+            relationship_value_context=relationship_assessment.to_dict() if relationship_assessment else {},
             model=model,
         ), hyperparams=hyperparams)
         first_raw = _run_extractor(extractors, "first_order", snapshot, default=insufficient_output("first_order"))
@@ -285,20 +386,21 @@ def run_m12_2_tick(
         patch_non_empty=next_model.to_json() != model.to_json(),
     )
     durable_hints = hints_from_candidates(durable_candidates, source="durable") if durable_ran else ()
-    hints = reconcile_hints(assessment.reply_policy_hints, durable_hints, durable_ran=durable_ran)
+    hints = reconcile_hints((*assessment.reply_policy_hints, *relationship_hints), durable_hints, durable_ran=durable_ran)
     cards = evidence_cards_from_candidates(durable_candidates, model=next_model)
     return next_state, M122TurnResult(
-        True,
-        decision,
-        before,
-        next_state.to_dict(),
-        assessment,
-        cards,
-        prompt_safe_cards(cards),
-        hints,
-        safety_findings,
-        recorded,
-        event_ids,
+        enabled=True,
+        trigger_decision=decision,
+        state_before=before,
+        state_after=next_state.to_dict(),
+        light_turn_assessment=assessment,
+        evidence_cards=cards,
+        prompt_safe_evidence_cards=prompt_safe_cards(cards),
+        reply_policy_hints=hints,
+        relationship_value_assessment=relationship_assessment,
+        safety_linter_findings=safety_findings,
+        recorded_extractor_outputs=recorded,
+        published_event_ids=event_ids,
     )
 
 
@@ -375,6 +477,43 @@ def _snapshot(**kwargs: object) -> dict[str, object]:
     if isinstance(quotes, Mapping):
         allowed.extend(f"{turn_id}:{quote_id}" for quote_id in quotes)
     return {**kwargs, "allowed_evidence_quote_refs": sorted(set(str(item) for item in allowed))}
+
+
+def _prompt_safe_relationship_memory(item: Mapping[str, object]) -> dict[str, object]:
+    summary = str(item.get("summary", "")).strip()
+    prediction = str(item.get("prediction_constraint", "")).strip()
+    if not summary or not prediction:
+        return {}
+    priority = str(item.get("priority", "medium")).strip() or "medium"
+    if priority not in {"high", "medium", "low"}:
+        priority = "medium"
+    try:
+        confidence = max(0.0, min(float(item.get("confidence", 0.0) or 0.0), 1.0))
+    except (TypeError, ValueError):
+        confidence = 0.0
+    return {
+        "id": str(item.get("id", "")).strip()[:80],
+        "summary": summary[:240],
+        "prediction_constraint": prediction[:360],
+        "priority": priority,
+        "confidence": round(confidence, 6),
+        "source": str(item.get("source", "")).strip()[:80],
+    }
+
+
+def _strongest_relationship_band(memories: Sequence[Mapping[str, object]]) -> str:
+    strongest = "low"
+    for item in memories:
+        priority = str(item.get("priority", "medium"))
+        try:
+            confidence = float(item.get("confidence", 0.0) or 0.0)
+        except (TypeError, ValueError):
+            confidence = 0.0
+        if priority == "high" and confidence >= 0.80:
+            return "high"
+        if priority in {"high", "medium"} and confidence >= 0.60:
+            strongest = "medium"
+    return strongest
 
 
 def _run_extractor(

@@ -8,7 +8,14 @@ from typing import Literal, Mapping, Sequence
 from .reciprocal_model import EvidenceRef, InformationGainCandidate, TargetAxis, UncertaintyPoint
 
 ObservedUserProbe = Literal["none", "mild", "explicit", "adversarial", "boundary_test"]
-HintKind = Literal["ask_clear_question", "clarify_persona_stance", "acknowledge_uncertainty", "maintain_boundary", "no_action"]
+HintKind = Literal[
+    "ask_clear_question",
+    "clarify_persona_stance",
+    "acknowledge_uncertainty",
+    "maintain_boundary",
+    "apply_relationship_value_constraint",
+    "no_action",
+]
 
 
 @dataclass(frozen=True)
@@ -200,7 +207,7 @@ def _refs(value: object) -> tuple[EvidenceRef, ...]:
 
 def _hint_kind(value: object) -> HintKind:
     text = str(value or "no_action")
-    return text if text in {"ask_clear_question", "clarify_persona_stance", "acknowledge_uncertainty", "maintain_boundary", "no_action"} else "no_action"  # type: ignore[return-value]
+    return text if text in {"ask_clear_question", "clarify_persona_stance", "acknowledge_uncertainty", "maintain_boundary", "apply_relationship_value_constraint", "no_action"} else "no_action"  # type: ignore[return-value]
 
 
 def _axis(value: object) -> TargetAxis:

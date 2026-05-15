@@ -183,6 +183,8 @@ def bound_extractor_snapshot(
             }
         elif key == "transcript_quote_refs" and isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
             out[key] = [_json_safe(item, hyperparams=hyperparams, depth=1) for item in value[: hyperparams.max_transcript_quote_refs]]
+        elif key == "relationship_value_context":
+            out[key] = _bounded_relationship_value_context(value, hyperparams=hyperparams)
         elif key in {"m11_readonly_summary", "m12_readonly_summary", "m121_readonly_summary"}:
             out[key] = _bounded_readonly_summary(key, value, hyperparams=hyperparams)
         elif key == "model":
@@ -221,6 +223,48 @@ def _bounded_readonly_summary(key: str, value: object, *, hyperparams: M122Hyper
                     "report_id": str(report.get("report_id", ""))[: hyperparams.max_summary_chars],
                 }
     return out
+
+
+def _bounded_relationship_value_context(value: object, *, hyperparams: M122Hyperparams) -> dict[str, object]:
+    if not isinstance(value, Mapping):
+        return {}
+    allowed = {
+        "user_id",
+        "active_memories",
+        "persona_about_user",
+        "user_about_persona",
+        "persona_consistency_pressure_band",
+        "user_comfort_pressure_band",
+        "predicted_conflict_band",
+        "preferred_policy",
+        "relationship_value_constraints",
+    }
+    out: dict[str, object] = {}
+    for key in sorted(allowed):
+        if key not in value:
+            continue
+        if key in {"active_memories", "relationship_value_constraints"}:
+            rows = value.get(key)
+            if isinstance(rows, Sequence) and not isinstance(rows, (str, bytes)):
+                out[key] = [
+                    _bounded_relationship_value_row(item, hyperparams=hyperparams)
+                    for item in rows[: hyperparams.max_readonly_summary_items]
+                    if isinstance(item, Mapping)
+                ]
+            continue
+        out[key] = str(value.get(key, ""))[: hyperparams.max_summary_chars]
+    return out
+
+
+def _bounded_relationship_value_row(item: Mapping[str, object], *, hyperparams: M122Hyperparams) -> dict[str, object]:
+    return {
+        "id": str(item.get("id", ""))[:80],
+        "summary": str(item.get("summary", ""))[: hyperparams.max_summary_chars],
+        "prediction_constraint": str(item.get("prediction_constraint", ""))[: hyperparams.max_summary_chars],
+        "priority": str(item.get("priority", "medium"))[:16],
+        "confidence": item.get("confidence", 0.0),
+        "source": str(item.get("source", ""))[:80],
+    }
 
 
 def _bounded_model_summary(value: object, *, hyperparams: M122Hyperparams) -> dict[str, object]:
