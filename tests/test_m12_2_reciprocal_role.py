@@ -356,6 +356,62 @@ def test_m12_2_bootstrap_first_turn_skips_durable_consolidation():
     assert result.trigger_decision.reason == "bootstrap_first_turn_skips_durable"
 
 
+def test_m12_2_bootstrapped_empty_model_allows_later_explicit_consolidation():
+    state, first = run_m12_2_tick(
+        M122RuntimeState.clean(),
+        user_id="u1",
+        turn_id="t0",
+        turn_index=1,
+        hour_bucket=1,
+        user_text="I need help checking code.",
+        config=M122RuntimeConfig(m12_2_reciprocal_role_enabled=True),
+    )
+    assert first.trigger_decision.reason == "bootstrap_first_turn_skips_durable"
+
+    state, second = run_m12_2_tick(
+        state,
+        user_id="u1",
+        turn_id="t1",
+        turn_index=2,
+        hour_bucket=1,
+        user_text="Can you explain how you understand what I am checking about you?",
+        current_turn_quotes={"q1": "Can you explain how you understand what I am checking about you?"},
+        transcript_quote_refs=[{"turn_id": "t1", "quote_id": "q1"}],
+        extractors=_extractors(),
+        config=M122RuntimeConfig(m12_2_reciprocal_role_enabled=True),
+    )
+    assert second.trigger_decision.reason == "explicit_user_request"
+    assert state.models_by_user["u1"].all_claims()
+
+
+def test_m12_2_invalid_live_extractor_output_falls_back_to_conservative_claims():
+    def bad_first(_snapshot):
+        return {"persona_about_user_claims": [], "claim_group_updates": {"bad": True}}
+
+    def bad_second(_snapshot):
+        return {
+            "user_about_persona_claims": [{"claim_text_plain": "The user may be checking trust.", "confidence": 0.7}],
+            "claim_group_updates": [],
+        }
+
+    state, result = run_m12_2_tick(
+        M122RuntimeState(models_by_user={"u1": ReciprocalRoleModel.empty(user_id="u1")}),
+        user_id="u1",
+        turn_id="t1",
+        turn_index=2,
+        hour_bucket=1,
+        user_text="Can you explain how you understand what I am checking about you?",
+        current_turn_quotes={"q_current": "Can you explain how you understand what I am checking about you?"},
+        extractors={"first_order": bad_first, "second_order": bad_second},
+        config=M122RuntimeConfig(m12_2_reciprocal_role_enabled=True),
+    )
+    model = state.models_by_user["u1"]
+    assert result.trigger_decision.reason == "explicit_user_request"
+    assert model.persona_about_user_claims
+    assert model.user_about_persona_claims
+    assert result.recorded_extractor_outputs["validation_errors"]
+
+
 def test_m12_2_user_explicit_meta_request_produces_safe_plain_explanation():
     state, result = run_m12_2_tick(
         M122RuntimeState(models_by_user={"u1": ReciprocalRoleModel.empty(user_id="u1")}),

@@ -123,6 +123,13 @@ SYSTEM_FILE_NAMES: dict[str, str] = {
     key: f"{key}.json" for key in SYSTEM_FILE_DEFAULTS
 }
 
+SHARED_STATE_KEYS: frozenset[str] = frozenset(
+    {
+        "m12_2_reciprocal_role_enabled",
+        "m12_2_reciprocal_role",
+    }
+)
+
 PERSONA_ANALYSIS_KEYS = (
     "persona_name",
     "source_role_evidence",
@@ -710,6 +717,21 @@ class MVPStateStore:
             path = self.path_for(key)
             if not path.exists():
                 path.write_text(json.dumps(default, ensure_ascii=False, indent=2), encoding="utf-8")
+            shared_path = self._shared_state_path_for(key)
+            if shared_path != path:
+                shared_path.parent.mkdir(parents=True, exist_ok=True)
+                if key == "m12_2_reciprocal_role_enabled":
+                    value = self._merged_m12_2_enabled(default)
+                    existing = _safe_json_load(shared_path, default)
+                    if (not shared_path.exists()) or (bool(value) and not bool(existing)):
+                        shared_path.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8")
+                elif key == "m12_2_reciprocal_role":
+                    merged = self._merged_m12_2_state(default)
+                    existing = _safe_json_load(shared_path, default)
+                    if (not shared_path.exists()) or merged != existing:
+                        shared_path.write_text(json.dumps(merged, ensure_ascii=False, indent=2), encoding="utf-8")
+                elif not shared_path.exists():
+                    shared_path.write_text(json.dumps(default, ensure_ascii=False, indent=2), encoding="utf-8")
         if self._has_shared_short_term():
             shared_path = self._shared_short_term_path()
             shared_path.parent.mkdir(parents=True, exist_ok=True)
@@ -727,7 +749,7 @@ class MVPStateStore:
     def load(self) -> dict[str, Any]:
         self.ensure_files()
         state = {
-            key: _safe_json_load(self.path_for(key), default)
+            key: _safe_json_load(self._shared_state_path_for(key), default)
             for key, default in SYSTEM_FILE_DEFAULTS.items()
         }
         if self._has_shared_short_term():
@@ -751,6 +773,13 @@ class MVPStateStore:
                 json.dumps(value, ensure_ascii=False, indent=2),
                 encoding="utf-8",
             )
+            shared_path = self._shared_state_path_for(key)
+            if shared_path != self.path_for(key):
+                shared_path.parent.mkdir(parents=True, exist_ok=True)
+                shared_path.write_text(
+                    json.dumps(value, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
             if key == "short_term_memory" and self._has_shared_short_term():
                 shared = _safe_json_load(self._shared_short_term_path(), SYSTEM_FILE_DEFAULTS["short_term_memory"])
                 merged = _merge_recent_memory(
@@ -771,10 +800,127 @@ class MVPStateStore:
     def _has_shared_short_term(self) -> bool:
         return bool(self.shared_root and self.shared_root.resolve() != self.root.resolve())
 
+    def _has_shared_state(self) -> bool:
+        return bool(self.shared_root and self.shared_root.resolve() != self.root.resolve())
+
+    def _shared_state_path_for(self, key: str) -> Path:
+        if key in SHARED_STATE_KEYS and self._has_shared_state() and self.shared_root is not None:
+            return self.shared_root / SYSTEM_FILE_NAMES[key]
+        return self.path_for(key)
+
     def _shared_short_term_path(self) -> Path:
         if self.shared_root is None:
             return self.path_for("short_term_memory")
         return self.shared_root / SYSTEM_FILE_NAMES["short_term_memory"]
+
+    def _shared_state_candidate_paths(self, key: str) -> list[Path]:
+        paths: list[Path] = []
+        seen: set[str] = set()
+
+        def add(path: Path) -> None:
+            try:
+                marker = str(path.resolve())
+            except OSError:
+                marker = str(path)
+            if marker not in seen:
+                seen.add(marker)
+                paths.append(path)
+
+        add(self._shared_state_path_for(key))
+        add(self.path_for(key))
+        if self.shared_root is not None:
+            add(self.shared_root / SYSTEM_FILE_NAMES[key])
+            sessions_dir = self.shared_root / "sessions"
+            if sessions_dir.is_dir():
+                for path in sessions_dir.glob(f"*/{SYSTEM_FILE_NAMES[key]}"):
+                    add(path)
+        return sorted(paths, key=lambda path: (self._path_mtime(path), str(path)))
+
+    @staticmethod
+    def _path_mtime(path: Path) -> float:
+        try:
+            return path.stat().st_mtime
+        except OSError:
+            return -1.0
+
+    def _merged_m12_2_enabled(self, default: Any) -> bool:
+        value = bool(default)
+        for path in self._shared_state_candidate_paths("m12_2_reciprocal_role_enabled"):
+            payload = _safe_json_load(path, default)
+            value = value or bool(payload)
+        return value
+
+    def _merged_m12_2_state(self, default: Any) -> dict[str, Any]:
+        merged: dict[str, Any] = dict(default) if isinstance(default, Mapping) else {}
+        merged_models: dict[str, Any] = {}
+        model_has_content: dict[str, bool] = {}
+        merged_records: dict[str, list[Any]] = {}
+        record_seen: dict[str, set[str]] = {}
+        shared_path = self._shared_state_path_for("m12_2_reciprocal_role")
+        candidate_paths: list[Path] = []
+        shared_candidates: list[Path] = []
+        for path in self._shared_state_candidate_paths("m12_2_reciprocal_role"):
+            if self._same_path(path, shared_path):
+                shared_candidates.append(path)
+            else:
+                candidate_paths.append(path)
+
+        for path in [*candidate_paths, *shared_candidates]:
+            payload = _safe_json_load(path, default)
+            if not isinstance(payload, Mapping):
+                continue
+            models = payload.get("models_by_user")
+            if isinstance(models, Mapping):
+                for user_id, row in models.items():
+                    if not isinstance(row, Mapping):
+                        continue
+                    user_key = str(user_id)
+                    row_dict = dict(row)
+                    has_content = self._m12_2_model_has_content(row_dict)
+                    if user_key not in merged_models or has_content or not model_has_content.get(user_key, False):
+                        merged_models[user_key] = row_dict
+                        model_has_content[user_key] = has_content
+            records = payload.get("run_records_by_user")
+            if isinstance(records, Mapping):
+                for user_id, rows in records.items():
+                    if not isinstance(rows, list):
+                        continue
+                    user_key = str(user_id)
+                    bucket = merged_records.setdefault(user_key, [])
+                    seen = record_seen.setdefault(user_key, set())
+                    for index, row in enumerate(rows):
+                        if not isinstance(row, Mapping):
+                            continue
+                        row_dict = dict(row)
+                        record_key = str(row_dict.get("turn_id") or f"{path}:{index}")
+                        if record_key in seen:
+                            continue
+                        seen.add(record_key)
+                        bucket.append(row_dict)
+
+        merged["models_by_user"] = merged_models
+        merged["run_records_by_user"] = merged_records
+        return merged
+
+    @staticmethod
+    def _m12_2_model_has_content(model: Mapping[str, Any]) -> bool:
+        for key in (
+            "persona_about_user_claims",
+            "user_about_persona_claims",
+            "unresolved_uncertainty_points",
+            "high_gain_candidates",
+        ):
+            value = model.get(key)
+            if isinstance(value, list) and value:
+                return True
+        return bool(str(model.get("last_consolidated_turn_id") or "").strip())
+
+    @staticmethod
+    def _same_path(left: Path, right: Path) -> bool:
+        try:
+            return left.resolve() == right.resolve()
+        except OSError:
+            return left == right
 
     def _load_shared_short_term_groups(self) -> list[list[Any]]:
         groups: list[list[Any]] = []
@@ -3708,6 +3854,8 @@ class MVPDialogueRuntime:
         prior_m12_blob = state.get("m12_user_continuity")
         prior_m12_1_enabled = state.get("m12_1_personality_enabled")
         prior_m12_1_blob = state.get("m12_1_user_personality")
+        prior_m12_2_enabled = state.get("m12_2_reciprocal_role_enabled")
+        prior_m12_2_blob = state.get("m12_2_reciprocal_role")
         default_enable_m12 = _should_default_enable_m12_for_persona_init(state)
         default_enable_m12_1 = _should_default_enable_m12_1_for_persona_init(state)
         payload = normalize_persona_payload(persona_payload, fallback_name=self.persona_name)
@@ -3733,6 +3881,12 @@ class MVPDialogueRuntime:
             state["m12_1_personality_enabled"] = True
         if isinstance(prior_m12_1_blob, Mapping):
             state["m12_1_user_personality"] = dict(prior_m12_1_blob)
+        if isinstance(prior_m12_2_enabled, bool):
+            state["m12_2_reciprocal_role_enabled"] = prior_m12_2_enabled
+        elif prior_m12_2_enabled is not None:
+            state["m12_2_reciprocal_role_enabled"] = bool(prior_m12_2_enabled)
+        if isinstance(prior_m12_2_blob, Mapping):
+            state["m12_2_reciprocal_role"] = dict(prior_m12_2_blob)
         now = _utc_timestamp()
         for memory in state.get("long_term_memory", []):
             if isinstance(memory, dict):

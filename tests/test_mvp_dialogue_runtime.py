@@ -505,6 +505,63 @@ def test_mvp_runtime_persists_temporal_state_between_turns(tmp_path: Path) -> No
     assert any("避免冗长" in item["content"] for item in learned)
 
 
+def test_mvp_session_seed_uses_latest_temporal_state_across_sessions(tmp_path: Path) -> None:
+    from segmentum.dialogue.runtime.chat import _seed_mvp_session_store_if_needed
+
+    persona_root = tmp_path / "mvp" / "hutao"
+    session_root = persona_root / "sessions" / "new"
+    older = persona_root / "sessions" / "older"
+    latest = persona_root / "sessions" / "latest"
+    persona_root.mkdir(parents=True)
+    older.mkdir(parents=True)
+    latest.mkdir(parents=True)
+    (persona_root / "temporal_state.json").write_text(
+        json.dumps({"last_turn_at": 100, "last_user_text": "root"}),
+        encoding="utf-8",
+    )
+    (older / "temporal_state.json").write_text(
+        json.dumps({"last_turn_at": 200, "last_user_text": "older"}),
+        encoding="utf-8",
+    )
+    (latest / "temporal_state.json").write_text(
+        json.dumps({"last_turn_at": 300, "last_user_text": "latest"}),
+        encoding="utf-8",
+    )
+
+    _seed_mvp_session_store_if_needed(persona_root, session_root)
+
+    seeded = json.loads((session_root / "temporal_state.json").read_text(encoding="utf-8"))
+    assert seeded["last_turn_at"] == 300
+    assert seeded["last_user_text"] == "latest"
+
+
+def test_mvp_session_seed_does_not_copy_m12_2_session_defaults(tmp_path: Path) -> None:
+    from segmentum.dialogue.runtime.chat import _seed_mvp_session_store_if_needed
+
+    persona_root = tmp_path / "mvp" / "hutao"
+    session_root = persona_root / "sessions" / "new"
+    persona_root.mkdir(parents=True)
+    (persona_root / "m12_2_reciprocal_role_enabled.json").write_text("true", encoding="utf-8")
+    (persona_root / "m12_2_reciprocal_role.json").write_text(
+        json.dumps(
+            {
+                "models_by_user": {"zq": {"user_id": "zq", "persona_about_user_claims": []}},
+                "run_records_by_user": {"zq": []},
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    _seed_mvp_session_store_if_needed(persona_root, session_root)
+
+    assert not (session_root / "m12_2_reciprocal_role_enabled.json").exists()
+    assert not (session_root / "m12_2_reciprocal_role.json").exists()
+    state = MVPStateStore(session_root, shared_root=persona_root).load()
+    assert state["m12_2_reciprocal_role_enabled"] is True
+    assert "zq" in state["m12_2_reciprocal_role"]["models_by_user"]
+
+
 def test_material_analysis_prompt_requests_structured_evidence() -> None:
     system_prompt, user_prompt = build_free_energy_personality_analysis_prompt(
         ["角色材料"],
@@ -1295,6 +1352,86 @@ def test_mvp_state_store_shares_recent_short_term_memory_across_sessions(tmp_pat
     store_b.save(state_b)
     shared_short = MVPStateStore(persona_root).load()["short_term_memory"]
     assert any(item.get("id") == "stm_zq_tea" for item in shared_short)
+
+
+def test_mvp_state_store_shares_m12_2_across_sessions(tmp_path: Path) -> None:
+    persona_root = tmp_path / "persona"
+    store_a = MVPStateStore(persona_root / "sessions" / "tab_a", shared_root=persona_root)
+    state_a = store_a.load()
+    state_a["m12_2_reciprocal_role_enabled"] = True
+    state_a["m12_2_reciprocal_role"] = {
+        "models_by_user": {
+            "zq": {
+                "user_id": "zq",
+                "persona_label": "hutao",
+                "persona_about_user_claims": [
+                    {
+                        "claim_id": "claim_zq_tests_trust",
+                        "claim_text_plain": "zq is testing whether Hu Tao can remember and understand him.",
+                        "confidence_band": "low",
+                        "uncertainty_band": "medium",
+                        "status": "active",
+                        "evidence_refs": [{"turn_id": "turn_0002", "quote_id": "q_current"}],
+                    }
+                ],
+                "user_about_persona_claims": [
+                    {
+                        "claim_id": "claim_zq_views_hutao",
+                        "claim_text_plain": "zq may see Hu Tao as interesting but still under evaluation.",
+                        "confidence_band": "low",
+                        "uncertainty_band": "medium",
+                        "status": "active",
+                        "evidence_refs": [{"turn_id": "turn_0002", "quote_id": "q_current"}],
+                    }
+                ],
+            }
+        },
+        "run_records_by_user": {"zq": [{"turn_id": "turn_0002", "turn_index": 1}]},
+    }
+    store_a.save(state_a)
+
+    store_b = MVPStateStore(persona_root / "sessions" / "tab_b", shared_root=persona_root)
+    state_b = store_b.load()
+
+    assert state_b["m12_2_reciprocal_role_enabled"] is True
+    model = state_b["m12_2_reciprocal_role"]["models_by_user"]["zq"]
+    assert model["persona_about_user_claims"][0]["claim_id"] == "claim_zq_tests_trust"
+    assert model["user_about_persona_claims"][0]["claim_id"] == "claim_zq_views_hutao"
+
+
+def test_mvp_state_store_migrates_legacy_session_m12_2_to_shared_root(tmp_path: Path) -> None:
+    persona_root = tmp_path / "persona"
+    legacy_store = MVPStateStore(persona_root / "sessions" / "legacy_tab")
+    legacy = legacy_store.load()
+    legacy["m12_2_reciprocal_role_enabled"] = True
+    legacy["m12_2_reciprocal_role"] = {
+        "models_by_user": {
+            "zq": {
+                "user_id": "zq",
+                "persona_about_user_claims": [
+                    {
+                        "claim_id": "legacy_claim",
+                        "claim_text_plain": "legacy session claim",
+                        "confidence_band": "low",
+                        "uncertainty_band": "medium",
+                        "status": "active",
+                    }
+                ],
+            }
+        },
+        "run_records_by_user": {"zq": [{"turn_id": "turn_0001"}]},
+    }
+    legacy_store.save(legacy)
+
+    store = MVPStateStore(persona_root / "sessions" / "new_tab", shared_root=persona_root)
+    state = store.load()
+
+    assert state["m12_2_reciprocal_role_enabled"] is True
+    assert state["m12_2_reciprocal_role"]["models_by_user"]["zq"]["persona_about_user_claims"][0][
+        "claim_id"
+    ] == "legacy_claim"
+    root_state = json.loads((persona_root / "m12_2_reciprocal_role.json").read_text(encoding="utf-8"))
+    assert "zq" in root_state["models_by_user"]
 
 
 def test_retrieve_memories_surfaces_repeated_interaction_as_experience() -> None:
@@ -2429,6 +2566,83 @@ def test_m12_state_persists_via_mvp_system_files(tmp_path: Path) -> None:
     reloaded = store.load()
     assert reloaded["m12_identity_continuity_enabled"] is True
     assert reloaded["m12_user_continuity"] == blob
+
+
+def test_initialize_from_persona_payload_preserves_m12_2_state(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=FakeJSONLLM(),
+        persona_name="test_persona",
+    )
+    state = runtime.store.load()
+    state["m12_2_reciprocal_role_enabled"] = True
+    state["m12_2_reciprocal_role"] = {
+        "models_by_user": {"zq": {"user_id": "zq", "persona_label": "hutao"}},
+        "run_records_by_user": {"zq": []},
+    }
+    runtime.store.save(state)
+
+    runtime.initialize_from_persona_payload(
+        {
+            "persona_name": "test_persona",
+            "source_role_evidence": ["material"],
+            "self_cognition": {"summary": "x"},
+            "short_term_memory": [],
+            "long_term_memory": [],
+            "pending_expectations": [],
+            "open_items": [],
+            "self_basic_facts": {"name": "test_persona"},
+            "habit_traits": {"big_five": {}},
+            "temporal_state": {"last_turn_at": None},
+            "m11_user_models": {},
+            "m12_2_reciprocal_role_enabled": False,
+            "m12_2_reciprocal_role": {"models_by_user": {}, "run_records_by_user": {}},
+            "social_sharing_policy": {"regret_bias": 0.0, "learned_boundaries": []},
+        }
+    )
+
+    saved = runtime.store.load()
+    assert saved["m12_2_reciprocal_role_enabled"] is True
+    assert saved["m12_2_reciprocal_role"]["models_by_user"]["zq"]["user_id"] == "zq"
+
+
+def test_initialize_from_persona_payload_preserves_shared_m12_2_state(tmp_path: Path) -> None:
+    persona_root = tmp_path / "persona"
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(persona_root / "sessions" / "tab_a", shared_root=persona_root),
+        llm=FakeJSONLLM(),
+        persona_name="test_persona",
+    )
+    state = runtime.store.load()
+    state["m12_2_reciprocal_role_enabled"] = True
+    state["m12_2_reciprocal_role"] = {
+        "models_by_user": {"zq": {"user_id": "zq", "persona_label": "hutao"}},
+        "run_records_by_user": {"zq": []},
+    }
+    runtime.store.save(state)
+
+    runtime.initialize_from_persona_payload(
+        {
+            "persona_name": "test_persona",
+            "source_role_evidence": ["material"],
+            "self_cognition": {"summary": "x"},
+            "short_term_memory": [],
+            "long_term_memory": [],
+            "pending_expectations": [],
+            "open_items": [],
+            "self_basic_facts": {"name": "test_persona"},
+            "habit_traits": {"big_five": {}},
+            "temporal_state": {"last_turn_at": None},
+            "m11_user_models": {},
+            "m12_2_reciprocal_role_enabled": False,
+            "m12_2_reciprocal_role": {"models_by_user": {}, "run_records_by_user": {}},
+            "social_sharing_policy": {"regret_bias": 0.0, "learned_boundaries": []},
+        }
+    )
+
+    saved = MVPStateStore(persona_root / "sessions" / "tab_b", shared_root=persona_root).load()
+    assert saved["m12_2_reciprocal_role_enabled"] is True
+    assert saved["m12_2_reciprocal_role"]["models_by_user"]["zq"]["persona_label"] == "hutao"
 
 
 def test_initialize_from_persona_payload_defaults_m12_on_for_fresh_persona(tmp_path: Path) -> None:

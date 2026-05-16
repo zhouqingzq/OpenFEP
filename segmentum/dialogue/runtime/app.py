@@ -1803,6 +1803,11 @@ def _mvp_substate_from_diagnostics(
     return state_after if state_after else _as_dict(section.get(state_key))
 
 
+def _m12_2_has_user_models(state: Mapping[str, object]) -> bool:
+    models = _as_dict(state.get("models_by_user"))
+    return bool(models)
+
+
 def _mvp_observation_sources(
     chat_iface: ChatInterface,
 ) -> tuple[dict[str, object], dict[str, object], dict[str, object], str]:
@@ -1819,13 +1824,17 @@ def _mvp_observation_sources(
     )
     source = "diagnostics" if (m121_state or m122_state) else ""
 
-    if not (m121_state and m122_state):
+    if not (m121_state and m122_state) or not _m12_2_has_user_models(m122_state):
         state = chat_iface.read_mvp_state_dict()
         if isinstance(state, dict):
             if not m121_state:
                 m121_state = _as_dict(state.get("m12_1_user_personality"))
-            if not m122_state:
-                m122_state = _as_dict(state.get("m12_2_reciprocal_role"))
+            file_m122_state = _as_dict(state.get("m12_2_reciprocal_role"))
+            if not m122_state or (
+                _m12_2_has_user_models(file_m122_state)
+                and not _m12_2_has_user_models(m122_state)
+            ):
+                m122_state = file_m122_state
             if not source and (m121_state or m122_state):
                 source = "system_files"
     return diagnostics, m121_state, m122_state, source

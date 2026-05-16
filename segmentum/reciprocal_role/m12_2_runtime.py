@@ -28,6 +28,7 @@ from .reciprocal_model import (
 )
 from .safety_linter import apply_safety_linter, findings_to_dict
 from .second_order_extractor import (
+    SecondOrderExtractorValidationError,
     bound_extractor_snapshot,
     insufficient_output,
     validate_first_order_output,
@@ -277,7 +278,7 @@ def run_m12_2_tick(
     )
     relationship_hints = relationship_value_hints(relationship_assessment, turn_id=turn_id)
     trigger = trigger_input or _default_trigger_input(
-        bootstrapped,
+        state,
         model=model,
         user_id=user_id,
         turn_index=turn_index,
@@ -306,9 +307,17 @@ def run_m12_2_tick(
         ), hyperparams=hyperparams)
         first_raw = _run_extractor(extractors, "first_order", snapshot, default=insufficient_output("first_order"))
         second_raw = _run_extractor(extractors, "second_order", snapshot, default=insufficient_output("second_order"))
-        first = validate_first_order_output(first_raw, snapshot=snapshot, hyperparams=hyperparams)
-        second = validate_second_order_output(second_raw, snapshot=snapshot, hyperparams=hyperparams)
-        recorded = {"first_order": first, "second_order": second}
+        validation_errors: list[dict[str, object]] = []
+        first = _validate_or_insufficient("first_order", first_raw, snapshot=snapshot, hyperparams=hyperparams, validation_errors=validation_errors)
+        second = _validate_or_insufficient("second_order", second_raw, snapshot=snapshot, hyperparams=hyperparams, validation_errors=validation_errors)
+        if validation_errors and not first.get("persona_about_user_claims") and not second.get("user_about_persona_claims"):
+            first, second = _fallback_claims_from_assessment(
+                first,
+                second,
+                assessment=assessment,
+                turn_id=turn_id,
+            )
+        recorded = {"first_order": first, "second_order": second, "validation_errors": validation_errors}
         groups = tuple(_group(row, turn_id=turn_id) for row in [*first.get("claim_group_updates", []), *second.get("claim_group_updates", [])] if isinstance(row, Mapping))
         claims = (
             tuple(_claim(row, "persona_about_user", turn_id=turn_id) for row in first.get("persona_about_user_claims", []) if isinstance(row, Mapping))
@@ -434,7 +443,7 @@ def _default_trigger_input(
         current_hour_bucket=hour_bucket,
         previous_run_turn_indices=tuple(record.turn_index for record in records),
         run_hour_buckets=tuple(record.hour_bucket for record in records),
-        has_existing_model=bool(model.last_consolidated_turn_id or model.all_claims()),
+        has_existing_model=bool(user_id in state.models_by_user or model.last_consolidated_turn_id or model.all_claims()),
         explicit_user_request=assessment.observed_user_probe == "explicit",
         high_second_order_uncertainty=assessment.user_about_persona_uncertainty_band == "high" and assessment.observed_user_probe in {"explicit", "adversarial", "boundary_test"},
         relationship_turning_point=relationship_turning_point,
@@ -530,6 +539,104 @@ def _run_extractor(
         return fn(snapshot)
     except Exception:
         return dict(default)
+
+
+def _validate_or_insufficient(
+    axis: str,
+    raw: Mapping[str, object],
+    *,
+    snapshot: Mapping[str, object],
+    hyperparams: M122Hyperparams,
+    validation_errors: list[dict[str, object]],
+) -> dict[str, object]:
+    try:
+        if axis == "first_order":
+            return validate_first_order_output(raw, snapshot=snapshot, hyperparams=hyperparams)
+        return validate_second_order_output(raw, snapshot=snapshot, hyperparams=hyperparams)
+    except SecondOrderExtractorValidationError as exc:
+        validation_errors.append(
+            {
+                "rule": "extractor_validation_failed",
+                "axis": axis,
+                "message": str(exc)[:240],
+            }
+        )
+        return insufficient_output(axis, reason="extractor_validation_failed")
+
+
+def _fallback_claims_from_assessment(
+    first: Mapping[str, object],
+    second: Mapping[str, object],
+    *,
+    assessment: ReciprocalTurnAssessment,
+    turn_id: str,
+) -> tuple[dict[str, object], dict[str, object]]:
+    if assessment.observed_user_probe not in {"explicit", "adversarial", "boundary_test"}:
+        return dict(first), dict(second)
+    refs = _assessment_ref_ids(assessment, turn_id=turn_id)
+    if not refs:
+        return dict(first), dict(second)
+    first_out = dict(first)
+    second_out = dict(second)
+    first_out["insufficient_evidence"] = False
+    second_out["insufficient_evidence"] = False
+    first_out["claim_group_updates"] = [
+        {
+            "group_id": f"group:{turn_id}:persona_about_user",
+            "target_axis": "persona_about_user",
+            "topic_label": "relationship_read_request",
+            "member_claim_ids": [f"claim:{turn_id}:persona_about_user"],
+            "status": "open",
+        }
+    ]
+    first_out["persona_about_user_claims"] = [
+        {
+            "claim_id": f"claim:{turn_id}:persona_about_user",
+            "group_id": f"group:{turn_id}:persona_about_user",
+            "topic_label": "relationship_read_request",
+            "claim_text_internal": "Fallback from explicit reciprocal-role probe after extractor validation failed.",
+            "claim_text_plain": "The user may want Hu Tao to read the relationship carefully and answer with evidence, not only with playfulness.",
+            "evidence_refs": refs,
+            "confidence_band": "low",
+            "uncertainty_band": "medium",
+            "status": "inferred_hypothesis",
+        }
+    ]
+    second_out["claim_group_updates"] = [
+        {
+            "group_id": f"group:{turn_id}:user_about_persona",
+            "target_axis": "user_about_persona",
+            "topic_label": "persona_legibility",
+            "member_claim_ids": [f"claim:{turn_id}:user_about_persona"],
+            "status": "open",
+        }
+    ]
+    second_out["user_about_persona_claims"] = [
+        {
+            "claim_id": f"claim:{turn_id}:user_about_persona",
+            "group_id": f"group:{turn_id}:user_about_persona",
+            "topic_label": "persona_legibility",
+            "claim_text_internal": "Fallback from explicit reciprocal-role probe after extractor validation failed.",
+            "claim_text_plain": "The user may be checking whether Hu Tao understands them and can stay trustworthy while guessing how they see her.",
+            "evidence_refs": refs,
+            "confidence_band": "low",
+            "uncertainty_band": "high",
+            "status": "inferred_hypothesis",
+        }
+    ]
+    return first_out, second_out
+
+
+def _assessment_ref_ids(assessment: ReciprocalTurnAssessment, *, turn_id: str) -> list[str]:
+    refs = [
+        ref.ref_id
+        for hint in assessment.reply_policy_hints
+        for ref in hint.evidence_refs
+        if ref.ref_id
+    ]
+    if not refs:
+        refs = [ref.ref_id for point in assessment.top_uncertainty_points for ref in point.evidence_refs if ref.ref_id]
+    return list(dict.fromkeys(refs or [f"{turn_id}:q_current"]))
 
 
 def _refs(rows: object) -> tuple[EvidenceRef, ...]:

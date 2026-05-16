@@ -18,6 +18,7 @@ from .mvp_loop import (
     MVPDialogueRuntime,
     MVPStateStore,
     OpenRouterJSONClient,
+    SHARED_STATE_KEYS,
     SYSTEM_FILE_NAMES,
 )
 
@@ -68,14 +69,48 @@ def _seed_mvp_session_store_if_needed(persona_root: Path, session_root: Path) ->
         session_root.mkdir(parents=True, exist_ok=True)
     except OSError:
         return
+    shared_file_names = {SYSTEM_FILE_NAMES[key] for key in SHARED_STATE_KEYS}
     for fname in SYSTEM_FILE_NAMES.values():
-        src = persona_root / fname
+        if fname in shared_file_names:
+            continue
+        src = (
+            _latest_temporal_state_seed(persona_root)
+            if fname == SYSTEM_FILE_NAMES["temporal_state"]
+            else persona_root / fname
+        )
         dst = session_root / fname
         if src.is_file() and not dst.exists():
             try:
                 shutil.copy2(src, dst)
             except OSError:
                 continue
+
+
+def _latest_temporal_state_seed(persona_root: Path) -> Path:
+    fallback = persona_root / SYSTEM_FILE_NAMES["temporal_state"]
+    candidates = [fallback]
+    sessions_root = persona_root / "sessions"
+    if sessions_root.is_dir():
+        candidates.extend(sessions_root.glob(f"*/{SYSTEM_FILE_NAMES['temporal_state']}"))
+    best_path = fallback
+    best_turn_at = _temporal_seed_turn_at(fallback)
+    for path in candidates:
+        turn_at = _temporal_seed_turn_at(path)
+        if turn_at > best_turn_at:
+            best_path = path
+            best_turn_at = turn_at
+    return best_path
+
+
+def _temporal_seed_turn_at(path: Path) -> int:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return -1
+    try:
+        return int(payload.get("last_turn_at", -1))
+    except (AttributeError, TypeError, ValueError):
+        return -1
 
 
 def _llm_api_key_available() -> bool:
