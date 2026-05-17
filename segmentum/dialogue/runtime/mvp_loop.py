@@ -54,6 +54,13 @@ from segmentum.reciprocal_role import (
     build_extractor_prompt as build_m12_2_extractor_prompt,
     run_m12_2_tick,
 )
+from segmentum.dialogue.runtime.m13_drive import (
+    M13DriveEvaluator,
+    apply_post_turn_m13_state,
+    default_m13_drive_state,
+    merge_drive_guidance_into_control,
+    normalize_m13_drive_state,
+)
 
 
 SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
@@ -117,6 +124,7 @@ SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
     "relationship_value_memories": {
         "by_user": {},
     },
+    "m13_drive_state": default_m13_drive_state(),
 }
 
 SYSTEM_FILE_NAMES: dict[str, str] = {
@@ -4316,6 +4324,31 @@ class MVPDialogueRuntime:
                 relationship_value_context,
             )
 
+        m13_state = normalize_m13_drive_state(state.get("m13_drive_state"))
+        m13_evaluator = M13DriveEvaluator()
+        m13_evaluation = m13_evaluator.evaluate(
+            user_text=user_text,
+            user_id=user_id,
+            turn_id=turn_key,
+            turn_index=turn_index,
+            conscious_plan=conscious,
+            memory_dynamics=memory_dynamics,
+            retrieved_memories=retrieved,
+            response_style_prior=response_style_prior,
+            habit_traits=_mapping(state.get("habit_traits")),
+            relationship_value_context=relationship_value_context,
+            m13_state=m13_state,
+            entity_binding=entity_binding,
+            evidence_judgment=evidence_judgment,
+        )
+        for m13_event in m13_evaluation.events:
+            bus.append(m13_event)
+        merge_drive_guidance_into_control(
+            memory_dynamics,
+            m13_evaluation,
+            evidence_judgment=evidence_judgment,
+        )
+
         thinking_system, thinking_user = build_thinking_prompt(
             state=_prompt_safe_state(state),
             user_text=user_text,
@@ -4441,6 +4474,25 @@ class MVPDialogueRuntime:
             user_id=user_id,
             now=now,
         )
+        safety_repair = bool(reply_validation.get("changed")) or bool(
+            _mapping(post_reply_observer).get("needs_followup")
+        )
+        m13_state, m13_post_events = apply_post_turn_m13_state(
+            m13_state,
+            evaluation=m13_evaluation,
+            user_id=user_id,
+            turn_id=turn_key,
+            turn_index=turn_index,
+            selected_action=action,
+            reply_validation=reply_validation,
+            post_reply_observer=post_reply_observer,
+            conscious_plan=conscious,
+            memory_candidates_applied=memory_candidates_applied,
+            safety_repair=safety_repair,
+        )
+        state["m13_drive_state"] = m13_state
+        for m13_event in m13_post_events:
+            bus.append(m13_event)
         visible_reply = "\n".join([reply, *followup_replies])
         sharing_policy = _mapping(control_guidance.get("sharing_policy"))
         _update_temporal_state(
@@ -4517,6 +4569,15 @@ class MVPDialogueRuntime:
             "pacing_guidance": control_guidance,
             "response_style_prior": response_style_prior,
             "habit_updates_applied": habit_updates_applied,
+            "m13_drive_evaluation": {
+                "event_id": m13_evaluation.event_id,
+                "top_behavioral_pull_action": m13_evaluation.top_behavioral_pull_action,
+                "pull_margin": m13_evaluation.pull_margin,
+                "topic_fingerprint": m13_evaluation.topic_fingerprint,
+                "preferred_reply_actions": m13_evaluation.preferred_reply_actions,
+                "prompt_safe_summary": m13_evaluation.prompt_safe_summary,
+            },
+            "m13_drive_state": m13_state,
             "retrieved_memories": retrieved,
             "thinking": thinking,
             "llm_thinking_result": llm_thinking_result,
