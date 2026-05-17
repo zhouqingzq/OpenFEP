@@ -1102,6 +1102,17 @@ def render_sidebar() -> None:
             st.sidebar.caption("MVP loop: active")
         else:
             st.sidebar.error("MVP loop: inactive")
+        if chat_iface.has_agent() and getattr(chat_iface, "mvp_runtime_active", False):
+            proactive_opt_in = st.sidebar.checkbox(
+                "Enable bounded proactive messages",
+                value=bool(st.session_state.get("m13_initiative_opt_in", False)),
+                key="m13_initiative_opt_in_checkbox",
+                help="Off by default. Allows a manual continue button; no background autonomy.",
+            )
+            if proactive_opt_in != bool(st.session_state.get("m13_initiative_opt_in_synced", False)):
+                chat_iface.set_bounded_proactive_opt_in(proactive_opt_in)
+                st.session_state.m13_initiative_opt_in_synced = proactive_opt_in
+            st.session_state.m13_initiative_opt_in = proactive_opt_in
         with st.sidebar.expander("LLM Settings", expanded=False):
             current_model = chat_iface.get_model()
             new_model = st.selectbox(
@@ -1441,7 +1452,54 @@ def render_chat() -> None:
         pending=pending_text,
     )
 
-    if pending_text and chat_iface.has_agent():
+    pending_proactive = bool(st.session_state.get("pending_proactive_continue"))
+    if pending_proactive and chat_iface.has_agent() and not pending_text:
+        speaker = (
+            st.session_state.pending_speaker_name
+            or st.session_state.current_speaker_name
+            or "测试用户"
+        )
+        with st.spinner("胡桃正在主动续写..."):
+            try:
+                check = chat_iface.maybe_propose_proactive_turn(manual_continue=True)
+                proposal = check.get("proposal") if isinstance(check, dict) else None
+                if isinstance(proposal, dict) and proposal.get("proposal_id"):
+                    resp = chat_iface.run_proactive_turn(
+                        str(proposal["proposal_id"]),
+                        speaker_name=str(speaker).strip() or "测试用户",
+                    )
+                    if str(resp.reply or "").strip():
+                        append_assistant_response_messages(st.session_state.messages, resp)
+                    else:
+                        reason = ""
+                        if isinstance(resp.diagnostics, dict):
+                            reason = str(resp.diagnostics.get("suppression_reason", "") or "")
+                        st.session_state.messages.append(
+                            {
+                                "role": "assistant",
+                                "text": (
+                                    "本轮未发送主动消息"
+                                    + (f"（{reason}）" if reason else "。")
+                                ),
+                            }
+                        )
+                else:
+                    reason = str(check.get("suppression_reason", "") if isinstance(check, dict) else "")
+                    st.session_state.messages.append(
+                        {
+                            "role": "assistant",
+                            "text": f"当前不适合主动续写（{reason or '已抑制'}）。",
+                        }
+                    )
+            except Exception as exc:  # pragma: no cover - UI guardrail
+                st.session_state.messages.append(
+                    {"role": "assistant", "text": f"主动续写失败：{exc}"}
+                )
+            finally:
+                st.session_state.pending_proactive_continue = False
+                st.session_state.pending_speaker_name = None
+        st.rerun()
+    elif pending_text and chat_iface.has_agent():
         chat_iface.sync_transcript_from_messages(
             st.session_state.messages,
             pending_user_text=pending_text,
@@ -1468,6 +1526,24 @@ def render_chat() -> None:
         st.session_state.pending_speaker_name = None
 
     disabled = not chat_iface.has_agent() or pending_text is not None
+    if (
+        chat_iface.has_agent()
+        and getattr(chat_iface, "mvp_runtime_active", False)
+        and bool(st.session_state.get("m13_initiative_opt_in", False))
+        and not pending_text
+        and not pending_proactive
+    ):
+        if st.button(
+            "让胡桃继续",
+            key="btn_manual_proactive_continue",
+            disabled=disabled,
+            help="Manual bounded proactive message (requires opt-in above).",
+        ):
+            st.session_state.pending_proactive_continue = True
+            st.session_state.pending_speaker_name = (
+                str(st.session_state.current_speaker_name or "").strip() or "测试用户"
+            )
+            st.rerun()
     user_input = st.chat_input(
         "发消息" if not disabled else "先加载一个 persona...",
         disabled=disabled,

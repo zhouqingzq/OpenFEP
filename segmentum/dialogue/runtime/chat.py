@@ -612,6 +612,114 @@ class ChatInterface:
             return None
         return copy.deepcopy(state) if isinstance(state, dict) else None
 
+    def set_bounded_proactive_opt_in(self, enabled: bool) -> dict[str, object]:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return {}
+        return dict(self._mvp_runtime.set_initiative_user_opt_in(bool(enabled)))
+
+    def maybe_propose_proactive_turn(
+        self,
+        *,
+        manual_continue: bool = False,
+        idle_seconds: float = 0.0,
+        user_typing: bool = False,
+        implicit_idle_request: bool = False,
+    ) -> dict[str, object]:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return {"proposal": None, "suppression_reason": "disabled", "events": []}
+        return dict(
+            self._mvp_runtime.maybe_propose_proactive_turn(
+                turn_index=self._turn_index,
+                idle_seconds=idle_seconds,
+                manual_continue=manual_continue,
+                user_typing=user_typing,
+                implicit_idle_request=implicit_idle_request,
+            )
+        )
+
+    def run_proactive_turn(self, proposal_id: str, *, speaker_name: str = "") -> ChatResponse:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None or self._agent is None:
+            raise RuntimeError("MVP runtime is not initialized")
+        pre_traits = self._agent.slow_variable_learner.state.traits.to_dict()
+        pp = self._agent.self_model.personality_profile
+        pre_big_five = {
+            "openness": pp.openness,
+            "conscientiousness": pp.conscientiousness,
+            "extraversion": pp.extraversion,
+            "agreeableness": pp.agreeableness,
+            "neuroticism": pp.neuroticism,
+        }
+        obs_channels = dict(self._last_obs_channels or {})
+        start = time.monotonic()
+        try:
+            result = self._mvp_runtime.run_proactive_turn(
+                proposal_id=str(proposal_id),
+                turn_index=self._turn_index,
+                speaker_name=speaker_name,
+            )
+            reply = str(result.reply or "")
+            followup_replies = list(getattr(result, "followup_replies", []) or [])
+            action = str(result.action or "proactive")
+            diagnostics = dict(result.diagnostics)
+        except Exception as exc:
+            reply = ""
+            followup_replies = []
+            action = "proactive_error"
+            diagnostics = {
+                "mvp_runtime": True,
+                "proactive_turn": True,
+                "llm_error": type(exc).__name__,
+                "llm_error_detail": str(exc),
+            }
+        llm_latency = round((time.monotonic() - start) * 1000.0, 3)
+        safe_text, checks = self._safety.enforce(reply, obs_channels)
+        safe_followups: list[str] = []
+        followup_safety_checks: list[Any] = []
+        for followup in followup_replies:
+            safe_followup, followup_checks = self._safety.enforce(followup, obs_channels)
+            if safe_followup.strip():
+                safe_followups.append(safe_followup)
+            followup_safety_checks.extend(followup_checks)
+        diagnostics["safe_followup_replies"] = safe_followups
+        diagnostics["proactive_turn"] = True
+        diagnostics["not_user_requested_current_turn"] = True
+        if safe_text.strip():
+            self._transcript.append(TranscriptUtterance(role="agent", text=safe_text))
+            for followup in safe_followups:
+                self._transcript.append(TranscriptUtterance(role="agent", text=followup))
+        self._last_action = action
+        self._turn_index += 1
+        post_traits = self._agent.slow_variable_learner.state.traits.to_dict()
+        post_big_five = {
+            "openness": pp.openness,
+            "conscientiousness": pp.conscientiousness,
+            "extraversion": pp.extraversion,
+            "agreeableness": pp.agreeableness,
+            "neuroticism": pp.neuroticism,
+        }
+        delta_traits = {k: round(post_traits[k] - pre_traits.get(k, 0.0), 6) for k in post_traits}
+        delta_big_five = {k: round(post_big_five[k] - pre_big_five.get(k, 0.0), 6) for k in post_big_five}
+        response = ChatResponse(
+            reply=safe_text,
+            action=action,
+            observation=obs_channels,
+            delta_traits=delta_traits,
+            delta_big_five=delta_big_five,
+            diagnostics=diagnostics,
+            safety_checks=[*checks, *followup_safety_checks],
+            turn_index=self._turn_index,
+            llm_latency_ms=llm_latency,
+            followup_replies=safe_followups,
+        )
+        self._last_response_diagnostics = dict(diagnostics)
+        return response
+
     # ── Internal ──────────────────────────────────────────────────────
 
     def _record_baseline(self) -> None:

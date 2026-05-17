@@ -72,6 +72,16 @@ from segmentum.dialogue.runtime.m13_drive import (
     prompt_safe_m13_turn_diagnostics,
     resolve_m13_safety_repair,
 )
+from segmentum.dialogue.runtime.m13_initiative import (
+    PROACTIVE_SURROGATE_USER_TEXT,
+    evaluate_proactive_initiative,
+    mark_proactive_turn_consumed,
+    merge_initiative_into_m13_state,
+    normalize_initiative_state,
+    proposal_from_initiative_state,
+    proactive_visible_text_is_safe,
+    set_initiative_user_opt_in,
+)
 from segmentum.dialogue.runtime.m13_reward import (
     M13RewardEvaluator,
     apply_post_turn_m13_reward_state,
@@ -4031,11 +4041,13 @@ class MVPDialogueRuntime:
         speaker_name: str = "",
         bus_messages: list[Mapping[str, Any]] | None = None,
         now: int | None = None,
+        proactive_context: Mapping[str, Any] | None = None,
     ) -> MVPTurnResult:
         now = _utc_timestamp() if now is None else int(now)
         state = self.store.load()
         display_name = str(speaker_name or "").strip() or "default_user"
         user_id = _safe_user_id(display_name)
+        proactive_turn = isinstance(proactive_context, Mapping) and bool(proactive_context)
         sharing_regret_feedback = self._apply_sharing_regret_feedback(
             state,
             user_text=user_text,
@@ -4047,14 +4059,32 @@ class MVPDialogueRuntime:
         temporal_input = _temporal_input_from_state(state, now=now)
         bus = list(bus_messages or [])
         bus.append({"type": "TemporalContextEvent", "turn_index": turn_index, **temporal_input})
-        bus.append({
-            "type": "UserUtteranceEvent",
-            "turn_index": turn_index,
-            "speaker_name": display_name,
-            "user_id": user_id,
-            "text": user_text,
-            "at": now,
-        })
+        if proactive_turn:
+            bus.append(
+                {
+                    "type": "M13ProactiveTurnRequestEvent",
+                    "turn_index": turn_index,
+                    "proposal_id": str(proactive_context.get("proposal_id", "")),
+                    "trigger": str(proactive_context.get("trigger", "")),
+                    "source": "m13_proactive_turn",
+                    "role": "assistant",
+                    "not_user_requested_current_turn": True,
+                    "ordinary_language_intent": str(
+                        proactive_context.get("ordinary_language_intent", "") or ""
+                    )[:240],
+                    "surrogate_context": str(user_text or "")[:240],
+                    "at": now,
+                }
+            )
+        else:
+            bus.append({
+                "type": "UserUtteranceEvent",
+                "turn_index": turn_index,
+                "speaker_name": display_name,
+                "user_id": user_id,
+                "text": user_text,
+                "at": now,
+            })
         identity_anchored_action = _identity_anchored_action_sensitive(user_text)
         m12_pre_result: dict[str, Any] | None = None
         turn_key = f"turn_{turn_index + 1:04d}"
@@ -4808,6 +4838,10 @@ class MVPDialogueRuntime:
             } if legacy_inner_thought else {}
         diagnostics = {
             "mvp_runtime": True,
+            "proactive_turn": proactive_turn,
+            "proactive_source": "m13_proactive_turn" if proactive_turn else "",
+            "proactive_trigger": str(proactive_context.get("trigger", "")) if proactive_turn else "",
+            "not_user_requested_current_turn": proactive_turn,
             "bus_messages": bus,
             "conscious_plan": conscious,
             "temporal_input": temporal_input,
@@ -4849,23 +4883,174 @@ class MVPDialogueRuntime:
             "state_root": str(self.store.root),
             "system_files": {key: str(self.store.path_for(key)) for key in SYSTEM_FILE_DEFAULTS},
         }
-        self.store.append_log(
-            {
-                "event": "turn",
-                "at": now,
-                "turn_index": turn_index,
-                "user_text": user_text,
-                "reply": reply,
-                "followup_replies": followup_replies,
-                "diagnostics": diagnostics,
-            }
-        )
+        if proactive_turn:
+            self.store.append_log(
+                {
+                    "event": "proactive_turn",
+                    "at": now,
+                    "turn_index": turn_index,
+                    "source": "m13_proactive_turn",
+                    "role": "assistant",
+                    "trigger": str(proactive_context.get("trigger", "")),
+                    "proposal_id": str(proactive_context.get("proposal_id", "")),
+                    "not_user_requested_current_turn": True,
+                    "reply": reply,
+                    "followup_replies": followup_replies,
+                    "surrogate_context": str(user_text or "")[:240],
+                    "diagnostics": diagnostics,
+                }
+            )
+        else:
+            self.store.append_log(
+                {
+                    "event": "turn",
+                    "at": now,
+                    "turn_index": turn_index,
+                    "user_text": user_text,
+                    "reply": reply,
+                    "followup_replies": followup_replies,
+                    "diagnostics": diagnostics,
+                }
+            )
         return MVPTurnResult(
             reply=reply,
             action=action,
             diagnostics=diagnostics,
             followup_replies=followup_replies,
         )
+
+    def maybe_propose_proactive_turn(
+        self,
+        *,
+        turn_index: int,
+        idle_seconds: float = 0.0,
+        manual_continue: bool = False,
+        user_typing: bool = False,
+        implicit_idle_request: bool = False,
+    ) -> dict[str, Any]:
+        state = self.store.load()
+        now = _utc_timestamp()
+        state, check = evaluate_proactive_initiative(
+            state,
+            now=now,
+            turn_index=turn_index,
+            idle_seconds=idle_seconds,
+            manual_continue=manual_continue,
+            user_typing=user_typing,
+            implicit_idle_request=implicit_idle_request,
+        )
+        self.store.save(state)
+        for event in check.events:
+            self.store.append_log({"event": "m13_proactive_audit", **event})
+        return {
+            "proposal": check.proposal.to_dict() if check.proposal else None,
+            "suppression_reason": check.suppression_reason,
+            "events": check.events,
+            "state_fields_read": check.state_fields_read,
+        }
+
+    def run_proactive_turn(
+        self,
+        *,
+        proposal_id: str,
+        turn_index: int,
+        speaker_name: str = "",
+    ) -> MVPTurnResult:
+        state = self.store.load()
+        now = _utc_timestamp()
+        m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state"))
+        initiative = normalize_initiative_state(m13_state.get("initiative"))
+        proposal = proposal_from_initiative_state(initiative, now=now)
+        if proposal is None or str(proposal.proposal_id) != str(proposal_id):
+            reason = "proposal_expired" if proposal is None else "proposal_not_found"
+            initiative["last_suppression_reason"] = reason
+            m13_state["initiative"] = initiative
+            state["m13_drive_state"] = m13_state
+            self.store.save(state)
+            self.store.append_log(
+                {
+                    "event": "m13_proactive_audit",
+                    "type": "M13ProactiveSuppressionEvent",
+                    "reason": reason,
+                    "proposal_id": proposal_id,
+                    "turn_index": turn_index,
+                }
+            )
+            return MVPTurnResult(
+                reply="",
+                action="proactive_suppressed",
+                diagnostics={"suppression_reason": reason, "proactive_turn": True},
+            )
+
+        result = self.run_turn(
+            PROACTIVE_SURROGATE_USER_TEXT,
+            turn_index=turn_index,
+            speaker_name=speaker_name,
+            now=now,
+            proactive_context=proposal.to_dict(),
+        )
+        reply = str(result.reply or "").strip()
+        if reply and not proactive_visible_text_is_safe(reply):
+            result = MVPTurnResult(
+                reply="",
+                action="proactive_suppressed",
+                diagnostics={
+                    **result.diagnostics,
+                    "suppression_reason": "safety_risk",
+                    "proactive_text_blocked": True,
+                },
+            )
+            initiative["last_suppression_reason"] = "safety_risk"
+            m13_state["initiative"] = initiative
+            state["m13_drive_state"] = m13_state
+            self.store.save(state)
+            self.store.append_log(
+                {
+                    "event": "m13_proactive_audit",
+                    "type": "M13ProactiveSuppressionEvent",
+                    "reason": "safety_risk",
+                    "proposal_id": proposal_id,
+                    "turn_index": turn_index,
+                }
+            )
+            return result
+
+        state = self.store.load()
+        m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state"))
+        state["m13_drive_state"] = mark_proactive_turn_consumed(
+            m13_state,
+            now=now,
+            turn_index=turn_index,
+            proposal=proposal,
+        )
+        self.store.save(state)
+        self.store.append_log(
+            {
+                "event": "m13_proactive_audit",
+                "type": "M13ProactiveGenerationEvent",
+                "turn_index": turn_index,
+                "proposal_id": proposal.proposal_id,
+                "trigger": proposal.trigger,
+                "source": "m13_proactive_turn",
+                "role": "assistant",
+                "not_user_requested_current_turn": True,
+                "reply": result.reply,
+                "action": result.action,
+            }
+        )
+        return result
+
+    def set_initiative_user_opt_in(self, enabled: bool) -> dict[str, Any]:
+        state = self.store.load()
+        state["m13_drive_state"] = set_initiative_user_opt_in(
+            state.get("m13_drive_state", {}),
+            enabled=enabled,
+        )
+        self.store.save(state)
+        initiative = normalize_initiative_state(
+            normalize_m13_drive_state(state.get("m13_drive_state")).get("initiative")
+        )
+        return dict(initiative)
 
     def _mark_recalled(self, state: dict[str, Any], retrieved: list[Mapping[str, Any]], now: int) -> None:
         ids = {str(item.get("id", "")) for item in retrieved if item.get("id")}
