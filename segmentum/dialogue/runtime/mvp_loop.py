@@ -9,6 +9,7 @@ state writes.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import copy
 import json
 import os
 import re
@@ -60,6 +61,8 @@ from segmentum.dialogue.runtime.m13_drive import (
     default_m13_drive_state,
     merge_drive_guidance_into_control,
     normalize_m13_drive_state,
+    normalize_recorded_reply_action,
+    prompt_safe_m13_state_summary,
 )
 
 
@@ -124,7 +127,7 @@ SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
     "relationship_value_memories": {
         "by_user": {},
     },
-    "m13_drive_state": default_m13_drive_state(),
+    "m13_drive_state": {},
 }
 
 SYSTEM_FILE_NAMES: dict[str, str] = {
@@ -143,6 +146,17 @@ PERSONA_ANALYSIS_KEYS = (
     "source_role_evidence",
     *SYSTEM_FILE_DEFAULTS.keys(),
 )
+
+
+def _system_file_default(key: str) -> Any:
+    if key == "m13_drive_state":
+        return default_m13_drive_state()
+    default = SYSTEM_FILE_DEFAULTS[key]
+    if isinstance(default, dict):
+        return copy.deepcopy(default)
+    if isinstance(default, list):
+        return copy.deepcopy(default)
+    return default
 
 
 def _utc_timestamp() -> int:
@@ -486,12 +500,21 @@ def normalize_persona_payload(payload: Mapping[str, Any], *, fallback_name: str 
     persona: dict[str, Any] = {}
     persona["persona_name"] = str(payload.get("persona_name") or fallback_name or "").strip() or "persona"
     persona["source_role_evidence"] = _string_list(payload.get("source_role_evidence"), limit=8)
-    for key, default in SYSTEM_FILE_DEFAULTS.items():
+    for key in SYSTEM_FILE_DEFAULTS:
+        if key == "m13_drive_state":
+            raw_value = payload.get(key)
+            persona[key] = (
+                normalize_m13_drive_state(raw_value)
+                if isinstance(raw_value, Mapping)
+                else default_m13_drive_state()
+            )
+            continue
+        default = _system_file_default(key)
         value = payload.get(key, default)
         if isinstance(default, list):
             persona[key] = value if isinstance(value, list) else []
         elif isinstance(default, dict):
-            persona[key] = dict(value) if isinstance(value, Mapping) else dict(default)
+            persona[key] = dict(value) if isinstance(value, Mapping) else copy.deepcopy(default)
         else:
             persona[key] = value
     facts = _mapping(persona.get("self_basic_facts"))
@@ -721,7 +744,8 @@ class MVPStateStore:
         self.ensure_files()
 
     def ensure_files(self) -> None:
-        for key, default in SYSTEM_FILE_DEFAULTS.items():
+        for key in SYSTEM_FILE_DEFAULTS:
+            default = _system_file_default(key)
             path = self.path_for(key)
             if not path.exists():
                 path.write_text(json.dumps(default, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -757,8 +781,8 @@ class MVPStateStore:
     def load(self) -> dict[str, Any]:
         self.ensure_files()
         state = {
-            key: _safe_json_load(self._shared_state_path_for(key), default)
-            for key, default in SYSTEM_FILE_DEFAULTS.items()
+            key: _safe_json_load(self._shared_state_path_for(key), _system_file_default(key))
+            for key in SYSTEM_FILE_DEFAULTS
         }
         if self._has_shared_short_term():
             state["short_term_memory"] = _merge_recent_memory(
@@ -770,7 +794,8 @@ class MVPStateStore:
 
     def save(self, state: Mapping[str, Any]) -> None:
         self.ensure_files()
-        for key, default in SYSTEM_FILE_DEFAULTS.items():
+        for key in SYSTEM_FILE_DEFAULTS:
+            default = _system_file_default(key)
             value = state.get(key, default)
             if key == "short_term_memory":
                 value = _merge_recent_memory(
@@ -3221,7 +3246,7 @@ def _sharing_feedback_negative(user_text: str) -> bool:
     return sharing_feedback_negative(user_text)
 
 
-def _prompt_safe_state(state: Mapping[str, Any]) -> dict[str, Any]:
+def _prompt_safe_state(state: Mapping[str, Any], *, user_id: str = "") -> dict[str, Any]:
     safe = dict(state)
     for key in ("short_term_memory", "long_term_memory"):
         rows = state.get(key, [])
@@ -3235,6 +3260,11 @@ def _prompt_safe_state(state: Mapping[str, Any]) -> dict[str, Any]:
                     if isinstance(item, Mapping) and item.get("id")
                 ],
             }
+    if "m13_drive_state" in safe:
+        safe["m13_drive_state"] = prompt_safe_m13_state_summary(
+            state.get("m13_drive_state"),
+            user_id=user_id,
+        )
     return safe
 
 
@@ -3864,6 +3894,7 @@ class MVPDialogueRuntime:
         prior_m12_1_blob = state.get("m12_1_user_personality")
         prior_m12_2_enabled = state.get("m12_2_reciprocal_role_enabled")
         prior_m12_2_blob = state.get("m12_2_reciprocal_role")
+        prior_m13_blob = state.get("m13_drive_state")
         default_enable_m12 = _should_default_enable_m12_for_persona_init(state)
         default_enable_m12_1 = _should_default_enable_m12_1_for_persona_init(state)
         payload = normalize_persona_payload(persona_payload, fallback_name=self.persona_name)
@@ -3895,6 +3926,10 @@ class MVPDialogueRuntime:
             state["m12_2_reciprocal_role_enabled"] = bool(prior_m12_2_enabled)
         if isinstance(prior_m12_2_blob, Mapping):
             state["m12_2_reciprocal_role"] = dict(prior_m12_2_blob)
+        if isinstance(prior_m13_blob, Mapping):
+            normalized_m13 = normalize_m13_drive_state(prior_m13_blob)
+            if normalized_m13.get("path_patterns_by_action") or normalized_m13.get("recent_action_trace"):
+                state["m13_drive_state"] = normalized_m13
         now = _utc_timestamp()
         for memory in state.get("long_term_memory", []):
             if isinstance(memory, dict):
@@ -4350,7 +4385,7 @@ class MVPDialogueRuntime:
         )
 
         thinking_system, thinking_user = build_thinking_prompt(
-            state=_prompt_safe_state(state),
+            state=_prompt_safe_state(state, user_id=user_id),
             user_text=user_text,
             speaker_name=display_name,
             conscious_plan=conscious,
@@ -4419,7 +4454,10 @@ class MVPDialogueRuntime:
         reply_contract["identity_anchored_action"] = identity_anchored_action
         reply_contract["selected_disclosure_action"] = str(thinking.get("disclosure_action", "none") or "none")
         reply, reply_validation = validate_visible_reply(raw_reply, reply_contract)
-        action = str(thinking.get("reply_action") or "answer")
+        action = normalize_recorded_reply_action(
+            str(thinking.get("reply_action") or "answer"),
+            allowed=set(m13_evaluation.candidate_actions),
+        )
         temporal_assessment = conscious.get("temporal_assessment")
         if not isinstance(temporal_assessment, Mapping):
             temporal_assessment = {}

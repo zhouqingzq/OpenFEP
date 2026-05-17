@@ -8,6 +8,7 @@ independent permanent systems.
 
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field
 import re
 import uuid
@@ -71,6 +72,32 @@ class M13PullWeights:
 
 M13_WEIGHTS = M13PullWeights()
 
+
+class M13Thresholds:
+    """Non-weight tuning constants; keep magic numbers out of call sites."""
+
+    preferred_band: float = 0.08
+    discouraged_gap: float = 0.05
+    weak_pull_margin: float = 0.04
+    repetition_penalty_high: float = 0.15
+    repetition_step: float = 0.15
+    repetition_trace_window: int = 6
+    cue_overlap_base: float = 0.2
+    cue_overlap_scale: float = 0.6
+    memory_hit_cap: int = 3
+    success_proxy_confidence_base: float = 0.60
+    success_proxy_confidence_step: float = 0.10
+    success_proxy_confidence_cap: float = 0.95
+    uncertain_confidence: float = 0.55
+    weak_uncertain_confidence: float = 0.45
+    min_pull_margin_for_action_match: float = 0.03
+    min_habit_for_action_match: float = 0.05
+    cue_map_from_habit_scale: float = 0.5
+    relation_map_from_habit_scale: float = 0.4
+
+
+M13_THRESHOLDS = M13Thresholds()
+
 _TOPIC_STOPWORDS = frozenset({
     "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
     "have", "has", "had", "do", "does", "did", "will", "would", "could",
@@ -108,19 +135,21 @@ def _new_id(prefix: str) -> str:
 
 
 def default_m13_drive_state() -> dict[str, Any]:
-    return {
-        "version": M13_STATE_VERSION,
-        "path_patterns_by_action": [],
-        "recent_action_trace": [],
-        "traction_by_action": {},
-        "cue_precision_by_topic": {},
-        "relation_path_precision": {},
-        "recent_topic_fingerprints": [],
-        "pending_settlements": [],
-        "tolerance_by_path": [],
-        "last_patch_id": "",
-        "rollback_window": [],
-    }
+    return copy.deepcopy(
+        {
+            "version": M13_STATE_VERSION,
+            "path_patterns_by_action": [],
+            "recent_action_trace": [],
+            "traction_by_action": {},
+            "cue_precision_by_topic": {},
+            "relation_path_precision": {},
+            "recent_topic_fingerprints": [],
+            "pending_settlements": [],
+            "tolerance_by_path": [],
+            "last_patch_id": "",
+            "rollback_window": [],
+        }
+    )
 
 
 def normalize_m13_drive_state(raw: Any) -> dict[str, Any]:
@@ -143,7 +172,50 @@ def normalize_m13_drive_state(raw: Any) -> dict[str, Any]:
         value = merged.get(key)
         merged[key] = dict(value) if isinstance(value, Mapping) else {}
     merged["last_patch_id"] = str(merged.get("last_patch_id", "") or "")
-    return merged
+    return copy.deepcopy(merged)
+
+
+def prompt_safe_m13_state_summary(
+    m13_state: Mapping[str, Any] | None,
+    *,
+    user_id: str = "",
+) -> dict[str, Any]:
+    """Compact summary for thinking prompts; never expose raw pattern tables."""
+    normalized = normalize_m13_drive_state(m13_state)
+    traction = _mapping(normalized.get("traction_by_action"))
+    summaries: list[str] = []
+    suffix = f"|{user_id}" if user_id else ""
+    for key, value in traction.items():
+        if suffix and not str(key).endswith(suffix):
+            continue
+        summaries.append(f"{key}: {_bounded_float(value):.2f}")
+    return {
+        "version": normalized.get("version"),
+        "last_patch_id": str(normalized.get("last_patch_id", "") or ""),
+        "traction_summary_for_user": summaries[:6],
+        "recent_trace_count": len(normalized.get("recent_action_trace", []) or []),
+        "visible_policy": (
+            "Use control_guidance.drive_guidance for reply tendencies; "
+            "do not treat internal habit scores as facts or compulsion."
+        ),
+    }
+
+
+def normalize_recorded_reply_action(
+    action: str,
+    *,
+    allowed: set[str] | None = None,
+) -> str:
+    """Map LLM reply_action to a known candidate before persisting M13 patterns."""
+    cleaned = str(action or "").strip().lower()
+    if cleaned in CANDIDATE_REPLY_ACTIONS and (allowed is None or cleaned in allowed):
+        return cleaned
+    if allowed:
+        for fallback in ("clarify", "deflect", "answer"):
+            if fallback in allowed:
+                return fallback
+        return sorted(allowed)[0]
+    return "answer"
 
 
 def _normalize_term(term: str) -> str:
@@ -206,6 +278,7 @@ def _pattern_lookup(
     action: str,
     user_id: str,
     topic_fingerprint: str = "",
+    allow_topic_fallback: bool = False,
 ) -> dict[str, Any] | None:
     topic = str(topic_fingerprint or "").strip()
     fallback: dict[str, Any] | None = None
@@ -215,9 +288,11 @@ def _pattern_lookup(
         row_topic = str(row.get("topic_fingerprint", "")).strip()
         if topic and row_topic == topic:
             return row
-        if fallback is None:
+        if allow_topic_fallback and fallback is None:
             fallback = row
-    return fallback
+    if allow_topic_fallback:
+        return fallback
+    return None
 
 
 def _traction_key(action: str, user_id: str) -> str:
@@ -296,16 +371,18 @@ def _cue_precision(
     keywords = {_normalize_term(t) for t in _string_list(conscious_plan.get("memory_search_keywords"), limit=12)}
     topic_terms = {t for t in topic_fingerprint.split("|") if t and t != "topic:unknown"}
     if not keywords or not topic_terms:
-        return 0.15 if topic_fingerprint != "topic:unknown" else 0.0
+        return 0.0
     overlap = len(keywords & topic_terms) / max(1, len(keywords))
-    return _bounded_float(0.2 + overlap * 0.6)
+    return _bounded_float(
+        M13_THRESHOLDS.cue_overlap_base + overlap * M13_THRESHOLDS.cue_overlap_scale
+    )
 
 
 def _relation_precision(state: Mapping[str, Any], *, user_id: str) -> float:
     rel = _mapping(state.get("relation_path_precision"))
     if user_id in rel:
         return _bounded_float(rel[user_id], default=0.0)
-    return 0.2
+    return 0.0
 
 
 def _memory_support(
@@ -325,10 +402,8 @@ def _memory_support(
         content = _normalize_term(str(item.get("content", ""))[:120])
         if topic_terms and (keywords & topic_terms or any(t in content for t in topic_terms)):
             hits += 1
-            continue
-        if action in {"self_disclose", "empathize"} and str(item.get("kind", "")) in {"preference", "relationship"}:
-            hits += 1
-    return _bounded_float(min(1.0, hits / max(1, min(3, len(retrieved_memories)))))
+    cap = M13_THRESHOLDS.memory_hit_cap
+    return _bounded_float(min(1.0, hits / max(1, min(cap, len(retrieved_memories)))))
 
 
 def _recent_success_proxy(pattern: dict[str, Any] | None) -> float:
@@ -344,7 +419,7 @@ def _repetition_penalty(
     *,
     action: str,
     user_id: str,
-    window: int = 6,
+    window: int = M13_THRESHOLDS.repetition_trace_window,
 ) -> float:
     recent = [row for row in trace[-window:] if isinstance(row, Mapping)]
     same = sum(
@@ -354,7 +429,7 @@ def _repetition_penalty(
     )
     if same <= 1:
         return 0.0
-    return _bounded_float(0.15 * (same - 1))
+    return _bounded_float(M13_THRESHOLDS.repetition_step * (same - 1))
 
 
 def _control_cost_discount(pattern: dict[str, Any] | None) -> float:
@@ -502,12 +577,15 @@ class M13DriveEvaluator:
 
         preferred: list[str] = []
         discouraged: list[str] = []
-        threshold = scores[top_action]["behavioral_pull"] - 0.08
+        threshold = scores[top_action]["behavioral_pull"] - M13_THRESHOLDS.preferred_band
         for action in ranked[:3]:
             if scores[action]["behavioral_pull"] >= threshold:
                 preferred.append(action)
         for action in reversed(ranked):
-            if scores[action]["behavioral_pull"] < threshold - 0.05 and action not in preferred:
+            if (
+                scores[action]["behavioral_pull"] < threshold - M13_THRESHOLDS.discouraged_gap
+                and action not in preferred
+            ):
                 discouraged.append(action)
             if len(discouraged) >= 2:
                 break
@@ -534,7 +612,8 @@ class M13DriveEvaluator:
             "evidence_refs": evidence_refs,
             "prompt_safe_summary": _prompt_safe_summary(top_action, margin),
             "scores_summary": {
-                action: round(scores[action]["behavioral_pull"], 4) for action in ranked[:5]
+                "top": top_action,
+                "runner_up": ranked[1] if len(ranked) > 1 else "",
             },
         }
         return M13EvaluationResult(
@@ -569,10 +648,11 @@ def merge_drive_guidance_into_control(
     preferred = [action for action in evaluation.preferred_reply_actions if action in allowed]
     discouraged = [action for action in evaluation.discouraged_reply_actions if action in allowed]
     caution = ""
-    if evaluation.pull_margin < 0.04:
+    if evaluation.pull_margin < M13_THRESHOLDS.weak_pull_margin:
         caution = "Path habits are weak; prioritize the live user request over style inertia."
     repetition_high = any(
-        evaluation.scores_by_action.get(action, {}).get("repetition_penalty", 0.0) >= 0.15
+        evaluation.scores_by_action.get(action, {}).get("repetition_penalty", 0.0)
+        >= M13_THRESHOLDS.repetition_penalty_high
         for action in preferred
     )
     if repetition_high:
@@ -723,6 +803,8 @@ def _build_proxy_outcome(
     selected_action: str,
     top_pull_action: str,
     memory_candidates_applied: list[Any],
+    pull_margin: float = 0.0,
+    pattern: Mapping[str, Any] | None = None,
     safety_repair: bool = False,
 ) -> tuple[str, float]:
     rollback, _ = should_trigger_m13_rollback(
@@ -734,12 +816,22 @@ def _build_proxy_outcome(
     if rollback:
         return "negative", 0.85
     validation = _mapping(reply_validation)
+    pattern_row = _mapping(pattern)
+    habit_on_topic = _bounded_float(pattern_row.get("habit_precision"), default=0.0)
     positive_signals = 0
     if not bool(validation.get("changed")):
         positive_signals += 1
     if memory_candidates_applied:
         positive_signals += 1
-    if selected_action == top_pull_action and top_pull_action:
+    action_match = (
+        selected_action == top_pull_action
+        and bool(top_pull_action)
+        and (
+            pull_margin >= M13_THRESHOLDS.min_pull_margin_for_action_match
+            or habit_on_topic >= M13_THRESHOLDS.min_habit_for_action_match
+        )
+    )
+    if action_match:
         positive_signals += 1
     confirmed = [
         item
@@ -748,11 +840,21 @@ def _build_proxy_outcome(
     ]
     if confirmed:
         positive_signals += 1
-    if positive_signals >= 2:
-        return "positive", min(0.95, 0.60 + 0.1 * positive_signals)
-    if positive_signals == 1:
-        return "uncertain", 0.55
-    return "uncertain", 0.45
+    strong_signal = bool(memory_candidates_applied) or bool(confirmed) or (
+        action_match and pull_margin >= M13_THRESHOLDS.min_pull_margin_for_action_match
+    )
+    if positive_signals >= 2 and strong_signal:
+        return (
+            "positive",
+            min(
+                M13_THRESHOLDS.success_proxy_confidence_cap,
+                M13_THRESHOLDS.success_proxy_confidence_base
+                + M13_THRESHOLDS.success_proxy_confidence_step * positive_signals,
+            ),
+        )
+    if positive_signals >= 1:
+        return "uncertain", M13_THRESHOLDS.uncertain_confidence
+    return "uncertain", M13_THRESHOLDS.weak_uncertain_confidence
 
 
 def apply_post_turn_m13_state(
@@ -775,17 +877,30 @@ def apply_post_turn_m13_state(
     patterns = [dict(row) for row in state.get("path_patterns_by_action", []) if isinstance(row, Mapping)]
     _apply_pattern_decay(patterns)
 
+    action = normalize_recorded_reply_action(
+        selected_action,
+        allowed=set(evaluation.candidate_actions),
+    )
+    topic = evaluation.topic_fingerprint
+    existing_pattern = _pattern_lookup(
+        patterns,
+        action=action,
+        user_id=user_id,
+        topic_fingerprint=topic,
+        allow_topic_fallback=False,
+    )
+
     outcome_band, confidence = _build_proxy_outcome(
         reply_validation=reply_validation,
         post_reply_observer=post_reply_observer,
         conscious_plan=conscious_plan,
-        selected_action=selected_action,
+        selected_action=action,
         top_pull_action=evaluation.top_behavioral_pull_action,
         memory_candidates_applied=memory_candidates_applied,
+        pull_margin=evaluation.pull_margin,
+        pattern=existing_pattern,
         safety_repair=safety_repair,
     )
-    action = str(selected_action or "answer")
-    topic = evaluation.topic_fingerprint
     evidence_id = evaluation.evidence_refs[0] if evaluation.evidence_refs else ""
     pattern = _upsert_pattern(
         patterns,
@@ -896,7 +1011,7 @@ def apply_post_turn_m13_state(
             }
         )
         state["last_patch_id"] = proposal_id
-    else:
+    elif outcome_band == "negative":
         pattern["failure_proxy_count"] = int(pattern.get("failure_proxy_count", 0) or 0) + 1
 
     _evict_patterns(patterns)
@@ -907,13 +1022,19 @@ def apply_post_turn_m13_state(
     state["traction_by_action"] = traction
     cue_map = _mapping(state.get("cue_precision_by_topic"))
     cue_map[topic] = round(
-        max(_bounded_float(cue_map.get(topic)), _bounded_float(pattern.get("habit_precision")) * 0.5),
+        max(
+            _bounded_float(cue_map.get(topic)),
+            _bounded_float(pattern.get("habit_precision")) * M13_THRESHOLDS.cue_map_from_habit_scale,
+        ),
         6,
     )
     state["cue_precision_by_topic"] = cue_map
     rel_map = _mapping(state.get("relation_path_precision"))
     rel_map[user_id] = round(
-        max(_bounded_float(rel_map.get(user_id)), _bounded_float(pattern.get("habit_precision")) * 0.4),
+        max(
+            _bounded_float(rel_map.get(user_id)),
+            _bounded_float(pattern.get("habit_precision")) * M13_THRESHOLDS.relation_map_from_habit_scale,
+        ),
         6,
     )
     state["relation_path_precision"] = rel_map
