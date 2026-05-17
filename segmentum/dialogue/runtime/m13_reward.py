@@ -65,6 +65,8 @@ def default_affective_reward_proxy_state() -> dict[str, Any]:
         "last_information_gain_proxy": 0.0,
         "pending_settlements": [],
         "reward_history": [],
+        "settlement_generation": 0,
+        "last_seen_turn_index": -1,
         "engineering_proxy_label": "mvp_local_affective_reward_proxy",
     }
 
@@ -95,6 +97,8 @@ def normalize_affective_reward_proxy_state(raw: Any) -> dict[str, Any]:
     merged["reward_history"] = (
         [dict(item) for item in history if isinstance(item, Mapping)] if isinstance(history, list) else []
     )
+    merged["settlement_generation"] = int(merged.get("settlement_generation", 0) or 0)
+    merged["last_seen_turn_index"] = int(merged.get("last_seen_turn_index", -1) or -1)
     return merged
 
 
@@ -260,23 +264,67 @@ def user_reaction_counts_as_settlement_signal(assessment: Mapping[str, Any] | No
     return str(normalized.get("reaction", "")) in {"uptake", "correction", "off_topic"}
 
 
+def _pending_row_assessable(row: Mapping[str, Any], *, turn_index: int) -> bool:
+    prior_turn = int(row.get("prior_turn_index", -1) or -1)
+    expires = int(row.get("expires_after_turns", PENDING_SETTLEMENT_TTL) or PENDING_SETTLEMENT_TTL)
+    if turn_index > prior_turn + expires:
+        return False
+    if turn_index <= prior_turn:
+        return False
+    return True
+
+
+def list_assessable_pending_rows(
+    reward_state: Mapping[str, Any],
+    *,
+    turn_index: int,
+) -> list[dict[str, Any]]:
+    """Pending rows due for settlement this turn (not expired / not future)."""
+    rows: list[dict[str, Any]] = []
+    for row in reward_state.get("pending_settlements", []) or []:
+        if not isinstance(row, Mapping):
+            continue
+        if _pending_row_assessable(row, turn_index=turn_index):
+            rows.append(dict(row))
+    return rows
+
+
 def first_assessable_pending_row(
     reward_state: Mapping[str, Any],
     *,
     turn_index: int,
 ) -> dict[str, Any] | None:
     """Return the first pending row due for settlement this turn (not expired / not future)."""
-    for row in reward_state.get("pending_settlements", []) or []:
-        if not isinstance(row, Mapping):
-            continue
-        prior_turn = int(row.get("prior_turn_index", -1) or -1)
-        expires = int(row.get("expires_after_turns", PENDING_SETTLEMENT_TTL) or PENDING_SETTLEMENT_TTL)
-        if turn_index > prior_turn + expires:
-            continue
-        if turn_index <= prior_turn:
-            continue
-        return dict(row)
-    return None
+    rows = list_assessable_pending_rows(reward_state, turn_index=turn_index)
+    return rows[0] if rows else None
+
+
+def reconcile_reward_proxy_turn_boundary(
+    reward_state: dict[str, Any],
+    *,
+    turn_index: int,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Drop pending traces after turn_index regression (e.g. UI session restart)."""
+    events: list[dict[str, Any]] = []
+    last_seen = int(reward_state.get("last_seen_turn_index", -1) or -1)
+    generation = int(reward_state.get("settlement_generation", 0) or 0)
+    if last_seen >= 0 and turn_index < last_seen:
+        generation += 1
+        reward_state["settlement_generation"] = generation
+        for row in list(reward_state.get("pending_settlements", []) or []):
+            if not isinstance(row, Mapping):
+                continue
+            events.append(
+                {
+                    "type": "M13RewardSettlementExpired",
+                    "pending_id": str(row.get("pending_id", "")),
+                    "turn_index": turn_index,
+                    "reason": "session_turn_index_regressed",
+                }
+            )
+        reward_state["pending_settlements"] = []
+    reward_state["last_seen_turn_index"] = max(last_seen, turn_index)
+    return reward_state, events
 
 
 def _settlement_observation_adjustment(
@@ -441,19 +489,29 @@ def _same_turn_negative_components(
 def settle_pending_m13_actions(
     m13_state: dict[str, Any],
     *,
-    user_text: str,
     user_id: str,
     turn_index: int,
     turn_id: str,
     boredom_information_gain: float = 0.0,
     observation_channels: Mapping[str, Any] | None = None,
+    user_reaction_assessments: Mapping[str, Mapping[str, Any]] | None = None,
     user_reaction_assessment: Mapping[str, Any] | None = None,
 ) -> tuple[dict[str, Any], list[M13SettlementResult], list[dict[str, Any]]]:
     """Settle prior-turn pending traces at run_turn start (before conscious planning)."""
     state = normalize_m13_drive_state(m13_state)
     reward_state = normalize_affective_reward_proxy_state(state.get("affective_reward_proxy"))
+    reward_state, boundary_events = reconcile_reward_proxy_turn_boundary(
+        reward_state,
+        turn_index=turn_index,
+    )
+    generation = int(reward_state.get("settlement_generation", 0) or 0)
+    assessments_by_id = {
+        str(key): dict(value)
+        for key, value in (user_reaction_assessments or {}).items()
+        if isinstance(value, Mapping)
+    }
     pending_rows = list(reward_state.get("pending_settlements", []))
-    events: list[dict[str, Any]] = []
+    events: list[dict[str, Any]] = list(boundary_events)
     settlements: list[M13SettlementResult] = []
     kept_pending: list[dict[str, Any]] = []
 
@@ -461,6 +519,17 @@ def settle_pending_m13_actions(
         pending_id = str(row.get("pending_id", ""))
         prior_turn = int(row.get("prior_turn_index", -1) or -1)
         expires = int(row.get("expires_after_turns", PENDING_SETTLEMENT_TTL) or PENDING_SETTLEMENT_TTL)
+        row_generation = int(row.get("settlement_generation", generation) or generation)
+        if row_generation != generation:
+            events.append(
+                {
+                    "type": "M13RewardSettlementExpired",
+                    "pending_id": pending_id,
+                    "turn_index": turn_index,
+                    "reason": "settlement_generation_mismatch",
+                }
+            )
+            continue
         if turn_index > prior_turn + expires:
             events.append(
                 {
@@ -513,8 +582,12 @@ def settle_pending_m13_actions(
         reason_codes.extend(neg_reasons[:4])
         reason_codes = list(dict.fromkeys(reason_codes))[:MAX_REASON_CODES]
 
+        row_assessment = assessments_by_id.get(pending_id)
+        if row_assessment is None and user_reaction_assessment is not None and len(assessments_by_id) <= 1:
+            row_assessment = user_reaction_assessment
+
         observed, confidence, reason_codes, correction_marker = apply_user_reaction_assessment_to_settlement(
-            assessment=user_reaction_assessment,
+            assessment=row_assessment,
             observed=observed,
             confidence=confidence,
             reason_codes=reason_codes,
@@ -522,7 +595,7 @@ def settle_pending_m13_actions(
         )
 
         signal_count = structured_signal_count + len(obs_reasons) + (
-            1 if user_reaction_counts_as_settlement_signal(user_reaction_assessment) else 0
+            1 if user_reaction_counts_as_settlement_signal(row_assessment) else 0
         )
         if signal_count == 0:
             outcome_band = "uncertain"
@@ -996,9 +1069,11 @@ def create_pending_settlement(
     safety_repair: bool,
     repetition_pressure: float,
     conflict_level: float,
+    settlement_generation: int = 0,
 ) -> dict[str, Any]:
     return {
         "pending_id": _new_id("m13_pending"),
+        "settlement_generation": int(settlement_generation),
         "prior_turn_index": turn_index,
         "prior_action": action,
         "prior_topic_fingerprint": topic_fingerprint,
@@ -1095,6 +1170,7 @@ def apply_post_turn_m13_reward_state(
         safety_repair=safety_repair,
         repetition_pressure=repetition_pressure,
         conflict_level=conflict_level,
+        settlement_generation=int(reward_state.get("settlement_generation", 0) or 0),
     )
     pending_rows = list(reward_state.get("pending_settlements", []))
     pending_rows.append(pending)

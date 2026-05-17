@@ -17,6 +17,7 @@ from segmentum.dialogue.runtime.m13_drive import (
     build_topic_fingerprint,
     normalize_m13_drive_state,
 )
+from segmentum.dialogue.runtime.m13_reward import normalize_affective_reward_proxy_state
 
 MAX_STALE_TURN_COUNT = 12
 MAX_EXPLORATION_COOLDOWN = 5
@@ -27,6 +28,8 @@ MAX_REGEX_INFORMATION_GAIN_BOOST = 0.12
 MAX_REGEX_DIRECT_TASK_PRESSURE = 0.45
 MAX_REGEX_URGENCY_SALIENCE = 0.12
 MAX_ULTRA_SHORT_USER_CHARS = 6
+OPPONENT_EXPLORATION_BIAS_BOOST = 0.12
+OPPONENT_EXPLORATION_THRESHOLD = 0.35
 
 # Engineering fields live on events/state only; never in thinking-prompt drive_guidance.
 _PROMPT_FORBIDDEN_DRIVE_GUIDANCE_KEYS: frozenset[str] = frozenset(
@@ -701,6 +704,17 @@ class M13BoredomEvaluator:
             exploration_bias = 0.0
         elif cooldown_active:
             exploration_bias = _bounded_float(exploration_bias * 0.45)
+        reward_proxy = normalize_affective_reward_proxy_state(
+            normalize_m13_drive_state(m13_state).get("affective_reward_proxy")
+        )
+        opponent_strength = _bounded_float(reward_proxy.get("opponent_strength"))
+        if (
+            not hard_suppressed
+            and opponent_strength >= OPPONENT_EXPLORATION_THRESHOLD
+        ):
+            exploration_bias = _bounded_float(
+                exploration_bias + OPPONENT_EXPLORATION_BIAS_BOOST * opponent_strength
+            )
         mode = _choose_exploration_mode(
             boredom_level=boredom_level,
             repetition_pressure=repetition_pressure,
@@ -718,6 +732,16 @@ class M13BoredomEvaluator:
             mode,
             suppressed=hard_suppressed or cooldown_active or exploration_bias < 0.35,
         )
+        if (
+            not hint
+            and not hard_suppressed
+            and opponent_strength >= OPPONENT_EXPLORATION_THRESHOLD
+            and exploration_bias >= 0.35
+        ):
+            hint = (
+                "Recent repair pressure suggests checking understanding before "
+                "repeating the same approach."
+            )
         if exploration_bias < 0.35 or cooldown_active or hard_suppressed:
             hint = ""
 
