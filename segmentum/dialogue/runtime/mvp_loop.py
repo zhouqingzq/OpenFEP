@@ -72,6 +72,17 @@ from segmentum.dialogue.runtime.m13_drive import (
     prompt_safe_m13_turn_diagnostics,
     resolve_m13_safety_repair,
 )
+from segmentum.dialogue.runtime.m13_reward import (
+    M13RewardEvaluator,
+    apply_post_turn_m13_reward_state,
+    apply_reward_pull_connection,
+    evaluate_pre_turn_reward_proxy,
+    merge_affective_guidance_into_control,
+    prompt_safe_m13_reward_diagnostics,
+    prompt_safe_m13_reward_ui_labels,
+    observation_channels_from_bus,
+    settle_pending_m13_actions,
+)
 
 
 SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
@@ -4088,6 +4099,19 @@ class MVPDialogueRuntime:
             "binding": entity_binding,
         })
 
+        m13_state = normalize_m13_drive_state(state.get("m13_drive_state"))
+        m13_state, _m13_settlements, m13_settlement_events = settle_pending_m13_actions(
+            m13_state,
+            user_text=user_text,
+            user_id=user_id,
+            turn_index=turn_index,
+            turn_id=turn_key,
+            observation_channels=observation_channels_from_bus(bus),
+        )
+        state["m13_drive_state"] = m13_state
+        for m13_settlement_event in m13_settlement_events:
+            bus.append(m13_settlement_event)
+
         conscious_system, conscious_user = build_conscious_loop_prompt(
             state=state,
             user_text=user_text,
@@ -4367,7 +4391,6 @@ class MVPDialogueRuntime:
                 relationship_value_context,
             )
 
-        m13_state = normalize_m13_drive_state(state.get("m13_drive_state"))
         m13_evaluator = M13DriveEvaluator()
         m13_evaluation = m13_evaluator.evaluate(
             user_text=user_text,
@@ -4411,6 +4434,20 @@ class MVPDialogueRuntime:
             evidence_judgment=evidence_judgment,
             boredom_evaluation=m13_boredom_evaluation,
         )
+        control_for_reward = _mapping(memory_dynamics.get("control_guidance"))
+        m13_reward_pre_turn = evaluate_pre_turn_reward_proxy(
+            turn_id=turn_key,
+            turn_index=turn_index,
+            user_id=user_id,
+            m13_state=m13_state,
+            m13_evaluation=m13_evaluation,
+            information_gain_proxy=m13_boredom_evaluation.information_gain_proxy,
+            repetition_pressure=m13_boredom_evaluation.repetition_pressure,
+            conflict_level=_bounded_float(control_for_reward.get("conflict_level")),
+        )
+        for m13_reward_event in m13_reward_pre_turn.events:
+            bus.append(m13_reward_event)
+        merge_affective_guidance_into_control(memory_dynamics, m13_reward_pre_turn)
 
         thinking_system, thinking_user = build_thinking_prompt(
             state=_prompt_safe_state(state, user_id=user_id),
@@ -4566,11 +4603,62 @@ class MVPDialogueRuntime:
             retrieved_memories=retrieved,
             turn_index=turn_index,
         )
+        m13_reward_evaluator = M13RewardEvaluator()
+        selected_pull = _bounded_float(
+            m13_evaluation.scores_by_action.get(action, {}).get("behavioral_pull", 0.0)
+        )
+        m13_reward_evaluation = m13_reward_evaluator.evaluate(
+            turn_id=turn_key,
+            turn_index=turn_index,
+            user_id=user_id,
+            action=action,
+            topic_fingerprint=m13_evaluation.topic_fingerprint,
+            m13_state=m13_state,
+            conscious_plan=conscious,
+            reply_validation=reply_validation,
+            post_reply_observer=post_reply_observer,
+            memory_candidates_applied=memory_candidates_applied,
+            evidence_judgment=evidence_judgment,
+            safety_repair=safety_repair,
+            information_gain_proxy=m13_boredom_evaluation.information_gain_proxy,
+            repetition_pressure=m13_boredom_evaluation.repetition_pressure,
+            conflict_level=_bounded_float(control_guidance.get("conflict_level")),
+            behavioral_pull=selected_pull,
+            evidence_refs=m13_evaluation.evidence_refs,
+            relationship_value_context=relationship_value_context,
+        )
+        for m13_reward_event in m13_reward_evaluation.events:
+            bus.append(m13_reward_event)
+        m13_state, m13_reward_post_events = apply_post_turn_m13_reward_state(
+            m13_state,
+            evaluation=m13_reward_evaluation,
+            user_id=user_id,
+            action=action,
+            topic_fingerprint=m13_evaluation.topic_fingerprint,
+            turn_index=turn_index,
+            reply_summary=reply[:160],
+            reply_validation=reply_validation,
+            post_reply_observer=post_reply_observer,
+            conscious_plan=conscious,
+            memory_candidates_applied=memory_candidates_applied,
+            evidence_judgment=evidence_judgment,
+            safety_repair=safety_repair,
+            repetition_pressure=m13_boredom_evaluation.repetition_pressure,
+            conflict_level=_bounded_float(control_guidance.get("conflict_level")),
+            behavioral_pull=selected_pull,
+        )
+        m13_state = apply_reward_pull_connection(
+            m13_state,
+            evaluation=m13_reward_evaluation,
+            behavioral_pull=selected_pull,
+        )
         state["m13_drive_state"] = m13_state
         for m13_event in m13_post_events:
             bus.append(m13_event)
         for m13_boredom_event in m13_boredom_post_events:
             bus.append(m13_boredom_event)
+        for m13_reward_event in m13_reward_post_events:
+            bus.append(m13_reward_event)
         visible_reply = "\n".join([reply, *followup_replies])
         sharing_policy = _mapping(control_guidance.get("sharing_policy"))
         _update_temporal_state(
@@ -4649,6 +4737,8 @@ class MVPDialogueRuntime:
             "habit_updates_applied": habit_updates_applied,
             "m13_drive_evaluation": prompt_safe_m13_turn_diagnostics(m13_evaluation),
             "m13_boredom_evaluation": prompt_safe_m13_boredom_diagnostics(m13_boredom_evaluation),
+            "m13_reward_evaluation": prompt_safe_m13_reward_diagnostics(m13_reward_evaluation),
+            "m13_reward_ui_labels": prompt_safe_m13_reward_ui_labels(),
             "m13_drive_state": prompt_safe_m13_state_summary(m13_state, user_id=user_id),
             "retrieved_memories": retrieved,
             "thinking": thinking,

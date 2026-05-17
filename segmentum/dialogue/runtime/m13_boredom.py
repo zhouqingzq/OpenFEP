@@ -459,6 +459,11 @@ def prompt_safe_control_guidance_for_thinking(control: Mapping[str, Any]) -> dic
     drive = _mapping(result.get("drive_guidance"))
     if drive:
         result["drive_guidance"] = sanitize_drive_guidance_for_prompt(drive)
+    affective = _mapping(result.get("affective_drive_guidance"))
+    if affective:
+        from segmentum.dialogue.runtime.m13_reward import sanitize_affective_drive_guidance_for_prompt
+
+        result["affective_drive_guidance"] = sanitize_affective_drive_guidance_for_prompt(affective)
     return result
 
 

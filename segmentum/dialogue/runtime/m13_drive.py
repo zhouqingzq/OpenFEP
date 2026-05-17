@@ -49,6 +49,7 @@ MINIMUM_SUCCESS_PROXY_CONFIDENCE = 0.60
 MAX_HABIT_PRECISION_DELTA = 0.05
 MAX_CONTROL_DISCOUNT_DELTA = 0.04
 PATTERN_DECAY_PER_TURN = 0.002
+SETTLEMENT_ROLLBACK_PREDICTION_ERROR_THRESHOLD = 0.35
 
 
 class M13PullWeights:
@@ -162,6 +163,7 @@ def _new_id(prefix: str) -> str:
 
 def default_m13_drive_state() -> dict[str, Any]:
     from segmentum.dialogue.runtime.m13_boredom import default_boredom_state
+    from segmentum.dialogue.runtime.m13_reward import default_affective_reward_proxy_state
 
     return copy.deepcopy(
         {
@@ -177,6 +179,7 @@ def default_m13_drive_state() -> dict[str, Any]:
             "last_patch_id": "",
             "rollback_window": [],
             "boredom": default_boredom_state(),
+            "affective_reward_proxy": default_affective_reward_proxy_state(),
         }
     )
 
@@ -202,8 +205,23 @@ def normalize_m13_drive_state(raw: Any) -> dict[str, Any]:
         merged[key] = dict(value) if isinstance(value, Mapping) else {}
     merged["last_patch_id"] = str(merged.get("last_patch_id", "") or "")
     from segmentum.dialogue.runtime.m13_boredom import normalize_boredom_state
+    from segmentum.dialogue.runtime.m13_reward import normalize_affective_reward_proxy_state
 
     merged["boredom"] = normalize_boredom_state(merged.get("boredom"))
+    reward_proxy = normalize_affective_reward_proxy_state(merged.get("affective_reward_proxy"))
+    legacy_pending = merged.get("pending_settlements") or []
+    legacy_tolerance = merged.get("tolerance_by_path") or []
+    if legacy_pending and not reward_proxy.get("pending_settlements"):
+        reward_proxy["pending_settlements"] = [
+            dict(item) for item in legacy_pending if isinstance(item, Mapping)
+        ][-MAX_PENDING_SETTLEMENTS:]
+    if legacy_tolerance and not reward_proxy.get("tolerance_by_path"):
+        reward_proxy["tolerance_by_path"] = [
+            dict(item) for item in legacy_tolerance if isinstance(item, Mapping)
+        ][-MAX_TOLERANCE_BY_PATH:]
+    merged["affective_reward_proxy"] = reward_proxy
+    merged["pending_settlements"] = []
+    merged["tolerance_by_path"] = []
     return copy.deepcopy(merged)
 
 
@@ -1171,4 +1189,103 @@ def apply_post_turn_m13_state(
         topic_fingerprint=topic,
         outcome_band=outcome_band,
     )
+    return state, events
+
+
+def apply_settlement_habit_rollback(
+    m13_state: dict[str, Any],
+    *,
+    action: str,
+    user_id: str,
+    topic_fingerprint: str,
+    settlement_id: str,
+    reason: str,
+    confidence: float,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Reverse recent habit increments when M13.2 settlement disconfirms a prior success proxy."""
+    state = normalize_m13_drive_state(m13_state)
+    events: list[dict[str, Any]] = []
+    patterns = [dict(row) for row in state.get("path_patterns_by_action", []) if isinstance(row, Mapping)]
+    pattern = _pattern_lookup(
+        patterns,
+        action=action,
+        user_id=user_id,
+        topic_fingerprint=topic_fingerprint,
+        allow_topic_fallback=True,
+    )
+    if pattern is None:
+        return state, events
+
+    current_hp = _bounded_float(pattern.get("habit_precision"), default=0.0)
+    current_discount = _bounded_float(pattern.get("mean_control_cost_discount"), default=0.0)
+    window = state.get("rollback_window", [])
+    if not isinstance(window, list):
+        window = []
+
+    matched_entry: Mapping[str, Any] | None = None
+    for entry in reversed(window):
+        if not isinstance(entry, Mapping):
+            continue
+        if (
+            str(entry.get("action", "")) == action
+            and str(entry.get("user_id", "")) == user_id
+            and str(entry.get("topic_fingerprint", "")).strip() == str(topic_fingerprint or "").strip()
+        ):
+            matched_entry = entry
+            break
+
+    scale = _bounded_float(confidence, default=0.7)
+    if matched_entry is not None:
+        rev_hp = _bounded_float(matched_entry.get("previous_habit_precision"), default=current_hp)
+        rev_discount = _bounded_float(matched_entry.get("previous_control_discount"), default=current_discount)
+        pattern["habit_precision"] = round(
+            max(rev_hp, current_hp - MAX_HABIT_PRECISION_DELTA * scale),
+            6,
+        )
+        pattern["mean_control_cost_discount"] = round(
+            max(rev_discount, current_discount - MAX_CONTROL_DISCOUNT_DELTA * scale),
+            6,
+        )
+    else:
+        pattern["habit_precision"] = round(max(0.0, current_hp - MAX_HABIT_PRECISION_DELTA * scale), 6)
+        pattern["mean_control_cost_discount"] = round(
+            max(0.0, current_discount - MAX_CONTROL_DISCOUNT_DELTA * scale),
+            6,
+        )
+
+    pattern["failure_proxy_count"] = int(pattern.get("failure_proxy_count", 0) or 0) + 1
+    _evict_patterns(patterns)
+    state["path_patterns_by_action"] = patterns
+    traction = _mapping(state.get("traction_by_action"))
+    traction[_traction_key(action, user_id)] = round(_bounded_float(pattern.get("habit_precision")), 6)
+    state["traction_by_action"] = traction
+
+    proposal_id = _new_id("m13_patch")
+    events.append(
+        {
+            "type": "M13DrivePatchProposal",
+            "patch_id": proposal_id,
+            "target": "m13_drive_state",
+            "operation": "rollback",
+            "field_path": f"path_patterns_by_action/{action}/{user_id}",
+            "previous_summary": f"habit={current_hp:.3f}",
+            "new_summary": f"habit={pattern['habit_precision']:.3f}",
+            "source_event_id": settlement_id,
+            "reason": reason,
+            "confidence": round(scale, 6),
+            "ttl": 1,
+        }
+    )
+    events.append(
+        {
+            "type": "M13DrivePatchCommit",
+            "commit_id": _new_id("m13_commit"),
+            "patch_id": proposal_id,
+            "accepted": True,
+            "owner": "MVPDialogueRuntime",
+            "reason": reason,
+            "committed_summary": f"settlement rollback {action} for {user_id}",
+        }
+    )
+    state["last_patch_id"] = proposal_id
     return state, events
