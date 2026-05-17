@@ -22,6 +22,11 @@ MAX_STALE_TURN_COUNT = 12
 MAX_EXPLORATION_COOLDOWN = 5
 MAX_PROMPT_GUIDANCE_LINES = 6
 MAX_PROMPT_LINE_LENGTH = 160
+# Cap single regex hits so structured M11/M12/M12.2 signals dominate keyword cues.
+MAX_REGEX_INFORMATION_GAIN_BOOST = 0.12
+MAX_REGEX_DIRECT_TASK_PRESSURE = 0.45
+MAX_REGEX_URGENCY_SALIENCE = 0.12
+MAX_ULTRA_SHORT_USER_CHARS = 6
 
 # Engineering fields live on events/state only; never in thinking-prompt drive_guidance.
 _PROMPT_FORBIDDEN_DRIVE_GUIDANCE_KEYS: frozenset[str] = frozenset(
@@ -189,7 +194,9 @@ def _novelty_proxy(
 
     stripped = str(user_text or "").strip()
     short_low_cue = 0.0
-    if len(stripped) <= 12 or _SHORT_ACK_PATTERNS.match(stripped):
+    if _SHORT_ACK_PATTERNS.match(stripped) or (
+        len(stripped) <= MAX_ULTRA_SHORT_USER_CHARS and stripped
+    ):
         short_low_cue = 0.35
 
     novelty = 1.0 - (
@@ -238,10 +245,10 @@ def _information_gain_proxy(
         m11_user = _mapping(m11_after.get("user_model"))
         m11_open = _string_list(m11_user.get("open_uncertainties"), limit=6)
         if m11_open:
-            gain += min(0.2, 0.05 * len(m11_open))
+            gain += min(0.24, 0.07 * len(m11_open))
         quarantined = _string_list(m11.get("quarantined_hypotheses"), limit=4)
         if quarantined:
-            gain += 0.12
+            gain += 0.14
 
     m12 = _mapping(m12_payload)
     if m12:
@@ -255,7 +262,7 @@ def _information_gain_proxy(
                 and str(row.get("resolution_status", "open")).lower() in {"open", "probed"}
             ]
             if open_conflicts:
-                gain += min(0.22, 0.06 * len(open_conflicts))
+                gain += min(0.26, 0.08 * len(open_conflicts))
 
     m12_2 = _mapping(m12_2_result)
     if m12_2:
@@ -263,12 +270,27 @@ def _information_gain_proxy(
         for key in ("unresolved_uncertainty_points", "clarifying_reply_candidates"):
             items = extractor.get(key) or []
             if isinstance(items, list) and items:
-                gain += min(0.18, 0.04 * len(items))
+                gain += min(0.22, 0.06 * len(items))
 
     if _HIGH_GAIN_PATTERNS.search(user_text or ""):
-        gain += 0.28
+        gain += MAX_REGEX_INFORMATION_GAIN_BOOST
 
     return _bounded_float(gain)
+
+
+def _closed_expectation_progress(impact: Mapping[str, Any]) -> float:
+    closed_ids = impact.get("closed_expectation_ids")
+    if isinstance(closed_ids, list) and closed_ids:
+        return 0.2
+    if isinstance(closed_ids, str) and closed_ids.strip():
+        return 0.2
+    closed_count = impact.get("closed_count")
+    try:
+        if int(closed_count or 0) > 0:
+            return 0.2
+    except (TypeError, ValueError):
+        pass
+    return 0.0
 
 
 def _progress_signal(
@@ -290,8 +312,7 @@ def _progress_signal(
 
     dynamics = _mapping(memory_dynamics)
     impact = _mapping(dynamics.get("expectation_impact"))
-    if str(impact.get("closed_expectation_ids", "")) or impact.get("closed_count"):
-        progress += 0.2
+    progress += _closed_expectation_progress(impact)
 
     evidence = _mapping(evidence_judgment)
     stance = str(evidence.get("epistemic_stance", "")).strip().lower()
@@ -354,7 +375,7 @@ def _explicit_task_pressure(user_text: str) -> float:
     if not text:
         return 0.0
     if _DIRECT_TASK_PATTERNS.search(text):
-        return 0.55
+        return MAX_REGEX_DIRECT_TASK_PRESSURE
     if "?" in text or "？" in text:
         if len(text) >= 18:
             return 0.25
@@ -376,7 +397,7 @@ def _user_need_salience(user_text: str) -> float:
     if len(text) >= 24:
         return 0.18
     if re.search(r"(?i)(急|尽快|马上|important|asap|赶紧)", text):
-        return 0.28
+        return MAX_REGEX_URGENCY_SALIENCE
     return 0.0
 
 
@@ -635,21 +656,27 @@ class M13BoredomEvaluator:
         identity_pressure = _identity_clarification_pressure(entity_binding, evidence_judgment)
         weak_margin = pull_margin < M13_THRESHOLDS.weak_pull_margin
 
-        stale_boost = _bounded_float(
-            int(boredom_state.get("stale_turn_count", 0) or 0) / max(1, MAX_STALE_TURN_COUNT) * 0.22
+        stale_boost = 0.0
+        if information_gain_proxy < 0.4 and explicit_task < 0.25:
+            stale_boost = _bounded_float(
+                int(boredom_state.get("stale_turn_count", 0) or 0)
+                / max(1, MAX_STALE_TURN_COUNT)
+                * 0.22
+            )
+        boredom_level = _bounded_float(
+            _compute_boredom_level(
+                predictability=predictability,
+                repetition_pressure=repetition_pressure,
+                novelty_proxy=novelty_proxy,
+                information_gain_proxy=information_gain_proxy,
+                progress_signal=progress_signal,
+                explicit_task_pressure=explicit_task,
+                conflict_or_repair_pressure=max(conflict_repair, identity_pressure),
+                user_need_salience=user_salience,
+                weak_pull_margin=weak_margin,
+            )
+            + stale_boost
         )
-        boredom_level = _compute_boredom_level(
-            predictability=predictability,
-            repetition_pressure=repetition_pressure,
-            novelty_proxy=novelty_proxy,
-            information_gain_proxy=information_gain_proxy,
-            progress_signal=progress_signal,
-            explicit_task_pressure=explicit_task,
-            conflict_or_repair_pressure=max(conflict_repair, identity_pressure),
-            user_need_salience=user_salience,
-            weak_pull_margin=weak_margin,
-        )
-        boredom_level = _bounded_float(boredom_level + stale_boost)
 
         hard_suppressed = (
             turn_index <= 0
@@ -751,11 +778,14 @@ def merge_exploration_guidance_into_control(
     guidance = dict(_mapping(control.get("drive_guidance")))
     if drive_guidance:
         guidance.update(dict(drive_guidance))
+    exploration_mode = (
+        boredom.preferred_exploration_mode if boredom.ordinary_language_hint else ""
+    )
     lines = build_prompt_safe_guidance_lines(
         drive_summary=str(guidance.get("action_tendency_reason", "") or ""),
         drive_caution=str(guidance.get("caution", "") or ""),
         exploration_hint=boredom.ordinary_language_hint,
-        exploration_mode="",
+        exploration_mode=exploration_mode,
     )
     guidance["prompt_safe_lines"] = lines
     control["drive_guidance"] = sanitize_drive_guidance_for_prompt(guidance)
@@ -800,7 +830,7 @@ def apply_post_turn_boredom_state(
         and boredom.exploration_bias >= 0.35
         and boredom.boredom_band in {"medium", "high"}
     )
-    if fired_exploration and boredom.exploration_bias >= 0.35:
+    if fired_exploration:
         cooldown = MAX_EXPLORATION_COOLDOWN
 
     retrieved_ids = [

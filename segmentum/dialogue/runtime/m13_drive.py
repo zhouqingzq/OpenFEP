@@ -161,6 +161,8 @@ def _new_id(prefix: str) -> str:
 
 
 def default_m13_drive_state() -> dict[str, Any]:
+    from segmentum.dialogue.runtime.m13_boredom import default_boredom_state
+
     return copy.deepcopy(
         {
             "version": M13_STATE_VERSION,
@@ -174,17 +176,7 @@ def default_m13_drive_state() -> dict[str, Any]:
             "tolerance_by_path": [],
             "last_patch_id": "",
             "rollback_window": [],
-            "boredom": {
-                "boredom_level": 0.0,
-                "novelty_baseline": 0.55,
-                "last_exploration_target": "",
-                "exploration_cooldown": 0,
-                "stale_turn_count": 0,
-                "last_progress_signal": 0.0,
-                "recent_retrieval_ids": [],
-                "recent_plan_terms": [],
-                "engineering_proxy_label": "mvp_local_boredom_proxy",
-            },
+            "boredom": default_boredom_state(),
         }
     )
 

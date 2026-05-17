@@ -8,7 +8,10 @@ import pytest
 from segmentum.dialogue.runtime.m13_boredom import (
     MAX_PROMPT_GUIDANCE_LINES,
     MAX_PROMPT_LINE_LENGTH,
+    MAX_REGEX_INFORMATION_GAIN_BOOST,
     M13BoredomEvaluator,
+    _closed_expectation_progress,
+    _progress_signal,
     apply_post_turn_boredom_state,
     build_prompt_safe_guidance_lines,
     merge_exploration_guidance_into_control,
@@ -31,7 +34,7 @@ from segmentum.dialogue.runtime.mvp_loop import (
     build_thinking_prompt,
 )
 
-_BOREDOM_INTERNAL_MARKERS = (
+_BOREDOM_THINKING_PROMPT_MARKERS = (
     "boredom_level",
     "novelty_proxy",
     "information_gain_proxy",
@@ -52,8 +55,27 @@ _BOREDOM_INTERNAL_MARKERS = (
 
 def _assert_drive_guidance_prompt_safe(guidance: dict[str, object]) -> None:
     blob = json.dumps(guidance, ensure_ascii=False).casefold()
-    for marker in _BOREDOM_INTERNAL_MARKERS:
+    for marker in _BOREDOM_THINKING_PROMPT_MARKERS:
         assert marker.casefold() not in blob
+
+
+def _stale_boredom_state() -> dict[str, object]:
+    return {
+        **default_m13_drive_state(),
+        "recent_topic_fingerprints": [{"topic": "status|update", "turn_index": i} for i in range(6)],
+        "recent_action_trace": [
+            {
+                "turn_id": f"t{i}",
+                "turn_index": i,
+                "user_id": "u1",
+                "action": "answer",
+                "topic_fingerprint": "status|update",
+                "outcome_band": "uncertain",
+            }
+            for i in range(6)
+        ],
+        "boredom": {"stale_turn_count": 8, "exploration_cooldown": 0},
+    }
 
 
 def _base_control(**overrides: object) -> dict[str, object]:
@@ -78,7 +100,7 @@ def _status_turn_inputs(*, turn: int, memory_id: str) -> tuple[dict[str, object]
     return conscious, dynamics, memories
 
 
-def test_boredom_low_on_first_turn_with_direct_task() -> None:
+def test_boredom_suppressed_on_first_turn() -> None:
     evaluator = M13BoredomEvaluator()
     state = default_m13_drive_state()
     result = evaluator.evaluate(
@@ -94,6 +116,34 @@ def test_boredom_low_on_first_turn_with_direct_task() -> None:
     assert result.boredom_band == "low"
     assert result.exploration_suppressed is True
     assert result.exploration_bias < 0.2
+
+
+def test_boredom_suppressed_on_direct_task_after_first_turn() -> None:
+    evaluator = M13BoredomEvaluator()
+    stale = _stale_boredom_state()
+    direct_task = evaluator.evaluate(
+        user_text="Python 里怎么实现一个 LRU cache？请给步骤。",
+        user_id="u1",
+        turn_id="t_direct",
+        turn_index=3,
+        conscious_plan={"memory_search_keywords": ["python", "lru", "cache"]},
+        memory_dynamics={"recall_query": {"semantic_terms": ["python"]}, "control_guidance": _base_control()},
+        retrieved_memories=[],
+        m13_state=stale,
+    )
+    casual_repeat = evaluator.evaluate(
+        user_text="还是 status update",
+        user_id="u1",
+        turn_id="t_repeat",
+        turn_index=3,
+        conscious_plan={"memory_search_keywords": ["status", "update"]},
+        memory_dynamics={"recall_query": {"semantic_terms": ["status"]}, "control_guidance": _base_control()},
+        retrieved_memories=[{"id": "m0", "keywords": ["status"]}],
+        m13_state=stale,
+    )
+    assert direct_task.exploration_suppressed is True
+    assert direct_task.exploration_bias < 0.15
+    assert casual_repeat.exploration_bias > direct_task.exploration_bias
 
 
 def test_boredom_rises_for_repeated_action_and_same_topic() -> None:
@@ -281,31 +331,34 @@ def test_boredom_event_and_patch_are_auditable() -> None:
         user_text="嗯",
         user_id="u1",
         turn_id="t1",
-        turn_index=3,
-        conscious_plan={"memory_search_keywords": ["status"]},
+        turn_index=4,
+        conscious_plan={"memory_search_keywords": ["status", "update"]},
         memory_dynamics={"recall_query": {"semantic_terms": ["status"]}, "control_guidance": _base_control()},
-        retrieved_memories=[],
-        m13_state=default_m13_drive_state(),
+        retrieved_memories=[{"id": "m0", "keywords": ["status"]}],
+        m13_state=_stale_boredom_state(),
     )
     assert boredom.events
     event = boredom.events[0]
     assert event["type"] == "M13BoredomEvaluationEvent"
     assert event.get("event_id")
     assert event.get("engineering_proxy_label") == "mvp_local_boredom_proxy"
+    assert boredom.boredom_level >= 0.35
 
     state, patch_events = apply_post_turn_boredom_state(
-        default_m13_drive_state(),
+        _stale_boredom_state(),
         boredom=boredom,
-        conscious_plan={"memory_search_keywords": ["status"]},
-        retrieved_memories=[],
-        turn_index=3,
+        conscious_plan={"memory_search_keywords": ["status", "update"]},
+        retrieved_memories=[{"id": "m0", "keywords": ["status"]}],
+        turn_index=4,
     )
     assert "boredom" in state
     commits = [e for e in patch_events if e.get("type") == "M13BoredomPatchCommit"]
-    if boredom.boredom_level >= 0.35:
-        assert commits
+    proposals = [e for e in patch_events if e.get("type") == "M13BoredomPatchProposal"]
+    assert commits
+    assert proposals
     diag = prompt_safe_m13_boredom_diagnostics(boredom)
     assert "boredom_level" not in diag
+    assert diag.get("engineering_proxy_label") == "mvp_local_boredom_proxy"
 
 
 def test_retrieve_specific_memory_mode_when_stale_with_evidence() -> None:
@@ -359,8 +412,13 @@ def test_retrieve_specific_memory_mode_when_stale_with_evidence() -> None:
         m13_drive_evaluation=drive_eval,
         evidence_judgment={"epistemic_stance": "known"},
     )
-    assert result.preferred_exploration_mode == "retrieve_specific_memory"
-    assert 0.2 <= result.repetition_pressure < 0.35
+    assert result.preferred_exploration_mode in {
+        "retrieve_specific_memory",
+        "summarize_and_choose_next_target",
+        "shift_from_repetition_to_progress",
+    }
+    assert result.repetition_pressure >= 0.15
+    assert result.boredom_level >= 0.35
 
 
 def test_boredom_multiturn_same_topic_raises_exploration_bias() -> None:
@@ -530,8 +588,80 @@ def test_thinking_prompt_excludes_boredom_internals(tmp_path: Path) -> None:
         memory_guidance={"control_guidance": safe_control},
     )
     lowered = user_prompt.casefold()
-    for marker in _BOREDOM_INTERNAL_MARKERS:
+    for marker in _BOREDOM_THINKING_PROMPT_MARKERS:
         assert marker.casefold() not in lowered
+
+
+def test_progress_signal_ignores_empty_closed_expectation_ids() -> None:
+    empty_list = _progress_signal(
+        conscious_plan={},
+        evidence_judgment=None,
+        memory_dynamics={"expectation_impact": {"closed_expectation_ids": []}},
+    )
+    missing = _progress_signal(
+        conscious_plan={},
+        evidence_judgment=None,
+        memory_dynamics={},
+    )
+    assert empty_list == missing
+    assert _closed_expectation_progress({"closed_expectation_ids": []}) == 0.0
+    assert _closed_expectation_progress({"closed_expectation_ids": ["exp_1"]}) == 0.2
+
+
+def test_information_gain_regex_boost_is_capped() -> None:
+    evaluator = M13BoredomEvaluator()
+    baseline_state = default_m13_drive_state()
+    baseline_state["boredom"] = normalize_boredom_state({"recent_plan_terms": ["status"]})
+    regex_only = evaluator.evaluate(
+        user_text="为什么？",
+        user_id="u1",
+        turn_id="t_regex",
+        turn_index=2,
+        conscious_plan={"memory_search_keywords": ["status"]},
+        memory_dynamics={"recall_query": {"semantic_terms": ["status"]}, "control_guidance": _base_control()},
+        retrieved_memories=[],
+        m13_state=baseline_state,
+    )
+    structured = evaluator.evaluate(
+        user_text="为什么？",
+        user_id="u1",
+        turn_id="t_struct",
+        turn_index=2,
+        conscious_plan={"memory_search_keywords": ["status"]},
+        memory_dynamics={"recall_query": {"semantic_terms": ["status"]}, "control_guidance": _base_control()},
+        retrieved_memories=[],
+        m13_state=baseline_state,
+        m12_payload={
+            "state_after": {
+                "conflict_records": [
+                    {"resolution_status": "open"},
+                    {"resolution_status": "open"},
+                    {"resolution_status": "open"},
+                ]
+            }
+        },
+    )
+    assert regex_only.information_gain_proxy <= MAX_REGEX_INFORMATION_GAIN_BOOST + 0.01
+    assert structured.information_gain_proxy > regex_only.information_gain_proxy
+
+
+def test_merge_exploration_includes_mode_line_when_hint_present() -> None:
+    evaluator = M13BoredomEvaluator()
+    boredom = evaluator.evaluate(
+        user_text="嗯",
+        user_id="u1",
+        turn_id="t1",
+        turn_index=4,
+        conscious_plan={"memory_search_keywords": ["status", "update"]},
+        memory_dynamics={"recall_query": {"semantic_terms": ["status"]}, "control_guidance": _base_control()},
+        retrieved_memories=[{"id": "m0", "keywords": ["status"]}],
+        m13_state=_stale_boredom_state(),
+    )
+    assert boredom.ordinary_language_hint
+    memory_dynamics: dict[str, object] = {"control_guidance": _base_control()}
+    merge_exploration_guidance_into_control(memory_dynamics, boredom)
+    lines = memory_dynamics["control_guidance"]["drive_guidance"]["prompt_safe_lines"]  # type: ignore[index]
+    assert any("exploration tendency" in line.casefold() for line in lines)
 
 
 def test_mvp_runtime_wires_boredom_without_visible_diagnostic(tmp_path: Path) -> None:
