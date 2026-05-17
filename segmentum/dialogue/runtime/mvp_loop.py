@@ -55,6 +55,12 @@ from segmentum.reciprocal_role import (
     build_extractor_prompt as build_m12_2_extractor_prompt,
     run_m12_2_tick,
 )
+from segmentum.dialogue.runtime.m13_boredom import (
+    M13BoredomEvaluator,
+    apply_post_turn_boredom_state,
+    prompt_safe_control_guidance_for_thinking,
+    prompt_safe_m13_boredom_diagnostics,
+)
 from segmentum.dialogue.runtime.m13_drive import (
     M13DriveEvaluator,
     apply_post_turn_m13_state,
@@ -4380,10 +4386,30 @@ class MVPDialogueRuntime:
         )
         for m13_event in m13_evaluation.events:
             bus.append(m13_event)
+        m13_boredom_evaluator = M13BoredomEvaluator()
+        m13_boredom_evaluation = m13_boredom_evaluator.evaluate(
+            user_text=user_text,
+            user_id=user_id,
+            turn_id=turn_key,
+            turn_index=turn_index,
+            conscious_plan=conscious,
+            memory_dynamics=memory_dynamics,
+            retrieved_memories=retrieved,
+            m13_state=m13_state,
+            m13_drive_evaluation=m13_evaluation,
+            entity_binding=entity_binding,
+            evidence_judgment=evidence_judgment,
+            m11_result=m11_result_dict or None,
+            m12_payload=m12_pre_result,
+            m12_2_result=m12_2_result_dict if m12_2_enabled else None,
+        )
+        for m13_boredom_event in m13_boredom_evaluation.events:
+            bus.append(m13_boredom_event)
         merge_drive_guidance_into_control(
             memory_dynamics,
             m13_evaluation,
             evidence_judgment=evidence_judgment,
+            boredom_evaluation=m13_boredom_evaluation,
         )
 
         thinking_system, thinking_user = build_thinking_prompt(
@@ -4398,7 +4424,9 @@ class MVPDialogueRuntime:
             memory_guidance={
                 "memory_value": memory_dynamics.get("memory_value", {}),
                 "recall": memory_dynamics.get("recall", {}),
-                "control_guidance": memory_dynamics.get("control_guidance", {}),
+                "control_guidance": prompt_safe_control_guidance_for_thinking(
+                    memory_dynamics.get("control_guidance", {})
+                ),
                 "write_candidates": memory_dynamics.get("write_candidates", []),
                 "expectation_impact": memory_dynamics.get("expectation_impact", {}),
                 "evidence_judgment": evidence_judgment,
@@ -4531,9 +4559,18 @@ class MVPDialogueRuntime:
             memory_candidates_applied=memory_candidates_applied,
             safety_repair=safety_repair,
         )
+        m13_state, m13_boredom_post_events = apply_post_turn_boredom_state(
+            m13_state,
+            boredom=m13_boredom_evaluation,
+            conscious_plan=conscious,
+            retrieved_memories=retrieved,
+            turn_index=turn_index,
+        )
         state["m13_drive_state"] = m13_state
         for m13_event in m13_post_events:
             bus.append(m13_event)
+        for m13_boredom_event in m13_boredom_post_events:
+            bus.append(m13_boredom_event)
         visible_reply = "\n".join([reply, *followup_replies])
         sharing_policy = _mapping(control_guidance.get("sharing_policy"))
         _update_temporal_state(
@@ -4611,7 +4648,8 @@ class MVPDialogueRuntime:
             "response_style_prior": response_style_prior,
             "habit_updates_applied": habit_updates_applied,
             "m13_drive_evaluation": prompt_safe_m13_turn_diagnostics(m13_evaluation),
-            "m13_drive_state": m13_state,
+            "m13_boredom_evaluation": prompt_safe_m13_boredom_diagnostics(m13_boredom_evaluation),
+            "m13_drive_state": prompt_safe_m13_state_summary(m13_state, user_id=user_id),
             "retrieved_memories": retrieved,
             "thinking": thinking,
             "llm_thinking_result": llm_thinking_result,

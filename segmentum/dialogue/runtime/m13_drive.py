@@ -174,6 +174,17 @@ def default_m13_drive_state() -> dict[str, Any]:
             "tolerance_by_path": [],
             "last_patch_id": "",
             "rollback_window": [],
+            "boredom": {
+                "boredom_level": 0.0,
+                "novelty_baseline": 0.55,
+                "last_exploration_target": "",
+                "exploration_cooldown": 0,
+                "stale_turn_count": 0,
+                "last_progress_signal": 0.0,
+                "recent_retrieval_ids": [],
+                "recent_plan_terms": [],
+                "engineering_proxy_label": "mvp_local_boredom_proxy",
+            },
         }
     )
 
@@ -198,6 +209,9 @@ def normalize_m13_drive_state(raw: Any) -> dict[str, Any]:
         value = merged.get(key)
         merged[key] = dict(value) if isinstance(value, Mapping) else {}
     merged["last_patch_id"] = str(merged.get("last_patch_id", "") or "")
+    from segmentum.dialogue.runtime.m13_boredom import normalize_boredom_state
+
+    merged["boredom"] = normalize_boredom_state(merged.get("boredom"))
     return copy.deepcopy(merged)
 
 
@@ -714,6 +728,7 @@ def merge_drive_guidance_into_control(
     evaluation: M13EvaluationResult,
     *,
     evidence_judgment: Mapping[str, Any] | None = None,
+    boredom_evaluation: Any | None = None,
 ) -> None:
     """Patch prompt-safe drive_guidance; intersect with allowed actions."""
     allowed = collect_allowed_reply_actions(
@@ -735,7 +750,7 @@ def merge_drive_guidance_into_control(
             "A similar reply pattern was used recently; vary approach if the user's need changed."
         )
     control = _mapping(memory_dynamics.get("control_guidance"))
-    control["drive_guidance"] = {
+    drive_guidance = {
         "preferred_reply_actions": preferred,
         "discouraged_reply_actions": discouraged,
         "action_tendency_reason": evaluation.prompt_safe_summary,
@@ -745,6 +760,16 @@ def merge_drive_guidance_into_control(
         ),
         "advisory_only": True,
     }
+    if boredom_evaluation is not None:
+        from segmentum.dialogue.runtime.m13_boredom import merge_exploration_guidance_into_control
+
+        merge_exploration_guidance_into_control(
+            memory_dynamics,
+            boredom_evaluation,
+            drive_guidance=drive_guidance,
+        )
+        return
+    control["drive_guidance"] = drive_guidance
     memory_dynamics["control_guidance"] = control
 
 
