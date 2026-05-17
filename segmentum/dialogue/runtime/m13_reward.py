@@ -6,7 +6,6 @@ Engineering proxies only; never exposed as subjective pleasure or addiction labe
 from __future__ import annotations
 
 import copy
-import re
 import uuid
 from dataclasses import dataclass, field
 from typing import Any, Mapping
@@ -35,15 +34,10 @@ MAX_SINGLE_TURN_OPPONENT_STRENGTH_DELTA = 0.04
 MAX_SINGLE_TURN_BASELINE_DELTA = 0.03
 MIN_SETTLEMENT_CONFIDENCE_FOR_POSITIVE = 0.60
 MAX_REWARD_PULL_CONFIDENCE_BOOST = 0.02
-
-# Bounded user-text cues for settlement only; structured diagnostics dominate.
-_USER_CORRECTION_PATTERN = re.compile(
-    r"(?i)(不对|错了|不是这样|你搞错|我说的是|actually|wrong|not what i|纠正|更正)",
+MIN_USER_REACTION_ASSESSMENT_CONFIDENCE = 0.55
+SETTLEMENT_USER_REACTIONS: frozenset[str] = frozenset(
+    {"uptake", "correction", "neutral", "unclear", "off_topic"}
 )
-_USER_UPTAKE_STRONG_PATTERN = re.compile(
-    r"(?i)(谢谢|感谢|明白了|懂了|got it|thanks|makes sense|收到|good to know)",
-)
-_USER_UPTAKE_WEAK_PATTERN = re.compile(r"(?i)^(好的|继续|嗯|ok|okay)[。!！?？…~\s]*$")
 
 _PROMPT_FORBIDDEN_AFFECTIVE_KEYS: frozenset[str] = frozenset(
     {
@@ -182,17 +176,107 @@ def observation_channels_from_bus(bus_messages: list[Mapping[str, Any]] | None) 
     return {}
 
 
-def _user_uptake_signal(user_text: str, *, structured_signal_count: int) -> bool:
-    text = str(user_text or "").strip()
-    if not text:
+def normalize_user_reaction_assessment(raw: Any) -> dict[str, Any]:
+    """Normalize LLM settlement assessor output; never treat free text as scores."""
+    base = {"reaction": "unclear", "confidence": 0.0, "reason_codes": []}
+    if not isinstance(raw, Mapping):
+        return copy.deepcopy(base)
+    reaction = str(raw.get("reaction", "unclear")).strip().lower()
+    if reaction not in SETTLEMENT_USER_REACTIONS:
+        reaction = "unclear"
+    codes = _string_list(raw.get("reason_codes"), limit=4)
+    return {
+        "reaction": reaction,
+        "confidence": round(_bounded_float(raw.get("confidence")), 6),
+        "reason_codes": codes,
+    }
+
+
+def pending_diagnostics_summary_for_assessor(row: Mapping[str, Any]) -> dict[str, Any]:
+    """Compact prior-turn diagnostics for the settlement LLM; no raw prompts or memory dumps."""
+    evidence = _mapping(row.get("prior_evidence_judgment"))
+    return {
+        "prior_action": str(row.get("prior_action", "") or "")[:64],
+        "prior_topic_fingerprint": str(row.get("prior_topic_fingerprint", "") or "")[:120],
+        "prior_reply_validation": _mapping(row.get("prior_reply_validation")),
+        "prior_post_reply_observer": _mapping(row.get("prior_post_reply_observer")),
+        "prior_expectation_results": list(row.get("prior_expectation_results") or [])[:4],
+        "prior_memory_write": bool(row.get("prior_memory_candidates_applied")),
+        "prior_safety_repair": bool(row.get("prior_safety_repair")),
+        "prior_epistemic_stance": str(evidence.get("epistemic_stance", "") or "")[:48],
+        "prior_repetition_pressure": round(_bounded_float(row.get("prior_repetition_pressure")), 6),
+        "prior_conflict_level": round(_bounded_float(row.get("prior_conflict_level")), 6),
+    }
+
+
+def apply_user_reaction_assessment_to_settlement(
+    *,
+    assessment: Mapping[str, Any] | None,
+    observed: float,
+    confidence: float,
+    reason_codes: list[str],
+    structured_signal_count: int,
+) -> tuple[float, float, list[str], bool]:
+    """Apply bounded deltas from LLM semantic reaction; returns correction_marker flag."""
+    if not assessment:
+        return observed, confidence, reason_codes, False
+    normalized = normalize_user_reaction_assessment(assessment)
+    reaction = str(normalized.get("reaction", "unclear"))
+    assess_conf = _bounded_float(normalized.get("confidence"))
+    codes = list(
+        dict.fromkeys([*reason_codes, *_string_list(normalized.get("reason_codes"), limit=4)])
+    )[:MAX_REASON_CODES]
+    if assess_conf < MIN_USER_REACTION_ASSESSMENT_CONFIDENCE:
+        return observed, confidence, codes, False
+
+    correction_marker = False
+    if reaction == "uptake":
+        boost = 0.12 if structured_signal_count > 0 else 0.06
+        observed = _bounded_float(observed + boost)
+        codes.append("llm_user_uptake")
+        confidence = max(confidence, 0.65 if structured_signal_count > 0 else 0.52)
+    elif reaction == "correction":
+        observed = _bounded_float(observed - 0.25)
+        codes.append("llm_user_correction")
+        confidence = max(confidence, 0.72)
+        correction_marker = True
+    elif reaction == "off_topic":
+        observed = _bounded_float(observed - 0.08)
+        codes.append("llm_user_off_topic")
+        confidence = max(confidence, 0.58)
+    elif reaction == "neutral":
+        codes.append("llm_user_neutral")
+    else:
+        codes.append("llm_user_unclear")
+    return observed, confidence, codes[:MAX_REASON_CODES], correction_marker
+
+
+def user_reaction_counts_as_settlement_signal(assessment: Mapping[str, Any] | None) -> bool:
+    if not assessment:
         return False
-    if _USER_CORRECTION_PATTERN.search(text):
+    normalized = normalize_user_reaction_assessment(assessment)
+    if _bounded_float(normalized.get("confidence")) < MIN_USER_REACTION_ASSESSMENT_CONFIDENCE:
         return False
-    if _USER_UPTAKE_STRONG_PATTERN.search(text):
-        return True
-    if structured_signal_count > 0 and _USER_UPTAKE_WEAK_PATTERN.match(text):
-        return True
-    return False
+    return str(normalized.get("reaction", "")) in {"uptake", "correction", "off_topic"}
+
+
+def first_assessable_pending_row(
+    reward_state: Mapping[str, Any],
+    *,
+    turn_index: int,
+) -> dict[str, Any] | None:
+    """Return the first pending row due for settlement this turn (not expired / not future)."""
+    for row in reward_state.get("pending_settlements", []) or []:
+        if not isinstance(row, Mapping):
+            continue
+        prior_turn = int(row.get("prior_turn_index", -1) or -1)
+        expires = int(row.get("expires_after_turns", PENDING_SETTLEMENT_TTL) or PENDING_SETTLEMENT_TTL)
+        if turn_index > prior_turn + expires:
+            continue
+        if turn_index <= prior_turn:
+            continue
+        return dict(row)
+    return None
 
 
 def _settlement_observation_adjustment(
@@ -363,6 +447,7 @@ def settle_pending_m13_actions(
     turn_id: str,
     boredom_information_gain: float = 0.0,
     observation_channels: Mapping[str, Any] | None = None,
+    user_reaction_assessment: Mapping[str, Any] | None = None,
 ) -> tuple[dict[str, Any], list[M13SettlementResult], list[dict[str, Any]]]:
     """Settle prior-turn pending traces at run_turn start (before conscious planning)."""
     state = normalize_m13_drive_state(m13_state)
@@ -423,30 +508,29 @@ def settle_pending_m13_actions(
             observed = _bounded_float(observed + obs_delta)
             reason_codes.extend(obs_reasons)
             confidence = max(confidence, 0.45 + obs_conf_boost)
-        if _USER_CORRECTION_PATTERN.search(user_text or ""):
-            observed = _bounded_float(observed - 0.25)
-            reason_codes.append("user_correction_marker")
-            confidence = 0.72
-        uptake = _user_uptake_signal(user_text, structured_signal_count=structured_signal_count)
-        if uptake:
-            observed = _bounded_float(observed + (0.12 if structured_signal_count > 0 else 0.06))
-            reason_codes.append("user_uptake_marker")
-            confidence = max(confidence, 0.65 if structured_signal_count > 0 else 0.52)
 
         reason_codes.extend(pos_reasons[:4])
         reason_codes.extend(neg_reasons[:4])
         reason_codes = list(dict.fromkeys(reason_codes))[:MAX_REASON_CODES]
 
+        observed, confidence, reason_codes, correction_marker = apply_user_reaction_assessment_to_settlement(
+            assessment=user_reaction_assessment,
+            observed=observed,
+            confidence=confidence,
+            reason_codes=reason_codes,
+            structured_signal_count=structured_signal_count,
+        )
+
         signal_count = structured_signal_count + len(obs_reasons) + (
-            1 if _USER_CORRECTION_PATTERN.search(user_text or "") else 0
-        ) + (1 if uptake else 0)
+            1 if user_reaction_counts_as_settlement_signal(user_reaction_assessment) else 0
+        )
         if signal_count == 0:
             outcome_band = "uncertain"
             confidence = 0.4
             reason_codes.append("insufficient_settlement_evidence")
         elif observed >= 0.55 and confidence >= MIN_SETTLEMENT_CONFIDENCE_FOR_POSITIVE:
             outcome_band = "positive"
-        elif observed <= 0.25 or "user_correction_marker" in reason_codes:
+        elif observed <= 0.25 or correction_marker:
             outcome_band = "negative"
         else:
             outcome_band = "uncertain"
@@ -658,7 +742,8 @@ def evaluate_pre_turn_reward_proxy(
     )
     baseline = _bounded_float(reward_state.get("reward_baseline"), default=0.35)
     information_gain = _bounded_float(information_gain_proxy)
-    observed = _bounded_float(reward_state.get("last_net_reward_proxy")) * 0.35
+    # Pre-turn guidance uses path dynamics only; same-turn observed reward is post-reply.
+    observed = 0.0
     relief = 0.0
     net = compute_net_affective_reward_proxy(
         observed_reward_proxy=observed,

@@ -25,6 +25,7 @@ from segmentum.dialogue.runtime.m13_reward import (
     evaluate_pre_turn_reward_proxy,
     merge_affective_guidance_into_control,
     normalize_affective_reward_proxy_state,
+    normalize_user_reaction_assessment,
     observation_channels_from_bus,
     path_id_for,
     prompt_safe_m13_reward_diagnostics,
@@ -59,6 +60,14 @@ def _base_control(**overrides: object) -> dict[str, object]:
     }
     control.update(overrides)
     return control
+
+
+def _llm_uptake_assessment() -> dict[str, object]:
+    return {"reaction": "uptake", "confidence": 0.72, "reason_codes": ["semantic_uptake"]}
+
+
+def _llm_correction_assessment() -> dict[str, object]:
+    return {"reaction": "correction", "confidence": 0.8, "reason_codes": ["semantic_correction"]}
 
 
 def _status_inputs(turn: int) -> tuple[dict[str, object], dict[str, object], list[dict[str, object]]]:
@@ -165,6 +174,88 @@ def test_stale_pending_settlement_expires_without_update() -> None:
     assert updated["affective_reward_proxy"]["pending_settlements"] == []
 
 
+def test_normalize_user_reaction_assessment_rejects_invalid_reaction() -> None:
+    normalized = normalize_user_reaction_assessment(
+        {"reaction": "addicted", "confidence": 1.5, "reason_codes": ["x"] * 10}
+    )
+    assert normalized["reaction"] == "unclear"
+    assert normalized["confidence"] <= 1.0
+    assert len(normalized["reason_codes"]) <= 4
+
+
+def test_polite_user_text_without_llm_assessment_does_not_imply_uptake() -> None:
+    """Regression: regex keyword cues removed; short polite text alone is not uptake."""
+    state = default_m13_drive_state()
+    reward = normalize_affective_reward_proxy_state(state["affective_reward_proxy"])
+    reward["pending_settlements"] = [
+        create_pending_settlement(
+            turn_index=1,
+            action="answer",
+            topic_fingerprint="status|update",
+            reply_summary="summary",
+            predicted_reward=0.3,
+            predicted_relief=0.1,
+            information_gain_proxy=0.0,
+            evidence_refs=[],
+            reply_validation={"changed": False},
+            post_reply_observer={"needs_followup": False, "followup_type": "none"},
+            conscious_plan={},
+            memory_candidates_applied=[],
+            evidence_judgment=None,
+            safety_repair=False,
+            repetition_pressure=0.0,
+            conflict_level=0.0,
+        )
+    ]
+    state["affective_reward_proxy"] = reward
+    _, settlements, _ = settle_pending_m13_actions(
+        state,
+        user_text="明白了，请继续",
+        user_id="u1",
+        turn_index=2,
+        turn_id="turn_0003",
+        user_reaction_assessment=None,
+    )
+    assert settlements[0].outcome_band == "uncertain"
+    assert "llm_user_uptake" not in settlements[0].reason_codes
+
+
+def test_llm_uptake_assessment_can_support_positive_settlement() -> None:
+    state = default_m13_drive_state()
+    reward = normalize_affective_reward_proxy_state(state["affective_reward_proxy"])
+    reward["pending_settlements"] = [
+        create_pending_settlement(
+            turn_index=1,
+            action="answer",
+            topic_fingerprint="status|update",
+            reply_summary="summary",
+            predicted_reward=0.3,
+            predicted_relief=0.1,
+            information_gain_proxy=0.0,
+            evidence_refs=[],
+            reply_validation={"changed": False},
+            post_reply_observer={"needs_followup": False, "followup_type": "none"},
+            conscious_plan={"expectation_results": [{"status": "confirmed"}]},
+            memory_candidates_applied=["m1"],
+            evidence_judgment={"epistemic_stance": "known"},
+            safety_repair=False,
+            repetition_pressure=0.0,
+            conflict_level=0.0,
+        )
+    ]
+    state["affective_reward_proxy"] = reward
+    _, settlements, _ = settle_pending_m13_actions(
+        state,
+        user_text="明白了，请继续",
+        user_id="u1",
+        turn_index=2,
+        turn_id="turn_0003",
+        user_reaction_assessment=_llm_uptake_assessment(),
+    )
+    assert settlements[0].outcome_band == "positive"
+    assert "llm_user_uptake" in settlements[0].reason_codes
+
+
 def test_repeated_success_raises_predicted_reward_and_tolerance() -> None:
     state = default_m13_drive_state()
     user_id = "u1"
@@ -199,6 +290,7 @@ def test_repeated_success_raises_predicted_reward_and_tolerance() -> None:
             user_id=user_id,
             turn_index=turn,
             turn_id=f"turn_{turn:04d}",
+            user_reaction_assessment=_llm_uptake_assessment(),
         )
         assert settlements[-1].outcome_band == "positive"
     path_rows = state["affective_reward_proxy"]["tolerance_by_path"]
@@ -333,12 +425,14 @@ def test_negative_settlement_rolls_back_habit_and_lowers_predicted() -> None:
     state["affective_reward_proxy"] = reward
     updated, settlements, events = settle_pending_m13_actions(
         state,
-        user_text="不对，你搞错了",
+        user_text="我补充一下背景",
         user_id=user_id,
         turn_index=2,
         turn_id="turn_0003",
+        user_reaction_assessment=_llm_correction_assessment(),
     )
     assert settlements[0].outcome_band == "negative"
+    assert "llm_user_correction" in settlements[0].reason_codes
     row = updated["path_patterns_by_action"][0]
     assert float(row["habit_precision"]) < 0.42
     assert float(row["habit_precision"]) >= 0.32
@@ -440,6 +534,7 @@ def test_behavioral_pull_can_increase_while_reward_proxy_drops() -> None:
                 turn_index=turn + 1,
                 turn_id=f"turn_{turn:04d}",
                 boredom_information_gain=boredom.information_gain_proxy,
+                user_reaction_assessment=_llm_uptake_assessment(),
             )
         action = drive_eval.top_behavioral_pull_action
         pull = float(drive_eval.scores_by_action[action]["behavioral_pull"])
@@ -545,6 +640,7 @@ def test_repeated_path_reward_drops_while_pull_does_not_drop() -> None:
                 turn_index=turn + 1,
                 turn_id=f"turn_{turn:04d}",
                 boredom_information_gain=boredom.information_gain_proxy,
+                user_reaction_assessment=_llm_uptake_assessment(),
             )
         action = drive_eval.top_behavioral_pull_action
         pull = float(drive_eval.scores_by_action[action]["behavioral_pull"])
@@ -759,13 +855,20 @@ def test_mvp_runtime_wires_settlement_and_reward(tmp_path: Path) -> None:
                     "memory_search_keywords": ["status"],
                     "temporal_assessment": {},
                 }
+            if "上轮回复后果评估" in system_prompt:
+                return {
+                    "reaction": "uptake",
+                    "confidence": 0.7,
+                    "reason_codes": ["continues_thread"],
+                }
             return {"reply": "好的。", "reply_action": "answer", "llm_thinking_result": {}}
 
     runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "p_reward"), llm=ShortLLM())
     first = runtime.run_turn("项目 status", turn_index=0)
     second = runtime.run_turn("好的，继续", turn_index=1)
     bus_types = [msg.get("type") for msg in second.diagnostics.get("bus_messages", [])]
-    assert "M13RewardSettlementEvent" in bus_types or "M13RewardSettlementExpired" in bus_types
+    assert "M13RewardSettlementAssessorEvent" in bus_types
+    assert "M13RewardSettlementEvent" in bus_types
     diag = second.diagnostics.get("m13_reward_evaluation", {})
     assert isinstance(diag, dict)
     diag_blob = json.dumps(diag, ensure_ascii=False).casefold()

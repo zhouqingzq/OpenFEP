@@ -77,7 +77,11 @@ from segmentum.dialogue.runtime.m13_reward import (
     apply_post_turn_m13_reward_state,
     apply_reward_pull_connection,
     evaluate_pre_turn_reward_proxy,
+    first_assessable_pending_row,
     merge_affective_guidance_into_control,
+    normalize_affective_reward_proxy_state,
+    normalize_user_reaction_assessment,
+    pending_diagnostics_summary_for_assessor,
     prompt_safe_m13_reward_diagnostics,
     prompt_safe_m13_reward_ui_labels,
     observation_channels_from_bus,
@@ -1531,6 +1535,48 @@ thinking 摘要:
   ]
 }}
 """
+    return system_prompt, user_prompt
+
+
+def build_m13_settlement_assessor_prompt(
+    *,
+    user_text: str,
+    prior_reply_summary: str,
+    prior_diagnostics: Mapping[str, Any],
+    observation_channels: Mapping[str, Any],
+    turn_index: int,
+) -> tuple[str, str]:
+    system_prompt = """你是数字人格 MVP 路径的“上轮回复后果评估”模块。
+根据用户本轮发言，判断其对上一轮子代理回复的语义反应（接纳、纠正、无关、中性或无法判断）。
+这是工程代理信号，不是情绪模拟，不要诊断成瘾，不要使用 reward/tolerance 等术语。
+只输出 JSON，不要 Markdown。"""
+    user_prompt = f"""turn_index: {turn_index}
+
+用户本轮发言:
+{user_text}
+
+上一轮子代理回复摘要:
+{prior_reply_summary}
+
+上一轮工程诊断摘要:
+{_json_text(dict(prior_diagnostics))}
+
+观察通道数值（若有）:
+{_json_text(dict(observation_channels))}
+
+请输出 JSON:
+{{
+  "reaction": "uptake|correction|neutral|unclear|off_topic",
+  "confidence": 0.0,
+  "reason_codes": ["简短原因标签，最多4个"]
+}}
+
+reaction 说明:
+- uptake: 用户接纳、理解、愿意继续该方向
+- correction: 用户指出上轮回复有误、未理解、需纠正
+- neutral: 有回应但不构成明确接纳或纠正
+- unclear: 信息不足，无法判断
+- off_topic: 用户明显转向无关话题"""
     return system_prompt, user_prompt
 
 
@@ -4100,6 +4146,51 @@ class MVPDialogueRuntime:
         })
 
         m13_state = normalize_m13_drive_state(state.get("m13_drive_state"))
+        reward_for_settlement = normalize_affective_reward_proxy_state(
+            m13_state.get("affective_reward_proxy")
+        )
+        user_reaction_assessment: dict[str, Any] | None = None
+        assessable_pending = first_assessable_pending_row(reward_for_settlement, turn_index=turn_index)
+        if assessable_pending and str(user_text or "").strip():
+            try:
+                assessor_system, assessor_user = build_m13_settlement_assessor_prompt(
+                    user_text=user_text,
+                    prior_reply_summary=str(assessable_pending.get("prior_reply_summary", "") or "")[:160],
+                    prior_diagnostics=pending_diagnostics_summary_for_assessor(assessable_pending),
+                    observation_channels=observation_channels_from_bus(bus),
+                    turn_index=turn_index,
+                )
+                assessor_raw = self.llm.complete_json(
+                    system_prompt=assessor_system,
+                    user_prompt=assessor_user,
+                )
+                user_reaction_assessment = normalize_user_reaction_assessment(assessor_raw)
+                bus.append(
+                    {
+                        "type": "M13RewardSettlementAssessorEvent",
+                        "turn_id": turn_key,
+                        "turn_index": turn_index,
+                        "pending_id": str(assessable_pending.get("pending_id", "")),
+                        "reaction": user_reaction_assessment.get("reaction"),
+                        "confidence": user_reaction_assessment.get("confidence"),
+                        "reason_codes": list(user_reaction_assessment.get("reason_codes", []))[:4],
+                        "engineering_proxy_label": "mvp_local_affective_reward_proxy",
+                    }
+                )
+            except Exception as exc:
+                bus.append(
+                    {
+                        "type": "M13RewardSettlementAssessorEvent",
+                        "turn_id": turn_key,
+                        "turn_index": turn_index,
+                        "pending_id": str(assessable_pending.get("pending_id", "")),
+                        "reaction": "unclear",
+                        "confidence": 0.0,
+                        "reason_codes": ["assessor_error"],
+                        "assessor_error": type(exc).__name__,
+                        "engineering_proxy_label": "mvp_local_affective_reward_proxy",
+                    }
+                )
         m13_state, _m13_settlements, m13_settlement_events = settle_pending_m13_actions(
             m13_state,
             user_text=user_text,
@@ -4107,6 +4198,7 @@ class MVPDialogueRuntime:
             turn_index=turn_index,
             turn_id=turn_key,
             observation_channels=observation_channels_from_bus(bus),
+            user_reaction_assessment=user_reaction_assessment,
         )
         state["m13_drive_state"] = m13_state
         for m13_settlement_event in m13_settlement_events:
