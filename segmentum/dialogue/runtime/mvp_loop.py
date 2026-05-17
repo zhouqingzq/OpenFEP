@@ -74,12 +74,13 @@ from segmentum.dialogue.runtime.m13_drive import (
 )
 from segmentum.dialogue.runtime.m13_initiative import (
     PROACTIVE_SURROGATE_USER_TEXT,
+    build_proactive_thinking_user_text,
     evaluate_proactive_initiative,
     mark_proactive_turn_consumed,
     merge_initiative_into_m13_state,
     normalize_initiative_state,
     proposal_from_initiative_state,
-    proactive_visible_text_is_safe,
+    proactive_delivered_text_is_safe,
     set_initiative_user_opt_in,
 )
 from segmentum.dialogue.runtime.m13_reward import (
@@ -4048,12 +4049,24 @@ class MVPDialogueRuntime:
         display_name = str(speaker_name or "").strip() or "default_user"
         user_id = _safe_user_id(display_name)
         proactive_turn = isinstance(proactive_context, Mapping) and bool(proactive_context)
-        sharing_regret_feedback = self._apply_sharing_regret_feedback(
-            state,
-            user_text=user_text,
-            current_user_id=user_id,
-            now=now,
-        )
+        prior_last_user_text = str(_mapping(state.get("temporal_state")).get("last_user_text", "") or "")
+        proactive_surrogate_text = str(user_text or "") if proactive_turn else ""
+        proactive_defer_audit_log = bool(proactive_context.get("defer_audit_log")) if proactive_turn else False
+        if proactive_turn:
+            user_text = build_proactive_thinking_user_text(
+                surrogate=proactive_surrogate_text,
+                ordinary_language_intent=str(proactive_context.get("ordinary_language_intent", "") or ""),
+                proposed_topic=str(proactive_context.get("proposed_topic", "") or ""),
+                trigger=str(proactive_context.get("trigger", "") or ""),
+            )
+        sharing_regret_feedback: dict[str, Any] = {}
+        if not proactive_turn:
+            sharing_regret_feedback = self._apply_sharing_regret_feedback(
+                state,
+                user_text=user_text,
+                current_user_id=user_id,
+                now=now,
+            )
         m11_state = _load_m11_state(state, user_id=user_id, display_name=display_name)
         m11_result_dict: dict[str, Any] = {}
         temporal_input = _temporal_input_from_state(state, now=now)
@@ -4072,7 +4085,7 @@ class MVPDialogueRuntime:
                     "ordinary_language_intent": str(
                         proactive_context.get("ordinary_language_intent", "") or ""
                     )[:240],
-                    "surrogate_context": str(user_text or "")[:240],
+                    "surrogate_context": str(proactive_surrogate_text or "")[:240],
                     "at": now,
                 }
             )
@@ -4089,7 +4102,7 @@ class MVPDialogueRuntime:
         m12_pre_result: dict[str, Any] | None = None
         turn_key = f"turn_{turn_index + 1:04d}"
         m12_cognitive_bus = CognitiveEventBus()
-        if _m12_enabled_for_state(state):
+        if _m12_enabled_for_state(state) and not proactive_turn:
             m12_state = _load_m12_state(state)
             m11_readonly_pre: dict[str, object] = {}
 
@@ -4184,7 +4197,7 @@ class MVPDialogueRuntime:
             reward_for_settlement,
             turn_index=turn_index,
         )
-        if assessable_pending_rows and str(user_text or "").strip():
+        if assessable_pending_rows and str(user_text or "").strip() and not proactive_turn:
             observation_channels = observation_channels_from_bus(bus)
             for assessable_pending in assessable_pending_rows:
                 pending_id = str(assessable_pending.get("pending_id", ""))
@@ -4353,7 +4366,7 @@ class MVPDialogueRuntime:
         self._mark_recalled(state, retrieved, now)
         response_style_prior = _response_style_prior(state, retrieved)
         m11_result_dict: dict[str, Any] = {}
-        if _m11_enabled_for_state(state):
+        if _m11_enabled_for_state(state) and not proactive_turn:
             def _extract_m11(snapshot: Mapping[str, object]) -> Mapping[str, object]:
                 system_prompt, user_prompt = build_m11_extractor_prompt(
                     snapshot=snapshot,
@@ -4452,7 +4465,7 @@ class MVPDialogueRuntime:
             user_text,
         )
         m12_2_result_dict: dict[str, Any] = {}
-        m12_2_enabled = _m12_2_enabled_for_state(state)
+        m12_2_enabled = _m12_2_enabled_for_state(state) and not proactive_turn
         if m12_2_enabled:
             m12_2_state = _load_m12_2_state(state)
 
@@ -4558,6 +4571,7 @@ class MVPDialogueRuntime:
             m11_result=m11_result_dict or None,
             m12_payload=m12_pre_result,
             m12_2_result=m12_2_result_dict if m12_2_enabled else None,
+            llm=self.llm,
         )
         for m13_boredom_event in m13_boredom_evaluation.events:
             bus.append(m13_boredom_event)
@@ -4794,11 +4808,12 @@ class MVPDialogueRuntime:
             bus.append(m13_reward_event)
         visible_reply = "\n".join([reply, *followup_replies])
         sharing_policy = _mapping(control_guidance.get("sharing_policy"))
+        temporal_user_text = prior_last_user_text if proactive_turn else user_text
         _update_temporal_state(
             state,
             now=now,
             turn_index=turn_index,
-            user_text=user_text,
+            user_text=temporal_user_text,
             reply=visible_reply,
             temporal_input=temporal_input,
             share_trace={
@@ -4883,7 +4898,7 @@ class MVPDialogueRuntime:
             "state_root": str(self.store.root),
             "system_files": {key: str(self.store.path_for(key)) for key in SYSTEM_FILE_DEFAULTS},
         }
-        if proactive_turn:
+        if proactive_turn and not proactive_defer_audit_log:
             self.store.append_log(
                 {
                     "event": "proactive_turn",
@@ -4896,7 +4911,7 @@ class MVPDialogueRuntime:
                     "not_user_requested_current_turn": True,
                     "reply": reply,
                     "followup_replies": followup_replies,
-                    "surrogate_context": str(user_text or "")[:240],
+                    "surrogate_context": str(proactive_surrogate_text or "")[:240],
                     "diagnostics": diagnostics,
                 }
             )
@@ -4938,6 +4953,7 @@ class MVPDialogueRuntime:
             manual_continue=manual_continue,
             user_typing=user_typing,
             implicit_idle_request=implicit_idle_request,
+            llm=self.llm,
         )
         self.store.save(state)
         for event in check.events:
@@ -4982,28 +4998,32 @@ class MVPDialogueRuntime:
                 diagnostics={"suppression_reason": reason, "proactive_turn": True},
             )
 
+        state_snapshot = copy.deepcopy(self.store.load())
+        proactive_context = {**proposal.to_dict(), "defer_audit_log": True}
         result = self.run_turn(
             PROACTIVE_SURROGATE_USER_TEXT,
             turn_index=turn_index,
             speaker_name=speaker_name,
             now=now,
-            proactive_context=proposal.to_dict(),
+            proactive_context=proactive_context,
         )
         reply = str(result.reply or "").strip()
-        if reply and not proactive_visible_text_is_safe(reply):
-            result = MVPTurnResult(
-                reply="",
-                action="proactive_suppressed",
-                diagnostics={
-                    **result.diagnostics,
-                    "suppression_reason": "safety_risk",
-                    "proactive_text_blocked": True,
-                },
-            )
+        followup_replies = list(getattr(result, "followup_replies", []) or [])
+        if reply and not proactive_delivered_text_is_safe(
+            reply,
+            followup_replies,
+            llm=self.llm,
+            ordinary_language_intent=proposal.ordinary_language_intent,
+            trigger=proposal.trigger,
+            turn_index=turn_index,
+        ):
+            self.store.save(state_snapshot)
+            m13_state = merge_initiative_into_m13_state(state_snapshot.get("m13_drive_state"))
+            initiative = normalize_initiative_state(m13_state.get("initiative"))
             initiative["last_suppression_reason"] = "safety_risk"
             m13_state["initiative"] = initiative
-            state["m13_drive_state"] = m13_state
-            self.store.save(state)
+            state_snapshot["m13_drive_state"] = m13_state
+            self.store.save(state_snapshot)
             self.store.append_log(
                 {
                     "event": "m13_proactive_audit",
@@ -5011,9 +5031,20 @@ class MVPDialogueRuntime:
                     "reason": "safety_risk",
                     "proposal_id": proposal_id,
                     "turn_index": turn_index,
+                    "proactive_text_blocked": True,
                 }
             )
-            return result
+            return MVPTurnResult(
+                reply="",
+                action="proactive_suppressed",
+                diagnostics={
+                    **result.diagnostics,
+                    "suppression_reason": "safety_risk",
+                    "proactive_text_blocked": True,
+                    "proactive_turn": True,
+                },
+                followup_replies=[],
+            )
 
         state = self.store.load()
         m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state"))
@@ -5024,6 +5055,22 @@ class MVPDialogueRuntime:
             proposal=proposal,
         )
         self.store.save(state)
+        self.store.append_log(
+            {
+                "event": "proactive_turn",
+                "at": now,
+                "turn_index": turn_index,
+                "source": "m13_proactive_turn",
+                "role": "assistant",
+                "trigger": proposal.trigger,
+                "proposal_id": proposal.proposal_id,
+                "not_user_requested_current_turn": True,
+                "reply": reply,
+                "followup_replies": followup_replies,
+                "surrogate_context": PROACTIVE_SURROGATE_USER_TEXT[:240],
+                "diagnostics": result.diagnostics,
+            }
+        )
         self.store.append_log(
             {
                 "event": "m13_proactive_audit",

@@ -6,9 +6,10 @@ from pathlib import Path
 import pytest
 
 from segmentum.dialogue.runtime.m13_boredom import (
+    BOREDOM_USER_TEXT_ASSESSOR_MARKER,
     MAX_PROMPT_GUIDANCE_LINES,
     MAX_PROMPT_LINE_LENGTH,
-    MAX_REGEX_INFORMATION_GAIN_BOOST,
+    MAX_SEMANTIC_INFORMATION_GAIN_HINT,
     M13BoredomEvaluator,
     _closed_expectation_progress,
     _progress_signal,
@@ -16,6 +17,7 @@ from segmentum.dialogue.runtime.m13_boredom import (
     build_prompt_safe_guidance_lines,
     merge_exploration_guidance_into_control,
     normalize_boredom_state,
+    normalize_boredom_user_text_assessment,
     prompt_safe_control_guidance_for_thinking,
     prompt_safe_m13_boredom_diagnostics,
     sanitize_drive_guidance_for_prompt,
@@ -78,6 +80,49 @@ def _stale_boredom_state() -> dict[str, object]:
     }
 
 
+class _BoredomSemanticLLM:
+    """Stub LLM for boredom user-text semantics (not production keyword policy)."""
+
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        if BOREDOM_USER_TEXT_ASSESSOR_MARKER not in system_prompt:
+            return {}
+        text = user_prompt
+        if "LRU" in text or "怎么实现" in text:
+            return normalize_boredom_user_text_assessment(
+                {
+                    "explicit_task_pressure": 0.45,
+                    "information_gain_hint": 0.06,
+                    "user_need_salience": 0.35,
+                    "low_information_utterance": False,
+                    "confidence": 0.88,
+                    "reason_codes": ["direct_implementation_request"],
+                }
+            )
+        if "为什么" in text:
+            return normalize_boredom_user_text_assessment(
+                {
+                    "explicit_task_pressure": 0.0,
+                    "information_gain_hint": 0.12,
+                    "user_need_salience": 0.12,
+                    "low_information_utterance": False,
+                    "confidence": 0.8,
+                    "reason_codes": ["analytic_question"],
+                }
+            )
+        if "用户本轮发言:\n嗯" in text or text.rstrip().endswith("嗯"):
+            return normalize_boredom_user_text_assessment(
+                {
+                    "explicit_task_pressure": 0.0,
+                    "information_gain_hint": 0.0,
+                    "user_need_salience": 0.0,
+                    "low_information_utterance": True,
+                    "confidence": 0.9,
+                    "reason_codes": ["minimal_backchannel"],
+                }
+            )
+        return normalize_boredom_user_text_assessment({})
+
+
 def _base_control(**overrides: object) -> dict[str, object]:
     control: dict[str, object] = {
         "sharing_policy": {"allow_direct_disclosure": True, "allow_abstract_sharing": True},
@@ -121,6 +166,7 @@ def test_boredom_suppressed_on_first_turn() -> None:
 def test_boredom_suppressed_on_direct_task_after_first_turn() -> None:
     evaluator = M13BoredomEvaluator()
     stale = _stale_boredom_state()
+    llm = _BoredomSemanticLLM()
     direct_task = evaluator.evaluate(
         user_text="Python 里怎么实现一个 LRU cache？请给步骤。",
         user_id="u1",
@@ -130,6 +176,7 @@ def test_boredom_suppressed_on_direct_task_after_first_turn() -> None:
         memory_dynamics={"recall_query": {"semantic_terms": ["python"]}, "control_guidance": _base_control()},
         retrieved_memories=[],
         m13_state=stale,
+        llm=llm,
     )
     casual_repeat = evaluator.evaluate(
         user_text="还是 status update",
@@ -140,6 +187,7 @@ def test_boredom_suppressed_on_direct_task_after_first_turn() -> None:
         memory_dynamics={"recall_query": {"semantic_terms": ["status"]}, "control_guidance": _base_control()},
         retrieved_memories=[{"id": "m0", "keywords": ["status"]}],
         m13_state=stale,
+        llm=llm,
     )
     assert direct_task.exploration_suppressed is True
     assert direct_task.exploration_bias < 0.15
@@ -608,19 +656,21 @@ def test_progress_signal_ignores_empty_closed_expectation_ids() -> None:
     assert _closed_expectation_progress({"closed_expectation_ids": ["exp_1"]}) == 0.2
 
 
-def test_information_gain_regex_boost_is_capped() -> None:
+def test_information_gain_semantic_hint_is_capped_and_structured_dominates() -> None:
     evaluator = M13BoredomEvaluator()
+    llm = _BoredomSemanticLLM()
     baseline_state = default_m13_drive_state()
     baseline_state["boredom"] = normalize_boredom_state({"recent_plan_terms": ["status"]})
-    regex_only = evaluator.evaluate(
+    hint_only = evaluator.evaluate(
         user_text="为什么？",
         user_id="u1",
-        turn_id="t_regex",
+        turn_id="t_hint",
         turn_index=2,
         conscious_plan={"memory_search_keywords": ["status"]},
         memory_dynamics={"recall_query": {"semantic_terms": ["status"]}, "control_guidance": _base_control()},
         retrieved_memories=[],
         m13_state=baseline_state,
+        llm=llm,
     )
     structured = evaluator.evaluate(
         user_text="为什么？",
@@ -631,6 +681,7 @@ def test_information_gain_regex_boost_is_capped() -> None:
         memory_dynamics={"recall_query": {"semantic_terms": ["status"]}, "control_guidance": _base_control()},
         retrieved_memories=[],
         m13_state=baseline_state,
+        llm=llm,
         m12_payload={
             "state_after": {
                 "conflict_records": [
@@ -641,8 +692,9 @@ def test_information_gain_regex_boost_is_capped() -> None:
             }
         },
     )
-    assert regex_only.information_gain_proxy <= MAX_REGEX_INFORMATION_GAIN_BOOST + 0.01
-    assert structured.information_gain_proxy > regex_only.information_gain_proxy
+    assert hint_only.information_gain_proxy <= MAX_SEMANTIC_INFORMATION_GAIN_HINT + 0.01
+    assert structured.information_gain_proxy > hint_only.information_gain_proxy
+    assert any(event.get("type") == "M13BoredomUserTextAssessmentEvent" for event in hint_only.events)
 
 
 def test_merge_exploration_includes_mode_line_when_hint_present() -> None:
@@ -665,7 +717,7 @@ def test_merge_exploration_includes_mode_line_when_hint_present() -> None:
 
 
 def test_mvp_runtime_wires_boredom_without_visible_diagnostic(tmp_path: Path) -> None:
-    class ShortLLM:
+    class ShortLLM(_BoredomSemanticLLM):
         def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
             if "意识主循环" in system_prompt:
                 return {
@@ -673,6 +725,8 @@ def test_mvp_runtime_wires_boredom_without_visible_diagnostic(tmp_path: Path) ->
                     "memory_search_keywords": ["status"],
                     "temporal_assessment": {},
                 }
+            if BOREDOM_USER_TEXT_ASSESSOR_MARKER in system_prompt:
+                return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
             return {"reply": "好的。", "reply_action": "answer", "llm_thinking_result": {}}
 
     runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "p_boredom"), llm=ShortLLM())

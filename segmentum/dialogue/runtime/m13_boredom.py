@@ -1,15 +1,17 @@
 """MVP-local M13.1 boredom and exploration bias for the UI chat path.
 
-Engineering proxies only; diagnostics label them as such. No LLM calls.
+Engineering proxies only; diagnostics label them as such.
+User-text semantics (task pressure, gain hint, salience) use a small LLM assessor — not regex cues.
 """
 
 from __future__ import annotations
 
 import copy
+import json
 import re
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Mapping
+from typing import Any, Mapping, Protocol
 
 from segmentum.dialogue.runtime.m13_drive import (
     M13EvaluationResult,
@@ -23,13 +25,15 @@ MAX_STALE_TURN_COUNT = 12
 MAX_EXPLORATION_COOLDOWN = 5
 MAX_PROMPT_GUIDANCE_LINES = 6
 MAX_PROMPT_LINE_LENGTH = 160
-# Cap single regex hits so structured M11/M12/M12.2 signals dominate keyword cues.
-MAX_REGEX_INFORMATION_GAIN_BOOST = 0.12
-MAX_REGEX_DIRECT_TASK_PRESSURE = 0.45
-MAX_REGEX_URGENCY_SALIENCE = 0.12
+MAX_SEMANTIC_INFORMATION_GAIN_HINT = 0.12
+MAX_SEMANTIC_EXPLICIT_TASK_PRESSURE = 0.45
+MAX_SEMANTIC_USER_NEED_SALIENCE = 0.35
+MIN_BOREDOM_USER_TEXT_ASSESSMENT_CONFIDENCE = 0.5
 MAX_ULTRA_SHORT_USER_CHARS = 6
 OPPONENT_EXPLORATION_BIAS_BOOST = 0.12
 OPPONENT_EXPLORATION_THRESHOLD = 0.35
+
+BOREDOM_USER_TEXT_ASSESSOR_MARKER = "M13 无聊代理用户话语语义评估"
 
 # Engineering fields live on events/state only; never in thinking-prompt drive_guidance.
 _PROMPT_FORBIDDEN_DRIVE_GUIDANCE_KEYS: frozenset[str] = frozenset(
@@ -60,15 +64,8 @@ _EXPLORATION_MODES: tuple[str, ...] = (
     "shift_from_repetition_to_progress",
 )
 
-_DIRECT_TASK_PATTERNS = re.compile(
-    r"(?i)(怎么实现|如何实现|步骤|教程|implement|how\s+to|what\s+is|什么是|"
-    r"请写|写代码|fix\s+this|bug|错误在哪|根因|部署|配置)",
-)
-_HIGH_GAIN_PATTERNS = re.compile(
-    r"(?i)(分析|设计|对比|评估|纠正|改正|决定|trade.?off|architecture|"
-    r"方案|为什么|复盘|review|correct|decide)",
-)
-_SHORT_ACK_PATTERNS = re.compile(r"^(嗯|哦|好|ok|okay|行|继续|然后呢)[\s。!?.]*$", re.I)
+class BoredomUserTextLLM(Protocol):
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, Any]: ...
 
 
 def _mapping(value: Any) -> dict[str, Any]:
@@ -93,6 +90,101 @@ def _string_list(value: Any, *, limit: int = 12) -> list[str]:
 
 def _new_id(prefix: str) -> str:
     return f"{prefix}_{uuid.uuid4().hex[:12]}"
+
+
+def _json_text(payload: Any) -> str:
+    return json.dumps(payload, ensure_ascii=False, indent=2)
+
+
+def normalize_boredom_user_text_assessment(raw: Any) -> dict[str, Any]:
+    base = {
+        "explicit_task_pressure": 0.0,
+        "information_gain_hint": 0.0,
+        "user_need_salience": 0.0,
+        "low_information_utterance": False,
+        "confidence": 0.0,
+        "reason_codes": [],
+    }
+    if not isinstance(raw, Mapping):
+        return copy.deepcopy(base)
+    return {
+        "explicit_task_pressure": round(
+            min(
+                MAX_SEMANTIC_EXPLICIT_TASK_PRESSURE,
+                _bounded_float(raw.get("explicit_task_pressure")),
+            ),
+            6,
+        ),
+        "information_gain_hint": round(
+            min(MAX_SEMANTIC_INFORMATION_GAIN_HINT, _bounded_float(raw.get("information_gain_hint"))),
+            6,
+        ),
+        "user_need_salience": round(
+            min(MAX_SEMANTIC_USER_NEED_SALIENCE, _bounded_float(raw.get("user_need_salience"))),
+            6,
+        ),
+        "low_information_utterance": bool(raw.get("low_information_utterance")),
+        "confidence": round(_bounded_float(raw.get("confidence")), 6),
+        "reason_codes": _string_list(raw.get("reason_codes"), limit=6),
+    }
+
+
+def build_boredom_user_text_assessor_prompt(
+    *,
+    user_text: str,
+    turn_index: int,
+    topic_fingerprint: str,
+) -> tuple[str, str]:
+    system_prompt = f"""你是数字人格 MVP 路径的「{BOREDOM_USER_TEXT_ASSESSOR_MARKER}」模块。
+根据用户本轮话语的语义（不是关键词表）估计无聊代理用的工程标量：
+
+- explicit_task_pressure: 用户是否在要直接实现/步骤/修 bug/部署等可执行任务（0~{MAX_SEMANTIC_EXPLICIT_TASK_PRESSURE}）
+- information_gain_hint: 是否在求分析/设计/权衡/根因等高密度信息（0~{MAX_SEMANTIC_INFORMATION_GAIN_HINT}）
+- user_need_salience: 需求是否实质或带合理紧迫感（0~{MAX_SEMANTIC_USER_NEED_SALIENCE}）
+- low_information_utterance: 是否仅为极短附和/回 channel（如单字嗯、好）几乎无新信息
+
+这是工程代理，不是情绪模拟。只输出 JSON，不要 Markdown。"""
+    user_prompt = f"""turn_index: {turn_index}
+topic_fingerprint: {topic_fingerprint[:160]}
+
+用户本轮发言:
+{str(user_text or "")[:480]}
+
+请输出 JSON:
+{{
+  "explicit_task_pressure": 0.0,
+  "information_gain_hint": 0.0,
+  "user_need_salience": 0.0,
+  "low_information_utterance": false,
+  "confidence": 0.0,
+  "reason_codes": ["简短依据，最多4个"]
+}}"""
+    return system_prompt, user_prompt
+
+
+def assess_boredom_user_text_semantics(
+    llm: BoredomUserTextLLM,
+    *,
+    user_text: str,
+    turn_index: int,
+    topic_fingerprint: str,
+) -> dict[str, Any]:
+    system_prompt, user_prompt = build_boredom_user_text_assessor_prompt(
+        user_text=user_text,
+        turn_index=turn_index,
+        topic_fingerprint=topic_fingerprint,
+    )
+    try:
+        raw = llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+    except Exception:
+        return normalize_boredom_user_text_assessment({})
+    return normalize_boredom_user_text_assessment(raw)
+
+
+def _user_text_assessment_active(assessment: Mapping[str, Any] | None) -> bool:
+    if not assessment:
+        return False
+    return _bounded_float(assessment.get("confidence")) >= MIN_BOREDOM_USER_TEXT_ASSESSMENT_CONFIDENCE
 
 
 def _normalize_term(term: str) -> str:
@@ -169,6 +261,7 @@ def _novelty_proxy(
     user_text: str,
     retrieved_ids: list[str],
     prior_retrieval_ids: list[str],
+    user_text_assessment: Mapping[str, Any] | None = None,
 ) -> float:
     """Higher means more novelty (less boring)."""
     current_terms = _topic_terms(topic_fingerprint)
@@ -197,9 +290,11 @@ def _novelty_proxy(
 
     stripped = str(user_text or "").strip()
     short_low_cue = 0.0
-    if _SHORT_ACK_PATTERNS.match(stripped) or (
-        len(stripped) <= MAX_ULTRA_SHORT_USER_CHARS and stripped
+    if _user_text_assessment_active(user_text_assessment) and bool(
+        user_text_assessment.get("low_information_utterance")
     ):
+        short_low_cue = 0.35
+    elif not user_text_assessment and len(stripped) <= MAX_ULTRA_SHORT_USER_CHARS and stripped:
         short_low_cue = 0.35
 
     novelty = 1.0 - (
@@ -219,7 +314,7 @@ def _information_gain_proxy(
     m11_result: Mapping[str, Any] | None,
     m12_payload: Mapping[str, Any] | None,
     m12_2_result: Mapping[str, Any] | None,
-    user_text: str,
+    user_text_assessment: Mapping[str, Any] | None = None,
     prior_plan_terms: list[str],
 ) -> float:
     gain = 0.0
@@ -275,8 +370,8 @@ def _information_gain_proxy(
             if isinstance(items, list) and items:
                 gain += min(0.22, 0.06 * len(items))
 
-    if _HIGH_GAIN_PATTERNS.search(user_text or ""):
-        gain += MAX_REGEX_INFORMATION_GAIN_BOOST
+    if _user_text_assessment_active(user_text_assessment):
+        gain += _bounded_float(user_text_assessment.get("information_gain_hint"))
 
     return _bounded_float(gain)
 
@@ -373,16 +468,24 @@ def _predictability(
     return _bounded_float(min(1.0, repeats * 0.16 + recall_stable * 0.35))
 
 
-def _explicit_task_pressure(user_text: str) -> float:
+def _explicit_task_pressure_heuristic(user_text: str) -> float:
+    """Length/question heuristic only when no LLM assessor is available."""
     text = str(user_text or "").strip()
     if not text:
         return 0.0
-    if _DIRECT_TASK_PATTERNS.search(text):
-        return MAX_REGEX_DIRECT_TASK_PRESSURE
     if "?" in text or "？" in text:
         if len(text) >= 18:
             return 0.25
     return 0.0
+
+
+def _explicit_task_pressure(
+    user_text: str,
+    user_text_assessment: Mapping[str, Any] | None = None,
+) -> float:
+    if _user_text_assessment_active(user_text_assessment):
+        return _bounded_float(user_text_assessment.get("explicit_task_pressure"))
+    return _explicit_task_pressure_heuristic(user_text)
 
 
 def _conflict_or_repair_pressure(memory_dynamics: Mapping[str, Any]) -> float:
@@ -393,14 +496,17 @@ def _conflict_or_repair_pressure(memory_dynamics: Mapping[str, Any]) -> float:
     return _bounded_float(max(conflict, repair * 0.9, clarification * 0.85))
 
 
-def _user_need_salience(user_text: str) -> float:
+def _user_need_salience(
+    user_text: str,
+    user_text_assessment: Mapping[str, Any] | None = None,
+) -> float:
+    if _user_text_assessment_active(user_text_assessment):
+        return _bounded_float(user_text_assessment.get("user_need_salience"))
     text = str(user_text or "").strip()
     if len(text) >= 48:
         return 0.35
     if len(text) >= 24:
         return 0.18
-    if re.search(r"(?i)(急|尽快|马上|important|asap|赶紧)", text):
-        return MAX_REGEX_URGENCY_SALIENCE
     return 0.0
 
 
@@ -601,6 +707,7 @@ class M13BoredomEvaluator:
         m11_result: Mapping[str, Any] | None = None,
         m12_payload: Mapping[str, Any] | None = None,
         m12_2_result: Mapping[str, Any] | None = None,
+        llm: BoredomUserTextLLM | None = None,
     ) -> M13BoredomEvaluationResult:
         state = normalize_m13_drive_state(m13_state)
         boredom_state = normalize_boredom_state(state.get("boredom"))
@@ -624,6 +731,25 @@ class M13BoredomEvaluator:
             top_action = str(m13_drive_evaluation.top_behavioral_pull_action or "")
             pull_margin = float(m13_drive_evaluation.pull_margin or 0.0)
 
+        user_text_assessment: dict[str, Any] | None = None
+        assessment_events: list[dict[str, Any]] = []
+        if llm is not None and str(user_text or "").strip():
+            user_text_assessment = assess_boredom_user_text_semantics(
+                llm,
+                user_text=user_text,
+                turn_index=turn_index,
+                topic_fingerprint=topic,
+            )
+            assessment_events.append(
+                {
+                    "type": "M13BoredomUserTextAssessmentEvent",
+                    "turn_id": turn_id,
+                    "turn_index": turn_index,
+                    "assessment": user_text_assessment,
+                    "engineering_proxy_label": "mvp_local_boredom_proxy",
+                }
+            )
+
         novelty_proxy = _novelty_proxy(
             topic_fingerprint=topic,
             recent_topics=recent_topics,
@@ -631,6 +757,7 @@ class M13BoredomEvaluator:
             user_text=user_text,
             retrieved_ids=retrieved_ids,
             prior_retrieval_ids=boredom_state.get("recent_retrieval_ids", []),
+            user_text_assessment=user_text_assessment,
         )
         information_gain_proxy = _information_gain_proxy(
             conscious_plan=conscious_plan,
@@ -639,7 +766,7 @@ class M13BoredomEvaluator:
             m11_result=m11_result,
             m12_payload=m12_payload,
             m12_2_result=m12_2_result,
-            user_text=user_text,
+            user_text_assessment=user_text_assessment,
             prior_plan_terms=boredom_state.get("recent_plan_terms", []),
         )
         progress_signal = _progress_signal(
@@ -658,9 +785,9 @@ class M13BoredomEvaluator:
             recent_topics=recent_topics,
             memory_dynamics=memory_dynamics,
         )
-        explicit_task = _explicit_task_pressure(user_text)
+        explicit_task = _explicit_task_pressure(user_text, user_text_assessment)
         conflict_repair = _conflict_or_repair_pressure(memory_dynamics)
-        user_salience = _user_need_salience(user_text)
+        user_salience = _user_need_salience(user_text, user_text_assessment)
         identity_pressure = _identity_clarification_pressure(entity_binding, evidence_judgment)
         weak_margin = pull_margin < M13_THRESHOLDS.weak_pull_margin
 
@@ -792,7 +919,7 @@ class M13BoredomEvaluator:
             evidence_refs=evidence_refs,
             prompt_safe_summary=summary,
             exploration_suppressed=suppressed,
-            events=[eval_event],
+            events=[*assessment_events, eval_event],
         )
 
 

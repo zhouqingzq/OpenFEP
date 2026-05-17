@@ -1461,7 +1461,10 @@ def render_chat() -> None:
         )
         with st.spinner("胡桃正在主动续写..."):
             try:
-                check = chat_iface.maybe_propose_proactive_turn(manual_continue=True)
+                check = chat_iface.maybe_propose_proactive_turn(
+                    manual_continue=True,
+                    user_typing=bool(pending_text),
+                )
                 proposal = check.get("proposal") if isinstance(check, dict) else None
                 if isinstance(proposal, dict) and proposal.get("proposal_id"):
                     resp = chat_iface.run_proactive_turn(
