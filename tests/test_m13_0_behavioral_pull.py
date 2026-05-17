@@ -7,14 +7,19 @@ import pytest
 
 from segmentum.dialogue.runtime.m13_drive import (
     CANDIDATE_REPLY_ACTIONS,
+    MAX_PATH_PATTERNS,
     M13DriveEvaluator,
     apply_post_turn_m13_state,
     build_topic_fingerprint,
     collect_allowed_reply_actions,
     default_m13_drive_state,
+    evict_path_patterns,
     merge_drive_guidance_into_control,
     normalize_m13_drive_state,
     prompt_safe_m13_state_summary,
+    prompt_safe_m13_turn_diagnostics,
+    resolve_m13_safety_repair,
+    should_trigger_m13_rollback,
 )
 from segmentum.dialogue.runtime.mvp_loop import (
     MVPDialogueRuntime,
@@ -505,7 +510,7 @@ def test_behavioral_pull_multiturn_repetition_scenario() -> None:
     }
     status_conscious = {"memory_search_keywords": ["status", "update"]}
     pulls: list[float] = []
-    for turn in range(4):
+    for turn in range(8):
         evaluation = evaluator.evaluate(
             user_text="项目 status update 呢",
             user_id=user_id,
@@ -559,3 +564,323 @@ def test_behavioral_pull_multiturn_repetition_scenario() -> None:
     )
     travel_pull = travel_eval.scores_by_action["answer"]["behavioral_pull"]
     assert travel_pull < pulls[-1]
+    assert len(pulls) == 8
+
+
+def test_resolve_m13_safety_repair_matches_rollback_repair_signals() -> None:
+    assert resolve_m13_safety_repair(reply_validation={"changed": True}) is True
+    assert (
+        resolve_m13_safety_repair(
+            post_reply_observer={"needs_followup": True, "followup_type": "clarify"}
+        )
+        is True
+    )
+    rollback, reason = should_trigger_m13_rollback(
+        reply_validation={"changed": True},
+        post_reply_observer={"needs_followup": True, "followup_type": "clarify"},
+        safety_repair=resolve_m13_safety_repair(
+            reply_validation={"changed": True},
+            post_reply_observer={"needs_followup": True, "followup_type": "clarify"},
+        ),
+    )
+    assert rollback is True
+    assert reason == "rollback_safety_repair"
+
+
+def test_needs_followup_without_type_does_not_trigger_safety_repair() -> None:
+    assert (
+        resolve_m13_safety_repair(
+            post_reply_observer={"needs_followup": True, "followup_type": "none"}
+        )
+        is False
+    )
+    rollback, _ = should_trigger_m13_rollback(
+        post_reply_observer={"needs_followup": True, "followup_type": "none"},
+        safety_repair=False,
+    )
+    assert rollback is False
+
+
+def test_should_trigger_m13_rollback_on_expectation_violated() -> None:
+    rollback, reason = should_trigger_m13_rollback(
+        conscious_plan={"expectation_results": [{"status": "violated"}]},
+    )
+    assert rollback is True
+    assert reason == "rollback_expectation_violated"
+
+
+def test_rollback_reverses_recent_positive_habit_patch() -> None:
+    state = default_m13_drive_state()
+    evaluator = M13DriveEvaluator()
+    evaluation = evaluator.evaluate(
+        user_text="项目进展如何",
+        user_id="u1",
+        turn_id="turn_0001",
+        turn_index=0,
+        conscious_plan={"memory_search_keywords": ["项目", "进展"]},
+        memory_dynamics={
+            "recall_query": {"semantic_terms": ["项目", "进展"]},
+            "control_guidance": {
+                "sharing_policy": {"allow_direct_disclosure": True, "allow_abstract_sharing": True},
+                "reply_contract": {},
+            },
+        },
+        retrieved_memories=[{"id": "m1", "keywords": ["项目"], "content": "上周讨论过项目"}],
+        response_style_prior={},
+        habit_traits={},
+        relationship_value_context={},
+        m13_state=state,
+    )
+    state, _ = apply_post_turn_m13_state(
+        state,
+        evaluation=evaluation,
+        user_id="u1",
+        turn_id="turn_0001",
+        turn_index=0,
+        selected_action=evaluation.top_behavioral_pull_action,
+        reply_validation={"changed": False},
+        post_reply_observer={"needs_followup": False},
+        conscious_plan={"expectation_results": [{"status": "confirmed"}]},
+        memory_candidates_applied=[{"id": "m1"}],
+    )
+    pattern = state["path_patterns_by_action"][0]
+    habit_after_positive = float(pattern["habit_precision"])
+    assert habit_after_positive > 0.0
+
+    state, rollback_events = apply_post_turn_m13_state(
+        state,
+        evaluation=evaluation,
+        user_id="u1",
+        turn_id="turn_0002",
+        turn_index=1,
+        selected_action=evaluation.top_behavioral_pull_action,
+        reply_validation={"changed": True},
+        post_reply_observer={"needs_followup": False},
+        conscious_plan={},
+        memory_candidates_applied=[],
+        safety_repair=True,
+    )
+    rolled_back = state["path_patterns_by_action"][0]
+    assert float(rolled_back["habit_precision"]) < habit_after_positive
+    rollback_commits = [
+        e for e in rollback_events if e.get("type") == "M13DrivePatchCommit"
+    ]
+    assert rollback_commits
+    assert str(rollback_commits[0].get("reason", "")).startswith("rollback_")
+
+
+def test_path_patterns_evict_oldest_when_over_max() -> None:
+    patterns: list[dict[str, object]] = []
+    for index in range(MAX_PATH_PATTERNS + 5):
+        patterns.append(
+            {
+                "action": "answer",
+                "user_id": f"user_{index}",
+                "topic_fingerprint": f"topic_{index}",
+                "support_count": 1,
+                "success_proxy_count": 0,
+                "failure_proxy_count": 0,
+                "habit_precision": 0.1,
+                "mean_control_cost_discount": 0.0,
+                "last_seen_turn": index,
+                "source_evidence_ids": [],
+                "status": "active",
+            }
+        )
+    evict_path_patterns(patterns)
+    assert len(patterns) == MAX_PATH_PATTERNS
+    assert int(patterns[0]["last_seen_turn"]) == 5
+    assert int(patterns[-1]["last_seen_turn"]) == MAX_PATH_PATTERNS + 4
+
+
+def test_habit_traits_boost_matching_action_pull() -> None:
+    state = default_m13_drive_state()
+    evaluator = M13DriveEvaluator()
+    base_kwargs = dict(
+        user_text="今天有点累",
+        user_id="alice",
+        turn_id="turn_0001",
+        turn_index=0,
+        conscious_plan={"memory_search_keywords": ["累"]},
+        memory_dynamics={
+            "recall_query": {"semantic_terms": ["累"]},
+            "control_guidance": {
+                "sharing_policy": {"allow_direct_disclosure": True, "allow_abstract_sharing": True},
+                "reply_contract": {},
+            },
+        },
+        retrieved_memories=[],
+        response_style_prior={},
+        relationship_value_context={},
+        m13_state=state,
+        entity_binding={},
+    )
+    without_traits = evaluator.evaluate(**base_kwargs, habit_traits={})
+    with_traits = evaluator.evaluate(
+        **base_kwargs,
+        habit_traits={
+            "learned_conversation_habits": [
+                {"content": "用户反馈后更适合共情式安慰和理解", "confidence": 0.8}
+            ],
+        },
+    )
+    assert (
+        with_traits.scores_by_action["empathize"]["behavioral_pull"]
+        > without_traits.scores_by_action["empathize"]["behavioral_pull"]
+    )
+
+
+def test_relationship_value_context_boosts_empathize() -> None:
+    state = default_m13_drive_state()
+    evaluator = M13DriveEvaluator()
+    kwargs = dict(
+        user_text="我最近压力很大",
+        user_id="bob",
+        turn_id="turn_0001",
+        turn_index=0,
+        conscious_plan={"memory_search_keywords": ["压力"]},
+        memory_dynamics={
+            "recall_query": {"semantic_terms": ["压力"]},
+            "control_guidance": {
+                "sharing_policy": {"allow_direct_disclosure": True, "allow_abstract_sharing": True},
+                "reply_contract": {},
+            },
+        },
+        retrieved_memories=[],
+        response_style_prior={},
+        habit_traits={},
+        m13_state=state,
+    )
+    plain = evaluator.evaluate(**kwargs, relationship_value_context={})
+    with_relationship = evaluator.evaluate(
+        **kwargs,
+        relationship_value_context={
+            "active_relationship_value_memories": [
+                {
+                    "summary": "用户希望被理解",
+                    "prediction_constraint": "优先共情而不是说教",
+                }
+            ],
+        },
+    )
+    assert (
+        with_relationship.scores_by_action["empathize"]["behavioral_pull"]
+        > plain.scores_by_action["empathize"]["behavioral_pull"]
+    )
+
+
+def test_memory_support_prefers_kind_aligned_memories() -> None:
+    state = default_m13_drive_state()
+    evaluator = M13DriveEvaluator()
+    memories = [
+        {"id": "f1", "kind": "fact", "keywords": ["压力"], "content": "事实片段"},
+        {"id": "r1", "kind": "relationship", "keywords": ["压力"], "content": "关系片段"},
+    ]
+    empathize = evaluator.evaluate(
+        user_text="压力很大",
+        user_id="u1",
+        turn_id="t1",
+        turn_index=0,
+        conscious_plan={"memory_search_keywords": ["压力"]},
+        memory_dynamics={
+            "recall_query": {"semantic_terms": ["压力"]},
+            "control_guidance": {
+                "sharing_policy": {"allow_direct_disclosure": True, "allow_abstract_sharing": True},
+                "reply_contract": {},
+            },
+        },
+        retrieved_memories=memories,
+        response_style_prior={},
+        habit_traits={},
+        relationship_value_context={},
+        m13_state=state,
+    )
+    answer = evaluator.evaluate(
+        user_text="压力很大",
+        user_id="u1",
+        turn_id="t1",
+        turn_index=0,
+        conscious_plan={"memory_search_keywords": ["压力"]},
+        memory_dynamics={
+            "recall_query": {"semantic_terms": ["压力"]},
+            "control_guidance": {
+                "sharing_policy": {"allow_direct_disclosure": True, "allow_abstract_sharing": True},
+                "reply_contract": {},
+            },
+        },
+        retrieved_memories=memories,
+        response_style_prior={},
+        habit_traits={},
+        relationship_value_context={},
+        m13_state=state,
+    )
+    assert (
+        empathize.scores_by_action["empathize"]["memory_support"]
+        >= answer.scores_by_action["answer"]["memory_support"]
+    )
+
+
+def test_action_match_without_anchor_does_not_strengthen_habit() -> None:
+    state = default_m13_drive_state()
+    evaluator = M13DriveEvaluator()
+    evaluation = evaluator.evaluate(
+        user_text="随便聊聊",
+        user_id="u1",
+        turn_id="turn_0001",
+        turn_index=0,
+        conscious_plan={},
+        memory_dynamics={
+            "control_guidance": {
+                "sharing_policy": {"allow_direct_disclosure": True, "allow_abstract_sharing": True},
+                "reply_contract": {},
+            }
+        },
+        retrieved_memories=[],
+        response_style_prior={},
+        habit_traits={},
+        relationship_value_context={},
+        m13_state=state,
+    )
+    updated, events = apply_post_turn_m13_state(
+        state,
+        evaluation=evaluation,
+        user_id="u1",
+        turn_id="turn_0001",
+        turn_index=0,
+        selected_action=evaluation.top_behavioral_pull_action,
+        reply_validation={"changed": False},
+        post_reply_observer={"needs_followup": False},
+        conscious_plan={},
+        memory_candidates_applied=[],
+    )
+    commits = [e for e in events if e.get("type") == "M13DrivePatchCommit"]
+    assert not commits
+    pattern = updated["path_patterns_by_action"][0]
+    assert float(pattern.get("habit_precision", 0.0) or 0.0) == 0.0
+
+
+def test_prompt_safe_m13_turn_diagnostics_omits_internal_terms() -> None:
+    state = default_m13_drive_state()
+    _seed_pattern(state, action="answer", user_id="u1", habit_precision=0.5)
+    evaluation = M13DriveEvaluator().evaluate(
+        user_text="项目",
+        user_id="u1",
+        turn_id="t1",
+        turn_index=0,
+        conscious_plan={"memory_search_keywords": ["项目"]},
+        memory_dynamics={
+            "recall_query": {"semantic_terms": ["项目"]},
+            "control_guidance": {
+                "sharing_policy": {"allow_direct_disclosure": True, "allow_abstract_sharing": True},
+                "reply_contract": {},
+            },
+        },
+        retrieved_memories=[],
+        response_style_prior={},
+        habit_traits={},
+        relationship_value_context={},
+        m13_state=state,
+    )
+    payload = json.dumps(prompt_safe_m13_turn_diagnostics(evaluation), ensure_ascii=False)
+    for marker in _M13_INTERNAL_MARKERS:
+        assert marker not in payload

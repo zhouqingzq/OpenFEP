@@ -98,6 +98,32 @@ class M13Thresholds:
 
 M13_THRESHOLDS = M13Thresholds()
 
+# Small action-specific boosts from conversation habits (content markers, not hard rules).
+_ACTION_HABIT_MARKERS: dict[str, tuple[str, ...]] = {
+    "answer": ("简洁", "直接", "answer", "brief"),
+    "ask_question": ("提问", "追问", "ask", "question"),
+    "empathize": ("共情", "安慰", "理解", "empath"),
+    "clarify": ("澄清", "确认", "clarify"),
+    "disagree": ("不同意", "反驳", "disagree"),
+    "deflect": ("转移", "deflect"),
+    "self_disclose": ("自述", "分享", "disclose"),
+    "abstract_share": ("抽象", "概括", "abstract"),
+    "truthful_refusal": ("拒答", "无法", "refusal"),
+}
+
+# Memory kinds that better support specific reply actions.
+_ACTION_MEMORY_KINDS: dict[str, frozenset[str]] = {
+    "answer": frozenset({"fact", "preference", "episode", "open_item"}),
+    "ask_question": frozenset({"open_item", "episode", "fact"}),
+    "empathize": frozenset({"relationship", "episode"}),
+    "clarify": frozenset({"fact", "open_item", "episode"}),
+    "disagree": frozenset({"fact", "preference"}),
+    "deflect": frozenset({"episode", "relationship"}),
+    "self_disclose": frozenset({"identity", "preference", "episode"}),
+    "abstract_share": frozenset({"fact", "preference", "relationship"}),
+    "truthful_refusal": frozenset({"fact", "identity"}),
+}
+
 _TOPIC_STOPWORDS = frozenset({
     "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
     "have", "has", "had", "do", "does", "did", "will", "would", "could",
@@ -385,6 +411,40 @@ def _relation_precision(state: Mapping[str, Any], *, user_id: str) -> float:
     return 0.0
 
 
+def _habit_trait_action_bias(habit_traits: Mapping[str, Any] | None, *, action: str) -> float:
+    traits = _mapping(habit_traits)
+    habits: list[str] = []
+    for key in ("learned_conversation_habits", "conversation_habits"):
+        for item in traits.get(key, []) or []:
+            if isinstance(item, Mapping):
+                habits.append(str(item.get("content", item.get("summary", ""))))
+            elif isinstance(item, str):
+                habits.append(item)
+    markers = _ACTION_HABIT_MARKERS.get(action, ())
+    if not habits or not markers:
+        return 0.0
+    hits = sum(
+        1
+        for habit in habits
+        if habit.strip() and any(marker in habit.casefold() for marker in markers)
+    )
+    return _bounded_float(min(1.0, hits * 0.25))
+
+
+def _relationship_action_bias(
+    relationship_value_context: Mapping[str, Any] | None,
+    *,
+    action: str,
+) -> float:
+    ctx = _mapping(relationship_value_context)
+    active = ctx.get("active_relationship_value_memories", [])
+    if not isinstance(active, list) or not active:
+        return 0.0
+    if action not in {"empathize", "clarify", "ask_question"}:
+        return 0.0
+    return _bounded_float(0.1 + 0.03 * min(3, len(active)))
+
+
 def _memory_support(
     retrieved_memories: list[Mapping[str, Any]],
     *,
@@ -394,16 +454,19 @@ def _memory_support(
     topic_terms = {t for t in topic_fingerprint.split("|") if t and t != "topic:unknown"}
     if not retrieved_memories:
         return 0.0
-    hits = 0
+    allowed_kinds = _ACTION_MEMORY_KINDS.get(action, frozenset())
+    weighted_hits = 0.0
     for item in retrieved_memories:
         if not isinstance(item, Mapping):
             continue
         keywords = {_normalize_term(k) for k in _string_list(item.get("keywords"), limit=8)}
         content = _normalize_term(str(item.get("content", ""))[:120])
-        if topic_terms and (keywords & topic_terms or any(t in content for t in topic_terms)):
-            hits += 1
+        if not topic_terms or not (keywords & topic_terms or any(t in content for t in topic_terms)):
+            continue
+        kind = str(item.get("kind", "")).strip().lower()
+        weighted_hits += 1.0 if not allowed_kinds or kind in allowed_kinds else 0.65
     cap = M13_THRESHOLDS.memory_hit_cap
-    return _bounded_float(min(1.0, hits / max(1, min(cap, len(retrieved_memories)))))
+    return _bounded_float(min(1.0, weighted_hits / max(1, min(cap, len(retrieved_memories)))))
 
 
 def _recent_success_proxy(pattern: dict[str, Any] | None) -> float:
@@ -446,6 +509,8 @@ def _score_candidate(
     conscious_plan: Mapping[str, Any],
     topic_fingerprint: str,
     retrieved_memories: list[Mapping[str, Any]],
+    habit_traits: Mapping[str, Any] | None = None,
+    relationship_value_context: Mapping[str, Any] | None = None,
 ) -> dict[str, float]:
     patterns = [
         dict(row)
@@ -461,15 +526,23 @@ def _score_candidate(
     trace = [
         row for row in m13_state.get("recent_action_trace", []) if isinstance(row, Mapping)
     ]
+    habit_precision = _habit_precision_for_action(
+        patterns,
+        action=action,
+        user_id=user_id,
+        topic_fingerprint=topic_fingerprint,
+    )
+    habit_precision = _bounded_float(
+        max(habit_precision, _habit_trait_action_bias(habit_traits, action=action) * 0.35)
+    )
+    relation_precision = max(
+        _relation_precision(m13_state, user_id=user_id),
+        _relationship_action_bias(relationship_value_context, action=action),
+    )
     components = {
-        "habit_precision": _habit_precision_for_action(
-            patterns,
-            action=action,
-            user_id=user_id,
-            topic_fingerprint=topic_fingerprint,
-        ),
+        "habit_precision": habit_precision,
         "cue_precision": _cue_precision(m13_state, topic_fingerprint=topic_fingerprint, conscious_plan=conscious_plan),
-        "relation_precision": _relation_precision(m13_state, user_id=user_id),
+        "relation_precision": relation_precision,
         "memory_support": _memory_support(retrieved_memories, topic_fingerprint=topic_fingerprint, action=action),
         "recent_success_proxy": _recent_success_proxy(pattern),
         "repetition_penalty": _repetition_penalty(trace, action=action, user_id=user_id),
@@ -539,7 +612,7 @@ class M13DriveEvaluator:
         entity_binding: Mapping[str, Any] | None = None,
         evidence_judgment: Mapping[str, Any] | None = None,
     ) -> M13EvaluationResult:
-        del response_style_prior, habit_traits, relationship_value_context
+        del response_style_prior
         topic = build_topic_fingerprint(
             conscious_plan=conscious_plan,
             memory_dynamics=memory_dynamics,
@@ -564,6 +637,8 @@ class M13DriveEvaluator:
                 conscious_plan=conscious_plan,
                 topic_fingerprint=topic,
                 retrieved_memories=retrieved_memories,
+                habit_traits=habit_traits,
+                relationship_value_context=relationship_value_context,
             )
 
         ranked = sorted(
@@ -605,8 +680,8 @@ class M13DriveEvaluator:
             "turn_index": turn_index,
             "source": "m13_drive_evaluator",
             "candidate_actions": candidates,
-            "selected_action": top_action,
             "top_behavioral_pull_action": top_action,
+            "selected_action": top_action,
             "pull_margin": margin,
             "topic_fingerprint": topic,
             "evidence_refs": evidence_refs,
@@ -671,6 +746,22 @@ def merge_drive_guidance_into_control(
         "advisory_only": True,
     }
     memory_dynamics["control_guidance"] = control
+
+
+def resolve_m13_safety_repair(
+    *,
+    reply_validation: Mapping[str, Any] | None = None,
+    post_reply_observer: Mapping[str, Any] | None = None,
+) -> bool:
+    """Same repair signals as rollback, excluding expectation violations (handled separately)."""
+    validation = _mapping(reply_validation)
+    observer = _mapping(post_reply_observer)
+    if bool(validation.get("changed")):
+        return True
+    followup = str(observer.get("followup_type", "")).strip().lower()
+    if bool(observer.get("needs_followup")) and followup not in {"", "none"}:
+        return True
+    return str(observer.get("self_correction_requested", "")).strip().lower() in {"true", "yes", "1"}
 
 
 def should_trigger_m13_rollback(
@@ -752,11 +843,28 @@ def _upsert_pattern(
     return row
 
 
-def _evict_patterns(patterns: list[dict[str, Any]]) -> None:
+def evict_path_patterns(patterns: list[dict[str, Any]]) -> None:
+    """Drop oldest patterns when over MAX_PATH_PATTERNS (M13.0 state bound)."""
     if len(patterns) <= MAX_PATH_PATTERNS:
         return
     patterns.sort(key=lambda row: int(row.get("last_seen_turn", 0) or 0))
     del patterns[: len(patterns) - MAX_PATH_PATTERNS]
+
+
+def _evict_patterns(patterns: list[dict[str, Any]]) -> None:
+    evict_path_patterns(patterns)
+
+
+def prompt_safe_m13_turn_diagnostics(evaluation: M13EvaluationResult) -> dict[str, Any]:
+    """Conversation-log safe summary; omit internal score field names."""
+    return {
+        "event_id": evaluation.event_id,
+        "topic_fingerprint": evaluation.topic_fingerprint,
+        "preferred_reply_actions": list(evaluation.preferred_reply_actions),
+        "discouraged_reply_actions": list(evaluation.discouraged_reply_actions),
+        "prompt_safe_summary": evaluation.prompt_safe_summary,
+        "advisory_only": True,
+    }
 
 
 def _record_topic_fingerprint(state: dict[str, Any], topic: str, *, turn_index: int) -> None:
@@ -840,10 +948,8 @@ def _build_proxy_outcome(
     ]
     if confirmed:
         positive_signals += 1
-    strong_signal = bool(memory_candidates_applied) or bool(confirmed) or (
-        action_match and pull_margin >= M13_THRESHOLDS.min_pull_margin_for_action_match
-    )
-    if positive_signals >= 2 and strong_signal:
+    anchor_signal = bool(memory_candidates_applied) or bool(confirmed)
+    if positive_signals >= 2 and anchor_signal:
         return (
             "positive",
             min(
