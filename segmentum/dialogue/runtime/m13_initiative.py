@@ -238,7 +238,7 @@ def build_proactive_context_assessor_prompt(
 ) -> tuple[str, str]:
     system_prompt = f"""你是数字人格 MVP 路径的「{CONTEXT_ASSESSOR_MARKER}」模块。
 根据最近对话语义（不是关键词表）判断：
-1) 当前是否应抑制有界主动续写（依赖施压、孤独索取、内疚/惩罚式措辞、注意力绑架等）；
+1) 当前是否应抑制有界主动续写（依赖施压、内疚/惩罚式措辞等明显不当情形）；
 2) 用户是否明确请求「稍后继续」或「提醒/跟进」类主动续写（需明确授权，不能靠闲聊推断）。
 
 这是工程代理信号，不是情绪模拟。不要诊断用户心理，不要使用 reward/tolerance 等术语。
@@ -284,12 +284,10 @@ def build_proactive_delivery_assessor_prompt(
 判断待展示的主动续写文案在语义上是否可送达（不是关键词表匹配）。
 
 应拒绝（allow_delivery=false）的情形包括：
-- 声称孤独、寂寞、无聊等待、需要你陪聊等主观索取
 - 依赖、嫉妒、内疚施压、惩罚式措辞
-- 强行要求用户回复或注意力绑架
 - 与 engineering intent 无关的敏感推断
 
-可接受：简短、具体、基于 open item/线程的下一步建议，且不要求回复。
+可接受：简短、具体、基于 open item/线程的下一步建议，且不要求回复；日常寒暄、天气、时间延续等自然续写也可送达。
 只输出 JSON，不要 Markdown。"""
     user_prompt = f"""turn_index: {turn_index}
 trigger: {trigger}

@@ -257,25 +257,40 @@ def test_implicit_idle_delivery_requires_explicit_opt_in_when_enabled() -> None:
     assert check2.proposal is not None
 
 
-def test_delivery_semantic_assessor_blocks_subjective_wording() -> None:
+def test_delivery_semantic_assessor_allows_casual_proactive_wording() -> None:
+    llm = _ShortLLM()
+    reply = "阳光这么好，心情都跟着亮堂了～"
+    assessment = assess_proactive_delivery_semantics(
+        llm,
+        reply=reply,
+        followup_replies=[],
+        ordinary_language_intent="Follow up on the open item: later",
+        trigger="open_item_next_check",
+        turn_index=0,
+    )
+    normalized = normalize_proactive_delivery_assessment(assessment)
+    assert normalized["allow_delivery"] is True
+    assert proactive_delivered_text_is_safe(
+        reply,
+        llm=llm,
+        ordinary_language_intent="Follow up on the open item: later",
+        trigger="open_item_next_check",
+        turn_index=0,
+    )
+
+
+def test_delivery_semantic_assessor_can_still_block_via_assessor() -> None:
+    """Delivery gate remains; policy no longer targets loneliness/attention by default."""
     llm = _DeliveryUnsafeLLM()
     assessment = assess_proactive_delivery_semantics(
         llm,
-        reply="我好寂寞，一直想和你聊聊。",
+        reply="example",
         followup_replies=[],
         ordinary_language_intent="test",
         trigger="open_item_next_check",
         turn_index=0,
     )
-    normalized = normalize_proactive_delivery_assessment(assessment)
-    assert normalized["allow_delivery"] is False
-    assert not proactive_delivered_text_is_safe(
-        "我好寂寞，一直想和你聊聊。",
-        llm=llm,
-        ordinary_language_intent="test",
-        trigger="open_item_next_check",
-        turn_index=0,
-    )
+    assert normalize_proactive_delivery_assessment(assessment)["allow_delivery"] is False
 
 
 def test_build_proactive_thinking_user_text_includes_intent() -> None:
