@@ -36,13 +36,17 @@ M13.0: MVP-Local Behavioral Pull
 M13.1: MVP-Local Boredom And Exploration Bias
 M13.2: MVP-Local Affective Reward Proxy And Tolerance
 M13.3: UI-Level Bounded Initiative
+M13.4: UI Idle Tick And Introspection Entry Point
+M14.0: Conscious Idle Reflector And Self-Cognition Patch
 ```
 
 M8.9 is a bridge milestone. It does not replace the original roadmap; it locks state ownership, memory write intent, and generation evidence boundaries before M9-M12 expand the system.
 
 M11.0 was repurposed from the earlier "Conscious Projection Runtime" scope to the user-modeling track. M12 is split into M12.0 (identity continuity, alias claims, impersonation strangeness, entity binding), M12.1 (mechanistic personality model with the eight-step plain-language report), and M12.2 (reciprocal role cognition). M12.1 and M12.2 read upstream state read-only and never write back into M11 or M12.0 ledgers.
 
-M13 is an MVP-local drive layer for the real UI chat path. It intentionally does not wait for full Path A / Path B unification. The sequence is M13.0 behavioral pull, M13.1 boredom and exploration bias, M13.2 affective reward proxy and tolerance, and M13.3 bounded UI initiative.
+M13 is an MVP-local drive layer for the real UI chat path. It intentionally does not wait for full Path A / Path B unification. The sequence is M13.0 behavioral pull, M13.1 boredom and exploration bias, M13.2 affective reward proxy and tolerance, M13.3 bounded UI initiative, and M13.4 the UI idle tick plus introspection entry point.
+
+M14.0 builds on the M13.4 plumbing to add the conscious idle reflector: idle ticks can trigger a JSON-only conscious plan that proposes self-cognition patches, memory consolidation intents, and open-item updates, and may optionally hand off to the existing M13.3 outreach pipeline. Path A and M10 are explicitly out of scope.
 
 ## Migration Note
 
