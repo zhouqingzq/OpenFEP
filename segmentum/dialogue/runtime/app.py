@@ -1136,8 +1136,26 @@ def render_sidebar() -> None:
                     "Idle introspection: "
                     f"reflections={idle_status.get('reflection_count_this_session', 0)}/"
                     f"{idle_status.get('max_per_session', '?')} "
+                    f"outreach_via_idle={idle_status.get('outreach_via_introspection_count_this_session', 0)} "
                     f"last_skip={idle_status.get('last_skip_reason') or '—'}"
                 )
+                last_plan = idle_status.get("last_conscious_idle_plan")
+                if isinstance(last_plan, dict) and last_plan:
+                    with st.sidebar.expander("Last idle plan (diagnostics)", expanded=False):
+                        st.json(last_plan, expanded=False)
+                        outcome = str(idle_status.get("last_outreach_outcome", "") or "")
+                        if outcome:
+                            st.caption(f"Last outreach outcome: {outcome}")
+                patch_history = []
+                if chat_iface.has_agent():
+                    mvp_state = chat_iface.read_mvp_state_dict()
+                    if isinstance(mvp_state, dict):
+                        sc = mvp_state.get("self_cognition", {})
+                        if isinstance(sc, dict):
+                            patch_history = sc.get("patch_history", []) or []
+                if isinstance(patch_history, list) and patch_history:
+                    with st.sidebar.expander("Self-cognition patch history", expanded=False):
+                        st.json(patch_history[-5:], expanded=False)
         with st.sidebar.expander("LLM Settings", expanded=False):
             current_model = chat_iface.get_model()
             new_model = st.selectbox(

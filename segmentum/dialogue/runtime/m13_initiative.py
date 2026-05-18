@@ -64,6 +64,7 @@ _ALLOWED_TRIGGERS: frozenset[str] = frozenset(
         "user_continue_later",
         "correction_followup",
         "explicit_remind_request",
+        "reflection_outreach",
     }
 )
 
@@ -567,6 +568,7 @@ def evaluate_proactive_initiative(
     user_typing: bool = False,
     implicit_idle_request: bool = False,
     llm: ProactiveInitiativeLLM | None = None,
+    locked_proposal: ProactiveTurnProposal | None = None,
 ) -> tuple[dict[str, Any], ProactiveInitiativeCheckResult]:
     """Policy with structural signals + optional LLM semantic gates (no regex cues)."""
     m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
@@ -641,6 +643,35 @@ def evaluate_proactive_initiative(
         threshold = float(initiative.get("idle_threshold_seconds", DEFAULT_IDLE_THRESHOLD_SECONDS))
         if idle_seconds < threshold:
             return state, suppress("idle_time_too_short")
+
+    if locked_proposal is not None:
+        if locked_proposal.trigger not in _ALLOWED_TRIGGERS:
+            return state, suppress("no_high_value_target")
+        if _safety_risk_from_state(state, m13_state):
+            return state, suppress("safety_risk")
+        initiative["pending_proactive_proposal"] = locked_proposal.to_dict()
+        initiative["last_suppression_reason"] = ""
+        m13_state["initiative"] = initiative
+        state["m13_drive_state"] = m13_state
+        events.append(
+            {
+                "type": "M13ProactiveProposalEvent",
+                "turn_index": turn_index,
+                "proposal_id": locked_proposal.proposal_id,
+                "trigger": locked_proposal.trigger,
+                "urgency_band": locked_proposal.urgency_band,
+                "risk_band": locked_proposal.risk_band,
+                "ordinary_language_intent": locked_proposal.ordinary_language_intent,
+                "engineering_proxy_label": "mvp_local_m13_initiative",
+                "source": "m14_reflection_outreach",
+            }
+        )
+        return state, ProactiveInitiativeCheckResult(
+            proposal=locked_proposal,
+            suppression_reason="",
+            events=events,
+            state_fields_read=fields_read,
+        )
 
     if not manual_continue and not implicit_idle_request:
         return state, suppress("implicit_idle_disabled")
@@ -741,6 +772,43 @@ def proposal_from_initiative_state(initiative: Mapping[str, Any], *, now: int) -
         expires_at=expires,
         cooldown_cost=int(pending.get("cooldown_cost", DEFAULT_COOLDOWN_TURNS) or DEFAULT_COOLDOWN_TURNS),
     )
+
+
+def build_reflection_outreach_proposal(
+    *,
+    suggested_intent: str,
+    evidence_refs: list[str],
+    proposed_topic: str,
+    now: int,
+    initiative: Mapping[str, Any],
+) -> ProactiveTurnProposal:
+    intent = str(suggested_intent or "").strip()[:240]
+    topic = str(proposed_topic or "reflection_thread").strip()[:120] or "reflection_thread"
+    return _build_proposal(
+        trigger="reflection_outreach",
+        proposed_topic=topic,
+        ordinary_language_intent=intent or f"Follow up on: {topic}",
+        evidence_refs=evidence_refs,
+        now=now,
+        initiative=initiative,
+        urgency_band="medium",
+        expected_user_value_band="medium",
+        risk_band="low",
+    )
+
+
+def mark_outreach_via_introspection(m13_state: dict[str, Any]) -> dict[str, Any]:
+    from segmentum.dialogue.runtime.m13_idle import merge_idle_introspection_into_initiative, normalize_idle_introspection_state
+
+    state = merge_initiative_into_m13_state(m13_state)
+    initiative = merge_idle_introspection_into_initiative(state.get("initiative"))
+    idle = normalize_idle_introspection_state(initiative.get("idle_introspection"))
+    idle["outreach_via_introspection_count_this_session"] = int(
+        idle.get("outreach_via_introspection_count_this_session", 0) or 0
+    ) + 1
+    initiative["idle_introspection"] = idle
+    state["initiative"] = initiative
+    return state
 
 
 def mark_proactive_turn_consumed(

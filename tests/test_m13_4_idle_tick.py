@@ -29,6 +29,11 @@ class _NoLLM:
         raise AssertionError("M13.4 tests must not call LLM")
 
 
+class _IdleStubLLM:
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        return {}
+
+
 def _fully_opted_state(**overrides: object) -> dict[str, object]:
     state: dict[str, object] = {
         "open_items": [],
@@ -137,7 +142,7 @@ def test_idle_tick_skips_when_no_structural_signal() -> None:
 
 
 def test_idle_tick_runs_stub_introspection_when_signals_present(tmp_path: Path) -> None:
-    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "sess"), llm=_NoLLM())  # type: ignore[name-defined]
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "sess"), llm=_IdleStubLLM())  # type: ignore[name-defined]
     state = _fully_opted_state(
         open_items=[{"id": "oi", "status": "open", "title": "t", "next_check": "draft gates"}],
     )
@@ -150,7 +155,7 @@ def test_idle_tick_runs_stub_introspection_when_signals_present(tmp_path: Path) 
     assert result["skip_reason"] == ""
     idle_result = result.get("idle_result")
     assert isinstance(idle_result, dict)
-    assert idle_result.get("ran_llm") is False
+    assert idle_result.get("ran_llm") is True
 
     reloaded = runtime.store.load()
     initiative = reloaded["m13_drive_state"]["initiative"]
@@ -160,14 +165,21 @@ def test_idle_tick_runs_stub_introspection_when_signals_present(tmp_path: Path) 
 
     log_path = runtime.store.root / "conversation_log.jsonl"
     rows = [json.loads(line) for line in log_path.read_text(encoding="utf-8").splitlines() if line.strip()]
-    assert any(r.get("type") == "IdleIntrospectionTickEvent" for r in rows if r.get("event") == "m13_idle_audit")
+    assert any(
+        r.get("type") == "IdleIntrospectionTickEvent"
+        for r in rows
+        if r.get("event") in {"m13_idle_audit", "m14_idle_audit"}
+    )
 
 
 def test_idle_introspection_never_emits_user_visible_message(tmp_path: Path) -> None:
-    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "sess2"), llm=_NoLLM())  # type: ignore[name-defined]
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "sess2"), llm=_IdleStubLLM())  # type: ignore[name-defined]
     state = _fully_opted_state(
         open_items=[{"id": "oi", "status": "open", "title": "t", "next_check": "later"}],
     )
+    m13 = normalize_m13_drive_state(state["m13_drive_state"])  # type: ignore[arg-type]
+    m13["affective_reward_proxy"]["path_feels_stale_proxy"] = True
+    state["m13_drive_state"] = m13
     runtime.store.save(state)  # type: ignore[arg-type]
     runtime.set_initiative_user_opt_in(True)
     runtime.set_idle_introspection_opt_in(True)
@@ -202,7 +214,7 @@ def test_idle_introspection_session_cap_blocks_further_ticks() -> None:
 
 
 def test_idle_audit_events_are_persisted(tmp_path: Path) -> None:
-    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "sess3"), llm=_NoLLM())  # type: ignore[name-defined]
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "sess3"), llm=_IdleStubLLM())  # type: ignore[name-defined]
     state = _fully_opted_state(
         open_items=[{"id": "oi", "status": "open", "title": "t", "next_check": "check later"}],
     )

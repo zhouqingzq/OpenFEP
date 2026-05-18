@@ -83,10 +83,13 @@ def default_idle_introspection_state() -> dict[str, Any]:
         "min_interval_seconds": DEFAULT_IDLE_INTROSPECTION_MIN_INTERVAL_SECONDS,
         "max_per_session": DEFAULT_IDLE_INTROSPECTION_MAX_PER_SESSION,
         "reflection_count_this_session": 0,
+        "outreach_via_introspection_count_this_session": 0,
         "last_introspection_at": 0,
         "last_skip_reason": "",
         "last_audit_logged_at": 0,
         "last_audit_logged_skip_reason": "",
+        "last_conscious_idle_plan": {},
+        "last_outreach_outcome": "",
         "engineering_proxy_label": ENGINEERING_PROXY_LABEL,
     }
 
@@ -117,7 +120,13 @@ def normalize_idle_introspection_state(raw: Any) -> dict[str, Any]:
         int(merged.get("max_per_session", DEFAULT_IDLE_INTROSPECTION_MAX_PER_SESSION) or DEFAULT_IDLE_INTROSPECTION_MAX_PER_SESSION),
     )
     merged["reflection_count_this_session"] = max(0, int(merged.get("reflection_count_this_session", 0) or 0))
+    merged["outreach_via_introspection_count_this_session"] = max(
+        0, int(merged.get("outreach_via_introspection_count_this_session", 0) or 0)
+    )
     merged["last_introspection_at"] = int(merged.get("last_introspection_at", 0) or 0)
+    last_plan = merged.get("last_conscious_idle_plan")
+    merged["last_conscious_idle_plan"] = dict(last_plan) if isinstance(last_plan, Mapping) else {}
+    merged["last_outreach_outcome"] = str(merged.get("last_outreach_outcome", "") or "")[:64]
     merged["last_audit_logged_at"] = int(merged.get("last_audit_logged_at", 0) or 0)
     merged["last_audit_logged_skip_reason"] = str(merged.get("last_audit_logged_skip_reason", "") or "")[:64]
     reason = str(merged.get("last_skip_reason", "") or "")[:64]

@@ -86,13 +86,31 @@ from segmentum.dialogue.runtime.m13_idle import (
 from segmentum.dialogue.runtime.m13_initiative import (
     PROACTIVE_SURROGATE_USER_TEXT,
     build_proactive_thinking_user_text,
+    build_reflection_outreach_proposal,
     evaluate_proactive_initiative,
+    mark_outreach_via_introspection,
     mark_proactive_turn_consumed,
     merge_initiative_into_m13_state,
     normalize_initiative_state,
     proposal_from_initiative_state,
     proactive_delivered_text_is_safe,
     set_initiative_user_opt_in,
+)
+from segmentum.dialogue.runtime.m14_idle_owners import (
+    MemoryConsolidationOwner,
+    OpenItemPatchOwner,
+    SelfCognitionPatchOwner,
+    count_session_idle_patches,
+)
+from segmentum.dialogue.runtime.m14_idle_reflector import (
+    M14_ENGINEERING_PROXY_LABEL,
+    apply_idle_drive_rules,
+    build_conscious_idle_prompt,
+    build_idle_context,
+    build_structural_idle_plan,
+    empty_conscious_idle_plan,
+    idle_retrieval_keywords,
+    normalize_conscious_idle_plan,
 )
 from segmentum.dialogue.runtime.m13_reward import (
     M13RewardEvaluator,
@@ -118,6 +136,7 @@ SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
         "identity_tensions": [],
         "stable_values": [],
         "known_limits": [],
+        "patch_history": [],
     },
     "short_term_memory": [],
     "long_term_memory": [],
@@ -5003,9 +5022,10 @@ class MVPDialogueRuntime:
         proposal_id: str,
         turn_index: int,
         speaker_name: str = "",
+        now: int | None = None,
     ) -> MVPTurnResult:
         state = self.store.load()
-        now = _utc_timestamp()
+        now = int(now if now is not None else _utc_timestamp())
         m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state"))
         initiative = normalize_initiative_state(m13_state.get("initiative"))
         proposal = proposal_from_initiative_state(initiative, now=now)
@@ -5256,20 +5276,20 @@ class MVPDialogueRuntime:
         turn_index: int,
         structural_signals: Any,
     ) -> MVPIdleResult:
-        """M13.4 stub: bookkeeping + audit only; M14.0 adds conscious idle LLM."""
+        """M14.0: conscious idle plan, named-owner patches, optional M13.3 outreach."""
         state = self.store.load()
-        m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+        m13_state = normalize_m13_drive_state(state.get("m13_drive_state"))
+        m13_state = merge_initiative_into_m13_state(m13_state)
         initiative = normalize_initiative_state(m13_state.get("initiative"))
-        idle = initiative.get("idle_introspection", {})
-        if not isinstance(idle, Mapping):
-            idle = {}
+        idle = normalize_idle_introspection_state(initiative.get("idle_introspection"))
 
-        outreach = {
-            "should_outreach": False,
-            "reason": "reflection_only",
-            "suggested_intent": "",
-            "trigger": "reflection_outreach",
-        }
+        sig_dict = (
+            structural_signals.to_dict()
+            if hasattr(structural_signals, "to_dict")
+            else dict(structural_signals)
+            if isinstance(structural_signals, Mapping)
+            else {}
+        )
         audit_events: list[dict[str, Any]] = [
             {
                 "type": "IdleIntrospectionTickEvent",
@@ -5277,41 +5297,228 @@ class MVPDialogueRuntime:
                 "at": now,
                 "idle_introspection.enabled": bool(idle.get("enabled")),
                 "idle_introspection.user_opt_in": bool(idle.get("user_opt_in")),
-                "structural_signals": (
-                    structural_signals.to_dict()
-                    if hasattr(structural_signals, "to_dict")
-                    else dict(structural_signals)
-                    if isinstance(structural_signals, Mapping)
-                    else {}
-                ),
-                "engineering_proxy_label": IDLE_ENGINEERING_PROXY_LABEL,
-                "stub": True,
-            }
+                "structural_signals": sig_dict,
+                "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
+            },
+            {
+                "type": "M13DriveSummaryEvent",
+                "turn_index": turn_index,
+                "at": now,
+                "boredom_band": sig_dict.get("boredom_band"),
+                "path_feels_stale_proxy": sig_dict.get("path_feels_stale_proxy"),
+                "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
+            },
         ]
-        for event in audit_events:
-            self.store.append_log({"event": "m13_idle_audit", **event})
 
-        state["m13_drive_state"] = mark_idle_introspection_consumed(
-            state.get("m13_drive_state", {}),
+        idle_context = build_idle_context(
+            state,
+            m13_state=m13_state,
+            structural_signals=structural_signals,
+            turn_index=turn_index,
             now=now,
         )
+        keywords = idle_retrieval_keywords(idle_context)
+        retrieved = retrieve_memories(state, keywords, limit=8)
+        retrieved_ids = {str(item.get("id", "")) for item in retrieved if item.get("id")}
+
+        audit_events.append(
+            {
+                "type": "MemoryDynamicsIdleSummaryEvent",
+                "turn_index": turn_index,
+                "at": now,
+                "retrieval_keywords": keywords[:12],
+                "retrieved_ids": sorted(retrieved_ids)[:12],
+                "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
+            }
+        )
+
+        ran_llm = False
+        llm_error = ""
+        raw_plan: dict[str, Any] = {}
+        try:
+            system_prompt, user_prompt = build_conscious_idle_prompt(
+                idle_context=idle_context,
+                retrieved_memories=retrieved,
+                turn_index=turn_index,
+            )
+            raw_plan = self.llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+            ran_llm = True
+        except Exception as exc:
+            llm_error = str(exc)[:240]
+            audit_events.append(
+                {
+                    "type": "IdleIntrospectionAbortEvent",
+                    "turn_index": turn_index,
+                    "at": now,
+                    "reason": "llm_unavailable",
+                    "detail": llm_error,
+                    "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
+                }
+            )
+
+        if not raw_plan or not isinstance(raw_plan, Mapping):
+            raw_plan = build_structural_idle_plan(idle_context, retrieved_ids=retrieved_ids)
+        else:
+            normalized_probe = normalize_conscious_idle_plan(raw_plan)
+            if normalized_probe == empty_conscious_idle_plan() and retrieved_ids:
+                raw_plan = build_structural_idle_plan(idle_context, retrieved_ids=retrieved_ids)
+
+        plan = apply_idle_drive_rules(
+            normalize_conscious_idle_plan(raw_plan),
+            idle_context=idle_context,
+            structural_signals=structural_signals,
+        )
+
+        audit_events.append(
+            {
+                "type": "IdleIntrospectionPlanEvent",
+                "turn_index": turn_index,
+                "at": now,
+                "plan": plan,
+                "ran_llm": ran_llm,
+                "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
+            }
+        )
+
+        session_counts = count_session_idle_patches(state)
+        patch_result = SelfCognitionPatchOwner.validate_and_commit(
+            state,
+            _mapping(plan.get("self_cognition_patch_proposal")),
+            retrieved_ids=retrieved_ids,
+            turn_index=turn_index,
+            now=now,
+            session_patches=int(session_counts.get("self_cognition", 0)),
+        )
+        audit_events.extend(patch_result.events)
+
+        open_result = OpenItemPatchOwner.validate_and_commit(
+            state,
+            [row for row in plan.get("open_item_proposals", []) if isinstance(row, Mapping)],
+            retrieved_ids=retrieved_ids,
+            turn_index=turn_index,
+            now=now,
+            session_patches=int(session_counts.get("open_items", 0)),
+        )
+        audit_events.extend(open_result.events)
+
+        mem_intents, mem_violations = MemoryConsolidationOwner.translate_to_intents(
+            [row for row in plan.get("memory_consolidation_proposals", []) if isinstance(row, Mapping)],
+            retrieved_ids=retrieved_ids,
+        )
+        if mem_violations:
+            audit_events.append(
+                {
+                    "type": "MemoryConsolidationIntentEvent",
+                    "turn_index": turn_index,
+                    "at": now,
+                    "committed": False,
+                    "violation_codes": mem_violations[:6],
+                    "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
+                }
+            )
+        mem_apply = MemoryConsolidationOwner.apply_intents(
+            state,
+            mem_intents,
+            turn_index=turn_index,
+            now=now,
+            session_count=int(session_counts.get("memory", 0)),
+        )
+        audit_events.extend(mem_apply.events)
+
+        outreach = _mapping(plan.get("outreach_recommendation"))
+        outreach_outcome = ""
+        if bool(outreach.get("should_outreach")):
+            focus = _mapping(plan.get("reflection_focus"))
+            refs = _string_list(focus.get("evidence_refs"), limit=8) or _string_list(
+                outreach.get("evidence_refs"), limit=8
+            )
+            topic = str(focus.get("topic", "") or "")[:120]
+            locked = build_reflection_outreach_proposal(
+                suggested_intent=str(outreach.get("suggested_intent", "") or ""),
+                evidence_refs=refs,
+                proposed_topic=topic,
+                now=now,
+                initiative=initiative,
+            )
+            audit_events.append(
+                {
+                    "type": "IdleOutreachProposalEvent",
+                    "turn_index": turn_index,
+                    "at": now,
+                    "proposal_id": locked.proposal_id,
+                    "trigger": locked.trigger,
+                    "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
+                }
+            )
+            check_state, check = evaluate_proactive_initiative(
+                state,
+                now=now,
+                turn_index=turn_index,
+                manual_continue=False,
+                locked_proposal=locked,
+                llm=self.llm,
+            )
+            state = check_state
+            self.store.save(state)
+            m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+            for event in check.events:
+                self.store.append_log({"event": "m13_proactive_audit", **event})
+            if check.proposal is not None:
+                proactive_result = self.run_proactive_turn(
+                    proposal_id=check.proposal.proposal_id,
+                    turn_index=turn_index,
+                    now=now,
+                )
+                outreach_outcome = (
+                    "delivered"
+                    if str(proactive_result.reply or "").strip()
+                    else str(proactive_result.diagnostics.get("suppression_reason", "suppressed"))
+                )
+                if outreach_outcome == "delivered":
+                    m13_state = mark_outreach_via_introspection(
+                        merge_initiative_into_m13_state(self.store.load().get("m13_drive_state", {}))
+                    )
+            else:
+                outreach_outcome = check.suppression_reason or "suppressed"
+        else:
+            outreach_outcome = str(outreach.get("reason", "reflection_only") or "reflection_only")
+
+        for event in audit_events:
+            self.store.append_log({"event": "m14_idle_audit", **event})
+
+        m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+        initiative = merge_idle_introspection_into_initiative(m13_state.get("initiative"))
+        idle = normalize_idle_introspection_state(initiative.get("idle_introspection"))
+        idle["last_conscious_idle_plan"] = plan
+        idle["last_outreach_outcome"] = outreach_outcome[:64]
+        initiative["idle_introspection"] = idle
+        m13_state["initiative"] = initiative
+        state["m13_drive_state"] = mark_idle_introspection_consumed(m13_state, now=now)
         self.store.save(state)
 
+        reflection_focus = plan.get("reflection_focus")
         diagnostics = {
             "mvp_runtime": True,
             "idle_introspection_turn": True,
             "not_user_requested_current_turn": True,
-            "ran_llm": False,
-            "structural_signals": audit_events[0].get("structural_signals", {}),
-            "engineering_proxy_label": IDLE_ENGINEERING_PROXY_LABEL,
+            "ran_llm": ran_llm,
+            "llm_error": llm_error,
+            "conscious_idle_plan": plan,
+            "outreach_outcome": outreach_outcome,
+            "structural_signals": sig_dict,
+            "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
         }
         return MVPIdleResult(
-            ran_llm=False,
-            reflection_focus=None,
-            self_cognition_patch_proposal=None,
-            memory_consolidation_proposals=[],
-            open_item_proposals=[],
-            outreach_recommendation=outreach,
+            ran_llm=ran_llm,
+            reflection_focus=dict(reflection_focus) if isinstance(reflection_focus, Mapping) else None,
+            self_cognition_patch_proposal=_mapping(plan.get("self_cognition_patch_proposal")) or None,
+            memory_consolidation_proposals=[
+                dict(row) for row in plan.get("memory_consolidation_proposals", []) if isinstance(row, Mapping)
+            ],
+            open_item_proposals=[
+                dict(row) for row in plan.get("open_item_proposals", []) if isinstance(row, Mapping)
+            ],
+            outreach_recommendation=dict(outreach),
             audit_events=audit_events,
             skip_reason="",
             diagnostics=diagnostics,
