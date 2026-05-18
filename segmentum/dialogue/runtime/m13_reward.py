@@ -35,6 +35,7 @@ MAX_SINGLE_TURN_BASELINE_DELTA = 0.03
 MIN_SETTLEMENT_CONFIDENCE_FOR_POSITIVE = 0.60
 MAX_REWARD_PULL_CONFIDENCE_BOOST = 0.02
 MIN_USER_REACTION_ASSESSMENT_CONFIDENCE = 0.55
+OPPONENT_STRENGTH_DECAY_PER_TURN = 0.012
 SETTLEMENT_USER_REACTIONS: frozenset[str] = frozenset(
     {"uptake", "correction", "neutral", "unclear", "off_topic"}
 )
@@ -506,6 +507,8 @@ def settle_pending_m13_actions(
         reward_state,
         turn_index=turn_index,
     )
+    prev_opp = _bounded_float(reward_state.get("opponent_strength"))
+    reward_state["opponent_strength"] = round(max(0.0, prev_opp - OPPONENT_STRENGTH_DECAY_PER_TURN), 6)
     generation = int(reward_state.get("settlement_generation", 0) or 0)
     assessments_by_id = {
         str(key): dict(value)

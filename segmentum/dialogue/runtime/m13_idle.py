@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any, Mapping
 
 from segmentum.dialogue.runtime.m13_boredom import boredom_band, normalize_boredom_state
-from segmentum.dialogue.runtime.m13_drive import normalize_m13_drive_state
+from segmentum.dialogue.runtime.m13_drive import _mapping, normalize_m13_drive_state
 from segmentum.dialogue.runtime.m13_initiative import merge_initiative_into_m13_state, normalize_initiative_state
 from segmentum.dialogue.runtime.m13_reward import (
     list_assessable_pending_rows,
@@ -40,10 +40,6 @@ IDLE_SKIP_REASONS: frozenset[str] = frozenset(
 )
 
 _NEXT_USER_TURN_MARKERS: frozenset[str] = frozenset({"next_user_turn", "next_turn"})
-
-
-def _mapping(value: Any) -> dict[str, Any]:
-    return dict(value) if isinstance(value, Mapping) else {}
 
 
 def _idle_user_activity_timestamp(temporal: Mapping[str, Any]) -> int:

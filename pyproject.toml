@@ -26,8 +26,9 @@ runtime = [
 include = ["segmentum*"]
 
 [tool.pytest.ini_options]
-addopts = "-m 'not stress and not m411'"
+addopts = "-m 'not stress and not m411 and not pre_m11'"
 markers = [
     "stress: long-running soak, benchmark, and endurance tests excluded from default pytest runs",
     "m411: slow M411 phenomenology rollouts; run explicitly with pytest -m m411 tests/test_m411_phenomenology.py",
+    "pre_m11: pre-M11.0 legacy tests skipped by default; run explicitly with pytest -m pre_m11",
 ]

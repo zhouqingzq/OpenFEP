@@ -9,13 +9,16 @@ from __future__ import annotations
 import copy
 import json
 import re
-import uuid
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Protocol
 
 from segmentum.dialogue.runtime.m13_drive import (
     M13EvaluationResult,
     M13_THRESHOLDS,
+    _bounded_float,
+    _mapping,
+    _new_id,
+    _string_list,
     build_topic_fingerprint,
     normalize_m13_drive_state,
 )
@@ -66,30 +69,6 @@ _EXPLORATION_MODES: tuple[str, ...] = (
 
 class BoredomUserTextLLM(Protocol):
     def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, Any]: ...
-
-
-def _mapping(value: Any) -> dict[str, Any]:
-    return dict(value) if isinstance(value, Mapping) else {}
-
-
-def _bounded_float(value: Any, *, default: float = 0.0) -> float:
-    try:
-        numeric = float(value)
-    except (TypeError, ValueError):
-        numeric = default
-    return max(0.0, min(1.0, numeric))
-
-
-def _string_list(value: Any, *, limit: int = 12) -> list[str]:
-    if isinstance(value, str) and value.strip():
-        return [value.strip()[:240]]
-    if isinstance(value, list):
-        return [str(item).strip()[:240] for item in value[:limit] if str(item).strip()]
-    return []
-
-
-def _new_id(prefix: str) -> str:
-    return f"{prefix}_{uuid.uuid4().hex[:12]}"
 
 
 def _json_text(payload: Any) -> str:
@@ -275,12 +254,12 @@ def _novelty_proxy(
     topic_overlap = sum(overlap_scores) / len(overlap_scores) if overlap_scores else 0.0
     low_topic_novelty = _bounded_float(topic_overlap)
 
-    same_action = sum(
+    same_topic = sum(
         1
         for row in recent_trace[-6:]
         if isinstance(row, Mapping) and str(row.get("topic_fingerprint", "")) == topic_fingerprint
     )
-    action_repeat = _bounded_float(max(0.0, (same_action - 1) * 0.22))
+    topic_repeat = _bounded_float(max(0.0, (same_topic - 1) * 0.22))
 
     if retrieved_ids and prior_retrieval_ids:
         shared = len(set(retrieved_ids) & set(prior_retrieval_ids))
@@ -299,7 +278,7 @@ def _novelty_proxy(
 
     novelty = 1.0 - (
         low_topic_novelty * 0.42
-        + action_repeat * 0.28
+        + topic_repeat * 0.28
         + _bounded_float(retrieval_overlap) * 0.20
         + short_low_cue * 0.10
     )

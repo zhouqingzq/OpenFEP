@@ -34,7 +34,7 @@ early experiment. **It is not part of the current architecture.**
 - Do not design features that depend on M10 events, producers, or gap triggers.
 - Do not propose “bridging M10 into MVP” or “wiring SelfThought into mvp_loop”.
 - Do not use M10 acceptance reports or Path A conversation-loop hooks as templates
-  for Path B behavior.
+for Path B behavior.
 
 Idle initiative, boredom, reward proxy, conscious planning, and memory dynamics
 on Path B replace that experiment track (see M13.x and MVP `run_turn`).
@@ -92,8 +92,8 @@ The six dialogue observation channels (`semantic_content`, `topic_novelty`,
 set of scalars so that:
 
 - FEP / decision scoring can **bias** among the bounded reply-action set (on Path
-  A this was explicit; on Path B, analogous guidance flows through
-  `control_guidance`, M13, and memory dynamics rather than a second personality),
+A this was explicit; on Path B, analogous guidance flows through
+`control_guidance`, M13, and memory dynamics rather than a second personality),
 - legacy research code could feed gap / exploration thresholds.
 
 **Do not treat channels as sufficient semantics for planning, memory recall, or
@@ -137,15 +137,15 @@ M12 is split into M12.0 (identity continuity) and M12.1 (mechanistic personality
 
 - Do not let prompt text become the only cognition layer.
 - Do not insert raw events, raw diagnostics, full memory dumps, full prompt text,
-  or full conscious markdown into user-visible replies.
+or full conscious markdown into user-visible replies.
 - Do not write anchored dialogue facts directly to memory when the work belongs to
-  M8.9 or later; prefer `MemoryWriteIntent` and audited patches on Path B.
+M8.9 or later; prefer `MemoryWriteIntent` and audited patches on Path B.
 - Do not promote unrecalled long-term memory, hypotheses, or unsupported details
-  into facts. Use unknown or uncertain stance.
+into facts. Use unknown or uncertain stance.
 - Do not treat `Conscious.md` or `Self-consciousness.md` as policy, memory, or
-  diagnostics truth.
+diagnostics truth.
 - Do not extend Path A (`conversation_loop.py`) or M10 (`exploration.py`
-  self-thought producers) for new Hu Tao / MVP chat behavior.
+self-thought producers) for new Hu Tao / MVP chat behavior.
 - Do not unify Path A and Path B in a single milestone.
 
 ---

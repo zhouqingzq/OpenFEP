@@ -9,12 +9,17 @@ from __future__ import annotations
 
 import copy
 import json
-import uuid
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Protocol
 
 from segmentum.dialogue.runtime.m13_boredom import boredom_band, normalize_boredom_state
-from segmentum.dialogue.runtime.m13_drive import normalize_m13_drive_state
+from segmentum.dialogue.runtime.m13_drive import (
+    _bounded_float,
+    _mapping,
+    _new_id,
+    _string_list,
+    normalize_m13_drive_state,
+)
 from segmentum.dialogue.runtime.m13_reward import normalize_affective_reward_proxy_state
 
 PROACTIVE_SOURCE = "m13_initiative_policy"
@@ -69,32 +74,8 @@ class ProactiveInitiativeLLM(Protocol):
     def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, Any]: ...
 
 
-def _mapping(value: Any) -> dict[str, Any]:
-    return dict(value) if isinstance(value, Mapping) else {}
-
-
-def _bounded_float(value: Any, *, default: float = 0.0) -> float:
-    try:
-        numeric = float(value)
-    except (TypeError, ValueError):
-        numeric = default
-    return max(0.0, min(1.0, numeric))
-
-
-def _string_list(value: Any, *, limit: int = 8) -> list[str]:
-    if isinstance(value, str) and value.strip():
-        return [value.strip()[:240]]
-    if isinstance(value, list):
-        return [str(item).strip()[:240] for item in value[:limit] if str(item).strip()]
-    return []
-
-
 def _json_text(payload: Any) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2)
-
-
-def _new_id(prefix: str) -> str:
-    return f"{prefix}_{uuid.uuid4().hex[:12]}"
 
 
 def default_initiative_state() -> dict[str, Any]:

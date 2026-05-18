@@ -1121,3 +1121,69 @@ def test_mvp_runtime_wires_settlement_and_reward(tmp_path: Path) -> None:
     assert "tolerance" not in diag_blob
     assert "addiction" not in diag_blob
     assert "behavioral_pull" not in diag_blob
+
+
+def test_opponent_strength_decays_without_negative_signals() -> None:
+    from segmentum.dialogue.runtime.m13_reward import OPPONENT_STRENGTH_DECAY_PER_TURN
+
+    state = default_m13_drive_state()
+    reward = normalize_affective_reward_proxy_state(state["affective_reward_proxy"])
+    reward["opponent_strength"] = 0.5
+    state["affective_reward_proxy"] = reward
+    user_id = "u1"
+    action = "answer"
+    topic = "status|update"
+
+    # Run settle_pending_m13_actions with empty pending — decay still applies.
+    updated, _, _ = settle_pending_m13_actions(
+        state,
+        user_id=user_id,
+        turn_index=2,
+        turn_id="turn_0003",
+    )
+    new_opp = _bounded_float(updated["affective_reward_proxy"]["opponent_strength"])
+    assert new_opp < 0.5
+    assert new_opp >= 0.5 - OPPONENT_STRENGTH_DECAY_PER_TURN - 1e-6
+
+
+def test_opponent_strength_net_effect_with_negative_then_decay() -> None:
+    from segmentum.dialogue.runtime.m13_reward import (
+        OPPONENT_STRENGTH_DECAY_PER_TURN,
+        MAX_SINGLE_TURN_OPPONENT_STRENGTH_DELTA,
+    )
+
+    state = default_m13_drive_state()
+    state["affective_reward_proxy"] = normalize_affective_reward_proxy_state(
+        {"opponent_strength": 0.3}
+    )
+    pending = create_pending_settlement(
+        turn_index=1,
+        action="answer",
+        topic_fingerprint="status|update",
+        reply_summary="bad",
+        predicted_reward=0.4,
+        predicted_relief=0.1,
+        information_gain_proxy=0.0,
+        evidence_refs=[],
+        reply_validation={"changed": True},
+        post_reply_observer={"needs_followup": True, "followup_type": "clarify"},
+        conscious_plan={"expectation_results": [{"status": "violated"}]},
+        memory_candidates_applied=[],
+        evidence_judgment=None,
+        safety_repair=True,
+        repetition_pressure=0.0,
+        conflict_level=0.0,
+    )
+    reward = normalize_affective_reward_proxy_state(state["affective_reward_proxy"])
+    reward["pending_settlements"] = [pending]
+    state["affective_reward_proxy"] = reward
+    updated, _, _ = settle_pending_m13_actions(
+        state,
+        user_id="u1",
+        turn_index=2,
+        turn_id="turn_0003",
+        user_reaction_assessments={str(pending["pending_id"]): _llm_correction_assessment()},
+    )
+    opp_after = _bounded_float(updated["affective_reward_proxy"]["opponent_strength"])
+    # Net effect: increase from negative outcome minus one turn of decay.
+    assert opp_after <= 0.3 + MAX_SINGLE_TURN_OPPONENT_STRENGTH_DELTA - OPPONENT_STRENGTH_DECAY_PER_TURN + 1e-6

@@ -8,7 +8,9 @@ import pytest
 from segmentum.dialogue.runtime.m13_drive import (
     CANDIDATE_REPLY_ACTIONS,
     MAX_PATH_PATTERNS,
+    PATTERN_DECAY_PER_TURN,
     M13DriveEvaluator,
+    _bounded_float,
     apply_post_turn_m13_state,
     build_topic_fingerprint,
     collect_allowed_reply_actions,
@@ -693,43 +695,6 @@ def test_path_patterns_evict_oldest_when_over_max() -> None:
     assert int(patterns[-1]["last_seen_turn"]) == MAX_PATH_PATTERNS + 4
 
 
-def test_habit_traits_boost_matching_action_pull() -> None:
-    state = default_m13_drive_state()
-    evaluator = M13DriveEvaluator()
-    base_kwargs = dict(
-        user_text="今天有点累",
-        user_id="alice",
-        turn_id="turn_0001",
-        turn_index=0,
-        conscious_plan={"memory_search_keywords": ["累"]},
-        memory_dynamics={
-            "recall_query": {"semantic_terms": ["累"]},
-            "control_guidance": {
-                "sharing_policy": {"allow_direct_disclosure": True, "allow_abstract_sharing": True},
-                "reply_contract": {},
-            },
-        },
-        retrieved_memories=[],
-        response_style_prior={},
-        relationship_value_context={},
-        m13_state=state,
-        entity_binding={},
-    )
-    without_traits = evaluator.evaluate(**base_kwargs, habit_traits={})
-    with_traits = evaluator.evaluate(
-        **base_kwargs,
-        habit_traits={
-            "learned_conversation_habits": [
-                {"content": "用户反馈后更适合共情式安慰和理解", "confidence": 0.8}
-            ],
-        },
-    )
-    assert (
-        with_traits.scores_by_action["empathize"]["behavioral_pull"]
-        > without_traits.scores_by_action["empathize"]["behavioral_pull"]
-    )
-
-
 def test_relationship_value_context_boosts_empathize() -> None:
     state = default_m13_drive_state()
     evaluator = M13DriveEvaluator()
@@ -884,3 +849,136 @@ def test_prompt_safe_m13_turn_diagnostics_omits_internal_terms() -> None:
     payload = json.dumps(prompt_safe_m13_turn_diagnostics(evaluation), ensure_ascii=False)
     for marker in _M13_INTERNAL_MARKERS:
         assert marker not in payload
+
+
+def test_rollback_window_eviction_at_limit() -> None:
+    state = default_m13_drive_state()
+    for i in range(12):
+        state.setdefault("rollback_window", []).append(
+            {
+                "patch_id": f"patch_{i}",
+                "action": "answer",
+                "user_id": "u1",
+                "topic_fingerprint": f"topic_{i}",
+                "previous_habit_precision": 0.3,
+                "previous_control_discount": 0.1,
+                "confidence": 0.7,
+            }
+        )
+    # Simulate a positive update which appends and caps at 8.
+    evaluator = M13DriveEvaluator()
+    evaluation = evaluator.evaluate(
+        user_text="test",
+        user_id="u1",
+        turn_id="turn_0001",
+        turn_index=0,
+        conscious_plan={"memory_search_keywords": ["test"]},
+        memory_dynamics={
+            "recall_query": {"semantic_terms": ["test"]},
+            "control_guidance": {
+                "sharing_policy": {"allow_direct_disclosure": True, "allow_abstract_sharing": True},
+                "reply_contract": {},
+            },
+        },
+        retrieved_memories=[{"id": "m1", "keywords": ["test"]}],
+        response_style_prior={},
+        habit_traits={},
+        relationship_value_context={},
+        m13_state=state,
+    )
+    updated, _ = apply_post_turn_m13_state(
+        state,
+        evaluation=evaluation,
+        user_id="u1",
+        turn_id="turn_0001",
+        turn_index=0,
+        selected_action="answer",
+        reply_validation={"changed": False},
+        post_reply_observer={"needs_followup": False},
+        conscious_plan={"expectation_results": [{"status": "confirmed"}]},
+        memory_candidates_applied=[{"id": "m1"}],
+    )
+    window = updated.get("rollback_window", [])
+    assert len(window) <= 8
+
+
+def test_pattern_decay_applied_to_existing_patterns() -> None:
+    state = default_m13_drive_state()
+    state["path_patterns_by_action"] = [
+        {
+            "action": "answer",
+            "user_id": "u1",
+            "topic_fingerprint": "old|topic",
+            "support_count": 1,
+            "success_proxy_count": 0,
+            "failure_proxy_count": 0,
+            "habit_precision": 0.5,
+            "mean_control_cost_discount": 0.3,
+            "last_seen_turn": 0,
+            "source_evidence_ids": [],
+            "status": "active",
+        }
+    ]
+    evaluator = M13DriveEvaluator()
+    evaluation = evaluator.evaluate(
+        user_text="new topic",
+        user_id="u2",
+        turn_id="turn_0002",
+        turn_index=1,
+        conscious_plan={"memory_search_keywords": ["new"]},
+        memory_dynamics={
+            "control_guidance": {
+                "sharing_policy": {"allow_direct_disclosure": True, "allow_abstract_sharing": True},
+                "reply_contract": {},
+            },
+        },
+        retrieved_memories=[],
+        response_style_prior={},
+        habit_traits={},
+        relationship_value_context={},
+        m13_state=state,
+    )
+    updated, _ = apply_post_turn_m13_state(
+        state,
+        evaluation=evaluation,
+        user_id="u2",
+        turn_id="turn_0002",
+        turn_index=1,
+        selected_action="deflect",
+        reply_validation={"changed": False},
+        post_reply_observer={"needs_followup": False},
+        conscious_plan={},
+        memory_candidates_applied=[],
+    )
+    old_pattern = updated["path_patterns_by_action"][0]
+    assert float(old_pattern["habit_precision"]) < 0.5
+    assert float(old_pattern["habit_precision"]) >= 0.5 - PATTERN_DECAY_PER_TURN - 1e-6
+    assert float(old_pattern["mean_control_cost_discount"]) < 0.3
+
+
+def test_boredom_suppressed_under_high_conflict_pressure() -> None:
+    from segmentum.dialogue.runtime.m13_boredom import M13BoredomEvaluator
+
+    state = default_m13_drive_state()
+    evaluator = M13BoredomEvaluator()
+    result = evaluator.evaluate(
+        user_text="嗯",
+        user_id="u1",
+        turn_id="t1",
+        turn_index=3,
+        conscious_plan={"memory_search_keywords": ["status"]},
+        memory_dynamics={
+            "recall_query": {"semantic_terms": ["status"]},
+            "control_guidance": {
+                "sharing_policy": {"allow_direct_disclosure": True, "allow_abstract_sharing": True},
+                "reply_contract": {},
+                "conflict_level": 0.85,
+                "repair_bias": 0.8,
+                "clarification_bias": 0.75,
+            },
+        },
+        retrieved_memories=[],
+        m13_state=state,
+    )
+    assert result.exploration_suppressed is True
+    assert result.boredom_band == "low"

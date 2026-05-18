@@ -99,19 +99,6 @@ class M13Thresholds:
 
 M13_THRESHOLDS = M13Thresholds()
 
-# Small action-specific boosts from conversation habits (content markers, not hard rules).
-_ACTION_HABIT_MARKERS: dict[str, tuple[str, ...]] = {
-    "answer": ("简洁", "直接", "answer", "brief"),
-    "ask_question": ("提问", "追问", "ask", "question"),
-    "empathize": ("共情", "安慰", "理解", "empath"),
-    "clarify": ("澄清", "确认", "clarify"),
-    "disagree": ("不同意", "反驳", "disagree"),
-    "deflect": ("转移", "deflect"),
-    "self_disclose": ("自述", "分享", "disclose"),
-    "abstract_share": ("抽象", "概括", "abstract"),
-    "truthful_refusal": ("拒答", "无法", "refusal"),
-}
-
 # Memory kinds that better support specific reply actions.
 _ACTION_MEMORY_KINDS: dict[str, frozenset[str]] = {
     "answer": frozenset({"fact", "preference", "episode", "open_item"}),
@@ -439,26 +426,6 @@ def _relation_precision(state: Mapping[str, Any], *, user_id: str) -> float:
     return 0.0
 
 
-def _habit_trait_action_bias(habit_traits: Mapping[str, Any] | None, *, action: str) -> float:
-    traits = _mapping(habit_traits)
-    habits: list[str] = []
-    for key in ("learned_conversation_habits", "conversation_habits"):
-        for item in traits.get(key, []) or []:
-            if isinstance(item, Mapping):
-                habits.append(str(item.get("content", item.get("summary", ""))))
-            elif isinstance(item, str):
-                habits.append(item)
-    markers = _ACTION_HABIT_MARKERS.get(action, ())
-    if not habits or not markers:
-        return 0.0
-    hits = sum(
-        1
-        for habit in habits
-        if habit.strip() and any(marker in habit.casefold() for marker in markers)
-    )
-    return _bounded_float(min(1.0, hits * 0.25))
-
-
 def _relationship_action_bias(
     relationship_value_context: Mapping[str, Any] | None,
     *,
@@ -559,9 +526,6 @@ def _score_candidate(
         action=action,
         user_id=user_id,
         topic_fingerprint=topic_fingerprint,
-    )
-    habit_precision = _bounded_float(
-        max(habit_precision, _habit_trait_action_bias(habit_traits, action=action) * 0.35)
     )
     relation_precision = max(
         _relation_precision(m13_state, user_id=user_id),
