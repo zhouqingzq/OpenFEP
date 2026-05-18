@@ -710,6 +710,22 @@ class ChatInterface:
             self._stop_background_runner()
         return bg
 
+    def update_background_continuity_config(self, **updates: object) -> dict[str, object]:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return {}
+        return dict(self._mvp_runtime.update_background_continuity_config(**updates))
+
+    def read_queued_outreach(self) -> list[dict[str, object]]:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return []
+        from segmentum.dialogue.runtime.m14_1_background_continuity import load_queued_outreach
+
+        return [dict(row) for row in load_queued_outreach(self._mvp_runtime.store.root)]
+
     def _start_background_runner(self) -> None:
         from segmentum.dialogue.runtime.m14_1_self_runner import BackgroundSelfRunner
 

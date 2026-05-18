@@ -99,6 +99,7 @@ class BackgroundSelfRunner:
         self._runtime.record_streamlit_ping()
 
     def _loop(self) -> None:
+        stop_reason = ""
         while not self._stop.is_set():
             started = time.monotonic()
             try:
@@ -122,16 +123,37 @@ class BackgroundSelfRunner:
                 if self._runtime.inline_runner_should_stop(
                     idle_death_seconds=INLINE_RUNNER_IDLE_DEATH_SECONDS
                 ):
+                    stop_reason = "inline_idle_death"
                     break
+        if stop_reason and not self._stop.is_set():
+            self._runtime.append_background_audit(
+                {
+                    "type": "BackgroundRunnerStopEvent",
+                    "at": int(time.time()),
+                    "runner_kind": self._runner_kind,
+                    "reason": stop_reason,
+                    "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
+                }
+            )
+            release_runner_lock(self._session_root)
 
 
 def _cli_main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="M14.1 background self-continuity CLI runner")
-    parser.add_argument("--session-root", required=True, help="MVP session directory")
-    parser.add_argument("--persona", default="", help="Persona id (diagnostics only)")
+    parser.add_argument("--session-root", default="", help="MVP session directory (test/debug override)")
+    parser.add_argument("--persona", default="", help="Persona id")
+    parser.add_argument("--session", default="", help="Session id under the persona MVP store")
     parser.add_argument("--tick-interval", type=int, default=90)
     args = parser.parse_args(argv)
-    session_root = Path(args.session_root).resolve()
+    if args.session_root:
+        session_root = Path(args.session_root).resolve()
+    else:
+        if not args.persona or not args.session:
+            parser.error("either --session-root or both --persona and --session are required")
+        safe_persona = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in args.persona).strip("_") or "default"
+        safe_session = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in args.session).strip("_") or "default"
+        project_root = Path(__file__).resolve().parents[3]
+        session_root = (project_root / "artifacts" / "mvp_personas" / safe_persona / "sessions" / safe_session).resolve()
     from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore, OpenRouterJSONClient
 
     store = MVPStateStore(session_root)

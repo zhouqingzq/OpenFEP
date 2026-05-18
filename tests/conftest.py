@@ -21,6 +21,8 @@ def _is_pre_m11_test(item: pytest.Item) -> bool:
     filename = item.path.name if hasattr(item, "path") else ""
     if not filename:
         return True
+    if filename == "test_lint_no_subjective_language.py":
+        return False
 
     # test_m1[1-9]* → M11–M19: run
     if re.match(r"test_m1[1-9]", filename):

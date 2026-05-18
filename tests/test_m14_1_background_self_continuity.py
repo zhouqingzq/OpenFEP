@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -11,23 +13,31 @@ from segmentum.dialogue.runtime.m13_idle import set_idle_introspection_user_opt_
 from segmentum.dialogue.runtime.m13_initiative import set_initiative_user_opt_in
 from segmentum.dialogue.runtime.m14_1_background_continuity import (
     DEFAULT_QUEUED_OUTREACH_TTL_SECONDS,
+    MAX_QUEUED_OUTREACH_TTL_SECONDS,
+    MIN_QUEUED_OUTREACH_TTL_SECONDS,
     check_background_budgets,
     default_background_continuity_state,
     enqueue_outreach_proposal,
+    expire_queued_outreach,
     load_queued_outreach,
     maybe_rollover_daily_counters,
     normalize_background_continuity_state,
     pop_next_pending_outreach,
+    read_runner_lock,
+    release_runner_lock,
     session_file_lock,
     set_background_continuity_opt_in,
+    try_acquire_runner_lock,
 )
 from segmentum.dialogue.runtime.m14_self_continuity import (
     K_DRIFT_KNOWN_LIMIT,
     K_STABLE_PROMOTION,
+    MIN_BASELINE_UPDATE_CONFIDENCE,
     apply_self_cognition_patch_to_continuity,
     default_self_continuity_state,
     run_self_review_tick,
 )
+from segmentum.dialogue.runtime.m14_1_self_runner import BackgroundSelfRunner
 from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore
 
 
@@ -111,6 +121,33 @@ class _BgIdleLLM:
         }
 
 
+class _LargeIdleLLM(_BgIdleLLM):
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        payload = super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+        if "M14" in system_prompt or "idle_introspection" in user_prompt:
+            payload = dict(payload)
+            payload["padding"] = "x" * 20_000
+        return payload
+
+
+class _LowConfidenceIdleLLM(_BgIdleLLM):
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        payload = super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+        if "M14" in system_prompt or "idle_introspection" in user_prompt:
+            patch = dict(payload["self_cognition_patch_proposal"])  # type: ignore[index]
+            patch["confidence"] = MIN_BASELINE_UPDATE_CONFIDENCE - 0.05
+            patch["summary_delta"] = "low confidence background delta"
+            payload = dict(payload)
+            payload["self_cognition_patch_proposal"] = patch
+            payload["outreach_recommendation"] = {
+                "should_outreach": False,
+                "reason": "reflection_only",
+                "suggested_intent": "",
+                "trigger": "reflection_outreach",
+            }
+        return payload
+
+
 def test_background_continuity_disabled_by_default() -> None:
     bg = default_background_continuity_state()
     assert bg["enabled"] is False
@@ -141,6 +178,14 @@ def test_llm_calls_budget_blocks() -> None:
     assert check_background_budgets(bg) == "llm_calls_budget_exhausted"
 
 
+def test_background_runner_requires_parent_opt_ins() -> None:
+    state = {"m13_drive_state": default_m13_drive_state()}
+    m13 = set_background_continuity_opt_in(state["m13_drive_state"], enabled=True, runner_kind="inline")  # type: ignore[arg-type]
+    bg = m13["initiative"]["background_continuity"]  # type: ignore[index]
+    assert bg["enabled"] is True
+    assert m13["initiative"]["user_opt_in"] is False  # type: ignore[index]
+
+
 def test_queued_outreach_default_ttl_is_24_hours(tmp_path: Path) -> None:
     assert DEFAULT_QUEUED_OUTREACH_TTL_SECONDS == 24 * 3600
     now = 1_700_000_000
@@ -157,6 +202,13 @@ def test_queued_outreach_default_ttl_is_24_hours(tmp_path: Path) -> None:
         ttl_seconds=DEFAULT_QUEUED_OUTREACH_TTL_SECONDS,
     )
     assert int(entry["expires_at"]) == now + 24 * 3600
+
+
+def test_queued_outreach_ttl_clamped() -> None:
+    low = normalize_background_continuity_state({"queued_outreach_ttl_seconds": 1})
+    high = normalize_background_continuity_state({"queued_outreach_ttl_seconds": 999999})
+    assert low["queued_outreach_ttl_seconds"] == MIN_QUEUED_OUTREACH_TTL_SECONDS
+    assert high["queued_outreach_ttl_seconds"] == MAX_QUEUED_OUTREACH_TTL_SECONDS
 
 
 def test_queued_outreach_persists_across_restart(tmp_path: Path) -> None:
@@ -177,6 +229,20 @@ def test_queued_outreach_persists_across_restart(tmp_path: Path) -> None:
     pending = pop_next_pending_outreach(tmp_path, now=now)
     assert pending is not None
     assert pending["proposal_id"] == "prop_persist"
+
+
+def test_queued_outreach_expires_after_ttl(tmp_path: Path) -> None:
+    now = 1_700_000_000
+    enqueue_outreach_proposal(
+        tmp_path,
+        proposal={"proposal_id": "prop_expire", "ordinary_language_intent": "x"},
+        now=now,
+        ttl_seconds=3600,
+    )
+    events = expire_queued_outreach(tmp_path, now=now + 3601)
+    rows = load_queued_outreach(tmp_path)
+    assert events and events[0]["type"] == "QueuedOutreachExpiredEvent"
+    assert rows[0]["status"] == "expired"
 
 
 def test_self_continuity_pins_stable_value_after_consecutive_appearances() -> None:
@@ -219,11 +285,101 @@ def test_background_tick_queues_outreach(tmp_path: Path) -> None:
     assert any(str(r.get("status")) == "pending" for r in rows)
 
 
+def test_queued_outreach_drain_uses_delivery_path_and_counts_llm(tmp_path: Path) -> None:
+    store = MVPStateStore(tmp_path)
+    store.save(_full_opted_state())
+    runtime = MVPDialogueRuntime(store=store, llm=_BgIdleLLM())
+    runtime.run_background_self_tick(runner_kind="inline")
+    result = runtime.maybe_drain_queued_outreach(turn_index=3)
+    rows = load_queued_outreach(tmp_path)
+    bg = store.load()["m13_drive_state"]["initiative"]["background_continuity"]
+    assert result["drained"] is True
+    assert rows[0]["status"] == "delivered"
+    assert result["llm_calls_delta"] >= 1
+    assert bg["llm_calls_today"] >= 2
+    assert bg["tokens_used_today"] > 1
+
+
+def test_background_tick_records_estimated_tokens_not_constant_one(tmp_path: Path) -> None:
+    store = MVPStateStore(tmp_path)
+    store.save(_full_opted_state())
+    runtime = MVPDialogueRuntime(store=store, llm=_LargeIdleLLM())
+    runtime.run_background_self_tick(runner_kind="inline")
+    bg = store.load()["m13_drive_state"]["initiative"]["background_continuity"]
+    assert bg["llm_calls_today"] == 1
+    assert bg["tokens_used_today"] > 1000
+
+
+def test_low_confidence_background_patch_does_not_pollute_current_self_view(tmp_path: Path) -> None:
+    store = MVPStateStore(tmp_path)
+    store.save(_full_opted_state())
+    runtime = MVPDialogueRuntime(store=store, llm=_LowConfidenceIdleLLM())
+    runtime.run_background_self_tick(runner_kind="inline")
+    cognition = store.load()["self_cognition"]
+    continuity = cognition["self_continuity"]
+    assert "low confidence background delta" not in str(cognition.get("current_self_view", ""))
+    assert continuity["drift_window"]
+
+
 def test_session_file_lock_excludes_concurrent_writes(tmp_path: Path) -> None:
     with session_file_lock(tmp_path):
         lock_path = tmp_path / "store.lock"
         assert lock_path.is_file()
     assert not (tmp_path / "store.lock").exists()
+
+
+def test_runner_lock_is_atomic_and_reports_collision(tmp_path: Path) -> None:
+    ok, info = try_acquire_runner_lock(tmp_path, runner_kind="inline", now=1)
+    assert ok is True
+    assert info is not None
+    ok2, existing = try_acquire_runner_lock(tmp_path, runner_kind="cli", now=2)
+    assert ok2 is False
+    assert existing is not None and existing.pid == info.pid
+    release_runner_lock(tmp_path)
+
+
+def test_background_runner_collision_event_without_starting_second_thread(tmp_path: Path) -> None:
+    class RuntimeStub:
+        def __init__(self) -> None:
+            self.events: list[dict[str, object]] = []
+
+        def append_background_audit(self, event: dict[str, object]) -> None:
+            self.events.append(event)
+
+        def record_streamlit_ping(self) -> None:
+            pass
+
+        def inline_runner_should_stop(self, *, idle_death_seconds: int) -> bool:
+            return False
+
+    runtime = RuntimeStub()
+    ok, _info = try_acquire_runner_lock(tmp_path, runner_kind="inline", now=1)
+    assert ok is True
+    try:
+        colliding = BackgroundSelfRunner(runtime, session_root=tmp_path, tick_interval_seconds=30)
+        colliding.start()
+        assert any(e.get("type") == "BackgroundRunnerCollisionEvent" for e in runtime.events)
+    finally:
+        release_runner_lock(tmp_path)
+    assert read_runner_lock(tmp_path) is None
+
+
+def test_cli_accepts_persona_session_contract() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "segmentum.dialogue.runtime.m14_1_self_runner",
+            "--help",
+        ],
+        cwd=Path(__file__).resolve().parents[1],
+        capture_output=True,
+        text=True,
+        timeout=20,
+        check=True,
+    )
+    assert "--persona" in result.stdout
+    assert "--session" in result.stdout
 
 
 def test_no_background_autonomy_wording_in_engineering_surfaces() -> None:

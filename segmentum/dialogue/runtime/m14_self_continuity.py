@@ -38,8 +38,23 @@ def normalize_self_continuity_state(raw: Any) -> dict[str, Any]:
         return copy.deepcopy(base)
     merged = {**base, **dict(raw)}
     merged["baseline_summary"] = str(merged.get("baseline_summary", "") or "")[:800]
-    for key in ("baseline_stable_values", "baseline_known_limits"):
-        merged[key] = [str(item)[:200] for item in merged.get(key, []) if str(item).strip()][:32]
+    merged["baseline_stable_values"] = [
+        str(item)[:200] for item in merged.get("baseline_stable_values", []) if str(item).strip()
+    ][:32]
+    known_limits: list[Any] = []
+    for item in merged.get("baseline_known_limits", []) or []:
+        if isinstance(item, Mapping):
+            known_limits.append(
+                {
+                    "limit": str(item.get("limit", ""))[:240],
+                    "source": str(item.get("source", ""))[:80],
+                    "patch_ids": str(item.get("patch_ids", ""))[:160],
+                    "review_count": max(0, int(item.get("review_count", 0) or 0)),
+                }
+            )
+        elif str(item).strip():
+            known_limits.append(str(item)[:240])
+    merged["baseline_known_limits"] = known_limits[:32]
     merged["baseline_updated_at"] = int(merged.get("baseline_updated_at", 0) or 0)
     for list_key in ("drift_window", "identity_tension_history", "stable_value_candidates"):
         rows = merged.get(list_key)
@@ -158,8 +173,12 @@ def apply_self_cognition_patch_to_continuity(
         if text and text not in merged.get("baseline_known_limits", []):
             merged.setdefault("baseline_known_limits", []).append(text[:200])
 
-    for value in merged.get("baseline_stable_values", []) or []:
-        _bump_stable_candidate(merged, str(value), now=now)
+    candidate_values: list[str] = []
+    for key in ("stable_value_candidates", "baseline_stable_value_candidates", "new_stable_value_candidates"):
+        for value in proposal.get(key, []) or []:
+            candidate_values.append(str(value))
+    for value in candidate_values:
+        _bump_stable_candidate(merged, value, now=now)
 
     return merged, events
 
@@ -198,15 +217,26 @@ def run_self_review_tick(
     drift = list(merged.get("drift_window", []))
     pending = [d for d in drift if not bool(d.get("kept_into_baseline"))]
     if len(pending) >= K_DRIFT_KNOWN_LIMIT:
-        oldest = pending[0]
+        selected = pending[:K_DRIFT_KNOWN_LIMIT]
+        oldest = selected[0]
         text = str(oldest.get("summary_delta", "") or "").strip()
         if text:
             limits = list(merged.get("baseline_known_limits", []))
             entry = f"{text} (self_continuity_drift)"
             if entry not in limits:
-                limits.append(entry[:240])
+                ids = ",".join(str(row.get("patch_id", "")) for row in selected if row.get("patch_id"))[:120]
+                review_count = int(merged.get("self_review_count_today", 0) or 0)
+                limits.append(
+                    {
+                        "limit": entry[:240],
+                        "source": "self_continuity_drift",
+                        "patch_ids": ids,
+                        "review_count": review_count,
+                    }
+                )
                 merged["baseline_known_limits"] = limits[-32:]
-        oldest["kept_into_baseline"] = True
+        for row in selected:
+            row["kept_into_baseline"] = True
         merged["drift_window"] = drift[-MAX_DRIFT_WINDOW:]
 
     events.append(

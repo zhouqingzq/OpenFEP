@@ -43,6 +43,11 @@ from segmentum.dialogue.runtime.mvp_loop import (
     OpenRouterJSONClient,
     analyze_materials_into_personas,
 )
+from segmentum.dialogue.runtime.m14_1_background_continuity import (
+    MAX_QUEUED_OUTREACH_TTL_SECONDS,
+    MIN_QUEUED_OUTREACH_TTL_SECONDS,
+    MIN_TICK_SECONDS,
+)
 
 _DIALOGUE_PREF_FIELDS: tuple[str, ...] = (
     "current_speaker_name",
@@ -1145,6 +1150,66 @@ def render_sidebar() -> None:
                 st.session_state.m14_1_background_opt_in_synced = bg_opt_in
             st.session_state.m14_1_background_opt_in = bg_opt_in
             bg_status = chat_iface.read_background_continuity_status()
+            if not bg_disabled and bg_status:
+                with st.sidebar.expander("Background budgets", expanded=False):
+                    tick_interval = st.number_input(
+                        "Tick interval seconds",
+                        min_value=MIN_TICK_SECONDS,
+                        max_value=3600,
+                        value=int(bg_status.get("tick_interval_seconds", 90) or 90),
+                        step=30,
+                        key="m14_1_tick_interval_input",
+                    )
+                    token_budget = st.number_input(
+                        "Tokens per day",
+                        min_value=1000,
+                        max_value=500000,
+                        value=int(bg_status.get("tokens_budget_per_day", 30000) or 30000),
+                        step=1000,
+                        key="m14_1_token_budget_input",
+                    )
+                    wallclock_budget = st.number_input(
+                        "Wallclock seconds per day",
+                        min_value=60,
+                        max_value=86400,
+                        value=int(float(bg_status.get("wallclock_budget_per_day_seconds", 600) or 600)),
+                        step=60,
+                        key="m14_1_wallclock_budget_input",
+                    )
+                    max_ticks = st.number_input(
+                        "Max ticks per day",
+                        min_value=1,
+                        max_value=5000,
+                        value=int(bg_status.get("max_ticks_per_day", 400) or 400),
+                        step=10,
+                        key="m14_1_max_ticks_input",
+                    )
+                    llm_budget = st.number_input(
+                        "LLM calls per day",
+                        min_value=1,
+                        max_value=1000,
+                        value=int(bg_status.get("llm_calls_budget_per_day", 80) or 80),
+                        step=5,
+                        key="m14_1_llm_budget_input",
+                    )
+                    ttl_hours = st.number_input(
+                        "Queued outreach TTL hours",
+                        min_value=MIN_QUEUED_OUTREACH_TTL_SECONDS // 3600,
+                        max_value=MAX_QUEUED_OUTREACH_TTL_SECONDS // 3600,
+                        value=int(int(bg_status.get("queued_outreach_ttl_seconds", 24 * 3600) or 24 * 3600) / 3600),
+                        step=1,
+                        key="m14_1_ttl_hours_input",
+                    )
+                    desired_bg = {
+                        "tick_interval_seconds": int(tick_interval),
+                        "tokens_budget_per_day": int(token_budget),
+                        "wallclock_budget_per_day_seconds": int(wallclock_budget),
+                        "max_ticks_per_day": int(max_ticks),
+                        "llm_calls_budget_per_day": int(llm_budget),
+                        "queued_outreach_ttl_seconds": int(ttl_hours) * 3600,
+                    }
+                    if any(bg_status.get(k) != v for k, v in desired_bg.items()):
+                        bg_status = chat_iface.update_background_continuity_config(**desired_bg)
             if bg_status and bg_opt_in:
                 st.sidebar.caption(
                     "Background: "
@@ -1925,6 +1990,33 @@ def render_dashboard() -> None:
             f"tokens 今日 {bg.get('tokens_used_today', 0)}/{bg.get('tokens_budget_per_day', '?')} "
             f"｜ 预算阻断 {bg.get('last_budget_block_reason') or '—'}"
         )
+
+        bg_events = [
+            row for row in chat_iface.read_conversation_log(limit=80)
+            if str(row.get("event", "")) == "m14_1_background_audit"
+        ]
+        with st.expander("Background audit events", expanded=False):
+            st.json(bg_events[-5:], expanded=False)
+        queue_rows = chat_iface.read_queued_outreach() if hasattr(chat_iface, "read_queued_outreach") else []
+        if queue_rows:
+            st.markdown("**Queued outreach (background)**")
+            now_ts = int(datetime.now(timezone.utc).timestamp())
+            st.dataframe(
+                pd.DataFrame(
+                    [
+                        {
+                            "proposal_id": row.get("proposal_id", ""),
+                            "status": row.get("status", ""),
+                            "age_seconds": max(0, now_ts - int(row.get("created_at", 0) or 0)),
+                            "expires_at": _format_unix_time(row.get("expires_at")),
+                            "intent": _clip_text(row.get("ordinary_language_intent"), limit=120),
+                        }
+                        for row in queue_rows[-8:]
+                    ]
+                ),
+                use_container_width=True,
+                hide_index=True,
+            )
 
     c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric("最近轮次", str(temporal_state.get("last_turn_index") or "—"))

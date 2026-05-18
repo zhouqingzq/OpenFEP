@@ -6,6 +6,7 @@ from pathlib import Path
 
 FORBIDDEN_ENGINEERING_PHRASES = (
     "she is awake",
+    "the runner is awake",
     "consciousness module",
     "self-awareness module",
     "true self",
@@ -19,7 +20,28 @@ SCAN_PATHS = (
     "segmentum/dialogue/runtime/m14_1_background_continuity.py",
     "segmentum/dialogue/runtime/m14_self_continuity.py",
     "segmentum/dialogue/runtime/m14_idle_owners.py",
+    "segmentum/dialogue/runtime/m14_idle_reflector.py",
+    "segmentum/dialogue/runtime/m13_initiative.py",
+    "segmentum/dialogue/runtime/app.py",
+    "CLAUDE.md",
+    "prompts/M13.3_Work_Prompt.md",
+    "prompts/M13.4_Work_Prompt.md",
+    "prompts/M14.1_Work_Prompt.md",
 )
+
+
+def _allowed_reference_line(rel: str, line: str) -> bool:
+    stripped = line.strip()
+    if rel.endswith("m14_idle_reflector.py") and stripped.startswith(('"', "'")):
+        return True
+    if rel.startswith("prompts/"):
+        lowered = line.casefold()
+        return (
+            "forbidden" in lowered
+            or line.count('"') >= 2
+            or stripped.startswith(("-", '"', "'"))
+        )
+    return False
 
 
 def test_engineering_modules_avoid_subjective_system_claims() -> None:
@@ -29,10 +51,11 @@ def test_engineering_modules_avoid_subjective_system_claims() -> None:
         path = root / rel
         if not path.is_file():
             continue
-        text = path.read_text(encoding="utf-8").casefold()
-        for phrase in FORBIDDEN_ENGINEERING_PHRASES:
-            if phrase in text:
-                violations.append(f"{rel}: {phrase}")
+        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+            text = line.casefold()
+            for phrase in FORBIDDEN_ENGINEERING_PHRASES:
+                if phrase in text and not _allowed_reference_line(rel, line):
+                    violations.append(f"{rel}:{lineno}: {phrase}")
     assert not violations, violations
 
 

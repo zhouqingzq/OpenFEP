@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import ctypes
 import json
 import os
 import socket
@@ -11,7 +12,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-from typing import Any, Iterator, Mapping
+from typing import Any, Iterator, Mapping, Protocol
 
 M14_1_ENGINEERING_PROXY_LABEL = "mvp_local_background_self_continuity"
 
@@ -175,6 +176,44 @@ def record_background_llm_usage(
     return merged
 
 
+class BackgroundBudgetExhausted(RuntimeError):
+    """Raised before a background-owned LLM call would exceed a daily budget."""
+
+    def __init__(self, reason: str) -> None:
+        super().__init__(reason)
+        self.reason = reason
+
+
+class _JSONLLM(Protocol):
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, Any]: ...
+
+
+class BackgroundLLMMeter:
+    """Budget-checking LLM wrapper for background-owned call chains."""
+
+    def __init__(self, llm: _JSONLLM, bg: Mapping[str, Any]) -> None:
+        self._llm = llm
+        self.bg = normalize_background_continuity_state(bg)
+        self.llm_calls_delta = 0
+        self.tokens_delta = 0
+
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, Any]:
+        block = check_background_budgets(self.bg)
+        if block:
+            raise BackgroundBudgetExhausted(block)
+        response = self._llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+        before_tokens = int(self.bg.get("tokens_used_today", 0) or 0)
+        self.bg = record_background_llm_usage(
+            self.bg,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            response=response,
+        )
+        self.llm_calls_delta += 1
+        self.tokens_delta += int(self.bg.get("tokens_used_today", 0) or 0) - before_tokens
+        return response
+
+
 def record_background_tick(bg: dict[str, Any], *, wallclock_seconds: float, ran_introspection: bool) -> dict[str, Any]:
     merged = dict(bg)
     merged["ticks_today"] = int(merged.get("ticks_today", 0) or 0) + 1
@@ -239,25 +278,29 @@ def read_runner_lock(session_root: Path) -> RunnerLockInfo | None:
 
 
 def try_acquire_runner_lock(session_root: Path, *, runner_kind: str, now: int) -> tuple[bool, RunnerLockInfo | None]:
+    session_root.mkdir(parents=True, exist_ok=True)
+    lock_path = session_root / "runner.lock"
     existing = read_runner_lock(session_root)
     if existing is not None and _pid_alive(existing.pid):
         return False, existing
     if existing is not None:
-        (session_root / "runner.lock").unlink(missing_ok=True)
-    session_root.mkdir(parents=True, exist_ok=True)
+        lock_path.unlink(missing_ok=True)
     info = RunnerLockInfo(pid=os.getpid(), host=socket.gethostname()[:64], runner_kind=runner_kind, started_at=now)
-    (session_root / "runner.lock").write_text(
-        json.dumps(
-            {
-                "pid": info.pid,
-                "host": info.host,
-                "runner_kind": info.runner_kind,
-                "started_at": info.started_at,
-            },
-            ensure_ascii=False,
-        ),
-        encoding="utf-8",
+    payload = json.dumps(
+        {
+            "pid": info.pid,
+            "host": info.host,
+            "runner_kind": info.runner_kind,
+            "started_at": info.started_at,
+        },
+        ensure_ascii=False,
     )
+    try:
+        fd = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except FileExistsError:
+        return False, read_runner_lock(session_root)
+    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+        handle.write(payload)
     return True, info
 
 
@@ -271,6 +314,19 @@ def release_runner_lock(session_root: Path) -> None:
 def _pid_alive(pid: int) -> bool:
     if pid <= 0:
         return False
+    if os.name == "nt":
+        PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+        STILL_ACTIVE = 259
+        handle = ctypes.windll.kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, int(pid))
+        if not handle:
+            return False
+        try:
+            exit_code = ctypes.c_ulong()
+            if not ctypes.windll.kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code)):
+                return False
+            return int(exit_code.value) == STILL_ACTIVE
+        finally:
+            ctypes.windll.kernel32.CloseHandle(handle)
     try:
         os.kill(pid, 0)
     except OSError:

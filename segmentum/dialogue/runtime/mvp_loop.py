@@ -100,6 +100,7 @@ from segmentum.dialogue.runtime.m13_initiative import (
 from segmentum.dialogue.runtime.m14_idle_owners import (
     MemoryConsolidationOwner,
     OpenItemPatchOwner,
+    OwnerCommitResult,
     SelfCognitionPatchOwner,
     count_session_idle_patches,
 )
@@ -114,6 +115,8 @@ from segmentum.dialogue.runtime.m14_idle_reflector import (
     normalize_conscious_idle_plan,
 )
 from segmentum.dialogue.runtime.m14_1_background_continuity import (
+    BackgroundBudgetExhausted,
+    BackgroundLLMMeter,
     M14_1_ENGINEERING_PROXY_LABEL,
     check_background_budgets,
     enqueue_outreach_proposal,
@@ -122,13 +125,13 @@ from segmentum.dialogue.runtime.m14_1_background_continuity import (
     normalize_background_continuity_state,
     outreach_suppression_is_transient,
     pop_next_pending_outreach,
-    record_background_llm_usage,
     record_background_tick,
     session_file_lock,
     set_background_continuity_opt_in,
     update_queued_outreach_status,
 )
 from segmentum.dialogue.runtime.m14_self_continuity import (
+    MIN_BASELINE_UPDATE_CONFIDENCE,
     apply_self_cognition_patch_to_continuity,
     attach_self_continuity,
     build_self_continuity_snapshot,
@@ -4021,6 +4024,8 @@ class MVPIdleResult:
     audit_events: list[dict[str, Any]] = field(default_factory=list)
     skip_reason: str = ""
     diagnostics: dict[str, Any] = field(default_factory=dict)
+    llm_calls_delta: int = 0
+    tokens_delta: int = 0
 
 
 @dataclass
@@ -5203,8 +5208,64 @@ class MVPDialogueRuntime:
         bg = initiative.get("background_continuity", {})
         return dict(bg) if isinstance(bg, Mapping) else {}
 
+    def update_background_continuity_config(self, **updates: Any) -> dict[str, Any]:
+        state = self.store.load()
+        m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+        initiative = merge_background_continuity_into_initiative(
+            normalize_initiative_state(m13_state.get("initiative"))
+        )
+        bg = normalize_background_continuity_state(initiative.get("background_continuity"))
+        for key in (
+            "tick_interval_seconds",
+            "tokens_budget_per_day",
+            "wallclock_budget_per_day_seconds",
+            "max_ticks_per_day",
+            "llm_calls_budget_per_day",
+            "queued_outreach_ttl_seconds",
+        ):
+            if key in updates:
+                bg[key] = updates[key]
+        bg = normalize_background_continuity_state(bg)
+        initiative["background_continuity"] = bg
+        m13_state["initiative"] = initiative
+        state["m13_drive_state"] = m13_state
+        self.store.save(state)
+        return dict(bg)
+
     def append_background_audit(self, event: Mapping[str, Any]) -> None:
         self.store.append_log({"event": "m14_1_background_audit", **dict(event)})
+
+    def _persist_background_meter(
+        self,
+        meter: BackgroundLLMMeter,
+        *,
+        now: int,
+        block_reason: str = "",
+    ) -> dict[str, Any]:
+        state = self.store.load()
+        m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+        initiative = merge_background_continuity_into_initiative(
+            normalize_initiative_state(m13_state.get("initiative"))
+        )
+        bg = normalize_background_continuity_state(initiative.get("background_continuity"))
+        metered = normalize_background_continuity_state(meter.bg)
+        for key in ("llm_calls_today", "llm_calls_lifetime", "tokens_used_today", "tokens_used_lifetime"):
+            bg[key] = metered.get(key, bg.get(key, 0))
+        if block_reason:
+            bg["last_budget_block_reason"] = block_reason
+            self.append_background_audit(
+                {
+                    "type": "BackgroundBudgetReachedEvent",
+                    "at": now,
+                    "reason": block_reason,
+                    "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
+                }
+            )
+        initiative["background_continuity"] = bg
+        m13_state["initiative"] = initiative
+        state["m13_drive_state"] = m13_state
+        self.store.save(state)
+        return bg
 
     def record_streamlit_ping(self) -> None:
         state = self.store.load()
@@ -5261,6 +5322,7 @@ class MVPDialogueRuntime:
             initiative["background_continuity"] = bg
             m13_state["initiative"] = initiative
             state["m13_drive_state"] = m13_state
+            self.store.save(state)
 
             block = check_background_budgets(bg)
             if block:
@@ -5300,21 +5362,31 @@ class MVPDialogueRuntime:
                 )
                 return {"skip_reason": "no_structural_signal", "ran_introspection": False}
 
-            idle_result = self.run_idle_introspection_turn(
-                now=now,
-                turn_index=turn_index,
-                structural_signals=signals,
-                queue_outreach=True,
-                background_runner_kind=runner_kind,
-            )
+            meter = BackgroundLLMMeter(self.llm, bg)
+            original_llm = self.llm
+            try:
+                self.llm = meter  # type: ignore[assignment]
+                idle_result = self.run_idle_introspection_turn(
+                    now=now,
+                    turn_index=turn_index,
+                    structural_signals=signals,
+                    queue_outreach=True,
+                    background_runner_kind=runner_kind,
+                )
+            except BackgroundBudgetExhausted as exc:
+                self.llm = original_llm
+                self._persist_background_meter(meter, now=now, block_reason=exc.reason)
+                return {"skip_reason": exc.reason, "ran_introspection": False}
+            finally:
+                self.llm = original_llm
             state = self.store.load()
             m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
             initiative = merge_background_continuity_into_initiative(
                 normalize_initiative_state(m13_state.get("initiative"))
             )
             bg = normalize_background_continuity_state(initiative.get("background_continuity"))
-            if idle_result.ran_llm:
-                bg = record_background_llm_usage(bg)
+            for key in ("llm_calls_today", "llm_calls_lifetime", "tokens_used_today", "tokens_used_lifetime"):
+                bg[key] = meter.bg.get(key, bg.get(key, 0))
             bg = record_background_tick(
                 bg,
                 wallclock_seconds=time.monotonic() - wall_start,
@@ -5344,6 +5416,47 @@ class MVPDialogueRuntime:
 
     def maybe_drain_queued_outreach(self, *, turn_index: int) -> dict[str, Any]:
         now = _utc_timestamp()
+        with session_file_lock(self.store.root):
+            state = self.store.load()
+            m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+            initiative = merge_background_continuity_into_initiative(
+                normalize_initiative_state(m13_state.get("initiative"))
+            )
+            bg = normalize_background_continuity_state(initiative.get("background_continuity"))
+            if not bool(bg.get("user_opt_in")):
+                return {"drained": False, "reason": "not_opted_in"}
+            block = check_background_budgets(bg)
+            if block:
+                bg["last_budget_block_reason"] = block
+                initiative["background_continuity"] = bg
+                m13_state["initiative"] = initiative
+                state["m13_drive_state"] = m13_state
+                self.store.save(state)
+                self.append_background_audit(
+                    {
+                        "type": "BackgroundBudgetReachedEvent",
+                        "at": now,
+                        "reason": block,
+                        "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
+                    }
+                )
+                return {"drained": False, "reason": block}
+            meter = BackgroundLLMMeter(self.llm, bg)
+            original_llm = self.llm
+            try:
+                self.llm = meter  # type: ignore[assignment]
+                result = self._maybe_drain_queued_outreach_locked(turn_index=turn_index, now=now)
+            except BackgroundBudgetExhausted as exc:
+                result = {"drained": False, "reason": exc.reason}
+                self._persist_background_meter(meter, now=now, block_reason=exc.reason)
+            finally:
+                self.llm = original_llm
+            self._persist_background_meter(meter, now=now)
+            result["llm_calls_delta"] = meter.llm_calls_delta
+            result["tokens_delta"] = meter.tokens_delta
+            return result
+
+    def _maybe_drain_queued_outreach_locked(self, *, turn_index: int, now: int) -> dict[str, Any]:
         entry = pop_next_pending_outreach(self.store.root, now=now)
         if entry is None:
             return {"drained": False, "reason": "empty_queue"}
@@ -5611,6 +5724,8 @@ class MVPDialogueRuntime:
             )
             raw_plan = self.llm.complete_json(system_prompt=llm_system, user_prompt=llm_user)
             ran_llm = True
+        except BackgroundBudgetExhausted:
+            raise
         except Exception as exc:
             llm_error = str(exc)[:240]
             audit_events.append(
@@ -5649,20 +5764,50 @@ class MVPDialogueRuntime:
         )
 
         session_counts = count_session_idle_patches(state)
-        patch_result = SelfCognitionPatchOwner.validate_and_commit(
-            state,
-            _mapping(plan.get("self_cognition_patch_proposal")),
-            retrieved_ids=retrieved_ids,
-            turn_index=turn_index,
-            now=now,
-            session_patches=int(session_counts.get("self_cognition", 0)),
+        patch_proposal = _mapping(plan.get("self_cognition_patch_proposal"))
+        low_background_confidence = (
+            bool(background_runner_kind)
+            and bool(patch_proposal.get("apply"))
+            and _bounded_float(patch_proposal.get("confidence")) < MIN_BASELINE_UPDATE_CONFIDENCE
         )
-        audit_events.extend(patch_result.events)
-        continuity = get_self_continuity_from_state(state)
+        if low_background_confidence:
+            patch_result = OwnerCommitResult(
+                committed=False,
+                events=[
+                    {
+                        "type": "SelfCognitionPatchRejectedEvent",
+                        "turn_index": turn_index,
+                        "at": now,
+                        "evidence_refs": _string_list(patch_proposal.get("evidence_refs"), limit=8),
+                        "violation_codes": ["confidence_below_threshold"],
+                        "reason": "confidence_below_threshold",
+                        "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
+                    }
+                ],
+                violation_codes=["confidence_below_threshold"],
+            )
+            continuity, sc_events = apply_self_cognition_patch_to_continuity(
+                continuity,
+                patch_proposal,
+                now=now,
+                retrieved_ids=retrieved_ids,
+            )
+            audit_events.extend(patch_result.events)
+            audit_events.extend(sc_events)
+        else:
+            patch_result = SelfCognitionPatchOwner.validate_and_commit(
+                state,
+                patch_proposal,
+                retrieved_ids=retrieved_ids,
+                turn_index=turn_index,
+                now=now,
+                session_patches=int(session_counts.get("self_cognition", 0)),
+            )
+            audit_events.extend(patch_result.events)
         if patch_result.committed:
             continuity, sc_events = apply_self_cognition_patch_to_continuity(
                 continuity,
-                _mapping(plan.get("self_cognition_patch_proposal")),
+                patch_proposal,
                 now=now,
                 retrieved_ids=retrieved_ids,
             )
@@ -5839,6 +5984,8 @@ class MVPDialogueRuntime:
             audit_events=audit_events,
             skip_reason="",
             diagnostics=diagnostics,
+            llm_calls_delta=int(getattr(self.llm, "llm_calls_delta", 1 if ran_llm else 0) or 0),
+            tokens_delta=int(getattr(self.llm, "tokens_delta", 0) or 0),
         )
 
     def _mark_recalled(self, state: dict[str, Any], retrieved: list[Mapping[str, Any]], now: int) -> None:

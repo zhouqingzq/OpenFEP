@@ -313,7 +313,9 @@ def assess_proactive_context_semantics(
     )
     try:
         raw = llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
-    except Exception:
+    except Exception as exc:
+        if exc.__class__.__name__ == "BackgroundBudgetExhausted":
+            raise
         return normalize_proactive_context_assessment({})
     return normalize_proactive_context_assessment(raw)
 
@@ -336,7 +338,9 @@ def assess_proactive_delivery_semantics(
     )
     try:
         raw = llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
-    except Exception:
+    except Exception as exc:
+        if exc.__class__.__name__ == "BackgroundBudgetExhausted":
+            raise
         return normalize_proactive_delivery_assessment({})
     return normalize_proactive_delivery_assessment(raw)
 
