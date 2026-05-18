@@ -85,6 +85,7 @@ from segmentum.dialogue.runtime.m13_idle import (
 )
 from segmentum.dialogue.runtime.m13_initiative import (
     PROACTIVE_SURROGATE_USER_TEXT,
+    ProactiveTurnProposal,
     build_proactive_thinking_user_text,
     build_reflection_outreach_proposal,
     evaluate_proactive_initiative,
@@ -111,6 +112,30 @@ from segmentum.dialogue.runtime.m14_idle_reflector import (
     empty_conscious_idle_plan,
     idle_retrieval_keywords,
     normalize_conscious_idle_plan,
+)
+from segmentum.dialogue.runtime.m14_1_background_continuity import (
+    M14_1_ENGINEERING_PROXY_LABEL,
+    check_background_budgets,
+    enqueue_outreach_proposal,
+    maybe_rollover_daily_counters,
+    merge_background_continuity_into_initiative,
+    normalize_background_continuity_state,
+    outreach_suppression_is_transient,
+    pop_next_pending_outreach,
+    record_background_llm_usage,
+    record_background_tick,
+    session_file_lock,
+    set_background_continuity_opt_in,
+    update_queued_outreach_status,
+)
+from segmentum.dialogue.runtime.m14_self_continuity import (
+    apply_self_cognition_patch_to_continuity,
+    attach_self_continuity,
+    build_self_continuity_snapshot,
+    get_self_continuity_from_state,
+    note_idle_tick,
+    run_self_review_tick,
+    should_run_self_review,
 )
 from segmentum.dialogue.runtime.m13_reward import (
     M13RewardEvaluator,
@@ -5164,6 +5189,237 @@ class MVPDialogueRuntime:
         idle = initiative.get("idle_introspection", {})
         return dict(idle) if isinstance(idle, Mapping) else {}
 
+    def set_background_continuity_opt_in(self, enabled: bool, *, runner_kind: str = "inline") -> dict[str, Any]:
+        state = self.store.load()
+        state["m13_drive_state"] = set_background_continuity_opt_in(
+            state.get("m13_drive_state", {}),
+            enabled=enabled,
+            runner_kind=runner_kind if enabled else "none",
+        )
+        self.store.save(state)
+        initiative = normalize_initiative_state(
+            normalize_m13_drive_state(state.get("m13_drive_state")).get("initiative")
+        )
+        bg = initiative.get("background_continuity", {})
+        return dict(bg) if isinstance(bg, Mapping) else {}
+
+    def append_background_audit(self, event: Mapping[str, Any]) -> None:
+        self.store.append_log({"event": "m14_1_background_audit", **dict(event)})
+
+    def record_streamlit_ping(self) -> None:
+        state = self.store.load()
+        m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+        initiative = merge_background_continuity_into_initiative(
+            normalize_initiative_state(m13_state.get("initiative"))
+        )
+        bg = normalize_background_continuity_state(initiative.get("background_continuity"))
+        bg["last_streamlit_ping_at"] = _utc_timestamp()
+        initiative["background_continuity"] = bg
+        m13_state["initiative"] = initiative
+        state["m13_drive_state"] = m13_state
+        self.store.save(state)
+
+    def inline_runner_should_stop(self, *, idle_death_seconds: int) -> bool:
+        state = self.store.load()
+        initiative = merge_background_continuity_into_initiative(
+            normalize_initiative_state(
+                normalize_m13_drive_state(state.get("m13_drive_state")).get("initiative")
+            )
+        )
+        bg = normalize_background_continuity_state(initiative.get("background_continuity"))
+        if not bool(bg.get("user_opt_in")):
+            return True
+        last_ping = int(bg.get("last_streamlit_ping_at", 0) or 0)
+        if last_ping <= 0:
+            return False
+        return (_utc_timestamp() - last_ping) > int(idle_death_seconds)
+
+    def run_background_self_tick(self, *, runner_kind: str = "inline") -> dict[str, Any]:
+        from segmentum.dialogue.runtime.m13_idle import gather_idle_structural_signals
+
+        wall_start = time.monotonic()
+        now = _utc_timestamp()
+        temporal = _mapping(self.store.load().get("temporal_state"))
+        turn_index = int(temporal.get("last_turn_index", 0) or 0)
+
+        with session_file_lock(self.store.root):
+            state = self.store.load()
+            m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+            initiative = merge_background_continuity_into_initiative(
+                normalize_initiative_state(m13_state.get("initiative"))
+            )
+            bg = normalize_background_continuity_state(initiative.get("background_continuity"))
+            if not bool(bg.get("user_opt_in")) or not bool(initiative.get("user_opt_in")):
+                return {"skip_reason": "not_opted_in", "ran_introspection": False}
+            idle = normalize_idle_introspection_state(initiative.get("idle_introspection"))
+            if not bool(idle.get("enabled")):
+                return {"skip_reason": "idle_introspection_disabled", "ran_introspection": False}
+
+            bg, rollover = maybe_rollover_daily_counters(bg, now=now)
+            if rollover:
+                self.append_background_audit(rollover)
+            initiative["background_continuity"] = bg
+            m13_state["initiative"] = initiative
+            state["m13_drive_state"] = m13_state
+
+            block = check_background_budgets(bg)
+            if block:
+                bg["last_budget_block_reason"] = block
+                bg["last_tick_at"] = now
+                initiative["background_continuity"] = bg
+                m13_state["initiative"] = initiative
+                state["m13_drive_state"] = m13_state
+                self.store.save(state)
+                self.append_background_audit(
+                    {
+                        "type": "BackgroundBudgetReachedEvent",
+                        "at": now,
+                        "reason": block,
+                        "runner_kind": runner_kind,
+                        "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
+                    }
+                )
+                return {"skip_reason": block, "ran_introspection": False}
+
+            signals = gather_idle_structural_signals(state, now=now, turn_index=turn_index)
+            if not signals.should_run_llm():
+                bg = record_background_tick(bg, wallclock_seconds=time.monotonic() - wall_start, ran_introspection=False)
+                bg["last_tick_at"] = now
+                initiative["background_continuity"] = bg
+                m13_state["initiative"] = initiative
+                state["m13_drive_state"] = m13_state
+                self.store.save(state)
+                self.append_background_audit(
+                    {
+                        "type": "BackgroundIdleTickEvent",
+                        "at": now,
+                        "skip_reason": "no_structural_signal",
+                        "runner_kind": runner_kind,
+                        "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
+                    }
+                )
+                return {"skip_reason": "no_structural_signal", "ran_introspection": False}
+
+            idle_result = self.run_idle_introspection_turn(
+                now=now,
+                turn_index=turn_index,
+                structural_signals=signals,
+                queue_outreach=True,
+                background_runner_kind=runner_kind,
+            )
+            state = self.store.load()
+            m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+            initiative = merge_background_continuity_into_initiative(
+                normalize_initiative_state(m13_state.get("initiative"))
+            )
+            bg = normalize_background_continuity_state(initiative.get("background_continuity"))
+            if idle_result.ran_llm:
+                bg = record_background_llm_usage(bg)
+            bg = record_background_tick(
+                bg,
+                wallclock_seconds=time.monotonic() - wall_start,
+                ran_introspection=bool(idle_result.ran_llm or idle_result.reflection_focus),
+            )
+            bg["last_tick_at"] = now
+            bg["last_budget_block_reason"] = ""
+            initiative["background_continuity"] = bg
+            m13_state["initiative"] = initiative
+            state["m13_drive_state"] = m13_state
+            self.store.save(state)
+            self.append_background_audit(
+                {
+                    "type": "BackgroundIdleTickEvent",
+                    "at": now,
+                    "ran_introspection": True,
+                    "outreach_outcome": idle_result.diagnostics.get("outreach_outcome", ""),
+                    "runner_kind": runner_kind,
+                    "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
+                }
+            )
+            return {
+                "ran_introspection": True,
+                "skip_reason": "",
+                "outreach_outcome": idle_result.diagnostics.get("outreach_outcome", ""),
+            }
+
+    def maybe_drain_queued_outreach(self, *, turn_index: int) -> dict[str, Any]:
+        now = _utc_timestamp()
+        entry = pop_next_pending_outreach(self.store.root, now=now)
+        if entry is None:
+            return {"drained": False, "reason": "empty_queue"}
+        proposal = ProactiveTurnProposal(
+            proposal_id=str(entry.get("proposal_id", "")),
+            created_at=int(entry.get("created_at", now) or now),
+            source="queued_outreach",
+            trigger=str(entry.get("trigger", "reflection_outreach") or "reflection_outreach"),
+            trigger_evidence_refs=[str(r) for r in entry.get("evidence_refs", []) or []][:8],
+            urgency_band="medium",
+            expected_user_value_band="medium",
+            risk_band="low",
+            proposed_action="answer",
+            proposed_topic=str(entry.get("proposed_topic", "") or ""),
+            ordinary_language_intent=str(entry.get("ordinary_language_intent", "") or ""),
+            expires_at=int(entry.get("expires_at", now) or now),
+            cooldown_cost=0,
+        )
+        state = self.store.load()
+        check_state, check = evaluate_proactive_initiative(
+            state,
+            now=now,
+            turn_index=turn_index,
+            manual_continue=False,
+            locked_proposal=proposal,
+            llm=self.llm,
+        )
+        self.store.save(check_state)
+        for event in check.events:
+            self.store.append_log({"event": "m13_proactive_audit", **event})
+        if check.proposal is None:
+            reason = check.suppression_reason or "suppressed"
+            if outreach_suppression_is_transient(reason):
+                return {"drained": False, "reason": reason, "transient": True}
+            update_queued_outreach_status(self.store.root, proposal.proposal_id, "suppressed")
+            self.append_background_audit(
+                {
+                    "type": "QueuedOutreachSuppressedEvent",
+                    "at": now,
+                    "proposal_id": proposal.proposal_id,
+                    "reason": reason,
+                    "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
+                }
+            )
+            return {"drained": False, "reason": reason}
+        result = self.run_proactive_turn(
+            proposal_id=check.proposal.proposal_id,
+            turn_index=turn_index,
+            now=now,
+        )
+        if str(result.reply or "").strip():
+            update_queued_outreach_status(self.store.root, proposal.proposal_id, "delivered")
+            self.append_background_audit(
+                {
+                    "type": "QueuedOutreachDeliveredEvent",
+                    "at": now,
+                    "proposal_id": proposal.proposal_id,
+                    "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
+                }
+            )
+            return {"drained": True, "reply": result.reply, "reason": ""}
+        reason = str(result.diagnostics.get("suppression_reason", "") or "suppressed")
+        if outreach_suppression_is_transient(reason):
+            return {"drained": False, "reason": reason, "transient": True}
+        update_queued_outreach_status(self.store.root, proposal.proposal_id, "suppressed")
+        self.append_background_audit(
+            {
+                "type": "QueuedOutreachSuppressedEvent",
+                "at": now,
+                "proposal_id": proposal.proposal_id,
+                "reason": reason,
+                "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
+            }
+        )
+        return {"drained": False, "reason": reason}
+
     def _append_idle_audit_events(
         self,
         state: dict[str, Any],
@@ -5275,6 +5531,8 @@ class MVPDialogueRuntime:
         now: int,
         turn_index: int,
         structural_signals: Any,
+        queue_outreach: bool = False,
+        background_runner_kind: str = "",
     ) -> MVPIdleResult:
         """M14.0: conscious idle plan, named-owner patches, optional M13.3 outreach."""
         state = self.store.load()
@@ -5332,16 +5590,26 @@ class MVPDialogueRuntime:
             }
         )
 
+        continuity = get_self_continuity_from_state(state)
+        continuity = note_idle_tick(continuity)
+        attach_self_continuity(state, continuity)
+        snapshot = (
+            build_self_continuity_snapshot(continuity) if should_run_self_review(continuity) else None
+        )
+
         ran_llm = False
         llm_error = ""
         raw_plan: dict[str, Any] = {}
+        llm_system = ""
+        llm_user = ""
         try:
-            system_prompt, user_prompt = build_conscious_idle_prompt(
+            llm_system, llm_user = build_conscious_idle_prompt(
                 idle_context=idle_context,
                 retrieved_memories=retrieved,
                 turn_index=turn_index,
+                self_continuity_snapshot=snapshot,
             )
-            raw_plan = self.llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+            raw_plan = self.llm.complete_json(system_prompt=llm_system, user_prompt=llm_user)
             ran_llm = True
         except Exception as exc:
             llm_error = str(exc)[:240]
@@ -5390,6 +5658,29 @@ class MVPDialogueRuntime:
             session_patches=int(session_counts.get("self_cognition", 0)),
         )
         audit_events.extend(patch_result.events)
+        continuity = get_self_continuity_from_state(state)
+        if patch_result.committed:
+            continuity, sc_events = apply_self_cognition_patch_to_continuity(
+                continuity,
+                _mapping(plan.get("self_cognition_patch_proposal")),
+                now=now,
+                retrieved_ids=retrieved_ids,
+            )
+            audit_events.extend(sc_events)
+        if should_run_self_review(continuity):
+            continuity, review_events = run_self_review_tick(continuity, now=now)
+            audit_events.extend(review_events)
+            m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+            initiative = merge_background_continuity_into_initiative(
+                normalize_initiative_state(m13_state.get("initiative"))
+            )
+            bg = normalize_background_continuity_state(initiative.get("background_continuity"))
+            bg["self_reviews_today"] = int(bg.get("self_reviews_today", 0) or 0) + 1
+            bg["self_reviews_lifetime"] = int(bg.get("self_reviews_lifetime", 0) or 0) + 1
+            initiative["background_continuity"] = bg
+            m13_state["initiative"] = initiative
+            state["m13_drive_state"] = m13_state
+        attach_self_continuity(state, continuity)
 
         open_result = OpenItemPatchOwner.validate_and_commit(
             state,
@@ -5450,36 +5741,62 @@ class MVPDialogueRuntime:
                     "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
                 }
             )
-            check_state, check = evaluate_proactive_initiative(
-                state,
-                now=now,
-                turn_index=turn_index,
-                manual_continue=False,
-                locked_proposal=locked,
-                llm=self.llm,
-            )
-            state = check_state
-            self.store.save(state)
-            m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
-            for event in check.events:
-                self.store.append_log({"event": "m13_proactive_audit", **event})
-            if check.proposal is not None:
-                proactive_result = self.run_proactive_turn(
-                    proposal_id=check.proposal.proposal_id,
-                    turn_index=turn_index,
+            if queue_outreach:
+                initiative = merge_background_continuity_into_initiative(
+                    normalize_initiative_state(m13_state.get("initiative"))
+                )
+                bg = normalize_background_continuity_state(initiative.get("background_continuity"))
+                ttl = int(bg.get("queued_outreach_ttl_seconds", 0) or 0)
+                entry = enqueue_outreach_proposal(
+                    self.store.root,
+                    proposal=locked.to_dict(),
                     now=now,
+                    ttl_seconds=ttl,
+                    drive_snapshot={"boredom_band": sig_dict.get("boredom_band")},
                 )
-                outreach_outcome = (
-                    "delivered"
-                    if str(proactive_result.reply or "").strip()
-                    else str(proactive_result.diagnostics.get("suppression_reason", "suppressed"))
+                audit_events.append(
+                    {
+                        "type": "QueuedOutreachProposalEvent",
+                        "turn_index": turn_index,
+                        "at": now,
+                        "proposal_id": entry.get("proposal_id", ""),
+                        "expires_at": entry.get("expires_at"),
+                        "runner_kind": background_runner_kind,
+                        "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
+                    }
                 )
-                if outreach_outcome == "delivered":
-                    m13_state = mark_outreach_via_introspection(
-                        merge_initiative_into_m13_state(self.store.load().get("m13_drive_state", {}))
-                    )
+                outreach_outcome = "queued"
             else:
-                outreach_outcome = check.suppression_reason or "suppressed"
+                check_state, check = evaluate_proactive_initiative(
+                    state,
+                    now=now,
+                    turn_index=turn_index,
+                    manual_continue=False,
+                    locked_proposal=locked,
+                    llm=self.llm,
+                )
+                state = check_state
+                self.store.save(state)
+                m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+                for event in check.events:
+                    self.store.append_log({"event": "m13_proactive_audit", **event})
+                if check.proposal is not None:
+                    proactive_result = self.run_proactive_turn(
+                        proposal_id=check.proposal.proposal_id,
+                        turn_index=turn_index,
+                        now=now,
+                    )
+                    outreach_outcome = (
+                        "delivered"
+                        if str(proactive_result.reply or "").strip()
+                        else str(proactive_result.diagnostics.get("suppression_reason", "suppressed"))
+                    )
+                    if outreach_outcome == "delivered":
+                        m13_state = mark_outreach_via_introspection(
+                            merge_initiative_into_m13_state(self.store.load().get("m13_drive_state", {}))
+                        )
+                else:
+                    outreach_outcome = check.suppression_reason or "suppressed"
         else:
             outreach_outcome = str(outreach.get("reason", "reflection_only") or "reflection_only")
 

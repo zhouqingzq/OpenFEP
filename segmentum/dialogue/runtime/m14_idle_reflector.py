@@ -475,6 +475,7 @@ def build_conscious_idle_prompt(
     idle_context: Mapping[str, Any],
     retrieved_memories: list[Mapping[str, Any]],
     turn_index: int,
+    self_continuity_snapshot: Mapping[str, Any] | None = None,
 ) -> tuple[str, str]:
     system_prompt = f"""你是数字人格 MVP 路径的「{IDLE_INTROSPECTION_MARKER}」模块。
 本轮没有用户输入；不要生成 reply、对话台词、独白或 Markdown。
@@ -482,9 +483,15 @@ def build_conscious_idle_prompt(
 每个 patch 提案必须引用本轮检索到的 evidence id（evidence_refs）。
 若无法从材料中证明具体焦点，返回空计划（reflection_focus=null，各 apply=false/空列表）。
 """
+    continuity_block = ""
+    if self_continuity_snapshot:
+        continuity_block = f"""
+运营性自我基线快照 (self_continuity_snapshot):
+{_json_text(dict(self_continuity_snapshot))}
+"""
     user_prompt = f"""turn_index: {turn_index}
 engineering_proxy_label: {M14_ENGINEERING_PROXY_LABEL}
-
+{continuity_block}
 空闲上下文摘要:
 {_json_text(dict(idle_context))}
 

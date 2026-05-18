@@ -29,7 +29,7 @@ st.set_page_config(page_title="M5.6 Persona Runtime", layout="wide")
 
 _logger = logging.getLogger(__name__)
 
-from segmentum.dialogue.runtime.chat import ChatInterface, ChatRequest
+from segmentum.dialogue.runtime.chat import ChatInterface, ChatRequest, ChatResponse
 from datetime import datetime, timezone
 from segmentum.dialogue.runtime.manager import (
     PersonaManager,
@@ -1110,7 +1110,7 @@ def render_sidebar() -> None:
                 "Enable bounded proactive messages",
                 value=bool(st.session_state.get("m13_initiative_opt_in", False)),
                 key="m13_initiative_opt_in_checkbox",
-                help="Off by default. Allows a manual continue button; no background autonomy.",
+                help="Off by default. Manual continue; background self-continuity (M14.1) is separate opt-in.",
             )
             if proactive_opt_in != bool(st.session_state.get("m13_initiative_opt_in_synced", False)):
                 chat_iface.set_bounded_proactive_opt_in(proactive_opt_in)
@@ -1122,7 +1122,7 @@ def render_sidebar() -> None:
                 value=bool(st.session_state.get("m13_idle_introspection_opt_in", False)),
                 key="m13_idle_introspection_opt_in_checkbox",
                 disabled=idle_intro_disabled,
-                help="Requires bounded proactive messages. Runs on idle reruns only; no background threads.",
+                help="Requires bounded proactive messages. UI reruns may run one idle tick; use M14.1 for background loop.",
             )
             if idle_intro_disabled:
                 idle_intro_opt_in = False
@@ -1130,6 +1130,35 @@ def render_sidebar() -> None:
                 chat_iface.set_idle_introspection_opt_in(idle_intro_opt_in)
                 st.session_state.m13_idle_introspection_opt_in_synced = idle_intro_opt_in
             st.session_state.m13_idle_introspection_opt_in = idle_intro_opt_in
+            bg_disabled = not (proactive_opt_in and idle_intro_opt_in)
+            bg_opt_in = st.sidebar.checkbox(
+                "Enable background self-continuity (experimental)",
+                value=bool(st.session_state.get("m14_1_background_opt_in", False)),
+                key="m14_1_background_opt_in_checkbox",
+                disabled=bg_disabled,
+                help="Opt-in, budget-bounded heartbeat (tokens/wallclock per day). Queues outreach for M13.3 delivery.",
+            )
+            if bg_disabled:
+                bg_opt_in = False
+            if bg_opt_in != bool(st.session_state.get("m14_1_background_opt_in_synced", False)):
+                chat_iface.set_background_continuity_opt_in(bg_opt_in)
+                st.session_state.m14_1_background_opt_in_synced = bg_opt_in
+            st.session_state.m14_1_background_opt_in = bg_opt_in
+            bg_status = chat_iface.read_background_continuity_status()
+            if bg_status and bg_opt_in:
+                st.sidebar.caption(
+                    "Background: "
+                    f"ticks_today={bg_status.get('ticks_today', 0)}/"
+                    f"{bg_status.get('max_ticks_per_day', '?')} "
+                    f"llm={bg_status.get('llm_calls_today', 0)}/"
+                    f"{bg_status.get('llm_calls_budget_per_day', '?')} "
+                    f"lifetime_idle={bg_status.get('idle_ticks_lifetime', 0)}"
+                )
+                if st.sidebar.button("Stop background runner", key="btn_stop_bg_runner"):
+                    chat_iface.set_background_continuity_opt_in(False)
+                    st.session_state.m14_1_background_opt_in = False
+                    st.session_state.m14_1_background_opt_in_synced = False
+                    st.rerun()
             idle_status = chat_iface.read_idle_introspection_status()
             if idle_status:
                 st.sidebar.caption(
@@ -1575,6 +1604,11 @@ def render_chat() -> None:
         st.session_state.pending_user_message = None
         st.session_state.pending_speaker_name = None
 
+    if chat_iface.has_agent() and getattr(chat_iface, "mvp_runtime_active", False):
+        try:
+            chat_iface.record_background_streamlit_ping()
+        except Exception:  # pragma: no cover
+            pass
     if (
         chat_iface.has_agent()
         and getattr(chat_iface, "mvp_runtime_active", False)
@@ -1588,6 +1622,31 @@ def render_chat() -> None:
             chat_iface.maybe_run_idle_introspection(user_active=bool(pending_text))
         except Exception as exc:  # pragma: no cover - UI guardrail
             _logger.exception("idle introspection tick failed: %s", exc)
+    if (
+        chat_iface.has_agent()
+        and getattr(chat_iface, "mvp_runtime_active", False)
+        and bool(st.session_state.get("m13_initiative_opt_in", False))
+        and not pending_text
+        and not pending_proactive
+        and not bool(st.session_state.get("m13_ui_turn_in_progress", False))
+    ):
+        try:
+            drain = chat_iface.maybe_drain_queued_outreach()
+            if drain.get("drained") and str(drain.get("reply", "")).strip():
+                resp = ChatResponse(
+                    reply=str(drain["reply"]),
+                    action="proactive_queued",
+                    observation={},
+                    delta_traits={},
+                    delta_big_five={},
+                    diagnostics={"queued_outreach_drain": drain},
+                    safety_checks=[],
+                    turn_index=int(getattr(chat_iface, "_turn_index", 0)),
+                )
+                append_assistant_response_messages(st.session_state.messages, resp)
+                st.rerun()
+        except Exception as exc:  # pragma: no cover
+            _logger.exception("queued outreach drain failed: %s", exc)
 
     disabled = not chat_iface.has_agent() or pending_text is not None
     if (
@@ -1847,6 +1906,25 @@ def render_dashboard() -> None:
 
     proactive_ui = bool(st.session_state.get("m13_initiative_opt_in", False))
     idle_ui = bool(st.session_state.get("m13_idle_introspection_opt_in", False))
+    bg = _as_dict(initiative.get("background_continuity"))
+    self_continuity = _as_dict(self_cognition.get("self_continuity"))
+    bg_ui = bool(st.session_state.get("m14_1_background_opt_in", False))
+
+    if bg_ui and bg:
+        b1, b2, b3, b4, b5, b6 = st.columns(6)
+        b1.metric("自我思考(今日)", str(bg.get("ticks_today", 0)))
+        b2.metric("自我思考(累计)", str(bg.get("idle_ticks_lifetime", 0)))
+        b3.metric("自我审视(今日)", str(bg.get("self_reviews_today", 0)))
+        b4.metric(
+            "LLM请求(今日)",
+            f"{bg.get('llm_calls_today', 0)}/{bg.get('llm_calls_budget_per_day', '?')}",
+        )
+        b5.metric("LLM请求(累计)", str(bg.get("llm_calls_lifetime", 0)))
+        b6.metric("上次自我思考", _format_unix_time(bg.get("last_tick_at")))
+        st.caption(
+            f"tokens 今日 {bg.get('tokens_used_today', 0)}/{bg.get('tokens_budget_per_day', '?')} "
+            f"｜ 预算阻断 {bg.get('last_budget_block_reason') or '—'}"
+        )
 
     c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric("最近轮次", str(temporal_state.get("last_turn_index") or "—"))
@@ -1989,6 +2067,15 @@ def render_dashboard() -> None:
             st.markdown(_idle_plan_markdown(last_idle_plan))
 
     st.subheader("自我认知")
+    if self_continuity:
+        st.markdown("**运营性自我基线 (self_continuity)**")
+        st.markdown(f"- 基线摘要：{_clip_text(self_continuity.get('baseline_summary'), limit=400)}")
+        st.markdown(f"- 稳定价值：{_join_values(self_continuity.get('baseline_stable_values'))}")
+        st.markdown(f"- 已知局限：{_join_values(self_continuity.get('baseline_known_limits'))}")
+        st.caption(
+            f"上次自我审视 {_format_unix_time(self_continuity.get('last_self_review_at'))} "
+            f"｜ 今日 {self_continuity.get('self_review_count_today', 0)} 次"
+        )
     sc1, sc2 = st.columns(2)
     with sc1:
         st.markdown(f"**概要**  \n{_clip_text(self_cognition.get('summary'), limit=400)}")

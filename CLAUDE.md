@@ -119,6 +119,9 @@ M13.0: MVP-Local Behavioral Pull
 M13.1: Boredom / Exploration Bias
 M13.2: Affective Reward Proxy And Settlement
 M13.3: UI-Level Bounded Initiative
+M13.4: UI Idle Tick And Introspection Entry Point
+M14.0: Conscious Idle Reflector And Self-Cognition Patch
+M14.1: Background Self-Continuity And Persistent Idle Loop
 ```
 
 Deferred or non-active for new implementation unless explicitly revived:
@@ -147,6 +150,10 @@ diagnostics truth.
 - Do not extend Path A (`conversation_loop.py`) or M10 (`exploration.py`
 self-thought producers) for new Hu Tao / MVP chat behavior.
 - Do not unify Path A and Path B in a single milestone.
+- Background self-continuity (M14.1) is an engineering scheduler, not a claim of
+  subjective consciousness. Engineering-layer copy (audit, sidebar, code comments,
+  reflector JSON, ordinary_language_intent) uses operational language; persona
+  chat replies are out of scope for that rule.
 
 ---
 

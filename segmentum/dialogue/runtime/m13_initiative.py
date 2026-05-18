@@ -1,6 +1,7 @@
 """MVP-local M13.3 bounded UI initiative: proposals, suppression, audit events.
 
-Engineering policy only; not subjective agency or background autonomy.
+Engineering policy only; not a claim of subjective agency. Background
+self-continuity (M14.1) is opt-in and budget-bounded when enabled.
 Semantic gates (user-context safety, remind/continue-later, delivery wording) use a
 small LLM assessor — not keyword/regex cues.
 """
@@ -122,8 +123,10 @@ def normalize_initiative_state(raw: Any) -> dict[str, Any]:
     merged["pending_proactive_proposal"] = dict(pending) if isinstance(pending, Mapping) else {}
     merged["last_suppression_reason"] = str(merged.get("last_suppression_reason", "") or "")[:64]
     from segmentum.dialogue.runtime.m13_idle import normalize_idle_introspection_state
+    from segmentum.dialogue.runtime.m14_1_background_continuity import merge_background_continuity_into_initiative
 
     merged["idle_introspection"] = normalize_idle_introspection_state(merged.get("idle_introspection"))
+    merged = merge_background_continuity_into_initiative(merged)
     return merged
 
 
@@ -625,7 +628,8 @@ def evaluate_proactive_initiative(
         return state, suppress("disabled")
     if user_typing:
         return state, suppress("user_active")
-    if int(initiative.get("proactive_count_this_session", 0) or 0) >= int(
+    queued_delivery = locked_proposal is not None and str(locked_proposal.source) == "queued_outreach"
+    if not queued_delivery and int(initiative.get("proactive_count_this_session", 0) or 0) >= int(
         initiative.get("max_proactive_per_session", DEFAULT_MAX_PROACTIVE_PER_SESSION) or 1
     ):
         return state, suppress("session_limit_reached")
@@ -634,7 +638,11 @@ def evaluate_proactive_initiative(
         return state, suppress("cooldown_active")
     last_turn = int(initiative.get("last_proactive_turn_index", -1) or -1)
     cooldown_turns = int(initiative.get("cooldown_turns", DEFAULT_COOLDOWN_TURNS) or DEFAULT_COOLDOWN_TURNS)
-    if last_turn >= 0 and turn_index - last_turn <= cooldown_turns:
+    if (
+        not queued_delivery
+        and last_turn >= 0
+        and turn_index - last_turn <= cooldown_turns
+    ):
         return state, suppress("cooldown_active")
 
     if implicit_idle_request:

@@ -227,6 +227,7 @@ class ChatInterface:
             Path(__file__).resolve().parents[3] / "artifacts" / "mvp_personas"
         )
         self._mvp_runtime: MVPDialogueRuntime | None = None
+        self._background_runner: Any = None
         self._enable_conscious_trace = bool(enable_conscious_trace)
         if conscious_root is None:
             conscious_root = (
@@ -684,6 +685,71 @@ class ChatInterface:
         idle = initiative.get("idle_introspection", {})
         return dict(idle) if isinstance(idle, dict) else {}
 
+    def read_background_continuity_status(self) -> dict[str, object]:
+        state = self.read_mvp_state_dict()
+        if not state:
+            return {}
+        m13 = state.get("m13_drive_state", {})
+        if not isinstance(m13, dict):
+            return {}
+        initiative = m13.get("initiative", {})
+        if not isinstance(initiative, dict):
+            return {}
+        bg = initiative.get("background_continuity", {})
+        return dict(bg) if isinstance(bg, dict) else {}
+
+    def set_background_continuity_opt_in(self, enabled: bool) -> dict[str, object]:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return {}
+        bg = dict(self._mvp_runtime.set_background_continuity_opt_in(bool(enabled), runner_kind="inline"))
+        if enabled:
+            self._start_background_runner()
+        else:
+            self._stop_background_runner()
+        return bg
+
+    def _start_background_runner(self) -> None:
+        from segmentum.dialogue.runtime.m14_1_self_runner import BackgroundSelfRunner
+
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return
+        self._stop_background_runner()
+        store = self._mvp_runtime.store
+        bg = self.read_background_continuity_status()
+        interval = int(bg.get("tick_interval_seconds", 90) or 90)
+        self._background_runner = BackgroundSelfRunner(
+            self._mvp_runtime,
+            session_root=store.root,
+            runner_kind="inline",
+            tick_interval_seconds=interval,
+        )
+        self._background_runner.start()
+
+    def _stop_background_runner(self) -> None:
+        if self._background_runner is not None:
+            self._background_runner.stop()
+            self._background_runner = None
+
+    def record_background_streamlit_ping(self) -> None:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return
+        self._mvp_runtime.record_streamlit_ping()
+        if self._background_runner is not None:
+            self._background_runner.record_streamlit_ping()
+
+    def maybe_drain_queued_outreach(self) -> dict[str, object]:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return {"drained": False, "reason": "disabled"}
+        return dict(self._mvp_runtime.maybe_drain_queued_outreach(turn_index=self._turn_index))
+
     def maybe_propose_proactive_turn(
         self,
         *,
@@ -948,6 +1014,8 @@ class ChatInterface:
             self._mvp_runtime = None
         if not hasattr(self, "_last_response_diagnostics"):
             self._last_response_diagnostics = {}
+        if not hasattr(self, "_background_runner"):
+            self._background_runner = None
 
     def _repair_high_conflict_reply(self, user_text: str, reply: str) -> str:
         text = user_text.strip()
