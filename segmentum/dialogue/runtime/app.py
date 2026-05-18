@@ -30,7 +30,7 @@ st.set_page_config(page_title="M5.6 Persona Runtime", layout="wide")
 _logger = logging.getLogger(__name__)
 
 from segmentum.dialogue.runtime.chat import ChatInterface, ChatRequest
-from segmentum.dialogue.runtime.dashboard import DashboardCollector
+from datetime import datetime, timezone
 from segmentum.dialogue.runtime.manager import (
     PersonaManager,
     read_material_file_bytes,
@@ -1628,117 +1628,429 @@ def render_chat() -> None:
         st.rerun()
 
 
+_MIND_BUS_EVENT_PREFIXES = (
+    "M13",
+    "Idle",
+    "Proactive",
+    "Temporal",
+)
+
+
+def _clip_text(value: object, *, limit: int = 160) -> str:
+    text = " ".join(str(value or "").split())
+    if len(text) <= limit:
+        return text or "—"
+    return text[: limit - 1] + "…"
+
+
+def _format_unix_time(value: object) -> str:
+    try:
+        ts = int(value)
+    except (TypeError, ValueError):
+        return "—"
+    if ts <= 0:
+        return "—"
+    return datetime.fromtimestamp(ts, tz=timezone.utc).astimezone().strftime("%m-%d %H:%M:%S")
+
+
+def _yes_no(flag: object) -> str:
+    return "是" if bool(flag) else "否"
+
+
+def _bullet_lines(items: object, *, limit: int = 8) -> str:
+    if not isinstance(items, list):
+        return "—"
+    lines = [f"- {_clip_text(item, limit=200)}" for item in items[:limit] if str(item or "").strip()]
+    return "\n".join(lines) if lines else "—"
+
+
+def _extract_mind_bus_events(bus: object) -> list[str]:
+    if not isinstance(bus, list):
+        return []
+    lines: list[str] = []
+    for item in bus:
+        if not isinstance(item, Mapping):
+            continue
+        event_type = str(item.get("type", "") or "")
+        if not any(event_type.startswith(prefix) for prefix in _MIND_BUS_EVENT_PREFIXES):
+            continue
+        detail_parts: list[str] = []
+        for key in (
+            "reason",
+            "skip_reason",
+            "suppression_reason",
+            "trigger",
+            "ordinary_language_intent",
+            "proposed_topic",
+            "boredom_band",
+            "prompt_safe_summary",
+        ):
+            val = item.get(key)
+            if val not in (None, "", []):
+                detail_parts.append(f"{key}={_clip_text(val, limit=80)}")
+        suffix = f" ({', '.join(detail_parts)})" if detail_parts else ""
+        lines.append(f"{event_type}{suffix}")
+    return lines
+
+
+def _conscious_plan_markdown(plan: Mapping[str, object]) -> str:
+    if not plan:
+        return "暂无意识主循环记录。发送一轮消息后会出现。"
+    temporal = _as_dict(plan.get("temporal_assessment"))
+    parts = [
+        f"**当前任务**  \n{_clip_text(plan.get('current_task'), limit=280)}",
+        f"**后续任务**  \n{_clip_text(plan.get('next_task'), limit=280)}",
+        f"**判断备注**  \n{_clip_text(plan.get('reasoning_notes'), limit=280)}",
+        f"**分享意图**  \n{_clip_text(plan.get('sharing_intent'), limit=80)}",
+        f"**记忆检索词**  \n{_join_values(plan.get('memory_search_keywords'))}",
+    ]
+    if temporal:
+        parts.append(
+            "\n".join(
+                [
+                    "**时间语境**",
+                    f"- 读法：{_clip_text(temporal.get('current_time_read'), limit=120)}",
+                    f"- 间隔：{_clip_text(temporal.get('time_gap_label'), limit=40)}",
+                    f"- 时间跳变：{_yes_no(temporal.get('temporal_shift_detected'))}",
+                    f"- 用户在纠正时间：{_yes_no(temporal.get('user_is_correcting_time_context'))}",
+                    f"- 连续性风险：{_clip_text(temporal.get('continuity_risk'), limit=40)}",
+                    f"- 回复建议：{_clip_text(temporal.get('reply_guidance'), limit=200)}",
+                ]
+            )
+        )
+    if bool(plan.get("needs_self_cognition_update")):
+        parts.append(
+            f"**自我认知更新压力**  \n{_clip_text(plan.get('self_cognition_update_reason'), limit=200)}"
+        )
+    expectations = plan.get("expectation_results")
+    if isinstance(expectations, list) and expectations:
+        exp_lines = []
+        for item in expectations[:6]:
+            if not isinstance(item, Mapping):
+                continue
+            exp_lines.append(
+                f"- {item.get('id', '?')}: {item.get('status', '?')} — {_clip_text(item.get('evidence'), limit=100)}"
+            )
+        parts.append("**预期验证**\n" + "\n".join(exp_lines))
+    return "\n\n".join(parts)
+
+
+def _idle_plan_markdown(plan: Mapping[str, object]) -> str:
+    if not plan:
+        return "暂无空闲内省计划。"
+    focus = _as_dict(plan.get("reflection_focus"))
+    outreach = _as_dict(plan.get("outreach_recommendation"))
+    patch = _as_dict(plan.get("self_cognition_patch_proposal"))
+    lines = [
+        f"**模式**  \n{_clip_text(plan.get('mode'), limit=60)}",
+        f"**反思焦点**  \n{_clip_text(focus.get('topic'), limit=200) or '—'}",
+        f"**反思类型**  \n{_clip_text(focus.get('reflection_kind'), limit=60)}",
+        f"**是否建议 outreach**  \n{_yes_no(outreach.get('should_outreach'))}",
+        f"**outreach 理由**  \n{_clip_text(outreach.get('reason'), limit=120)}",
+        f"**建议意图**  \n{_clip_text(outreach.get('suggested_intent'), limit=200)}",
+        f"**自我认知补丁**  \n{_yes_no(patch.get('apply'))} — {_clip_text(patch.get('reason'), limit=160)}",
+    ]
+    mem_props = plan.get("memory_consolidation_proposals")
+    if isinstance(mem_props, list) and mem_props:
+        lines.append(f"**记忆整理提议**  \n{len(mem_props)} 条")
+    open_props = plan.get("open_item_proposals")
+    if isinstance(open_props, list) and open_props:
+        lines.append(f"**开放事项提议**  \n{len(open_props)} 条")
+    return "\n\n".join(lines)
+
+
+def _open_item_rows(open_items: object) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for item in _dict_rows(open_items)[-12:]:
+        rows.append(
+            {
+                "事项": _clip_text(item.get("title") or item.get("next_check"), limit=100),
+                "下次检查": _clip_text(item.get("next_check"), limit=80),
+                "状态": str(item.get("status") or ""),
+                "id": str(item.get("id") or "")[:24],
+            }
+        )
+    return rows
+
+
+def _patch_history_rows(patch_history: object) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for patch in _dict_rows(patch_history)[-10:]:
+        rows.append(
+            {
+                "时间": _format_unix_time(patch.get("at")),
+                "来源": str(patch.get("source") or ""),
+                "原因": _clip_text(patch.get("reason"), limit=120),
+                "摘要": _clip_text(patch.get("summary_delta") or patch.get("summary"), limit=140),
+            }
+        )
+    return rows
+
+
+def _mind_activity_log_rows(entries: list[dict[str, object]]) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for entry in reversed(entries):
+        diag = _as_dict(entry.get("diagnostics"))
+        bus = diag.get("bus_messages")
+        mind_events = _extract_mind_bus_events(bus)
+        event_kind = str(entry.get("event") or "turn")
+        if entry.get("not_user_requested_current_turn") or event_kind == "proactive_turn":
+            kind_label = "主动续写"
+        elif diag.get("proactive_turn"):
+            kind_label = "主动续写"
+        else:
+            kind_label = "对话轮"
+        user_bit = _clip_text(entry.get("user_text"), limit=72)
+        reply_bit = _clip_text(entry.get("reply"), limit=72)
+        rows.append(
+            {
+                "轮次": str(entry.get("turn_index", "")),
+                "类型": kind_label,
+                "时间": _format_unix_time(entry.get("at")),
+                "用户": user_bit,
+                "胡桃": reply_bit,
+                "内心事件": "；".join(mind_events[:4]) if mind_events else "—",
+            }
+        )
+    return rows
+
+
 def render_dashboard() -> None:
-    st.header("Dashboard")
+    st.header("内心活动")
+    st.caption("Path B MVP 可观测记录：意识主循环、M13 驱动、自我认知与主动/空闲内省。用于调试，不面向终端用户。")
     chat_iface: ChatInterface = st.session_state.chat_iface
 
     if not chat_iface.has_agent():
-        st.info("Load a persona to see its dashboard.")
+        st.info("请先在左侧加载 persona，再查看内心活动。")
         return
 
-    agent = chat_iface.agent
-    pp = agent.self_model.personality_profile
-    traits = agent.slow_variable_learner.state.traits
+    mvp_active = bool(getattr(chat_iface, "mvp_runtime_active", False))
+    if not mvp_active:
+        st.warning("当前未启用 MVP 循环（需 LLM 模式）。内心活动记录仅在 MVP 路径写入。")
+        return
 
-    # ── Big Five ──
-    st.subheader("Big Five")
-    bf_data = {
-        "Trait": ["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism"],
-        "Value": [pp.openness, pp.conscientiousness, pp.extraversion, pp.agreeableness, pp.neuroticism],
-    }
-    st.dataframe(
-        pd.DataFrame(bf_data).set_index("Trait"),
-        column_config={"Value": st.column_config.ProgressColumn(
-            "Value", min_value=0.0, max_value=1.0, format="%.3f"
-        )},
-        use_container_width=True,
+    mvp_state = chat_iface.read_mvp_state_dict() or {}
+    diagnostics = chat_iface.latest_response_diagnostics()
+    conscious_plan = _as_dict(diagnostics.get("conscious_plan"))
+    m13_eval = _as_dict(diagnostics.get("m13_drive_evaluation"))
+    m13_boredom_eval = _as_dict(diagnostics.get("m13_boredom_evaluation"))
+    m13_reward_eval = _as_dict(diagnostics.get("m13_reward_evaluation"))
+    thinking = _as_dict(diagnostics.get("llm_thinking_result"))
+    temporal_state = _as_dict(mvp_state.get("temporal_state"))
+    self_cognition = _as_dict(mvp_state.get("self_cognition"))
+    m13_state = _as_dict(mvp_state.get("m13_drive_state"))
+    initiative = _as_dict(m13_state.get("initiative"))
+    idle = _as_dict(initiative.get("idle_introspection"))
+    boredom = _as_dict(m13_state.get("boredom"))
+    reward = _as_dict(m13_state.get("affective_reward_proxy"))
+    pending_proposal = _as_dict(initiative.get("pending_proactive_proposal"))
+
+    proactive_ui = bool(st.session_state.get("m13_initiative_opt_in", False))
+    idle_ui = bool(st.session_state.get("m13_idle_introspection_opt_in", False))
+
+    c1, c2, c3, c4, c5 = st.columns(5)
+    c1.metric("最近轮次", str(temporal_state.get("last_turn_index") or "—"))
+    c2.metric("主动续写 opt-in", _yes_no(proactive_ui))
+    c3.metric("空闲内省 opt-in", _yes_no(idle_ui))
+    c4.metric("本轮主动", _yes_no(diagnostics.get("proactive_turn")))
+    c5.metric(
+        "会话主动次数",
+        str(initiative.get("proactive_count_this_session", 0)),
     )
 
-    # ── Slow Traits ──
-    st.subheader("Slow Traits (FEP Internal)")
-    st_data = {
-        "Trait": list(traits.to_dict().keys()),
-        "Value": list(traits.to_dict().values()),
-    }
-    st.dataframe(
-        pd.DataFrame(st_data).set_index("Trait"),
-        column_config={"Value": st.column_config.ProgressColumn(
-            "Value", min_value=0.0, max_value=1.0, format="%.3f"
-        )},
-        use_container_width=True,
-    )
-
-    # ── Precision Channels ──
-    st.subheader("Precision Channels")
-    prec = agent.precision_manipulator.channel_precisions
-    if prec:
-        prec_rows = []
-        for ch, val in sorted(prec.items()):
-            prec_rows.append({"Channel": ch, "Precision": f"{val:.3f}"})
-        st.dataframe(pd.DataFrame(prec_rows).set_index("Channel"), use_container_width=True)
-    else:
-        st.text("No precision data available.")
-
-    # ── Memory Stats ──
-    st.subheader("Memory")
-    episodic = (
-        agent.memory_store.episodic_count()
-        if getattr(agent, "memory_store", None)
-        else len(getattr(agent, "long_term_memory", {}).__dict__.get("episodes", []) or [])
-    )
-    semantic = len(getattr(agent, "semantic_memory", []))
-    procedural = len(getattr(agent, "action_history", []))
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Episodic", episodic)
-    c2.metric("Semantic", semantic)
-    c3.metric("Procedural", procedural)
-
-    # ── Body State ──
-    st.subheader("Body State")
-    bc1, bc2, bc3 = st.columns(3)
-    bc1.metric("Energy", f"{agent.energy:.2f}")
-    bc2.metric("Stress", f"{agent.stress:.2f}")
-    bc3.metric("Fatigue", f"{agent.fatigue:.2f}")
-
-    # ── Manual Parameter Overrides ──
-    st.subheader("Manual Overrides (Slow Traits)")
-    override_applied = False
-    new_traits: dict[str, float] = {}
-    for trait_name in ["caution_bias", "threat_sensitivity", "trust_stance",
-                        "exploration_posture", "social_approach"]:
-        current = float(getattr(traits, trait_name, 0.5))
-        new_val = st.slider(
-            trait_name, 0.05, 0.95, current, 0.01,
-            key=f"override_{trait_name}",
+    st.markdown(
+        "\n".join(
+            [
+                f"**时间间隔** {temporal_state.get('last_time_gap_label', '—')} "
+                f"（{_format_unix_time(temporal_state.get('last_turn_at'))}）",
+                f"**主动抑制原因** {_clip_text(initiative.get('last_suppression_reason'), limit=120)}",
+                f"**空闲内省跳过** {_clip_text(idle.get('last_skip_reason'), limit=120)}",
+            ]
         )
-        new_traits[trait_name] = new_val
-        if abs(new_val - current) > 0.001:
-            override_applied = True
+    )
 
-    if override_applied and st.button("Apply Overrides", key="btn_apply"):
-        for name, val in new_traits.items():
-            chat_iface.set_trait(name, val)
-        st.success("Overrides applied — next chat turn will use new values.")
+    st.subheader("最近一轮 · 意识主循环")
+    st.markdown(_conscious_plan_markdown(conscious_plan))
 
-    # ── Trajectory Chart ──
-    st.subheader("Trait Trajectory")
-    collector = chat_iface.get_dashboard()
-    traj = collector.trait_trajectory()
-    if traj and any(len(v) > 1 for v in traj.values()):
-        st.line_chart(pd.DataFrame(traj))
+    m13_left, m13_right = st.columns(2)
+    with m13_left:
+        st.markdown("**M13 行为牵引（本轮）**")
+        if m13_eval:
+            st.markdown(
+                "\n".join(
+                    [
+                        f"- 摘要：{_clip_text(m13_eval.get('prompt_safe_summary'), limit=200)}",
+                        f"- 倾向动作：{_join_values(m13_eval.get('preferred_reply_actions'))}",
+                        f"- 抑制动作：{_join_values(m13_eval.get('discouraged_reply_actions'))}",
+                    ]
+                )
+            )
+        else:
+            st.caption("暂无。")
+        st.markdown("**无聊 / 探索（本轮）**")
+        if m13_boredom_eval:
+            st.markdown(
+                "\n".join(
+                    [
+                        f"- 档位：{_clip_text(m13_boredom_eval.get('boredom_band'), limit=40)}",
+                        f"- 探索模式：{_clip_text(m13_boredom_eval.get('preferred_exploration_mode'), limit=60)}",
+                        f"- 摘要：{_clip_text(m13_boredom_eval.get('prompt_safe_summary'), limit=200)}",
+                    ]
+                )
+            )
+        else:
+            st.caption("暂无。")
+    with m13_right:
+        st.markdown("**奖赏代理（本轮）**")
+        if m13_reward_eval:
+            st.markdown(
+                "\n".join(
+                    [
+                        f"- 摘要：{_clip_text(m13_reward_eval.get('prompt_safe_summary'), limit=200)}",
+                        f"- 待结算：{len(_dict_rows(m13_reward_eval.get('pending_settlements')))} 条",
+                    ]
+                )
+            )
+        else:
+            st.caption("暂无。")
+        debug_summary = str(thinking.get("debug_summary") or "").strip()
+        if debug_summary:
+            st.markdown(f"**思考摘要（调试）**  \n{debug_summary}")
+
+    st.subheader("自主意识 · M13 持久状态")
+    auto1, auto2, auto3 = st.columns(3)
+    with auto1:
+        st.markdown(
+            "\n".join(
+                [
+                    "**有界主动续写**",
+                    f"- 已启用：{_yes_no(initiative.get('enabled'))}",
+                    f"- 用户 opt-in：{_yes_no(initiative.get('user_opt_in'))}",
+                    f"- 隐式空闲送达：{_yes_no(initiative.get('implicit_idle_delivery'))}",
+                    f"- 冷却轮次：{initiative.get('cooldown_turns', '—')}",
+                    f"- 上次主动：{_format_unix_time(initiative.get('last_proactive_turn_at'))}",
+                ]
+            )
+        )
+        if pending_proposal:
+            st.markdown(
+                "\n".join(
+                    [
+                        "**待执行主动提案**",
+                        f"- 触发：{_clip_text(pending_proposal.get('trigger'), limit=60)}",
+                        f"- 话题：{_clip_text(pending_proposal.get('proposed_topic'), limit=100)}",
+                        f"- 意图：{_clip_text(pending_proposal.get('ordinary_language_intent'), limit=160)}",
+                    ]
+                )
+            )
+    with auto2:
+        st.markdown(
+            "\n".join(
+                [
+                    "**无聊代理**",
+                    f"- 无聊度：{float(boredom.get('boredom_level', 0) or 0):.2f}",
+                    f"- 陈旧轮数：{boredom.get('stale_turn_count', 0)}",
+                    f"- 探索冷却：{boredom.get('exploration_cooldown', 0)}",
+                    f"- 上次探索目标：{_clip_text(boredom.get('last_exploration_target'), limit=100)}",
+                ]
+            )
+        )
+    with auto3:
+        pending_settlements = reward.get("pending_settlements")
+        settlement_count = len(pending_settlements) if isinstance(pending_settlements, list) else 0
+        st.markdown(
+            "\n".join(
+                [
+                    "**奖赏 / 路径厌倦**",
+                    f"- 路径显陈旧：{_yes_no(reward.get('path_feels_stale_proxy'))}",
+                    f"- 上次净奖赏：{float(reward.get('last_net_reward_proxy', 0) or 0):.2f}",
+                    f"- 待结算：{settlement_count} 条",
+                    f"- 最近动作轨迹：{len(_dict_rows(m13_state.get('recent_action_trace')))} 条",
+                ]
+            )
+        )
+
+    st.subheader("空闲内省（实验）")
+    st.markdown(
+        "\n".join(
+            [
+                f"- 已启用：{_yes_no(idle.get('enabled'))}（反思 "
+                f"{idle.get('reflection_count_this_session', 0)}/"
+                f"{idle.get('max_per_session', '?')}，"
+                f"经内省 outreach {idle.get('outreach_via_introspection_count_this_session', 0)}）",
+                f"- 上次内省：{_format_unix_time(idle.get('last_introspection_at'))}",
+                f"- 上次 outreach 结果：{_clip_text(idle.get('last_outreach_outcome'), limit=80)}",
+            ]
+        )
+    )
+    last_idle_plan = _as_dict(idle.get("last_conscious_idle_plan"))
+    if last_idle_plan:
+        with st.expander("最近一次空闲内省计划", expanded=True):
+            st.markdown(_idle_plan_markdown(last_idle_plan))
+
+    st.subheader("自我认知")
+    sc1, sc2 = st.columns(2)
+    with sc1:
+        st.markdown(f"**概要**  \n{_clip_text(self_cognition.get('summary'), limit=400)}")
+        st.markdown(f"**当前自我观**  \n{_clip_text(self_cognition.get('current_self_view'), limit=400)}")
+    with sc2:
+        st.markdown("**身份张力**")
+        st.markdown(_bullet_lines(self_cognition.get("identity_tensions")))
+        st.markdown("**稳定价值**")
+        st.markdown(_bullet_lines(self_cognition.get("stable_values")))
+        st.markdown("**已知局限**")
+        st.markdown(_bullet_lines(self_cognition.get("known_limits")))
+    patch_rows = _patch_history_rows(self_cognition.get("patch_history"))
+    if patch_rows:
+        st.markdown("**自我认知补丁历史**")
+        st.dataframe(pd.DataFrame(patch_rows), use_container_width=True, hide_index=True)
+
+    st.subheader("开放事项与待验证预期")
+    oi_rows = _open_item_rows(mvp_state.get("open_items"))
+    if oi_rows:
+        st.dataframe(pd.DataFrame(oi_rows), use_container_width=True, hide_index=True)
     else:
-        st.caption("Send more messages to see trait changes over time.")
+        st.caption("暂无 open_items。")
+    pending_exp = mvp_state.get("pending_expectations")
+    if isinstance(pending_exp, list) and pending_exp:
+        exp_rows = []
+        for item in pending_exp[-8:]:
+            if not isinstance(item, Mapping):
+                continue
+            exp_rows.append(
+                {
+                    "预期": _clip_text(item.get("description") or item.get("text"), limit=120),
+                    "状态": str(item.get("status") or ""),
+                    "id": str(item.get("id") or "")[:24],
+                }
+            )
+        if exp_rows:
+            st.dataframe(pd.DataFrame(exp_rows), use_container_width=True, hide_index=True)
 
-    # ── Delta display ──
-    if len(collector._history) >= 2:
-        st.subheader("Latest Change")
-        latest = collector._history[-1]
-        prev = collector._history[-2]
-        for k in latest.slow_traits:
-            delta = latest.slow_traits[k] - prev.slow_traits.get(k, 0.0)
-            if abs(delta) > 0.0001:
-                direction = "+" if delta > 0 else ""
-                st.text(f"{k}: {prev.slow_traits.get(k, 0.0):.3f} → {latest.slow_traits[k]:.3f} ({direction}{delta:.4f})")
+    log_entries = chat_iface.read_conversation_log(limit=20)
+    st.subheader("活动日志（conversation_log）")
+    if not log_entries:
+        st.caption("尚无会话日志；完成至少一轮对话后会出现。")
+    else:
+        activity_rows = _mind_activity_log_rows(log_entries)
+        st.dataframe(pd.DataFrame(activity_rows), use_container_width=True, hide_index=True)
+        with st.expander("最近一轮完整 diagnostics（调试 JSON）", expanded=False):
+            latest_entry = log_entries[-1]
+            latest_diag = _as_dict(latest_entry.get("diagnostics"))
+            slim: dict[str, object] = {
+                "turn_index": latest_entry.get("turn_index"),
+                "event": latest_entry.get("event"),
+                "conscious_plan": latest_diag.get("conscious_plan"),
+                "m13_drive_evaluation": latest_diag.get("m13_drive_evaluation"),
+                "m13_boredom_evaluation": latest_diag.get("m13_boredom_evaluation"),
+                "m13_reward_evaluation": latest_diag.get("m13_reward_evaluation"),
+                "llm_thinking_result": latest_diag.get("llm_thinking_result"),
+                "proactive_turn": latest_diag.get("proactive_turn"),
+                "post_reply_observer_skipped_reason": latest_diag.get(
+                    "post_reply_observer_skipped_reason"
+                ),
+            }
+            st.json(slim, expanded=False)
 
 
 def _join_values(value: object) -> str:
@@ -2212,7 +2524,9 @@ def main() -> None:
 
     render_sidebar()
 
-    chat_tab, dashboard_tab, inner_tab, judgment_tab = st.tabs(["Chat", "Dashboard", "内心观察", "当前人物判断"])
+    chat_tab, dashboard_tab, inner_tab, judgment_tab = st.tabs(
+        ["Chat", "内心活动", "内心观察", "当前人物判断"]
+    )
     with chat_tab:
         render_chat()
     with dashboard_tab:

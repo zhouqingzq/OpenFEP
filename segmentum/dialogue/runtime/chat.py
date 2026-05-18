@@ -612,6 +612,29 @@ class ChatInterface:
             return None
         return copy.deepcopy(state) if isinstance(state, dict) else None
 
+    def read_conversation_log(self, *, limit: int = 24) -> list[dict[str, object]]:
+        """Recent MVP conversation_log.jsonl rows (newest last)."""
+        self._ensure_runtime_fields()
+        runtime = self._mvp_runtime
+        store = getattr(runtime, "store", None) if runtime is not None else None
+        if store is None:
+            return []
+        path = store.root / "conversation_log.jsonl"
+        if not path.is_file():
+            return []
+        rows: list[dict[str, object]] = []
+        try:
+            for line in path.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                item = json.loads(line)
+                if isinstance(item, dict):
+                    rows.append(item)
+        except (OSError, json.JSONDecodeError):
+            return []
+        cap = max(1, int(limit))
+        return rows[-cap:]
+
     def set_bounded_proactive_opt_in(self, enabled: bool) -> dict[str, object]:
         self._ensure_runtime_fields()
         self._maybe_enable_mvp_llm_runtime()
