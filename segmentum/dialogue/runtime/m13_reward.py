@@ -67,6 +67,7 @@ def default_affective_reward_proxy_state() -> dict[str, Any]:
         "reward_history": [],
         "settlement_generation": 0,
         "last_seen_turn_index": -1,
+        "path_feels_stale_proxy": False,
         "engineering_proxy_label": "mvp_local_affective_reward_proxy",
     }
 
@@ -99,6 +100,7 @@ def normalize_affective_reward_proxy_state(raw: Any) -> dict[str, Any]:
     )
     merged["settlement_generation"] = int(merged.get("settlement_generation", 0) or 0)
     merged["last_seen_turn_index"] = int(merged.get("last_seen_turn_index", -1) or -1)
+    merged["path_feels_stale_proxy"] = bool(merged.get("path_feels_stale_proxy"))
     return merged
 
 
@@ -1152,6 +1154,7 @@ def apply_post_turn_m13_reward_state(
     reward_state["last_net_reward_proxy"] = evaluation.net_affective_reward_proxy
     reward_state["last_relief_proxy"] = evaluation.relief_proxy
     reward_state["last_information_gain_proxy"] = evaluation.information_gain_proxy
+    reward_state["path_feels_stale_proxy"] = bool(evaluation.path_feels_stale_proxy)
 
     pending = create_pending_settlement(
         turn_index=turn_index,

@@ -6,6 +6,7 @@ import base64
 from collections.abc import Mapping
 import hashlib
 import json
+import logging
 import shutil
 import sys
 import uuid
@@ -25,6 +26,8 @@ import streamlit.components.v1 as components
 import pandas as pd
 
 st.set_page_config(page_title="M5.6 Persona Runtime", layout="wide")
+
+_logger = logging.getLogger(__name__)
 
 from segmentum.dialogue.runtime.chat import ChatInterface, ChatRequest
 from segmentum.dialogue.runtime.dashboard import DashboardCollector
@@ -1113,6 +1116,28 @@ def render_sidebar() -> None:
                 chat_iface.set_bounded_proactive_opt_in(proactive_opt_in)
                 st.session_state.m13_initiative_opt_in_synced = proactive_opt_in
             st.session_state.m13_initiative_opt_in = proactive_opt_in
+            idle_intro_disabled = not proactive_opt_in
+            idle_intro_opt_in = st.sidebar.checkbox(
+                "Enable idle introspection (experimental)",
+                value=bool(st.session_state.get("m13_idle_introspection_opt_in", False)),
+                key="m13_idle_introspection_opt_in_checkbox",
+                disabled=idle_intro_disabled,
+                help="Requires bounded proactive messages. Runs on idle reruns only; no background threads.",
+            )
+            if idle_intro_disabled:
+                idle_intro_opt_in = False
+            if idle_intro_opt_in != bool(st.session_state.get("m13_idle_introspection_opt_in_synced", False)):
+                chat_iface.set_idle_introspection_opt_in(idle_intro_opt_in)
+                st.session_state.m13_idle_introspection_opt_in_synced = idle_intro_opt_in
+            st.session_state.m13_idle_introspection_opt_in = idle_intro_opt_in
+            idle_status = chat_iface.read_idle_introspection_status()
+            if idle_status:
+                st.sidebar.caption(
+                    "Idle introspection: "
+                    f"reflections={idle_status.get('reflection_count_this_session', 0)}/"
+                    f"{idle_status.get('max_per_session', '?')} "
+                    f"last_skip={idle_status.get('last_skip_reason') or '—'}"
+                )
         with st.sidebar.expander("LLM Settings", expanded=False):
             current_model = chat_iface.get_model()
             new_model = st.selectbox(
@@ -1459,6 +1484,7 @@ def render_chat() -> None:
             or st.session_state.current_speaker_name
             or "测试用户"
         )
+        st.session_state.m13_ui_turn_in_progress = True
         with st.spinner("胡桃正在主动续写..."):
             try:
                 check = chat_iface.maybe_propose_proactive_turn(
@@ -1501,12 +1527,14 @@ def render_chat() -> None:
             finally:
                 st.session_state.pending_proactive_continue = False
                 st.session_state.pending_speaker_name = None
+                st.session_state.m13_ui_turn_in_progress = False
         st.rerun()
     elif pending_text and chat_iface.has_agent():
         chat_iface.sync_transcript_from_messages(
             st.session_state.messages,
             pending_user_text=pending_text,
         )
+        st.session_state.m13_ui_turn_in_progress = True
         with st.spinner("AI 正在回复..."):
             try:
                 resp = chat_iface.send(
@@ -1523,10 +1551,25 @@ def render_chat() -> None:
             finally:
                 st.session_state.pending_user_message = None
                 st.session_state.pending_speaker_name = None
+                st.session_state.m13_ui_turn_in_progress = False
         st.rerun()
     elif pending_text and not chat_iface.has_agent():
         st.session_state.pending_user_message = None
         st.session_state.pending_speaker_name = None
+
+    if (
+        chat_iface.has_agent()
+        and getattr(chat_iface, "mvp_runtime_active", False)
+        and bool(st.session_state.get("m13_initiative_opt_in", False))
+        and bool(st.session_state.get("m13_idle_introspection_opt_in", False))
+        and not pending_text
+        and not pending_proactive
+        and not bool(st.session_state.get("m13_ui_turn_in_progress", False))
+    ):
+        try:
+            chat_iface.maybe_run_idle_introspection(user_active=bool(pending_text))
+        except Exception as exc:  # pragma: no cover - UI guardrail
+            _logger.exception("idle introspection tick failed: %s", exc)
 
     disabled = not chat_iface.has_agent() or pending_text is not None
     if (

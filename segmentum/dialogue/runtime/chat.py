@@ -619,6 +619,48 @@ class ChatInterface:
             return {}
         return dict(self._mvp_runtime.set_initiative_user_opt_in(bool(enabled)))
 
+    def set_idle_introspection_opt_in(self, enabled: bool) -> dict[str, object]:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return {}
+        return dict(self._mvp_runtime.set_idle_introspection_opt_in(bool(enabled)))
+
+    def maybe_run_idle_introspection(
+        self,
+        *,
+        user_active: bool = False,
+    ) -> dict[str, object]:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return {
+                "ran_introspection": False,
+                "skip_reason": "disabled",
+                "events": [],
+                "idle_result": None,
+            }
+        turn_index = max(0, int(self._turn_index))
+        return dict(
+            self._mvp_runtime.maybe_run_idle_introspection(
+                turn_index=turn_index,
+                user_active=user_active,
+            )
+        )
+
+    def read_idle_introspection_status(self) -> dict[str, object]:
+        state = self.read_mvp_state_dict()
+        if not state:
+            return {}
+        m13 = state.get("m13_drive_state", {})
+        if not isinstance(m13, dict):
+            return {}
+        initiative = m13.get("initiative", {})
+        if not isinstance(initiative, dict):
+            return {}
+        idle = initiative.get("idle_introspection", {})
+        return dict(idle) if isinstance(idle, dict) else {}
+
     def maybe_propose_proactive_turn(
         self,
         *,

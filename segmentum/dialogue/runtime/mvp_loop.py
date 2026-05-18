@@ -72,6 +72,17 @@ from segmentum.dialogue.runtime.m13_drive import (
     prompt_safe_m13_turn_diagnostics,
     resolve_m13_safety_repair,
 )
+from segmentum.dialogue.runtime.m13_idle import (
+    ENGINEERING_PROXY_LABEL as IDLE_ENGINEERING_PROXY_LABEL,
+    evaluate_idle_structural_pre_filter,
+    evaluate_idle_tick,
+    mark_idle_audit_logged,
+    mark_idle_introspection_consumed,
+    merge_idle_introspection_into_initiative,
+    normalize_idle_introspection_state,
+    set_idle_introspection_user_opt_in,
+    should_persist_idle_audit_events,
+)
 from segmentum.dialogue.runtime.m13_initiative import (
     PROACTIVE_SURROGATE_USER_TEXT,
     build_proactive_thinking_user_text,
@@ -129,6 +140,7 @@ SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
     },
     "temporal_state": {
         "last_turn_at": None,
+        "last_user_turn_at": None,
         "last_turn_index": None,
         "last_user_text": "",
         "last_reply": "",
@@ -3284,9 +3296,15 @@ def _update_temporal_state(
     reply: str,
     temporal_input: Mapping[str, Any],
     share_trace: Mapping[str, Any] | None = None,
+    proactive_turn: bool = False,
 ) -> None:
+    previous = _mapping(state.get("temporal_state"))
+    last_user_turn_at = previous.get("last_user_turn_at")
+    if not proactive_turn:
+        last_user_turn_at = now
     state["temporal_state"] = {
         "last_turn_at": now,
+        "last_user_turn_at": last_user_turn_at,
         "last_turn_index": turn_index,
         "last_user_text": user_text,
         "last_reply": reply,
@@ -3946,6 +3964,19 @@ class MVPTurnResult:
     action: str
     diagnostics: dict[str, Any] = field(default_factory=dict)
     followup_replies: list[str] = field(default_factory=list)
+
+
+@dataclass
+class MVPIdleResult:
+    ran_llm: bool
+    reflection_focus: dict[str, Any] | None = None
+    self_cognition_patch_proposal: dict[str, Any] | None = None
+    memory_consolidation_proposals: list[dict[str, Any]] = field(default_factory=list)
+    open_item_proposals: list[dict[str, Any]] = field(default_factory=list)
+    outreach_recommendation: dict[str, Any] = field(default_factory=dict)
+    audit_events: list[dict[str, Any]] = field(default_factory=list)
+    skip_reason: str = ""
+    diagnostics: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -4816,6 +4847,7 @@ class MVPDialogueRuntime:
             user_text=temporal_user_text,
             reply=visible_reply,
             temporal_input=temporal_input,
+            proactive_turn=proactive_turn,
             share_trace={
                 "user_id": user_id,
                 "speaker_name": display_name,
@@ -5098,6 +5130,192 @@ class MVPDialogueRuntime:
             normalize_m13_drive_state(state.get("m13_drive_state")).get("initiative")
         )
         return dict(initiative)
+
+    def set_idle_introspection_opt_in(self, enabled: bool) -> dict[str, Any]:
+        state = self.store.load()
+        state["m13_drive_state"] = set_idle_introspection_user_opt_in(
+            state.get("m13_drive_state", {}),
+            enabled=enabled,
+        )
+        self.store.save(state)
+        initiative = normalize_initiative_state(
+            normalize_m13_drive_state(state.get("m13_drive_state")).get("initiative")
+        )
+        idle = initiative.get("idle_introspection", {})
+        return dict(idle) if isinstance(idle, Mapping) else {}
+
+    def _append_idle_audit_events(
+        self,
+        state: dict[str, Any],
+        events: list[dict[str, Any]],
+        *,
+        skip_reason: str,
+        now: int,
+        force: bool = False,
+    ) -> dict[str, Any]:
+        m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+        initiative = merge_idle_introspection_into_initiative(m13_state.get("initiative"))
+        idle = normalize_idle_introspection_state(initiative.get("idle_introspection"))
+        if not should_persist_idle_audit_events(
+            idle,
+            skip_reason=skip_reason,
+            now=now,
+            force=force,
+        ):
+            return state
+        for event in events:
+            self.store.append_log({"event": "m13_idle_audit", **event})
+        mark_idle_audit_logged(idle, skip_reason=skip_reason, now=now)
+        initiative["idle_introspection"] = idle
+        m13_state["initiative"] = initiative
+        state["m13_drive_state"] = m13_state
+        return state
+
+    def maybe_run_idle_introspection(
+        self,
+        *,
+        turn_index: int,
+        user_active: bool = False,
+    ) -> dict[str, Any]:
+        state = self.store.load()
+        now = _utc_timestamp()
+        state, tick_check = evaluate_idle_tick(
+            state,
+            now=now,
+            turn_index=turn_index,
+            user_active=user_active,
+        )
+        events = list(tick_check.events)
+        state = self._append_idle_audit_events(
+            state,
+            events,
+            skip_reason=tick_check.skip_reason,
+            now=now,
+        )
+        if tick_check.skip_reason:
+            self.store.save(state)
+            return {
+                "ran_introspection": False,
+                "skip_reason": tick_check.skip_reason,
+                "events": events,
+                "idle_result": None,
+            }
+        signals = tick_check.structural_signals
+        if signals is None:
+            self.store.save(state)
+            return {
+                "ran_introspection": False,
+                "skip_reason": "no_structural_signal",
+                "events": events,
+                "idle_result": None,
+            }
+        state, pre_check = evaluate_idle_structural_pre_filter(
+            state,
+            now=now,
+            turn_index=turn_index,
+            signals=signals,
+        )
+        events.extend(pre_check.events)
+        state = self._append_idle_audit_events(
+            state,
+            pre_check.events,
+            skip_reason=pre_check.skip_reason,
+            now=now,
+            force=bool(pre_check.skip_reason),
+        )
+        if pre_check.skip_reason:
+            self.store.save(state)
+            return {
+                "ran_introspection": False,
+                "skip_reason": pre_check.skip_reason,
+                "events": events,
+                "idle_result": None,
+            }
+        idle_result = self.run_idle_introspection_turn(
+            now=now,
+            turn_index=turn_index,
+            structural_signals=signals,
+        )
+        events.extend(idle_result.audit_events)
+        return {
+            "ran_introspection": True,
+            "skip_reason": "",
+            "events": events,
+            "idle_result": {
+                "ran_llm": idle_result.ran_llm,
+                "reflection_focus": idle_result.reflection_focus,
+                "outreach_recommendation": idle_result.outreach_recommendation,
+                "diagnostics": idle_result.diagnostics,
+            },
+        }
+
+    def run_idle_introspection_turn(
+        self,
+        *,
+        now: int,
+        turn_index: int,
+        structural_signals: Any,
+    ) -> MVPIdleResult:
+        """M13.4 stub: bookkeeping + audit only; M14.0 adds conscious idle LLM."""
+        state = self.store.load()
+        m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+        initiative = normalize_initiative_state(m13_state.get("initiative"))
+        idle = initiative.get("idle_introspection", {})
+        if not isinstance(idle, Mapping):
+            idle = {}
+
+        outreach = {
+            "should_outreach": False,
+            "reason": "reflection_only",
+            "suggested_intent": "",
+            "trigger": "reflection_outreach",
+        }
+        audit_events: list[dict[str, Any]] = [
+            {
+                "type": "IdleIntrospectionTickEvent",
+                "turn_index": turn_index,
+                "at": now,
+                "idle_introspection.enabled": bool(idle.get("enabled")),
+                "idle_introspection.user_opt_in": bool(idle.get("user_opt_in")),
+                "structural_signals": (
+                    structural_signals.to_dict()
+                    if hasattr(structural_signals, "to_dict")
+                    else dict(structural_signals)
+                    if isinstance(structural_signals, Mapping)
+                    else {}
+                ),
+                "engineering_proxy_label": IDLE_ENGINEERING_PROXY_LABEL,
+                "stub": True,
+            }
+        ]
+        for event in audit_events:
+            self.store.append_log({"event": "m13_idle_audit", **event})
+
+        state["m13_drive_state"] = mark_idle_introspection_consumed(
+            state.get("m13_drive_state", {}),
+            now=now,
+        )
+        self.store.save(state)
+
+        diagnostics = {
+            "mvp_runtime": True,
+            "idle_introspection_turn": True,
+            "not_user_requested_current_turn": True,
+            "ran_llm": False,
+            "structural_signals": audit_events[0].get("structural_signals", {}),
+            "engineering_proxy_label": IDLE_ENGINEERING_PROXY_LABEL,
+        }
+        return MVPIdleResult(
+            ran_llm=False,
+            reflection_focus=None,
+            self_cognition_patch_proposal=None,
+            memory_consolidation_proposals=[],
+            open_item_proposals=[],
+            outreach_recommendation=outreach,
+            audit_events=audit_events,
+            skip_reason="",
+            diagnostics=diagnostics,
+        )
 
     def _mark_recalled(self, state: dict[str, Any], retrieved: list[Mapping[str, Any]], now: int) -> None:
         ids = {str(item.get("id", "")) for item in retrieved if item.get("id")}

@@ -139,6 +139,9 @@ def normalize_initiative_state(raw: Any) -> dict[str, Any]:
     pending = merged.get("pending_proactive_proposal")
     merged["pending_proactive_proposal"] = dict(pending) if isinstance(pending, Mapping) else {}
     merged["last_suppression_reason"] = str(merged.get("last_suppression_reason", "") or "")[:64]
+    from segmentum.dialogue.runtime.m13_idle import normalize_idle_introspection_state
+
+    merged["idle_introspection"] = normalize_idle_introspection_state(merged.get("idle_introspection"))
     return merged
 
 
@@ -779,6 +782,8 @@ def mark_proactive_turn_consumed(
 
 
 def set_initiative_user_opt_in(m13_state: dict[str, Any], *, enabled: bool) -> dict[str, Any]:
+    from segmentum.dialogue.runtime.m13_idle import disable_idle_introspection_on_proactive_off
+
     state = merge_initiative_into_m13_state(m13_state)
     initiative = normalize_initiative_state(state.get("initiative"))
     initiative["user_opt_in"] = bool(enabled)
@@ -786,5 +791,7 @@ def set_initiative_user_opt_in(m13_state: dict[str, Any], *, enabled: bool) -> d
     if not enabled:
         initiative["pending_proactive_proposal"] = {}
         initiative["last_suppression_reason"] = "not_opted_in"
+        state["initiative"] = initiative
+        return disable_idle_introspection_on_proactive_off(state)
     state["initiative"] = initiative
     return state
