@@ -122,6 +122,7 @@ M13.3: UI-Level Bounded Initiative
 M13.4: UI Idle Tick And Introspection Entry Point
 M14.0: Conscious Idle Reflector And Self-Cognition Patch
 M14.1: Background Self-Continuity And Persistent Idle Loop
+M14.2: Decoupled Environment Loop And Durable Overnight Outreach
 ```
 
 Deferred or non-active for new implementation unless explicitly revived:
@@ -154,6 +155,10 @@ self-thought producers) for new Hu Tao / MVP chat behavior.
   subjective consciousness. Engineering-layer copy (audit, sidebar, code comments,
   reflector JSON, ordinary_language_intent) uses operational language; persona
   chat replies are out of scope for that rule.
+- UI renders and reports runtime state; it is not the lifecycle owner for
+  overnight self-continuity. Explicit later-message requests must become
+  durable scheduled intents plus outbox entries, never just natural-language
+  follow-up notes.
 
 ---
 

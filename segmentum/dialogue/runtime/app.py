@@ -47,6 +47,7 @@ from segmentum.dialogue.runtime.m14_1_background_continuity import (
     MAX_QUEUED_OUTREACH_TTL_SECONDS,
     MIN_QUEUED_OUTREACH_TTL_SECONDS,
     MIN_TICK_SECONDS,
+    read_runner_lock,
 )
 
 _DIALOGUE_PREF_FIELDS: tuple[str, ...] = (
@@ -1127,7 +1128,7 @@ def render_sidebar() -> None:
                 value=bool(st.session_state.get("m13_idle_introspection_opt_in", False)),
                 key="m13_idle_introspection_opt_in_checkbox",
                 disabled=idle_intro_disabled,
-                help="Requires bounded proactive messages. UI reruns may run one idle tick; use M14.1 for background loop.",
+                help="Requires bounded proactive messages. Overnight work uses the M14.2 daemon path.",
             )
             if idle_intro_disabled:
                 idle_intro_opt_in = False
@@ -1141,7 +1142,7 @@ def render_sidebar() -> None:
                 value=bool(st.session_state.get("m14_1_background_opt_in", False)),
                 key="m14_1_background_opt_in_checkbox",
                 disabled=bg_disabled,
-                help="Opt-in, budget-bounded heartbeat (tokens/wallclock per day). Queues outreach for M13.3 delivery.",
+                help="Opt-in budgets for the M14.2 daemon. Inline execution is only a development fallback.",
             )
             if bg_disabled:
                 bg_opt_in = False
@@ -1211,14 +1212,26 @@ def render_sidebar() -> None:
                     if any(bg_status.get(k) != v for k, v in desired_bg.items()):
                         bg_status = chat_iface.update_background_continuity_config(**desired_bg)
             if bg_status and bg_opt_in:
+                runtime = getattr(chat_iface, "_mvp_runtime", None)
+                store = getattr(runtime, "store", None) if runtime is not None else None
+                lock = read_runner_lock(store.root) if store is not None else None
+                runner_kind = str(bg_status.get("runner_kind", "") or "none")
+                daemon_cmd = (
+                    f"python -m segmentum.dialogue.runtime.m14_2_self_loop "
+                    f"--persona {chat_iface.persona_name or 'default'} --session {getattr(chat_iface, '_session_id', 'm56_live')}"
+                )
                 st.sidebar.caption(
-                    "Background: "
+                    "Self-loop daemon: "
+                    f"status={'running' if lock else 'stopped'} "
+                    f"kind={runner_kind} "
+                    f"pid={getattr(lock, 'pid', 0) if lock else 0} "
                     f"ticks_today={bg_status.get('ticks_today', 0)}/"
                     f"{bg_status.get('max_ticks_per_day', '?')} "
                     f"llm={bg_status.get('llm_calls_today', 0)}/"
                     f"{bg_status.get('llm_calls_budget_per_day', '?')} "
                     f"lifetime_idle={bg_status.get('idle_ticks_lifetime', 0)}"
                 )
+                st.sidebar.code(daemon_cmd, language="bash")
                 if st.sidebar.button("Stop background runner", key="btn_stop_bg_runner"):
                     chat_iface.set_background_continuity_opt_in(False)
                     st.session_state.m14_1_background_opt_in = False
@@ -2017,6 +2030,46 @@ def render_dashboard() -> None:
                 use_container_width=True,
                 hide_index=True,
             )
+
+        if hasattr(chat_iface, "read_m14_2_environment_events"):
+            env_rows = chat_iface.read_m14_2_environment_events(limit=10)
+            intent_rows = chat_iface.read_m14_2_scheduled_intents()
+            if env_rows or intent_rows:
+                with st.expander("M14.2 runtime events and scheduled intents", expanded=False):
+                    if env_rows:
+                        st.markdown("**Environment events**")
+                        st.dataframe(
+                            pd.DataFrame(
+                                [
+                                    {
+                                        "type": row.get("event_type", ""),
+                                        "status": row.get("status", ""),
+                                        "source": row.get("source", ""),
+                                        "at": _format_unix_time(row.get("at")),
+                                    }
+                                    for row in env_rows[-10:]
+                                ]
+                            ),
+                            use_container_width=True,
+                            hide_index=True,
+                        )
+                    if intent_rows:
+                        st.markdown("**Scheduled intents**")
+                        st.dataframe(
+                            pd.DataFrame(
+                                [
+                                    {
+                                        "intent_id": row.get("intent_id", ""),
+                                        "status": row.get("status", ""),
+                                        "due_at": row.get("due_at", ""),
+                                        "source": _clip_text(row.get("user_request_excerpt", ""), limit=80),
+                                    }
+                                    for row in intent_rows[-10:]
+                                ]
+                            ),
+                            use_container_width=True,
+                            hide_index=True,
+                        )
 
     c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric("最近轮次", str(temporal_state.get("last_turn_index") or "—"))

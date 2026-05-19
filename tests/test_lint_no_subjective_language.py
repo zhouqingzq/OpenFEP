@@ -13,6 +13,9 @@ FORBIDDEN_ENGINEERING_PHRASES = (
     "free agent",
     "i needed to reach out",
     "she_misses_user",
+    "lonely runner",
+    "true consciousness daemon",
+    "system woke up because it missed the user",
 )
 
 SCAN_PATHS = (
@@ -21,12 +24,17 @@ SCAN_PATHS = (
     "segmentum/dialogue/runtime/m14_self_continuity.py",
     "segmentum/dialogue/runtime/m14_idle_owners.py",
     "segmentum/dialogue/runtime/m14_idle_reflector.py",
+    "segmentum/dialogue/runtime/m14_2_event_bus.py",
+    "segmentum/dialogue/runtime/m14_2_scheduled_intents.py",
+    "segmentum/dialogue/runtime/m14_2_self_loop.py",
     "segmentum/dialogue/runtime/m13_initiative.py",
     "segmentum/dialogue/runtime/app.py",
+    "reports/m14_2_runtime_lifecycle.md",
     "CLAUDE.md",
     "prompts/M13.3_Work_Prompt.md",
     "prompts/M13.4_Work_Prompt.md",
     "prompts/M14.1_Work_Prompt.md",
+    "prompts/M14.2_Work_Prompt.md",
 )
 
 

@@ -66,6 +66,7 @@ _ALLOWED_TRIGGERS: frozenset[str] = frozenset(
         "correction_followup",
         "explicit_remind_request",
         "reflection_outreach",
+        "scheduled_outreach",
     }
 )
 

@@ -28,11 +28,15 @@ class BackgroundSelfRunner:
         runtime: Any,
         *,
         session_root: Path,
+        persona_id: str = "default",
+        session_id: str = "default",
         runner_kind: str = "inline",
         tick_interval_seconds: int = 90,
     ) -> None:
         self._runtime = runtime
         self._session_root = Path(session_root)
+        self._persona_id = persona_id
+        self._session_id = session_id
         self._runner_kind = runner_kind
         self._tick_interval = max(MIN_TICK_SECONDS, int(tick_interval_seconds))
         self._stop = threading.Event()
@@ -103,7 +107,19 @@ class BackgroundSelfRunner:
         while not self._stop.is_set():
             started = time.monotonic()
             try:
-                self._runtime.run_background_self_tick(runner_kind=self._runner_kind)
+                if self._runner_kind == "inline_dev_fallback":
+                    from segmentum.dialogue.runtime.m14_2_self_loop import M142SelfLoopDaemon
+
+                    daemon = M142SelfLoopDaemon(
+                        self._runtime,
+                        persona_id=self._persona_id,
+                        session_id=self._session_id,
+                        tick_interval_seconds=self._tick_interval,
+                        runner_kind=self._runner_kind,
+                    )
+                    daemon.tick_once(record_clock_wake=True)
+                else:
+                    self._runtime.run_background_self_tick(runner_kind=self._runner_kind)
             except Exception as exc:  # pragma: no cover - runner resilience
                 self._runtime.append_background_audit(
                     {

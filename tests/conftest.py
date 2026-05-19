@@ -13,7 +13,22 @@ from segmentum.m225_benchmarks import (
     record_m225_test_execution,
 )
 
-_M_MILESTONE_RE = re.compile(r"test_m(\d+)")
+_M_DOTTED_RE = re.compile(r"test_m(\d+)_(\d+)")
+_M_COMPACT_RE = re.compile(r"test_m(\d+)")
+
+
+def _milestone_major_from_filename(filename: str) -> int | None:
+    dotted = _M_DOTTED_RE.search(filename)
+    if dotted:
+        return int(dotted.group(1))
+
+    compact = _M_COMPACT_RE.search(filename)
+    if compact is None:
+        return None
+    digits = compact.group(1)
+    if len(digits) >= 2 and digits[0] in {"2", "3", "4", "5", "6", "7", "8", "9"}:
+        return int(digits[0])
+    return int(digits)
 
 
 def _is_pre_m11_test(item: pytest.Item) -> bool:
@@ -24,20 +39,31 @@ def _is_pre_m11_test(item: pytest.Item) -> bool:
     if filename == "test_lint_no_subjective_language.py":
         return False
 
-    # test_m1[1-9]* → M11–M19: run
     if re.match(r"test_m1[1-9]", filename):
         return False
 
-    # test_m2* → M2.x (all pre-M11)
-    if filename.startswith("test_m2"):
+    major = _milestone_major_from_filename(filename)
+    if major is None:
         return True
+    return major < 11
 
-    # test_m3, test_m10 etc. → pre-M11
-    match = _M_MILESTONE_RE.search(filename)
-    if not match:
-        return True  # non-M-prefixed tests (e.g. test_metacognitive)
 
-    return int(match.group(1)) < 11
+def _is_inactive_path_a_test(item: pytest.Item) -> bool:
+    """Return True for frozen Path A / M10-and-earlier tests."""
+    filename = item.path.name if hasattr(item, "path") else ""
+    if not filename or filename == "test_lint_no_subjective_language.py":
+        return False
+    major = _milestone_major_from_filename(filename)
+    if major is not None and major <= 10:
+        return True
+    try:
+        source = Path(str(item.path)).read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return False
+    return any(
+        keyword in source
+        for keyword in ("conversation_loop", "CognitiveLoop", "SelfThoughtProducer")
+    )
 
 
 def pytest_collection_modifyitems(
@@ -46,6 +72,8 @@ def pytest_collection_modifyitems(
     for item in items:
         if _is_pre_m11_test(item):
             item.add_marker(pytest.mark.pre_m11)
+        if _is_inactive_path_a_test(item):
+            item.add_marker(pytest.mark.inactive_path_a)
 
 
 def pytest_sessionstart(session) -> None:  # noqa: ANN001

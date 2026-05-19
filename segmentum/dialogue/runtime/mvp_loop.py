@@ -125,6 +125,7 @@ from segmentum.dialogue.runtime.m14_1_background_continuity import (
     normalize_background_continuity_state,
     outreach_suppression_is_transient,
     pop_next_pending_outreach,
+    record_queued_outreach_delivery_attempt,
     record_background_tick,
     session_file_lock,
     set_background_continuity_opt_in,
@@ -5475,6 +5476,21 @@ class MVPDialogueRuntime:
             expires_at=int(entry.get("expires_at", now) or now),
             cooldown_cost=0,
         )
+        record_queued_outreach_delivery_attempt(self.store.root, proposal.proposal_id, now=now)
+        self.store.append_log(
+            {
+                "event": "m14_2_audit",
+                "type": "OutboxDeliveryAttemptEvent",
+                "at": now,
+                "proposal_id": proposal.proposal_id,
+                "source_intent_id": str(entry.get("source_intent_id", "")),
+                "runner_kind": "delivery_surface",
+                "persona_id": str(entry.get("persona_id", "default") or "default"),
+                "session_id": str(entry.get("session_id", self.store.root.name) or self.store.root.name),
+                "correlation_id": "",
+                "engineering_proxy_label": "mvp_local_decoupled_self_loop",
+            }
+        )
         state = self.store.load()
         check_state, check = evaluate_proactive_initiative(
             state,
@@ -5489,9 +5505,35 @@ class MVPDialogueRuntime:
             self.store.append_log({"event": "m13_proactive_audit", **event})
         if check.proposal is None:
             reason = check.suppression_reason or "suppressed"
+            suppression_type = (
+                "OutboxDeliveryTransientSuppressionEvent"
+                if outreach_suppression_is_transient(reason)
+                else "OutboxDeliveryHardSuppressionEvent"
+            )
+            self.store.append_log(
+                {
+                    "event": "m14_2_audit",
+                    "type": suppression_type,
+                    "at": now,
+                    "proposal_id": proposal.proposal_id,
+                    "source_intent_id": str(entry.get("source_intent_id", "")),
+                    "reason": reason,
+                    "runner_kind": "delivery_surface",
+                    "persona_id": str(entry.get("persona_id", "default") or "default"),
+                    "session_id": str(entry.get("session_id", self.store.root.name) or self.store.root.name),
+                    "correlation_id": "",
+                    "engineering_proxy_label": "mvp_local_decoupled_self_loop",
+                }
+            )
             if outreach_suppression_is_transient(reason):
                 return {"drained": False, "reason": reason, "transient": True}
-            update_queued_outreach_status(self.store.root, proposal.proposal_id, "suppressed")
+            update_queued_outreach_status(
+                self.store.root,
+                proposal.proposal_id,
+                "suppressed",
+                now=now,
+                suppression_reason=reason,
+            )
             self.append_background_audit(
                 {
                     "type": "QueuedOutreachSuppressedEvent",
@@ -5508,7 +5550,7 @@ class MVPDialogueRuntime:
             now=now,
         )
         if str(result.reply or "").strip():
-            update_queued_outreach_status(self.store.root, proposal.proposal_id, "delivered")
+            update_queued_outreach_status(self.store.root, proposal.proposal_id, "delivered", now=now)
             self.append_background_audit(
                 {
                     "type": "QueuedOutreachDeliveredEvent",
@@ -5517,11 +5559,38 @@ class MVPDialogueRuntime:
                     "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
                 }
             )
+            self._close_m14_2_delivery_links(entry, now=now)
             return {"drained": True, "reply": result.reply, "reason": ""}
         reason = str(result.diagnostics.get("suppression_reason", "") or "suppressed")
+        suppression_type = (
+            "OutboxDeliveryTransientSuppressionEvent"
+            if outreach_suppression_is_transient(reason)
+            else "OutboxDeliveryHardSuppressionEvent"
+        )
+        self.store.append_log(
+            {
+                "event": "m14_2_audit",
+                "type": suppression_type,
+                "at": now,
+                "proposal_id": proposal.proposal_id,
+                "source_intent_id": str(entry.get("source_intent_id", "")),
+                "reason": reason,
+                "runner_kind": "delivery_surface",
+                "persona_id": str(entry.get("persona_id", "default") or "default"),
+                "session_id": str(entry.get("session_id", self.store.root.name) or self.store.root.name),
+                "correlation_id": "",
+                "engineering_proxy_label": "mvp_local_decoupled_self_loop",
+            }
+        )
         if outreach_suppression_is_transient(reason):
             return {"drained": False, "reason": reason, "transient": True}
-        update_queued_outreach_status(self.store.root, proposal.proposal_id, "suppressed")
+        update_queued_outreach_status(
+            self.store.root,
+            proposal.proposal_id,
+            "suppressed",
+            now=now,
+            suppression_reason=reason,
+        )
         self.append_background_audit(
             {
                 "type": "QueuedOutreachSuppressedEvent",
@@ -5532,6 +5601,47 @@ class MVPDialogueRuntime:
             }
         )
         return {"drained": False, "reason": reason}
+
+    def _close_m14_2_delivery_links(self, entry: Mapping[str, Any], *, now: int) -> None:
+        intent_id = str(entry.get("source_intent_id", "") or "")
+        if not intent_id:
+            return
+        try:
+            from segmentum.dialogue.runtime.m14_2_scheduled_intents import (
+                ScheduledIntentStore,
+                close_scheduled_open_item,
+            )
+
+            intent_store = ScheduledIntentStore(
+                self.store.root,
+                persona_id=str(entry.get("persona_id", "default") or "default"),
+                session_id=str(entry.get("session_id", self.store.root.name) or self.store.root.name),
+            )
+            intent_store.mark_status(
+                intent_id,
+                "delivered",
+                now=now,
+                proposal_id=str(entry.get("proposal_id", "")),
+            )
+            state = self.store.load()
+            if close_scheduled_open_item(state, intent_id, status="closed"):
+                self.store.save(state)
+            self.store.append_log(
+                {
+                    "event": "m14_2_audit",
+                    "type": "OutboxEntryDeliveredEvent",
+                    "at": now,
+                    "source_intent_id": intent_id,
+                    "proposal_id": str(entry.get("proposal_id", "")),
+                    "runner_kind": "delivery_surface",
+                    "persona_id": intent_store.persona_id,
+                    "session_id": intent_store.session_id,
+                    "correlation_id": "",
+                    "engineering_proxy_label": "mvp_local_decoupled_self_loop",
+                }
+            )
+        except Exception:
+            return
 
     def _append_idle_audit_events(
         self,

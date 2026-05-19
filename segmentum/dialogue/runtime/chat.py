@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass, field
+import hashlib
 import json
+import logging
 import shutil
 from pathlib import Path
 import time
@@ -24,6 +26,8 @@ from .mvp_loop import (
 
 if TYPE_CHECKING:
     from ...agent import SegmentAgent
+
+_logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -703,11 +707,14 @@ class ChatInterface:
         self._maybe_enable_mvp_llm_runtime()
         if self._mvp_runtime is None:
             return {}
-        bg = dict(self._mvp_runtime.set_background_continuity_opt_in(bool(enabled), runner_kind="inline"))
-        if enabled:
-            self._start_background_runner()
-        else:
-            self._stop_background_runner()
+        runner_kind = "standalone_daemon" if enabled else "none"
+        bg = dict(
+            self._mvp_runtime.set_background_continuity_opt_in(
+                bool(enabled),
+                runner_kind=runner_kind,
+            )
+        )
+        self._stop_background_runner()
         return bg
 
     def update_background_continuity_config(self, **updates: object) -> dict[str, object]:
@@ -726,7 +733,36 @@ class ChatInterface:
 
         return [dict(row) for row in load_queued_outreach(self._mvp_runtime.store.root)]
 
+    def read_m14_2_environment_events(self, *, limit: int = 20) -> list[dict[str, object]]:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return []
+        from segmentum.dialogue.runtime.m14_2_event_bus import EnvironmentEventStore
+
+        store = EnvironmentEventStore(
+            self._mvp_runtime.store.root,
+            persona_id=self._resolved_persona_id(),
+            session_id=self._session_id,
+        )
+        return [dict(row) for row in store.query_events(limit=limit)]
+
+    def read_m14_2_scheduled_intents(self) -> list[dict[str, object]]:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return []
+        from segmentum.dialogue.runtime.m14_2_scheduled_intents import ScheduledIntentStore
+
+        store = ScheduledIntentStore(
+            self._mvp_runtime.store.root,
+            persona_id=self._resolved_persona_id(),
+            session_id=self._session_id,
+        )
+        return [dict(row) for row in store.list_intents()]
+
     def _start_background_runner(self) -> None:
+        """Development-only inline fallback; not the M14.2 overnight acceptance path."""
         from segmentum.dialogue.runtime.m14_1_self_runner import BackgroundSelfRunner
 
         self._ensure_runtime_fields()
@@ -740,7 +776,9 @@ class ChatInterface:
         self._background_runner = BackgroundSelfRunner(
             self._mvp_runtime,
             session_root=store.root,
-            runner_kind="inline",
+            persona_id=self._resolved_persona_id(),
+            session_id=self._session_id,
+            runner_kind="inline_dev_fallback",
             tick_interval_seconds=interval,
         )
         self._background_runner.start()
@@ -750,11 +788,59 @@ class ChatInterface:
             self._background_runner.stop()
             self._background_runner = None
 
+    def _append_m14_2_environment_event(
+        self,
+        event_type: str,
+        payload: dict[str, object],
+        *,
+        source: str,
+        correlation_id: str | None = None,
+    ) -> None:
+        runtime = self._mvp_runtime
+        if runtime is None:
+            return
+        try:
+            from segmentum.dialogue.runtime.m14_2_event_bus import EnvironmentEventStore
+
+            store = EnvironmentEventStore(
+                runtime.store.root,
+                persona_id=self._resolved_persona_id(),
+                session_id=self._session_id,
+            )
+            event_id = store.append_event(
+                event_type,
+                payload,
+                source=source,
+                correlation_id=correlation_id,
+            )
+            runtime.store.append_log(
+                {
+                    "event": "m14_2_audit",
+                    "type": "EnvironmentEventAppendedEvent",
+                    "event_id": event_id,
+                    "event_type": event_type,
+                    "runner_kind": "streamlit_adapter",
+                    "persona_id": self._resolved_persona_id(),
+                    "session_id": self._session_id,
+                    "correlation_id": correlation_id or "",
+                    "engineering_proxy_label": "mvp_local_decoupled_self_loop",
+                }
+            )
+        except Exception as exc:
+            _logger.warning("failed to append M14.2 environment event %s: %s", event_type, exc)
+            return
+
     def record_background_streamlit_ping(self) -> None:
         self._ensure_runtime_fields()
         self._maybe_enable_mvp_llm_runtime()
         if self._mvp_runtime is None:
             return
+        self._append_m14_2_environment_event(
+            "UIPingEvent",
+            {"surface": "streamlit_chat", "turn_index": self._turn_index},
+            source="streamlit",
+            correlation_id=f"ui-ping:{int(time.time())}",
+        )
         self._mvp_runtime.record_streamlit_ping()
         if self._background_runner is not None:
             self._background_runner.record_streamlit_ping()
@@ -764,6 +850,12 @@ class ChatInterface:
         self._maybe_enable_mvp_llm_runtime()
         if self._mvp_runtime is None:
             return {"drained": False, "reason": "disabled"}
+        self._append_m14_2_environment_event(
+            "OutboxDeliverySurfaceAvailableEvent",
+            {"surface": "streamlit_chat", "turn_index": self._turn_index},
+            source="streamlit",
+            correlation_id=f"delivery-surface:{self._turn_index}:{int(time.time())}",
+        )
         return dict(self._mvp_runtime.maybe_drain_queued_outreach(turn_index=self._turn_index))
 
     def maybe_propose_proactive_turn(
@@ -953,6 +1045,19 @@ class ChatInterface:
             self._transcript.append(TranscriptUtterance(role="agent", text=followup))
         self._dashboard.snapshot(self._agent)
         self._turn_index += 1
+        self._append_m14_2_environment_event(
+            "UserMessageCommittedEvent",
+            {
+                "user_text": request.user_text,
+                "speaker_name": request.speaker_name,
+                "turn_index": self._turn_index,
+            },
+            source="streamlit",
+            correlation_id=(
+                f"user-message:{self._turn_index}:"
+                f"{hashlib.sha1(request.user_text.encode('utf-8')).hexdigest()[:16]}"
+            ),
+        )
 
         post_traits = self._agent.slow_variable_learner.state.traits.to_dict()
         post_big_five = {

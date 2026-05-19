@@ -370,18 +370,37 @@ def enqueue_outreach_proposal(
     now: int,
     ttl_seconds: int,
     drive_snapshot: Mapping[str, Any] | None = None,
+    due_at: int | None = None,
+    source_intent_id: str = "",
 ) -> dict[str, Any]:
     rows = load_queued_outreach(session_root)
+    source_intent_id = str(source_intent_id or proposal.get("source_intent_id", "") or "")
+    if source_intent_id:
+        for row in rows:
+            if str(row.get("source_intent_id", "")) == source_intent_id:
+                return dict(row)
     entry = {
         "proposal_id": str(proposal.get("proposal_id", "") or ""),
         "created_at": now,
+        "due_at": int(due_at if due_at is not None else proposal.get("due_at", now) or now),
         "expires_at": now + max(MIN_QUEUED_OUTREACH_TTL_SECONDS, int(ttl_seconds)),
         "trigger": str(proposal.get("trigger", "reflection_outreach") or "reflection_outreach"),
+        "source_intent_id": source_intent_id,
+        "persona_id": str(proposal.get("persona_id", "") or ""),
+        "session_id": str(proposal.get("session_id", "") or ""),
         "ordinary_language_intent": str(proposal.get("ordinary_language_intent", "") or "")[:240],
         "proposed_topic": str(proposal.get("proposed_topic", "") or "")[:120],
         "evidence_refs": list(proposal.get("evidence_refs", []) or [])[:8],
         "drive_snapshot_compact": dict(drive_snapshot or {}),
         "status": "pending",
+        "delivery_policy": {
+            "require_m13_3_assessor": True,
+            "max_visible_messages": 1,
+            "no_direct_generation": True,
+        },
+        "delivery_attempts": 0,
+        "last_delivery_attempt_at": 0,
+        "last_suppression_reason": "",
         "source": "queued_outreach",
     }
     rows.append(entry)
@@ -427,11 +446,31 @@ def pop_next_pending_outreach(session_root: Path, *, now: int) -> dict[str, Any]
     return dict(pending[0])
 
 
-def update_queued_outreach_status(session_root: Path, proposal_id: str, status: str) -> None:
+def update_queued_outreach_status(
+    session_root: Path,
+    proposal_id: str,
+    status: str,
+    *,
+    now: int | None = None,
+    suppression_reason: str = "",
+) -> None:
     rows = load_queued_outreach(session_root)
     for row in rows:
         if str(row.get("proposal_id", "")) == proposal_id:
             row["status"] = status
+            if now is not None and status in {"delivered", "suppressed", "expired"}:
+                row["last_delivery_attempt_at"] = int(now)
+            if suppression_reason:
+                row["last_suppression_reason"] = str(suppression_reason)[:160]
+    save_queued_outreach(session_root, rows)
+
+
+def record_queued_outreach_delivery_attempt(session_root: Path, proposal_id: str, *, now: int) -> None:
+    rows = load_queued_outreach(session_root)
+    for row in rows:
+        if str(row.get("proposal_id", "")) == proposal_id:
+            row["delivery_attempts"] = int(row.get("delivery_attempts", 0) or 0) + 1
+            row["last_delivery_attempt_at"] = int(now)
     save_queued_outreach(session_root, rows)
 
 
