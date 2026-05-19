@@ -102,13 +102,9 @@ def _looks_like_scheduled_outreach(text: str) -> bool:
             "leave me a message",
             "message me",
             "tell me tomorrow",
+            "tell me at",
             "tell me when",
             "say something",
-            "remind me",
-            "follow up",
-            "keep thinking",
-            "think about this",
-            "mull it over",
             "remember to say",
             "remember to tell",
         )
@@ -255,12 +251,30 @@ class ScheduledIntentStore:
 
     def due_intents(self, *, now: datetime | int | float | None = None) -> list[dict[str, Any]]:
         ts = int(_now_dt(now, ZoneInfo(self.timezone_name)).timestamp())
+        self.expire_overdue_intents(now=ts)
         out: list[dict[str, Any]] = []
         for row in self.list_intents(statuses={"pending", "preparing"}):
             due = int(row.get("due_at_epoch", 0) or _epoch(str(row.get("due_at"))))
             if due <= ts:
                 out.append(row)
         return out
+
+    def expire_overdue_intents(self, *, now: datetime | int | float | None = None) -> list[dict[str, Any]]:
+        ts = int(_now_dt(now, ZoneInfo(self.timezone_name)).timestamp())
+        expired: list[dict[str, Any]] = []
+        for row in self.list_intents(statuses={"pending", "preparing"}):
+            due = int(row.get("due_at_epoch", 0) or _epoch(str(row.get("due_at"))))
+            window = max(1, int(row.get("due_window_seconds", DEFAULT_DUE_WINDOW_SECONDS) or DEFAULT_DUE_WINDOW_SECONDS))
+            if due and ts > due + window:
+                updated = self.mark_status(
+                    str(row.get("intent_id", "")),
+                    "expired",
+                    now=ts,
+                    reason="expired",
+                )
+                if updated is not None:
+                    expired.append(updated)
+        return expired
 
     def intent_for_source_event(self, source_event_id: str) -> dict[str, Any] | None:
         if not source_event_id:

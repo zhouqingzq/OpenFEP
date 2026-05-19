@@ -48,6 +48,7 @@ from segmentum.dialogue.runtime.m14_1_background_continuity import (
     MIN_QUEUED_OUTREACH_TTL_SECONDS,
     MIN_TICK_SECONDS,
     read_runner_lock,
+    runner_lock_is_alive,
 )
 
 _DIALOGUE_PREF_FIELDS: tuple[str, ...] = (
@@ -1215,14 +1216,16 @@ def render_sidebar() -> None:
                 runtime = getattr(chat_iface, "_mvp_runtime", None)
                 store = getattr(runtime, "store", None) if runtime is not None else None
                 lock = read_runner_lock(store.root) if store is not None else None
+                lock_alive = runner_lock_is_alive(lock)
                 runner_kind = str(bg_status.get("runner_kind", "") or "none")
+                daemon_status = "running" if lock_alive else "stale" if lock else "stopped"
                 daemon_cmd = (
                     f"python -m segmentum.dialogue.runtime.m14_2_self_loop "
                     f"--persona {chat_iface.persona_name or 'default'} --session {getattr(chat_iface, '_session_id', 'm56_live')}"
                 )
                 st.sidebar.caption(
                     "Self-loop daemon: "
-                    f"status={'running' if lock else 'stopped'} "
+                    f"status={daemon_status} "
                     f"kind={runner_kind} "
                     f"pid={getattr(lock, 'pid', 0) if lock else 0} "
                     f"ticks_today={bg_status.get('ticks_today', 0)}/"
@@ -1687,19 +1690,6 @@ def render_chat() -> None:
             chat_iface.record_background_streamlit_ping()
         except Exception:  # pragma: no cover
             pass
-    if (
-        chat_iface.has_agent()
-        and getattr(chat_iface, "mvp_runtime_active", False)
-        and bool(st.session_state.get("m13_initiative_opt_in", False))
-        and bool(st.session_state.get("m13_idle_introspection_opt_in", False))
-        and not pending_text
-        and not pending_proactive
-        and not bool(st.session_state.get("m13_ui_turn_in_progress", False))
-    ):
-        try:
-            chat_iface.maybe_run_idle_introspection(user_active=bool(pending_text))
-        except Exception as exc:  # pragma: no cover - UI guardrail
-            _logger.exception("idle introspection tick failed: %s", exc)
     if (
         chat_iface.has_agent()
         and getattr(chat_iface, "mvp_runtime_active", False)

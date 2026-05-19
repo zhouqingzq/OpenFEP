@@ -182,6 +182,12 @@ class M142SelfLoopDaemon:
                 if result:
                     prepared.append(result)
             except Exception as exc:
+                self.intent_store.mark_status(
+                    str(intent.get("intent_id", "")),
+                    "suppressed",
+                    now=ts,
+                    reason=type(exc).__name__,
+                )
                 self._audit(
                     {
                         "type": "ScheduledIntentSuppressedEvent",
@@ -282,6 +288,7 @@ class M142SelfLoopDaemon:
                 turn_index=turn_index,
                 structural_signals=signals,
                 queue_outreach=False,
+                allow_direct_outreach=False,
                 background_runner_kind=self.runner_kind,
             )
         except BackgroundBudgetExhausted as exc:

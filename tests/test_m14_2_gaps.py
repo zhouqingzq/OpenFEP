@@ -14,6 +14,8 @@ from segmentum.dialogue.runtime.m13_initiative import (
 from segmentum.dialogue.runtime.m14_1_background_continuity import (
     enqueue_outreach_proposal,
     load_queued_outreach,
+    outreach_suppression_is_transient,
+    pop_next_pending_outreach,
     set_background_continuity_opt_in,
 )
 from segmentum.dialogue.runtime.m14_2_event_bus import EnvironmentEventStore
@@ -91,6 +93,38 @@ def test_keyword_cue_accepts_remember_to_say_when_i_come_back() -> None:
 
 def test_keyword_cue_accepts_chinese_leave_message_phrase() -> None:
     assert _looks_like_scheduled_outreach("睡一晚，醒来给我留句话") is True
+
+
+def test_keyword_cue_rejects_reflection_or_reminder_without_message_request() -> None:
+    assert _looks_like_scheduled_outreach("think about this tomorrow") is False
+    assert _looks_like_scheduled_outreach("keep thinking about this overnight") is False
+    assert _looks_like_scheduled_outreach("remind me tomorrow about the meeting") is False
+    assert _looks_like_scheduled_outreach("follow up tomorrow on the report") is False
+
+
+def test_delivery_surface_unavailable_is_transient_suppression() -> None:
+    assert outreach_suppression_is_transient("delivery_surface_unavailable") is True
+
+
+def test_outbox_drain_waits_until_due_at(tmp_path: Path) -> None:
+    enqueue_outreach_proposal(
+        tmp_path,
+        proposal={
+            "proposal_id": "prop_future",
+            "trigger": "scheduled_outreach",
+            "source_intent_id": "intent_future",
+            "ordinary_language_intent": "future",
+            "proposed_topic": "scheduled outreach",
+        },
+        now=100,
+        ttl_seconds=3600,
+        due_at=200,
+        source_intent_id="intent_future",
+    )
+    assert pop_next_pending_outreach(tmp_path, now=199) is None
+    due = pop_next_pending_outreach(tmp_path, now=200)
+    assert due is not None
+    assert due["proposal_id"] == "prop_future"
 
 
 def test_opt_out_blocks_preparation_but_preserves_audit(tmp_path: Path) -> None:
@@ -223,7 +257,7 @@ def test_transient_delivery_suppression_keeps_outbox_pending(tmp_path: Path) -> 
         "segmentum.dialogue.runtime.mvp_loop.evaluate_proactive_initiative",
         side_effect=lambda state, **kwargs: _suppressed_check(state, "cooldown_active"),
     ):
-        result = runtime.maybe_drain_queued_outreach(turn_index=4)
+        result = runtime.maybe_drain_queued_outreach(turn_index=4, now=due)
     assert result["drained"] is False
     assert result.get("transient") is True
     rows = load_queued_outreach(tmp_path)
@@ -249,7 +283,7 @@ def test_hard_delivery_suppression_marks_outbox_suppressed(tmp_path: Path) -> No
         "segmentum.dialogue.runtime.mvp_loop.evaluate_proactive_initiative",
         side_effect=lambda state, **kwargs: _suppressed_check(state, "safety_risk"),
     ):
-        result = runtime.maybe_drain_queued_outreach(turn_index=4)
+        result = runtime.maybe_drain_queued_outreach(turn_index=4, now=due)
     assert result["drained"] is False
     rows = load_queued_outreach(tmp_path)
     assert rows and rows[0]["status"] == "suppressed"

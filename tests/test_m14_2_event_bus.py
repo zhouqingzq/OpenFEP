@@ -35,6 +35,18 @@ def test_event_bus_claim_lease_recovers_after_crash(tmp_path: Path) -> None:
     assert recovered and recovered[0]["claimed_by"] == "worker-b"
 
 
+def test_event_bus_non_retryable_failure_is_not_reclaimed(tmp_path: Path) -> None:
+    clock = {"now": 100}
+    store = EnvironmentEventStore(tmp_path, persona_id="p", session_id="s", clock=lambda: clock["now"])
+    event_id = store.append_event("UserMessageCommittedEvent", {"user_text": "x"}, source="test", correlation_id="x")
+    claimed = store.claim_events("worker-a", limit=1, lease_seconds=1)
+    assert claimed and claimed[0]["event_id"] == event_id
+    store.fail_event(event_id, "worker-a", "fatal", retryable=False)
+    clock["now"] = 102
+    assert store.query_events()[0]["retryable"] is False
+    assert store.claim_events("worker-b", limit=1, lease_seconds=1) == []
+
+
 def test_event_bus_idempotent_correlation_id(tmp_path: Path) -> None:
     store = EnvironmentEventStore(tmp_path, persona_id="p", session_id="s", clock=lambda: 100)
     first = store.append_event("UIPingEvent", {}, source="test", correlation_id="same")

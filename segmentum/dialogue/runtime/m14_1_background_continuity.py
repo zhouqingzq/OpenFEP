@@ -29,7 +29,9 @@ MAX_QUEUED_OUTREACH = 8
 INLINE_RUNNER_IDLE_DEATH_SECONDS = 1800
 LOCK_TIMEOUT_SECONDS = 5.0
 
-_TRANSIENT_OUTREACH_SUPPRESSION = frozenset({"cooldown_active", "user_active", "user_typing"})
+_TRANSIENT_OUTREACH_SUPPRESSION = frozenset(
+    {"cooldown_active", "delivery_surface_unavailable", "user_active", "user_typing"}
+)
 
 
 def default_background_continuity_state() -> dict[str, Any]:
@@ -277,6 +279,12 @@ def read_runner_lock(session_root: Path) -> RunnerLockInfo | None:
     )
 
 
+def runner_lock_is_alive(info: RunnerLockInfo | None) -> bool:
+    if info is None:
+        return False
+    return _pid_alive(int(info.pid))
+
+
 def try_acquire_runner_lock(session_root: Path, *, runner_kind: str, now: int) -> tuple[bool, RunnerLockInfo | None]:
     session_root.mkdir(parents=True, exist_ok=True)
     lock_path = session_root / "runner.lock"
@@ -439,10 +447,14 @@ def expire_queued_outreach(session_root: Path, *, now: int) -> list[dict[str, An
 def pop_next_pending_outreach(session_root: Path, *, now: int) -> dict[str, Any] | None:
     expire_queued_outreach(session_root, now=now)
     rows = load_queued_outreach(session_root)
-    pending = [r for r in rows if str(r.get("status", "")) == "pending"]
+    pending = [
+        r
+        for r in rows
+        if str(r.get("status", "")) == "pending" and int(r.get("due_at", r.get("created_at", 0)) or 0) <= now
+    ]
     if not pending:
         return None
-    pending.sort(key=lambda r: int(r.get("created_at", 0) or 0))
+    pending.sort(key=lambda r: (int(r.get("due_at", 0) or 0), int(r.get("created_at", 0) or 0)))
     return dict(pending[0])
 
 

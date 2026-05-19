@@ -190,6 +190,8 @@ class EnvironmentEventStore:
                 status = str(event.get("status", "pending"))
                 if status in TERMINAL_EVENT_STATUSES:
                     continue
+                if status == "failed" and not bool(event.get("retryable", True)):
+                    continue
                 if status == "claimed" and now - int(event.get("claimed_at", 0) or 0) <= lease_seconds:
                     continue
                 claim_row = {

@@ -76,6 +76,42 @@ class _DeliveryLLM:
         }
 
 
+class _DirectOutreachLLM(_DeliveryLLM):
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        if "M14" in system_prompt or "idle_introspection" in user_prompt:
+            return {
+                "mode": "idle_introspection",
+                "reflection_focus": {
+                    "topic": "scheduled outreach",
+                    "evidence_refs": ["env_due"],
+                    "reflection_kind": "open_item",
+                },
+                "self_cognition_patch_proposal": {"apply": False},
+                "memory_consolidation_proposals": [],
+                "open_item_proposals": [],
+                "outreach_recommendation": {
+                    "should_outreach": True,
+                    "suggested_intent": "send the scheduled follow-up",
+                    "evidence_refs": ["env_due"],
+                },
+            }
+        if "M13" in system_prompt:
+            return {"allow_delivery": True, "confidence": 0.9, "violation_codes": [], "reason_codes": []}
+        return {
+            "thought_type": "short",
+            "llm_thinking_result": {"debug_summary": "direct"},
+            "reply": "DIRECT_VISIBLE_REPLY_SHOULD_NOT_HAPPEN",
+            "reply_action": "answer",
+            "disclosure_action": "none",
+            "new_expectations": [],
+            "memory_writes": [],
+            "self_cognition_patch": {"apply": False},
+            "open_item_writes": [],
+            "habit_updates": [],
+            "memory_dynamics_note": "",
+        }
+
+
 def test_self_loop_daemon_records_clock_wake_events(tmp_path: Path) -> None:
     store = MVPStateStore(tmp_path)
     store.save(_full_opted_state())
@@ -140,8 +176,9 @@ def test_outbox_drain_uses_m13_3_and_closes_intent_and_open_item(tmp_path: Path)
         now=datetime(2026, 5, 19, 20, 0, tzinfo=ZoneInfo("Asia/Shanghai")),
     )
     assert intent is not None
-    daemon.prepare_due_intents(now=int(datetime(2026, 5, 20, 10, 0, tzinfo=ZoneInfo("Asia/Shanghai")).timestamp()))
-    result = runtime.maybe_drain_queued_outreach(turn_index=4)
+    due = int(datetime(2026, 5, 20, 10, 0, tzinfo=ZoneInfo("Asia/Shanghai")).timestamp())
+    daemon.prepare_due_intents(now=due)
+    result = runtime.maybe_drain_queued_outreach(turn_index=4, now=due)
     assert result["drained"] is True
     assert intent_store.get(intent["intent_id"])["status"] == "delivered"  # type: ignore[index]
     linked = [row for row in store.load()["open_items"] if row.get("intent_id") == intent["intent_id"]]
@@ -164,6 +201,27 @@ def test_runner_never_writes_visible_assistant_text_directly(tmp_path: Path) -> 
     text = log_path.read_text(encoding="utf-8") if log_path.is_file() else ""
     assert '"event": "proactive_turn"' not in text
     assert "短跟进" not in text
+
+
+def test_due_preparation_defers_idle_outreach_instead_of_direct_delivery(tmp_path: Path) -> None:
+    store = MVPStateStore(tmp_path)
+    store.save(_full_opted_state())
+    runtime = MVPDialogueRuntime(store=store, llm=_DirectOutreachLLM())  # type: ignore[arg-type]
+    daemon = M142SelfLoopDaemon(runtime, persona_id="p", session_id="s")
+    intent_store = ScheduledIntentStore(tmp_path, persona_id="p", session_id="s")
+    intent = intent_store.create_from_user_message_event(
+        {"event_id": "env_direct_branch", "payload": {"user_text": "sleep on it and tell me tomorrow morning"}},
+        now=datetime(2026, 5, 19, 20, 0, tzinfo=ZoneInfo("Asia/Shanghai")),
+    )
+    assert intent is not None
+    daemon.prepare_due_intents(now=int(datetime(2026, 5, 20, 10, 0, tzinfo=ZoneInfo("Asia/Shanghai")).timestamp()))
+    log_path = tmp_path / "conversation_log.jsonl"
+    text = log_path.read_text(encoding="utf-8") if log_path.is_file() else ""
+    assert '"event": "proactive_turn"' not in text
+    assert "DIRECT_VISIBLE_REPLY_SHOULD_NOT_HAPPEN" not in text
+    assert "IdleOutreachDeferredEvent" in text
+    rows = load_queued_outreach(tmp_path)
+    assert len([row for row in rows if row.get("source_intent_id") == intent["intent_id"]]) == 1
 
 
 def test_self_loop_daemon_cli_accepts_persona_session_contract() -> None:

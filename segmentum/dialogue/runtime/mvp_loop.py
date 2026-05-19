@@ -5415,8 +5415,8 @@ class MVPDialogueRuntime:
                 "outreach_outcome": idle_result.diagnostics.get("outreach_outcome", ""),
             }
 
-    def maybe_drain_queued_outreach(self, *, turn_index: int) -> dict[str, Any]:
-        now = _utc_timestamp()
+    def maybe_drain_queued_outreach(self, *, turn_index: int, now: int | None = None) -> dict[str, Any]:
+        now = int(now if now is not None else _utc_timestamp())
         with session_file_lock(self.store.root):
             state = self.store.load()
             m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
@@ -5755,6 +5755,7 @@ class MVPDialogueRuntime:
         turn_index: int,
         structural_signals: Any,
         queue_outreach: bool = False,
+        allow_direct_outreach: bool = True,
         background_runner_kind: str = "",
     ) -> MVPIdleResult:
         """M14.0: conscious idle plan, named-owner patches, optional M13.3 outreach."""
@@ -6021,6 +6022,19 @@ class MVPDialogueRuntime:
                     }
                 )
                 outreach_outcome = "queued"
+            elif not allow_direct_outreach:
+                audit_events.append(
+                    {
+                        "type": "IdleOutreachDeferredEvent",
+                        "turn_index": turn_index,
+                        "at": now,
+                        "proposal_id": locked.proposal_id,
+                        "runner_kind": background_runner_kind,
+                        "reason": "direct_delivery_disabled",
+                        "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
+                    }
+                )
+                outreach_outcome = "deferred_to_outbox"
             else:
                 check_state, check = evaluate_proactive_initiative(
                     state,
