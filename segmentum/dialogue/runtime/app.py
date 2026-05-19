@@ -21,6 +21,8 @@ if str(_project_root) not in sys.path:
 # In-process cache: (mtime_ns, data_uri) per slot; survives Streamlit reruns.
 _CHAT_AVATAR_DATA_URI_CACHE: dict[str, tuple[float, str]] = {}
 
+import time
+
 import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
@@ -1690,6 +1692,11 @@ def render_chat() -> None:
             chat_iface.record_background_streamlit_ping()
         except Exception:  # pragma: no cover
             pass
+    _maybe_run_streamlit_idle_introspection(
+        chat_iface,
+        pending_text=pending_text,
+        pending_proactive=pending_proactive,
+    )
     if (
         chat_iface.has_agent()
         and getattr(chat_iface, "mvp_runtime_active", False)
@@ -1761,6 +1768,39 @@ _MIND_BUS_EVENT_PREFIXES = (
     "Proactive",
     "Temporal",
 )
+
+
+_IDLE_INTRO_ATTEMPT_INTERVAL_SECONDS = 30
+
+
+def _maybe_run_streamlit_idle_introspection(
+    chat_iface: ChatInterface,
+    *,
+    pending_text: str | None,
+    pending_proactive: bool,
+) -> None:
+    """M13.4: cheap gate on reruns; LLM only when idle + structural signals pass."""
+    if not bool(st.session_state.get("m13_idle_introspection_opt_in", False)):
+        return
+    if not (
+        chat_iface.has_agent()
+        and getattr(chat_iface, "mvp_runtime_active", False)
+        and bool(st.session_state.get("m13_initiative_opt_in", False))
+    ):
+        return
+    if pending_text or pending_proactive or bool(st.session_state.get("m13_ui_turn_in_progress", False)):
+        return
+    now_mono = time.monotonic()
+    last = float(st.session_state.get("_idle_intro_last_attempt_mono", 0.0) or 0.0)
+    if now_mono - last < _IDLE_INTRO_ATTEMPT_INTERVAL_SECONDS:
+        return
+    st.session_state._idle_intro_last_attempt_mono = now_mono
+    try:
+        result = chat_iface.maybe_run_idle_introspection(user_active=False)
+        if bool(result.get("ran_introspection")):
+            st.rerun()
+    except Exception as exc:  # pragma: no cover - UI guardrail
+        _logger.exception("idle introspection tick failed: %s", exc)
 
 
 def _clip_text(value: object, *, limit: int = 160) -> str:
@@ -1979,6 +2019,16 @@ def render_dashboard() -> None:
     bg_ui = bool(st.session_state.get("m14_1_background_opt_in", False))
 
     if bg_ui and bg:
+        runtime = getattr(chat_iface, "_mvp_runtime", None)
+        store = getattr(runtime, "store", None) if runtime is not None else None
+        lock = read_runner_lock(store.root) if store is not None else None
+        lock_alive = runner_lock_is_alive(lock)
+        daemon_line = (
+            f"Self-loop daemon: **{'running' if lock_alive else 'stale' if lock else 'stopped'}** "
+            f"(kind={lock.runner_kind if lock else bg.get('runner_kind', 'none')}, "
+            f"pid={lock.pid if lock else 0})"
+        )
+        st.caption(daemon_line)
         b1, b2, b3, b4, b5, b6 = st.columns(6)
         b1.metric("自我思考(今日)", str(bg.get("ticks_today", 0)))
         b2.metric("自我思考(累计)", str(bg.get("idle_ticks_lifetime", 0)))
