@@ -47,6 +47,17 @@ def test_schedule_keywords_alone_do_not_create_scheduled_intent(tmp_path: Path) 
     assert store.create_from_user_message_event(event, now=datetime(2026, 5, 19, 20, 0, tzinfo=ZoneInfo("Asia/Shanghai"))) is None
 
 
+def test_chinese_immediate_tell_request_without_message_leave_is_not_scheduled_outreach(tmp_path: Path) -> None:
+    store = ScheduledIntentStore(tmp_path, persona_id="p", session_id="s")
+    now = datetime(2026, 5, 19, 20, 0, tzinfo=ZoneInfo("Asia/Shanghai"))
+    event = {
+        "event_id": "env_cn_fp",
+        "event_type": "UserMessageCommittedEvent",
+        "payload": {"user_text": "明天早上告诉我会议几点"},
+    }
+    assert store.create_from_user_message_event(event, now=now) is None
+
+
 def test_reflection_or_reminder_phrases_do_not_become_outreach_without_message_request(tmp_path: Path) -> None:
     store = ScheduledIntentStore(tmp_path, persona_id="p", session_id="s")
     now = datetime(2026, 5, 19, 20, 0, tzinfo=ZoneInfo("Asia/Shanghai"))

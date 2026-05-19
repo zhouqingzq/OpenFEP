@@ -102,6 +102,11 @@ def test_keyword_cue_rejects_reflection_or_reminder_without_message_request() ->
     assert _looks_like_scheduled_outreach("follow up tomorrow on the report") is False
 
 
+def test_keyword_cue_rejects_chinese_immediate_info_request_without_message_leave() -> None:
+    assert _looks_like_scheduled_outreach("明天早上告诉我会议几点") is False
+    assert _looks_like_scheduled_outreach("明天早上议程有三项") is False
+
+
 def test_delivery_surface_unavailable_is_transient_suppression() -> None:
     assert outreach_suppression_is_transient("delivery_surface_unavailable") is True
 

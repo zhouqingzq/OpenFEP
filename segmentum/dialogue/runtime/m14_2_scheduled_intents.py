@@ -122,20 +122,22 @@ def _looks_like_scheduled_outreach(text: str) -> bool:
             "回来时",
         )
     )
-    chinese_outreach = any(
+    chinese_message_leave = any(
         phrase in lowered
         for phrase in (
             "留言",
             "留句话",
             "留一句",
             "留句",
-            "告诉我",
-            "跟我说",
-            "提醒我",
             "给我留言",
             "给我留",
         )
     )
+    chinese_overnight_reflect = any(
+        phrase in lowered for phrase in ("想想", "睡一晚", "琢磨", "考虑一晚")
+    )
+    chinese_tell_with_reflect = "告诉我" in lowered and chinese_overnight_reflect
+    chinese_outreach = chinese_message_leave or chinese_tell_with_reflect
     return (english_schedule and english_outreach) or (chinese_schedule and chinese_outreach)
 
 
