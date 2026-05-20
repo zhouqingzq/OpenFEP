@@ -5,9 +5,13 @@ from dataclasses import dataclass, field
 import hashlib
 import json
 import logging
+import os
 import shutil
-from pathlib import Path
+import signal
+import subprocess
+import sys
 import time
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from ..conversation_loop import run_conversation
@@ -707,6 +711,8 @@ class ChatInterface:
         self._maybe_enable_mvp_llm_runtime()
         if self._mvp_runtime is None:
             return {}
+        if not enabled:
+            self.stop_self_loop_daemon()
         runner_kind = "standalone_daemon" if enabled else "none"
         bg = dict(
             self._mvp_runtime.set_background_continuity_opt_in(
@@ -716,6 +722,149 @@ class ChatInterface:
         )
         self._stop_background_runner()
         return bg
+
+    def read_self_loop_daemon_status(self) -> dict[str, object]:
+        """Runner lock + process liveness for the M14.2 standalone daemon."""
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return {"status": "unavailable", "pid": 0, "runner_kind": "none", "running": False}
+        from segmentum.dialogue.runtime.m14_1_background_continuity import read_runner_lock, runner_lock_is_alive
+
+        lock = read_runner_lock(self._mvp_runtime.store.root)
+        alive = runner_lock_is_alive(lock)
+        if lock is None:
+            status = "stopped"
+        elif alive:
+            status = "running"
+        else:
+            status = "stale"
+        return {
+            "status": status,
+            "running": alive,
+            "pid": int(lock.pid if lock else 0),
+            "runner_kind": str(lock.runner_kind if lock else ""),
+            "host": str(lock.host if lock else ""),
+            "started_at": int(lock.started_at if lock else 0),
+        }
+
+    def start_self_loop_daemon(self, *, wait_seconds: float = 6.0) -> dict[str, object]:
+        """Spawn ``m14_2_self_loop``; PID is read from ``runner.lock`` (not Streamlit's)."""
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return {"ok": False, "reason": "mvp_inactive"}
+        from segmentum.dialogue.runtime.m14_1_background_continuity import (
+            read_runner_lock,
+            release_runner_lock,
+            runner_lock_is_alive,
+        )
+
+        store = self._mvp_runtime.store
+        lock = read_runner_lock(store.root)
+        if runner_lock_is_alive(lock):
+            return {
+                "ok": True,
+                "reason": "already_running",
+                "pid": int(lock.pid if lock else 0),
+            }
+
+        if lock is not None and not runner_lock_is_alive(lock):
+            release_runner_lock(store.root)
+
+        persona = self._resolved_persona_id()
+        session = self._session_id
+        project_root = Path(__file__).resolve().parents[3]
+        cmd = [
+            sys.executable,
+            "-m",
+            "segmentum.dialogue.runtime.m14_2_self_loop",
+            "--persona",
+            persona,
+            "--session",
+            session,
+        ]
+        creationflags = 0
+        if sys.platform == "win32":
+            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS
+        try:
+            proc = subprocess.Popen(
+                cmd,
+                cwd=str(project_root),
+                env=os.environ.copy(),
+                creationflags=creationflags,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except OSError as exc:
+            return {"ok": False, "reason": f"spawn_failed:{exc}"[:120]}
+
+        deadline = time.monotonic() + max(1.0, float(wait_seconds))
+        while time.monotonic() < deadline:
+            lock = read_runner_lock(store.root)
+            if runner_lock_is_alive(lock):
+                return {
+                    "ok": True,
+                    "reason": "started",
+                    "pid": int(lock.pid if lock else 0),
+                    "spawn_pid": int(proc.pid),
+                }
+            if proc.poll() is not None:
+                return {
+                    "ok": False,
+                    "reason": "process_exited_early",
+                    "spawn_pid": int(proc.pid),
+                    "exit_code": int(proc.returncode or 0),
+                }
+            time.sleep(0.2)
+
+        return {
+            "ok": False,
+            "reason": "lock_not_acquired",
+            "spawn_pid": int(proc.pid),
+            "detail": "daemon may still be starting; refresh in a few seconds",
+        }
+
+    def stop_self_loop_daemon(self) -> dict[str, object]:
+        """Stop standalone daemon using ``runner.lock`` PID; clears stale locks."""
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        self._stop_background_runner()
+        if self._mvp_runtime is None:
+            return {"ok": False, "reason": "mvp_inactive"}
+        from segmentum.dialogue.runtime.m14_1_background_continuity import (
+            read_runner_lock,
+            release_runner_lock,
+            runner_lock_is_alive,
+        )
+
+        store = self._mvp_runtime.store
+        lock = read_runner_lock(store.root)
+        if lock is None:
+            return {"ok": True, "reason": "not_running", "pid": 0}
+
+        pid = int(lock.pid)
+        stopped = False
+        if runner_lock_is_alive(lock):
+            try:
+                if sys.platform == "win32":
+                    os.kill(pid, signal.SIGTERM)
+                else:
+                    os.kill(pid, signal.SIGTERM)
+                stopped = True
+            except OSError:
+                if sys.platform == "win32":
+                    try:
+                        subprocess.run(
+                            ["taskkill", "/PID", str(pid), "/T", "/F"],
+                            check=False,
+                            capture_output=True,
+                        )
+                        stopped = True
+                    except OSError:
+                        stopped = False
+        release_runner_lock(store.root)
+        return {"ok": True, "reason": "stopped" if stopped else "lock_cleared", "pid": pid}
 
     def update_background_continuity_config(self, **updates: object) -> dict[str, object]:
         self._ensure_runtime_fields()

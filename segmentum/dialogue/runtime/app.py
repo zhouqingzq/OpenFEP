@@ -49,8 +49,6 @@ from segmentum.dialogue.runtime.m14_1_background_continuity import (
     MAX_QUEUED_OUTREACH_TTL_SECONDS,
     MIN_QUEUED_OUTREACH_TTL_SECONDS,
     MIN_TICK_SECONDS,
-    read_runner_lock,
-    runner_lock_is_alive,
 )
 
 _DIALOGUE_PREF_FIELDS: tuple[str, ...] = (
@@ -1215,33 +1213,47 @@ def render_sidebar() -> None:
                     if any(bg_status.get(k) != v for k, v in desired_bg.items()):
                         bg_status = chat_iface.update_background_continuity_config(**desired_bg)
             if bg_status and bg_opt_in:
-                runtime = getattr(chat_iface, "_mvp_runtime", None)
-                store = getattr(runtime, "store", None) if runtime is not None else None
-                lock = read_runner_lock(store.root) if store is not None else None
-                lock_alive = runner_lock_is_alive(lock)
-                runner_kind = str(bg_status.get("runner_kind", "") or "none")
-                daemon_status = "running" if lock_alive else "stale" if lock else "stopped"
-                daemon_cmd = (
-                    f"python -m segmentum.dialogue.runtime.m14_2_self_loop "
-                    f"--persona {chat_iface.persona_name or 'default'} --session {getattr(chat_iface, '_session_id', 'm56_live')}"
+                daemon = chat_iface.read_self_loop_daemon_status()
+                daemon_status = str(daemon.get("status", "stopped"))
+                daemon_pid = int(daemon.get("pid", 0) or 0)
+                runner_kind = str(
+                    daemon.get("runner_kind") or bg_status.get("runner_kind", "") or "none"
                 )
                 st.sidebar.caption(
                     "Self-loop daemon: "
                     f"status={daemon_status} "
                     f"kind={runner_kind} "
-                    f"pid={getattr(lock, 'pid', 0) if lock else 0} "
+                    f"pid={daemon_pid} "
                     f"ticks_today={bg_status.get('ticks_today', 0)}/"
                     f"{bg_status.get('max_ticks_per_day', '?')} "
                     f"llm={bg_status.get('llm_calls_today', 0)}/"
                     f"{bg_status.get('llm_calls_budget_per_day', '?')} "
                     f"lifetime_idle={bg_status.get('idle_ticks_lifetime', 0)}"
                 )
-                st.sidebar.code(daemon_cmd, language="bash")
-                if st.sidebar.button("Stop background runner", key="btn_stop_bg_runner"):
-                    chat_iface.set_background_continuity_opt_in(False)
-                    st.session_state.m14_1_background_opt_in = False
-                    st.session_state.m14_1_background_opt_in_synced = False
-                    st.rerun()
+                start_col, stop_col = st.sidebar.columns(2)
+                if bool(daemon.get("running")):
+                    if stop_col.button("停止 daemon", key="btn_stop_bg_daemon"):
+                        chat_iface.stop_self_loop_daemon()
+                        st.rerun()
+                else:
+                    if start_col.button("启动 daemon", key="btn_start_bg_daemon", type="primary"):
+                        with st.spinner("正在启动 Self-loop daemon..."):
+                            result = chat_iface.start_self_loop_daemon()
+                        if result.get("ok"):
+                            st.sidebar.success(f"已启动，pid={result.get('pid', 0)}")
+                        else:
+                            detail = str(result.get("detail", "") or result.get("reason", "unknown"))
+                            st.sidebar.error(f"启动失败：{detail}")
+                        st.rerun()
+                with st.sidebar.expander("手动启动命令", expanded=False):
+                    st.code(
+                        (
+                            f"python -m segmentum.dialogue.runtime.m14_2_self_loop "
+                            f"--persona {chat_iface.persona_name or 'default'} "
+                            f"--session {getattr(chat_iface, '_session_id', 'm56_live')}"
+                        ),
+                        language="bash",
+                    )
             idle_status = chat_iface.read_idle_introspection_status()
             if idle_status:
                 st.sidebar.caption(
@@ -1687,42 +1699,6 @@ def render_chat() -> None:
         st.session_state.pending_user_message = None
         st.session_state.pending_speaker_name = None
 
-    if chat_iface.has_agent() and getattr(chat_iface, "mvp_runtime_active", False):
-        try:
-            chat_iface.record_background_streamlit_ping()
-        except Exception:  # pragma: no cover
-            pass
-    _maybe_run_streamlit_idle_introspection(
-        chat_iface,
-        pending_text=pending_text,
-        pending_proactive=pending_proactive,
-    )
-    if (
-        chat_iface.has_agent()
-        and getattr(chat_iface, "mvp_runtime_active", False)
-        and bool(st.session_state.get("m13_initiative_opt_in", False))
-        and not pending_text
-        and not pending_proactive
-        and not bool(st.session_state.get("m13_ui_turn_in_progress", False))
-    ):
-        try:
-            drain = chat_iface.maybe_drain_queued_outreach()
-            if drain.get("drained") and str(drain.get("reply", "")).strip():
-                resp = ChatResponse(
-                    reply=str(drain["reply"]),
-                    action="proactive_queued",
-                    observation={},
-                    delta_traits={},
-                    delta_big_five={},
-                    diagnostics={"queued_outreach_drain": drain},
-                    safety_checks=[],
-                    turn_index=int(getattr(chat_iface, "_turn_index", 0)),
-                )
-                append_assistant_response_messages(st.session_state.messages, resp)
-                st.rerun()
-        except Exception as exc:  # pragma: no cover
-            _logger.exception("queued outreach drain failed: %s", exc)
-
     disabled = not chat_iface.has_agent() or pending_text is not None
     if (
         chat_iface.has_agent()
@@ -1760,6 +1736,42 @@ def render_chat() -> None:
         st.session_state.pending_user_message = user_input
         st.session_state.pending_speaker_name = speaker
         st.rerun()
+
+    if chat_iface.has_agent() and getattr(chat_iface, "mvp_runtime_active", False):
+        try:
+            chat_iface.record_background_streamlit_ping()
+        except Exception:  # pragma: no cover
+            pass
+    _maybe_run_streamlit_idle_introspection(
+        chat_iface,
+        pending_text=pending_text,
+        pending_proactive=pending_proactive,
+    )
+    if (
+        chat_iface.has_agent()
+        and getattr(chat_iface, "mvp_runtime_active", False)
+        and bool(st.session_state.get("m13_initiative_opt_in", False))
+        and not pending_text
+        and not pending_proactive
+        and not bool(st.session_state.get("m13_ui_turn_in_progress", False))
+    ):
+        try:
+            drain = chat_iface.maybe_drain_queued_outreach()
+            if drain.get("drained") and str(drain.get("reply", "")).strip():
+                resp = ChatResponse(
+                    reply=str(drain["reply"]),
+                    action="proactive_queued",
+                    observation={},
+                    delta_traits={},
+                    delta_big_five={},
+                    diagnostics={"queued_outreach_drain": drain},
+                    safety_checks=[],
+                    turn_index=int(getattr(chat_iface, "_turn_index", 0)),
+                )
+                append_assistant_response_messages(st.session_state.messages, resp)
+                st.rerun()
+        except Exception as exc:  # pragma: no cover
+            _logger.exception("queued outreach drain failed: %s", exc)
 
 
 _MIND_BUS_EVENT_PREFIXES = (
@@ -2019,14 +2031,11 @@ def render_dashboard() -> None:
     bg_ui = bool(st.session_state.get("m14_1_background_opt_in", False))
 
     if bg_ui and bg:
-        runtime = getattr(chat_iface, "_mvp_runtime", None)
-        store = getattr(runtime, "store", None) if runtime is not None else None
-        lock = read_runner_lock(store.root) if store is not None else None
-        lock_alive = runner_lock_is_alive(lock)
+        daemon = chat_iface.read_self_loop_daemon_status()
         daemon_line = (
-            f"Self-loop daemon: **{'running' if lock_alive else 'stale' if lock else 'stopped'}** "
-            f"(kind={lock.runner_kind if lock else bg.get('runner_kind', 'none')}, "
-            f"pid={lock.pid if lock else 0})"
+            f"Self-loop daemon: **{daemon.get('status', 'stopped')}** "
+            f"(kind={daemon.get('runner_kind') or bg.get('runner_kind', 'none')}, "
+            f"pid={daemon.get('pid', 0)})"
         )
         st.caption(daemon_line)
         b1, b2, b3, b4, b5, b6 = st.columns(6)

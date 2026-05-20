@@ -69,7 +69,7 @@ def normalize_background_continuity_state(raw: Any) -> dict[str, Any]:
     merged = {**base, **dict(raw)}
     merged["enabled"] = bool(merged.get("enabled"))
     merged["user_opt_in"] = bool(merged.get("user_opt_in"))
-    merged["runner_kind"] = str(merged.get("runner_kind", "none") or "none")[:16]
+    merged["runner_kind"] = str(merged.get("runner_kind", "none") or "none")[:32]
     merged["tick_interval_seconds"] = max(
         MIN_TICK_SECONDS,
         int(merged.get("tick_interval_seconds", DEFAULT_TICK_INTERVAL_SECONDS) or DEFAULT_TICK_INTERVAL_SECONDS),
