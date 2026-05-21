@@ -95,14 +95,14 @@ def test_vague_verify_later_is_diagnostic_only() -> None:
     assert result.should_outreach is False
 
 
-def test_overdue_open_item_due_at_can_make_outreach_lowest_policy() -> None:
+def test_overdue_scheduled_open_item_can_make_outreach_lowest_policy() -> None:
     state = _state(
         open_items=[
             {
                 "id": "oi_due",
                 "status": "open",
                 "title": "benchmark follow-up",
-                "next_check": "2024-06-01T12:00:00Z",
+                "scheduled_intent_id": "intent_benchmark",
                 "due_at_epoch": NOW - 10_000,
                 "expected_window_seconds": 900,
                 "evidence_refs": ["mem_oi"],
@@ -117,6 +117,44 @@ def test_overdue_open_item_due_at_can_make_outreach_lowest_policy() -> None:
     assert result.selected_policy == "outreach"
     assert result.outreach_margin >= 0.08
     assert result.should_outreach is True
+
+
+def test_open_item_next_user_turn_emerges_without_calendar_due() -> None:
+    created = NOW - 5000
+    state = _state(
+        open_items=[
+            {
+                "id": "item_001",
+                "status": "open",
+                "content": "Who is 老爹 in the prior thread?",
+                "next_check": "next_user_turn",
+                "created_at": created,
+                "evidence_refs": ["stm_turn_old"],
+            }
+        ],
+        temporal_state={"last_user_turn_at": NOW - 120, "last_turn_at": NOW - 120},
+    )
+    normalized = normalize_expectations_for_efe(state, now=NOW, phase="idle")
+    assert [e.expectation_id for e in normalized.eligible_for_efe] == ["item_001"]
+    result = evaluate_memory_efe(state, phase="idle", now=NOW, turn_index=5, user_active=False)
+    assert result.social_prediction_error > 0
+    assert result.traceable_expectation_id == "item_001"
+
+
+def test_open_item_bare_due_at_without_scheduled_intent_is_diagnostic_only() -> None:
+    state = _state(
+        open_items=[
+            {
+                "id": "oi_alarm",
+                "status": "open",
+                "due_at_epoch": NOW - 10_000,
+                "next_check": "later",
+            }
+        ]
+    )
+    normalized = normalize_expectations_for_efe(state, now=NOW, phase="idle")
+    assert normalized.eligible_for_efe == []
+    assert normalized.diagnostic_only[0].ineligibility_reason == "vague_or_missing_traceable_next_check"
 
 
 def test_idle_next_user_turn_over_response_window_is_eligible() -> None:
@@ -254,7 +292,7 @@ def test_vague_open_item_next_check_is_not_efe_eligible() -> None:
     state = _state(open_items=[{"id": "oi", "status": "open", "next_check": "regular"}])
     normalized = normalize_expectations_for_efe(state, now=NOW, phase="idle")
     assert normalized.eligible_for_efe == []
-    assert normalized.diagnostic_only[0].ineligibility_reason == "vague_or_missing_concrete_due"
+    assert normalized.diagnostic_only[0].ineligibility_reason == "vague_or_missing_traceable_next_check"
 
 
 def test_outreach_proposal_not_delivered_does_not_clear_prediction_error() -> None:
@@ -299,8 +337,7 @@ def test_m13_3_single_entry_and_locked_memory_efe_priority() -> None:
                 {
                     "id": "oi_due",
                     "status": "open",
-                    "title": "benchmark follow-up",
-                    "next_check": "2024-06-01T12:00:00Z",
+                    "scheduled_intent_id": "intent_benchmark",
                     "due_at_epoch": NOW - 10_000,
                     "expected_window_seconds": 900,
                     "evidence_refs": ["mem_oi"],

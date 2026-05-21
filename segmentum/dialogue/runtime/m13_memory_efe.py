@@ -439,6 +439,19 @@ def _normalize_pending_expectation(
     )
 
 
+def _open_item_next_check_kind(next_check: str) -> str:
+    lowered = str(next_check or "").strip().casefold()
+    if lowered in _ELIGIBLE_NEXT_USER:
+        return "next_user_turn"
+    if lowered in _VAGUE_NEXT_CHECKS:
+        return "vague"
+    if _looks_like_concrete_due(next_check):
+        return "explicit_due_text"
+    if lowered:
+        return "other"
+    return "empty"
+
+
 def _normalize_open_item(
     row: Mapping[str, Any],
     *,
@@ -447,21 +460,50 @@ def _normalize_open_item(
     phase: str,
 ) -> NormalizedExpectation:
     next_check = str(row.get("next_check", row.get("next_step", "")) or "").strip()
-    lowered = next_check.casefold()
+    next_kind = _open_item_next_check_kind(next_check)
     scheduled_id = str(row.get("scheduled_intent_id", row.get("intent_id", "")) or "").strip()
     due_at = _epoch(row.get("due_at_epoch") or row.get("due_at"))
-    if due_at <= 0 and _looks_like_concrete_due(next_check):
-        due_at = _epoch(next_check)
-    window = int(row.get("expected_window_seconds", row.get("due_window_seconds", 0)) or DUE_AT_EXPECTED_WINDOW_SECONDS)
+    window = int(
+        row.get("expected_window_seconds", row.get("due_window_seconds", 0))
+        or DUE_AT_EXPECTED_WINDOW_SECONDS
+    )
     status = str(row.get("status", "open") or "open").strip().lower()
-    has_concrete_due = due_at > 0 or bool(scheduled_id)
-    eligible = status == "open" and has_concrete_due and lowered not in _VAGUE_NEXT_CHECKS
-    if not eligible and status == "open" and not has_concrete_due:
-        reason = "vague_or_missing_concrete_due"
-    elif not eligible:
+    temporal = _mapping(state.get("temporal_state"))
+    last_user = _epoch(temporal.get("last_user_turn_at"))
+    eligible = False
+    reason = ""
+
+    if status != "open":
         reason = "vague_or_not_open"
+    elif scheduled_id and due_at > 0:
+        # M14.2-linked wall-clock anchor only; not a generic open-item alarm.
+        eligible = True
+    elif next_kind == "next_user_turn":
+        created = _created_at(row) or last_user
+        window = window or NEXT_USER_TURN_EXPECTED_WINDOW_SECONDS
+        due_at = due_at or (created + ACTIVE_GRACE_SECONDS if created else 0)
+        if phase == "in_turn":
+            eligible = bool(due_at)
+        elif phase == "idle" and due_at:
+            newer_user_turn = bool(created and last_user and last_user > created)
+            if not newer_user_turn:
+                eligible = now >= due_at + window
+                reason = "" if eligible else "next_user_turn_not_overdue_or_newer_user_turn_seen"
+            else:
+                # User spoke since the open loop was raised but did not close it.
+                closure_due = last_user + ACTIVE_GRACE_SECONDS
+                due_at = closure_due
+                eligible = now >= closure_due
+                reason = "" if eligible else "open_item_awaiting_closure_after_user_turn"
+        else:
+            reason = "missing_observation_anchor"
+    elif next_kind == "vague" or next_kind == "empty":
+        reason = "vague_or_missing_traceable_next_check"
+    elif due_at > 0 and not scheduled_id:
+        reason = "wall_clock_open_item_requires_scheduled_intent"
     else:
-        reason = ""
+        reason = "open_item_not_traceable"
+
     return _make_expectation(
         row,
         state=state,
