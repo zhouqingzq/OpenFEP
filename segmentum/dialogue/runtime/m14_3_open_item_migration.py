@@ -155,17 +155,14 @@ def apply_open_item_traceability_patches(
 
 def _cli_main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Audit M14.3 open item traceability")
-    parser.add_argument("--session-root", default="")
+    parser.add_argument("--session-root", required=True, help="MVP session directory (MVPStateStore root)")
     parser.add_argument("--audit", action="store_true")
     parser.add_argument("--apply", action="store_true")
-    parser.add_argument("--persona", default="")
-    parser.add_argument("--session", default="")
     args = parser.parse_args(argv)
-    if not args.session_root:
-        parser.error("--session-root is required for the local migration helper")
-    root = Path(args.session_root)
-    state_path = root / "state.json"
-    state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.is_file() else {}
+    from segmentum.dialogue.runtime.mvp_loop import MVPStateStore
+
+    store = MVPStateStore(Path(args.session_root))
+    state = store.load()
     suggestions = audit_open_items_for_efe(state.get("open_items", []))
     if args.apply:
         patches = propose_open_item_traceability_patches(state.get("open_items", []), now=int(time.time()))
@@ -175,7 +172,7 @@ def _cli_main(argv: list[str] | None = None) -> int:
             source="cli",
             reason="m14_3_traceability_migration",
         )
-        state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+        store.save(state)
         print(json.dumps({"applied": applied, "suggestions": [s.to_dict() for s in suggestions]}, ensure_ascii=False))
     else:
         print(json.dumps({"suggestions": [s.to_dict() for s in suggestions]}, ensure_ascii=False))

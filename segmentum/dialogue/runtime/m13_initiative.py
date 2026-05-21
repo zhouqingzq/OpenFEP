@@ -23,6 +23,7 @@ from segmentum.dialogue.runtime.m13_drive import (
 from segmentum.dialogue.runtime.m13_reward import normalize_affective_reward_proxy_state
 from segmentum.dialogue.runtime.m14_3_proactive_alignment import (
     ProactiveTarget,
+    TRACEABLE_DELIVERY_TRIGGERS,
     select_proactive_target,
 )
 
@@ -219,6 +220,7 @@ class ProactiveTurnProposal:
 class ProactiveInitiativeCheckResult:
     proposal: ProactiveTurnProposal | None
     suppression_reason: str
+    suppression_reason_code: str = ""
     events: list[dict[str, Any]] = field(default_factory=list)
     state_fields_read: list[str] = field(default_factory=list)
 
@@ -312,14 +314,20 @@ def build_proactive_delivery_assessor_prompt(
     trigger: str,
     turn_index: int,
 ) -> tuple[str, str]:
+    traceable_rule = ""
+    if trigger in TRACEABLE_DELIVERY_TRIGGERS:
+        traceable_rule = """
+额外规则（traceable outreach trigger）：
+- 若 engineering_intent 指向未闭合期望/open item，仅天气、晚霞、泛泛寒暄且未触及 intent 主题时，必须 allow_delivery=false。
+- 可接受：直接跟进 intent 中的具体线程、问题或下一步。"""
     system_prompt = f"""你是数字人格 MVP 路径的「{DELIVERY_ASSESSOR_MARKER}」模块。
 判断待展示的主动续写文案在语义上是否可送达（不是关键词表匹配）。
 
 应拒绝（allow_delivery=false）的情形包括：
 - 依赖、嫉妒、内疚施压、惩罚式措辞
 - 与 engineering intent 无关的敏感推断
-
-可接受：简短、具体、基于 open item/线程的下一步建议，且不要求回复；日常寒暄、天气、时间延续等自然续写也可送达。
+{traceable_rule}
+非 traceable trigger 时：可接受简短、具体、基于 open item/线程的下一步建议。
 只输出 JSON，不要 Markdown。"""
     user_prompt = f"""turn_index: {turn_index}
 trigger: {trigger}
@@ -525,12 +533,15 @@ def _open_item_target(state: Mapping[str, Any]) -> tuple[str, str, str, list[str
 def _pick_structural_target_details(
     state: Mapping[str, Any],
     m13_state: Mapping[str, Any],
+    *,
+    memory_efe_evaluation: Any | None = None,
+    structural_signals: Mapping[str, Any] | None = None,
 ) -> ProactiveTarget | None:
     target = select_proactive_target(
         state,
         m13_state,
-        memory_efe_evaluation=None,
-        structural_signals={},
+        memory_efe_evaluation=memory_efe_evaluation,
+        structural_signals=structural_signals,
     )
     if target is not None:
         return target
@@ -550,11 +561,41 @@ def _pick_structural_target_details(
     return None
 
 
+def build_proposal_from_target(
+    target: ProactiveTarget,
+    *,
+    now: int,
+    initiative: Mapping[str, Any],
+    urgency_band: str = "medium",
+) -> ProactiveTurnProposal:
+    return _build_proposal(
+        trigger=target.trigger,
+        proposed_topic=target.proposed_topic,
+        ordinary_language_intent=target.ordinary_language_intent,
+        evidence_refs=target.evidence_refs,
+        now=now,
+        initiative=initiative,
+        urgency_band=urgency_band or target.urgency_band,
+        risk_band=target.risk_band,
+        traceable_expectation_id=target.traceable_expectation_id,
+        source_kind=target.source_kind,
+        selection_reason_codes=target.selection_reason_codes,
+    )
+
+
 def _pick_structural_target(
     state: Mapping[str, Any],
     m13_state: Mapping[str, Any],
+    *,
+    memory_efe_evaluation: Any | None = None,
+    structural_signals: Mapping[str, Any] | None = None,
 ) -> tuple[str, str, str, list[str]] | None:
-    target = _pick_structural_target_details(state, m13_state)
+    target = _pick_structural_target_details(
+        state,
+        m13_state,
+        memory_efe_evaluation=memory_efe_evaluation,
+        structural_signals=structural_signals,
+    )
     if target is not None:
         return (target.trigger, target.proposed_topic, target.ordinary_language_intent, list(target.evidence_refs))
     return None
@@ -626,6 +667,8 @@ def evaluate_proactive_initiative(
     implicit_idle_request: bool = False,
     llm: ProactiveInitiativeLLM | None = None,
     locked_proposal: ProactiveTurnProposal | None = None,
+    structural_signals: Mapping[str, Any] | None = None,
+    memory_efe_evaluation: Any | None = None,
 ) -> tuple[dict[str, Any], ProactiveInitiativeCheckResult]:
     """Policy with structural signals + optional LLM semantic gates (no regex cues)."""
     m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
@@ -661,7 +704,7 @@ def evaluate_proactive_initiative(
         extra: Mapping[str, Any] | None = None,
     ) -> ProactiveInitiativeCheckResult:
         code = str(reason_code or reason)[:96]
-        initiative["last_suppression_reason"] = reason
+        initiative["last_suppression_reason"] = code
         initiative["last_suppression_reason_code"] = code
         initiative["pending_proactive_proposal"] = {}
         m13_state["initiative"] = initiative
@@ -681,7 +724,8 @@ def evaluate_proactive_initiative(
         events.append(payload)
         return ProactiveInitiativeCheckResult(
             proposal=None,
-            suppression_reason=reason,
+            suppression_reason=code,
+            suppression_reason_code=code,
             events=events,
             state_fields_read=fields_read,
         )
@@ -721,7 +765,7 @@ def evaluate_proactive_initiative(
             return state, suppress("no_high_value_target", reason_code="no_traceable_proactive_target")
         if _safety_risk_from_state(state, m13_state):
             return state, suppress(
-                "safety_risk",
+                "opponent_strength_pre_block",
                 reason_code="opponent_strength_pre_block",
                 extra={
                     "opponent_strength": round(_opponent_strength_from_state(m13_state), 6),
@@ -751,6 +795,7 @@ def evaluate_proactive_initiative(
         return state, ProactiveInitiativeCheckResult(
             proposal=locked_proposal,
             suppression_reason="",
+            suppression_reason_code="",
             events=events,
             state_fields_read=fields_read,
         )
@@ -760,7 +805,7 @@ def evaluate_proactive_initiative(
 
     if _safety_risk_from_state(state, m13_state):
         return state, suppress(
-            "safety_risk",
+            "opponent_strength_pre_block",
             reason_code="opponent_strength_pre_block",
             extra={
                 "opponent_strength": round(_opponent_strength_from_state(m13_state), 6),
@@ -789,7 +834,7 @@ def evaluate_proactive_initiative(
         )
         if bool(context_assessment.get("context_unsafe")):
             return state, suppress(
-                "safety_risk",
+                "context_assessment_unsafe",
                 reason_code="context_assessment_unsafe",
                 extra={
                     "unsafe_reason_codes": context_assessment.get("unsafe_reason_codes", []),
@@ -797,39 +842,39 @@ def evaluate_proactive_initiative(
                 },
             )
 
-    target_detail = _pick_structural_target_details(state, m13_state)
-    target = None
-    if target_detail is not None:
-        target = (
-            target_detail.trigger,
-            target_detail.proposed_topic,
-            target_detail.ordinary_language_intent,
-            list(target_detail.evidence_refs),
-        )
-    if target is None and context_assessment is not None:
-        target = _target_from_context_assessment(context_assessment)
-    if target is None:
+    target_detail = _pick_structural_target_details(
+        state,
+        m13_state,
+        memory_efe_evaluation=memory_efe_evaluation,
+        structural_signals=structural_signals,
+    )
+    if target_detail is None:
         if llm is None and recent.strip():
-            return state, suppress("insufficient_evidence")
-        return state, suppress("no_high_value_target", reason_code="no_traceable_proactive_target")
+            return state, suppress("insufficient_evidence", reason_code="no_traceable_proactive_target")
+        return state, suppress("no_traceable_proactive_target", reason_code="no_traceable_proactive_target")
 
-    trigger, topic, intent, refs = target
-    proposal = _build_proposal(
-        trigger=trigger,
-        proposed_topic=topic,
-        ordinary_language_intent=intent,
-        evidence_refs=refs,
+    proposal = build_proposal_from_target(
+        target_detail,
         now=now,
         initiative=initiative,
         urgency_band="high" if manual_continue else "medium",
-        traceable_expectation_id=target_detail.traceable_expectation_id if target_detail else "",
-        source_kind=target_detail.source_kind if target_detail else "",
-        selection_reason_codes=target_detail.selection_reason_codes if target_detail else [],
     )
     initiative["pending_proactive_proposal"] = proposal.to_dict()
     initiative["last_suppression_reason"] = ""
     m13_state["initiative"] = initiative
     state["m13_drive_state"] = m13_state
+    events.append(
+        {
+            "type": "ProactiveTargetSelectedEvent",
+            "turn_index": turn_index,
+            "at": now,
+            "trigger": proposal.trigger,
+            "traceable_expectation_id": proposal.traceable_expectation_id,
+            "source_kind": proposal.source_kind,
+            "selection_reason_codes": list(proposal.selection_reason_codes[:8]),
+            "engineering_proxy_label": "mvp_local_proactive_alignment",
+        }
+    )
     events.append(
         {
             "type": "M13ProactiveProposalEvent",
@@ -848,6 +893,7 @@ def evaluate_proactive_initiative(
     return state, ProactiveInitiativeCheckResult(
         proposal=proposal,
         suppression_reason="",
+        suppression_reason_code="",
         events=events,
         state_fields_read=fields_read,
     )

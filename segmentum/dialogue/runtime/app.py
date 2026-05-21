@@ -1664,7 +1664,11 @@ def render_chat() -> None:
                     else:
                         reason = ""
                         if isinstance(resp.diagnostics, dict):
-                            reason = str(resp.diagnostics.get("suppression_reason", "") or "")
+                            reason = str(
+                                resp.diagnostics.get("reason_code")
+                                or resp.diagnostics.get("suppression_reason", "")
+                                or ""
+                            )
                         st.session_state.messages.append(
                             {
                                 "role": "assistant",
@@ -1675,7 +1679,12 @@ def render_chat() -> None:
                             }
                         )
                 else:
-                    reason = str(check.get("suppression_reason", "") if isinstance(check, dict) else "")
+                    reason = str(
+                        check.get("suppression_reason_code")
+                        or check.get("suppression_reason", "")
+                        if isinstance(check, dict)
+                        else ""
+                    )
                     st.session_state.messages.append(
                         {
                             "role": "assistant",

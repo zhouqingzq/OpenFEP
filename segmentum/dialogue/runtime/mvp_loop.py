@@ -88,7 +88,7 @@ from segmentum.dialogue.runtime.m13_initiative import (
     ProactiveTurnProposal,
     assess_proactive_delivery_semantics,
     build_proactive_thinking_user_text,
-    build_reflection_outreach_proposal,
+    build_proposal_from_target,
     evaluate_proactive_initiative,
     mark_outreach_via_introspection,
     mark_proactive_turn_consumed,
@@ -96,6 +96,10 @@ from segmentum.dialogue.runtime.m13_initiative import (
     normalize_initiative_state,
     proposal_from_initiative_state,
     set_initiative_user_opt_in,
+)
+from segmentum.dialogue.runtime.m14_3_proactive_alignment import (
+    select_proactive_target,
+    traceable_proactive_reply_grounded,
 )
 from segmentum.dialogue.runtime.m13_memory_efe import (
     apply_memory_efe_state,
@@ -5077,6 +5081,25 @@ class MVPDialogueRuntime:
             followup_replies=followup_replies,
         )
 
+    def _initiative_structural_signals(self, state: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        sig: dict[str, Any] = {}
+        try:
+            from segmentum.dialogue.runtime.m14_2_scheduled_intents import ScheduledIntentStore
+
+            scheduled_store = ScheduledIntentStore(
+                self.store.root,
+                persona_id=self.persona_name or "default",
+                session_id=str(self.store.root.resolve()),
+            )
+            sig["scheduled_intents"] = scheduled_store.list_intents()
+        except Exception:
+            sig["scheduled_intents"] = []
+        try:
+            sig["queued_outreach"] = load_queued_outreach(self.store.root)
+        except Exception:
+            sig["queued_outreach"] = []
+        return sig
+
     def maybe_propose_proactive_turn(
         self,
         *,
@@ -5088,6 +5111,7 @@ class MVPDialogueRuntime:
     ) -> dict[str, Any]:
         state = self.store.load()
         now = _utc_timestamp()
+        structural_signals = self._initiative_structural_signals(state)
         state, check = evaluate_proactive_initiative(
             state,
             now=now,
@@ -5097,6 +5121,7 @@ class MVPDialogueRuntime:
             user_typing=user_typing,
             implicit_idle_request=implicit_idle_request,
             llm=self.llm,
+            structural_signals=structural_signals,
         )
         self.store.save(state)
         for event in check.events:
@@ -5104,6 +5129,7 @@ class MVPDialogueRuntime:
         return {
             "proposal": check.proposal.to_dict() if check.proposal else None,
             "suppression_reason": check.suppression_reason,
+            "suppression_reason_code": check.suppression_reason_code or check.suppression_reason,
             "events": check.events,
             "state_fields_read": check.state_fields_read,
         }
@@ -5156,6 +5182,11 @@ class MVPDialogueRuntime:
         reply = str(result.reply or "").strip()
         followup_replies = list(getattr(result, "followup_replies", []) or [])
         delivery_assessment: dict[str, Any] = {}
+        grounded = traceable_proactive_reply_grounded(
+            reply,
+            ordinary_language_intent=proposal.ordinary_language_intent,
+            trigger=proposal.trigger,
+        )
         if reply and self.llm is not None:
             delivery_assessment = assess_proactive_delivery_semantics(
                 self.llm,
@@ -5178,18 +5209,24 @@ class MVPDialogueRuntime:
             delivery_ok = bool(delivery_assessment.get("allow_delivery")) and _bounded_float(
                 delivery_assessment.get("confidence")
             ) >= _bounded_float(initiative.get("delivery_assessor_min_confidence"), default=0.5)
+            delivery_ok = delivery_ok and grounded
         else:
-            delivery_ok = bool(reply)
+            delivery_ok = bool(reply) and grounded
         if not delivery_ok:
             self.store.save(state_snapshot)
             m13_state = merge_initiative_into_m13_state(state_snapshot.get("m13_drive_state"))
             initiative = normalize_initiative_state(m13_state.get("initiative"))
-            reason_code = "empty_generation" if not reply else "delivery_assessor_reject"
-            if reply and delivery_assessment and _bounded_float(delivery_assessment.get("confidence")) < _bounded_float(
+            if not reply:
+                reason_code = "empty_generation"
+            elif not grounded:
+                reason_code = "delivery_ungrounded_reply"
+            elif delivery_assessment and _bounded_float(delivery_assessment.get("confidence")) < _bounded_float(
                 initiative.get("delivery_assessor_min_confidence"), default=0.5
             ):
                 reason_code = "delivery_assessor_low_confidence"
-            initiative["last_suppression_reason"] = "safety_risk" if reply else "empty_generation"
+            else:
+                reason_code = "delivery_assessor_reject"
+            initiative["last_suppression_reason"] = reason_code
             initiative["last_suppression_reason_code"] = reason_code
             m13_state["initiative"] = initiative
             state_snapshot["m13_drive_state"] = m13_state
@@ -5198,7 +5235,7 @@ class MVPDialogueRuntime:
                 {
                     "event": "m13_proactive_audit",
                     "type": "M13ProactiveSuppressionEvent",
-                    "reason": "safety_risk" if reply else "empty_generation",
+                    "reason": reason_code,
                     "reason_code": reason_code,
                     "reason_stage": "post_generation",
                     "proposal_id": proposal_id,
@@ -5212,7 +5249,7 @@ class MVPDialogueRuntime:
                 action="proactive_suppressed",
                 diagnostics={
                     **result.diagnostics,
-                    "suppression_reason": "safety_risk" if reply else "empty_generation",
+                    "suppression_reason": reason_code,
                     "reason_code": reason_code,
                     "reason_stage": "post_generation",
                     "proactive_text_blocked": bool(reply),
@@ -5615,6 +5652,7 @@ class MVPDialogueRuntime:
             manual_continue=False,
             locked_proposal=proposal,
             llm=self.llm,
+            structural_signals=self._initiative_structural_signals(state),
         )
         self.store.save(check_state)
         for event in check.events:
@@ -6166,126 +6204,134 @@ class MVPDialogueRuntime:
         outreach = _mapping(plan.get("outreach_recommendation"))
         outreach_outcome = ""
         if bool(outreach.get("should_outreach")):
-            focus = _mapping(plan.get("reflection_focus"))
-            refs = _string_list(focus.get("evidence_refs"), limit=8) or _string_list(
-                outreach.get("evidence_refs"), limit=8
-            )
-            topic = str(focus.get("topic", "") or "")[:120]
             locked = None
-            if m13_memory_efe_evaluation.should_outreach:
+            target = select_proactive_target(
+                state,
+                m13_state,
+                memory_efe_evaluation=m13_memory_efe_evaluation,
+                structural_signals=sig_dict,
+            )
+            if target is not None:
+                locked = build_proposal_from_target(
+                    target,
+                    now=now,
+                    initiative=initiative,
+                )
+            elif m13_memory_efe_evaluation.should_outreach:
                 locked = build_memory_efe_outreach_proposal(
                     m13_memory_efe_evaluation,
                     now=now,
                     initiative=initiative,
                 )
             if locked is None:
-                locked = build_reflection_outreach_proposal(
-                    suggested_intent=str(outreach.get("suggested_intent", "") or ""),
-                    evidence_refs=refs,
-                    proposed_topic=topic,
-                    now=now,
-                    initiative=initiative,
-                )
-            audit_events.append(
-                {
-                    "type": "IdleOutreachProposalEvent",
-                    "turn_index": turn_index,
-                    "at": now,
-                    "proposal_id": locked.proposal_id,
-                    "trigger": locked.trigger,
-                    "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
-                }
-            )
-            if queue_outreach:
-                initiative = merge_background_continuity_into_initiative(
-                    normalize_initiative_state(m13_state.get("initiative"))
-                )
-                bg = normalize_background_continuity_state(initiative.get("background_continuity"))
-                ttl = int(bg.get("queued_outreach_ttl_seconds", 0) or 0)
-                entry = enqueue_outreach_proposal(
-                    self.store.root,
-                    proposal=locked.to_dict(),
-                    now=now,
-                    ttl_seconds=ttl,
-                    drive_snapshot={
-                        "boredom_band": sig_dict.get("boredom_band"),
-                        "memory_efe_should_outreach": m13_memory_efe_evaluation.should_outreach,
-                    },
-                )
-                m13_state, settlement_events = register_memory_efe_outreach_settlement(
-                    m13_state,
-                    evaluation=m13_memory_efe_evaluation,
-                    proposal_id=locked.proposal_id,
-                    delivery_status="queued",
-                    now=now,
-                )
-                state["m13_drive_state"] = m13_state
-                audit_events.extend(settlement_events)
+                outreach_outcome = "no_traceable_proactive_target"
+            else:
                 audit_events.append(
                     {
-                        "type": "QueuedOutreachProposalEvent",
-                        "turn_index": turn_index,
-                        "at": now,
-                        "proposal_id": entry.get("proposal_id", ""),
-                        "expires_at": entry.get("expires_at"),
-                        "runner_kind": background_runner_kind,
-                        "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
-                    }
-                )
-                outreach_outcome = "queued"
-            elif not allow_direct_outreach:
-                audit_events.append(
-                    {
-                        "type": "IdleOutreachDeferredEvent",
+                        "type": "IdleOutreachProposalEvent",
                         "turn_index": turn_index,
                         "at": now,
                         "proposal_id": locked.proposal_id,
-                        "runner_kind": background_runner_kind,
-                        "reason": "direct_delivery_disabled",
+                        "trigger": locked.trigger,
+                        "traceable_expectation_id": locked.traceable_expectation_id,
                         "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
                     }
                 )
-                outreach_outcome = "deferred_to_outbox"
-            else:
-                check_state, check = evaluate_proactive_initiative(
-                    state,
-                    now=now,
-                    turn_index=turn_index,
-                    manual_continue=False,
-                    locked_proposal=locked,
-                    llm=self.llm,
-                )
-                state = check_state
-                self.store.save(state)
-                m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
-                for event in check.events:
-                    self.store.append_log({"event": "m13_proactive_audit", **event})
-                if check.proposal is not None:
-                    proactive_result = self.run_proactive_turn(
-                        proposal_id=check.proposal.proposal_id,
-                        turn_index=turn_index,
+                if queue_outreach:
+                    initiative = merge_background_continuity_into_initiative(
+                        normalize_initiative_state(m13_state.get("initiative"))
+                    )
+                    bg = normalize_background_continuity_state(initiative.get("background_continuity"))
+                    ttl = int(bg.get("queued_outreach_ttl_seconds", 0) or 0)
+                    entry = enqueue_outreach_proposal(
+                        self.store.root,
+                        proposal=locked.to_dict(),
+                        now=now,
+                        ttl_seconds=ttl,
+                        drive_snapshot={
+                            "boredom_band": sig_dict.get("boredom_band"),
+                            "memory_efe_should_outreach": m13_memory_efe_evaluation.should_outreach,
+                        },
+                    )
+                    m13_state, settlement_events = register_memory_efe_outreach_settlement(
+                        m13_state,
+                        evaluation=m13_memory_efe_evaluation,
+                        proposal_id=locked.proposal_id,
+                        delivery_status="queued",
                         now=now,
                     )
-                    outreach_outcome = (
-                        "delivered"
-                        if str(proactive_result.reply or "").strip()
-                        else str(proactive_result.diagnostics.get("suppression_reason", "suppressed"))
+                    state["m13_drive_state"] = m13_state
+                    audit_events.extend(settlement_events)
+                    audit_events.append(
+                        {
+                            "type": "QueuedOutreachProposalEvent",
+                            "turn_index": turn_index,
+                            "at": now,
+                            "proposal_id": entry.get("proposal_id", ""),
+                            "expires_at": entry.get("expires_at"),
+                            "runner_kind": background_runner_kind,
+                            "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
+                        }
                     )
-                    if outreach_outcome == "delivered":
-                        m13_state = mark_outreach_via_introspection(
-                            merge_initiative_into_m13_state(self.store.load().get("m13_drive_state", {}))
-                        )
-                        m13_state, settlement_events = register_memory_efe_outreach_settlement(
-                            m13_state,
-                            evaluation=m13_memory_efe_evaluation,
-                            proposal_id=locked.proposal_id,
-                            delivery_status="delivered",
+                    outreach_outcome = "queued"
+                elif not allow_direct_outreach:
+                    audit_events.append(
+                        {
+                            "type": "IdleOutreachDeferredEvent",
+                            "turn_index": turn_index,
+                            "at": now,
+                            "proposal_id": locked.proposal_id,
+                            "runner_kind": background_runner_kind,
+                            "reason": "direct_delivery_disabled",
+                            "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
+                        }
+                    )
+                    outreach_outcome = "deferred_to_outbox"
+                else:
+                    check_state, check = evaluate_proactive_initiative(
+                        state,
+                        now=now,
+                        turn_index=turn_index,
+                        manual_continue=False,
+                        locked_proposal=locked,
+                        llm=self.llm,
+                        structural_signals=sig_dict,
+                        memory_efe_evaluation=m13_memory_efe_evaluation,
+                    )
+                    state = check_state
+                    self.store.save(state)
+                    m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+                    for event in check.events:
+                        self.store.append_log({"event": "m13_proactive_audit", **event})
+                    if check.proposal is not None:
+                        proactive_result = self.run_proactive_turn(
+                            proposal_id=check.proposal.proposal_id,
+                            turn_index=turn_index,
                             now=now,
                         )
-                        state["m13_drive_state"] = m13_state
-                        audit_events.extend(settlement_events)
-                else:
-                    outreach_outcome = check.suppression_reason or "suppressed"
+                        outreach_outcome = (
+                            "delivered"
+                            if str(proactive_result.reply or "").strip()
+                            else str(
+                                proactive_result.diagnostics.get("reason_code")
+                                or proactive_result.diagnostics.get("suppression_reason", "suppressed")
+                            )
+                        )
+                        if outreach_outcome == "delivered":
+                            m13_state = mark_outreach_via_introspection(
+                                merge_initiative_into_m13_state(self.store.load().get("m13_drive_state", {}))
+                            )
+                            m13_state, settlement_events = register_memory_efe_outreach_settlement(
+                                m13_state,
+                                evaluation=m13_memory_efe_evaluation,
+                                proposal_id=locked.proposal_id,
+                                delivery_status="delivered",
+                                now=now,
+                            )
+                            state["m13_drive_state"] = m13_state
+                            audit_events.extend(settlement_events)
+                    else:
+                        outreach_outcome = check.suppression_reason_code or check.suppression_reason or "suppressed"
         else:
             outreach_outcome = str(outreach.get("reason", "reflection_only") or "reflection_only")
 

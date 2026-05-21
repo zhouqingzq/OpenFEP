@@ -15,7 +15,7 @@ from segmentum.dialogue.runtime.m13_reward import (
     list_assessable_pending_rows,
     normalize_affective_reward_proxy_state,
 )
-from segmentum.dialogue.runtime.m14_3_proactive_alignment import is_traceable_open_item
+from segmentum.dialogue.runtime.m14_3_proactive_alignment import build_traceable_proactive_intent, is_traceable_open_item
 
 M14_ENGINEERING_PROXY_LABEL = "mvp_local_conscious_idle_reflector"
 IDLE_INTROSPECTION_MARKER = "M14 空闲内省意识主循环"
@@ -389,17 +389,18 @@ def build_structural_idle_plan(
     """Deterministic fallback when LLM unavailable or returns empty."""
     plan = empty_conscious_idle_plan()
     open_items = [row for row in idle_context.get("open_items", []) if isinstance(row, Mapping)]
+    traceable_open_items = [row for row in open_items if is_traceable_open_item(row)]
     boredom = _mapping(idle_context.get("boredom"))
     reward = _mapping(idle_context.get("affective_reward_proxy"))
     band = str(boredom.get("band", "low"))
 
-    if open_items:
-        first = open_items[0]
+    if traceable_open_items:
+        first = traceable_open_items[0]
         item_id = str(first.get("id", ""))
         refs = [item_id] if item_id in retrieved_ids else [rid for rid in retrieved_ids][:1]
         if refs:
             plan["reflection_focus"] = {
-                "topic": str(first.get("next_check", first.get("title", "")))[:120],
+                "topic": str(first.get("title", first.get("content", first.get("summary", ""))) or "")[:120],
                 "evidence_refs": refs,
                 "reflection_kind": "open_item",
             }
@@ -413,14 +414,14 @@ def build_structural_idle_plan(
                 "reflection_kind": "habit_calibration",
             }
 
-    if open_items and not bool(reward.get("path_feels_stale")):
-        first = open_items[0]
+    if traceable_open_items and not bool(reward.get("path_feels_stale")):
+        first = traceable_open_items[0]
         item_id = str(first.get("id", ""))
         if item_id in retrieved_ids and is_traceable_open_item(first):
             plan["outreach_recommendation"] = {
                 "should_outreach": True,
                 "reason": "open_item_followup",
-                "suggested_intent": f"Follow up on open item: {str(first.get('title') or first.get('next_check', ''))[:140]}",
+                "suggested_intent": build_traceable_proactive_intent(first),
                 "trigger": "reflection_outreach",
             }
     return plan
@@ -482,8 +483,15 @@ def apply_idle_drive_rules(
         outreach["should_outreach"] = True
         outreach["reason"] = "traceable_focus"
         trace_id = str(memory_efe.get("traceable_expectation_id", "") or "")[:120]
-        if not outreach.get("suggested_intent"):
-            outreach["suggested_intent"] = f"Follow up on traceable open expectation: {trace_id}"
+        intent = ""
+        for row in open_items:
+            if str(row.get("id", "")) == trace_id:
+                intent = build_traceable_proactive_intent(row)
+                break
+        if not intent and not outreach.get("suggested_intent"):
+            intent = f"Follow up on traceable expectation: {trace_id}" if trace_id else ""
+        if intent:
+            outreach["suggested_intent"] = intent
 
     focus = merged.get("reflection_focus")
     if isinstance(focus, Mapping) and band == "high":

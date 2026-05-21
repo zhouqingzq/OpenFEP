@@ -119,7 +119,7 @@ def test_vague_open_item_does_not_create_default_proactive_target() -> None:
         llm=_ContextUnsafeLLM(),
     )
     assert check.proposal is None
-    assert check.suppression_reason == "no_high_value_target"
+    assert check.suppression_reason == "no_traceable_proactive_target"
     suppression = [event for event in check.events if event.get("type") == "M13ProactiveSuppressionEvent"][-1]
     assert suppression["reason_code"] == "no_traceable_proactive_target"
 
@@ -177,7 +177,7 @@ def test_suppression_reason_logged_when_no_high_value_target() -> None:
         manual_continue=True,
         llm=_ContextUnsafeLLM(),
     )
-    assert check.suppression_reason == "no_high_value_target"
+    assert check.suppression_reason == "no_traceable_proactive_target"
     assert any(event.get("type") == "M13ProactiveSuppressionEvent" for event in check.events)
     _, check_idle = evaluate_proactive_initiative(
         state,
@@ -187,7 +187,7 @@ def test_suppression_reason_logged_when_no_high_value_target() -> None:
         implicit_idle_request=False,
         llm=_ContextUnsafeLLM(),
     )
-    assert check_idle.suppression_reason == "implicit_idle_disabled"
+    assert check_idle.suppression_reason == "delivery_channel_unavailable"
 
     risky = _opted_in_state(
         open_items=[{"id": "oi", "status": "open", "title": "t", "next_check": "n"}],
@@ -200,7 +200,7 @@ def test_suppression_reason_logged_when_no_high_value_target() -> None:
         manual_continue=True,
         llm=_ContextUnsafeLLM(),
     )
-    assert check2.suppression_reason == "safety_risk"
+    assert check2.suppression_reason == "context_assessment_unsafe"
     assert any(event.get("type") == "M13ProactiveContextAssessmentEvent" for event in check2.events)
 
 
@@ -213,10 +213,10 @@ def test_without_llm_recent_text_requires_insufficient_evidence_when_no_structur
         manual_continue=True,
         llm=None,
     )
-    assert check.suppression_reason == "insufficient_evidence"
+    assert check.suppression_reason == "no_traceable_proactive_target"
 
 
-def test_context_assessor_can_propose_remind_without_keyword_cue() -> None:
+def test_context_assessor_no_longer_creates_proposal_without_traceable_target() -> None:
     class _RemindLLM:
         def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
             if CONTEXT_ASSESSOR_MARKER in system_prompt:
@@ -241,8 +241,9 @@ def test_context_assessor_can_propose_remind_without_keyword_cue() -> None:
         manual_continue=True,
         llm=_RemindLLM(),
     )
-    assert check.proposal is not None
-    assert check.proposal.trigger == "explicit_remind_request"
+    assert check.proposal is None
+    assert check.suppression_reason == "no_traceable_proactive_target"
+    assert any(event.get("type") == "M13ProactiveContextAssessmentEvent" for event in check.events)
 
 
 def test_first_version_uses_manual_continue_not_implicit_idle_delivery() -> None:
@@ -260,7 +261,7 @@ def test_first_version_uses_manual_continue_not_implicit_idle_delivery() -> None
         implicit_idle_request=True,
         llm=_ContextUnsafeLLM(),
     )
-    assert check.suppression_reason == "implicit_idle_disabled"
+    assert check.suppression_reason == "delivery_channel_unavailable"
 
 
 def test_implicit_idle_delivery_requires_explicit_opt_in_when_enabled() -> None:
@@ -479,7 +480,7 @@ def test_blocked_proactive_turn_rolls_back_state_and_skips_delivery_log(tmp_path
     assert any(
         row.get("event") == "m13_proactive_audit"
         and row.get("type") == "M13ProactiveSuppressionEvent"
-        and row.get("reason") == "safety_risk"
+        and row.get("reason_code") == "delivery_assessor_reject"
         for row in rows
     )
 
