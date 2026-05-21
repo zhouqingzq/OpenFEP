@@ -651,6 +651,20 @@ class ChatInterface:
             return {}
         return dict(self._mvp_runtime.set_initiative_user_opt_in(bool(enabled)))
 
+    def set_implicit_idle_delivery(self, enabled: bool) -> dict[str, object]:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return {}
+        return dict(self._mvp_runtime.set_initiative_implicit_idle_delivery(bool(enabled)))
+
+    def read_initiative_status(self) -> dict[str, object]:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return {}
+        return dict(self._mvp_runtime.read_initiative_status())
+
     def set_idle_introspection_opt_in(self, enabled: bool) -> dict[str, object]:
         self._ensure_runtime_fields()
         self._maybe_enable_mvp_llm_runtime()
@@ -909,6 +923,82 @@ class ChatInterface:
             session_id=self._session_id,
         )
         return [dict(row) for row in store.list_intents()]
+
+    def read_m14_2_observability_summary(self) -> dict[str, object]:
+        """Aggregate M14.2 daemon, environment bus, idle introspection, and budgets for the UI."""
+        from datetime import datetime
+
+        now = int(time.time())
+        today = datetime.fromtimestamp(now).date().isoformat()
+        daemon = self.read_self_loop_daemon_status()
+        idle = self.read_idle_introspection_status()
+        bg = self.read_background_continuity_status()
+
+        clock_wake_acked_today = 0
+        last_clock_wake_at = 0
+        user_message_pending = 0
+        ui_audit_pending = 0
+        for row in self.read_m14_2_environment_events(limit=400):
+            event_type = str(row.get("event_type", "") or "")
+            status = str(row.get("status", "") or "")
+            at = int(row.get("at", 0) or 0)
+            event_day = datetime.fromtimestamp(at).date().isoformat() if at > 0 else ""
+            if event_type == "ClockWakeEvent" and status == "acked" and event_day == today:
+                clock_wake_acked_today += 1
+                last_clock_wake_at = max(last_clock_wake_at, at)
+            if event_type == "UserMessageCommittedEvent" and status == "pending":
+                user_message_pending += 1
+            if event_type in {"UIPingEvent", "OutboxDeliverySurfaceAvailableEvent"} and status == "pending":
+                ui_audit_pending += 1
+
+        active_intent_statuses = {"pending", "preparing", "prepared", "awaiting_delivery"}
+        scheduled_intents_active = 0
+        for row in self.read_m14_2_scheduled_intents():
+            if str(row.get("status", "") or "") in active_intent_statuses:
+                scheduled_intents_active += 1
+
+        queued_outreach = sum(
+            1
+            for row in self.read_queued_outreach()
+            if str(row.get("status", "") or "") == "pending"
+        )
+
+        health_ticks_today = 0
+        last_health_at = 0
+        for row in self.read_conversation_log(limit=300):
+            if str(row.get("event", "")) != "m14_2_audit":
+                continue
+            if str(row.get("type", "")) != "SelfLoopDaemonHealthEvent":
+                continue
+            at = int(row.get("at", 0) or 0)
+            if at > 0 and datetime.fromtimestamp(at).date().isoformat() == today:
+                health_ticks_today += 1
+                last_health_at = max(last_health_at, at)
+
+        reflection_count = int(idle.get("reflection_count_this_session", 0) or 0)
+        reflection_max = int(idle.get("max_per_session", 4) or 4)
+
+        return {
+            "daemon": daemon,
+            "clock_wake_acked_today": clock_wake_acked_today,
+            "last_clock_wake_at": last_clock_wake_at,
+            "health_ticks_today": health_ticks_today,
+            "last_health_at": last_health_at,
+            "user_message_pending": user_message_pending,
+            "ui_audit_pending": ui_audit_pending,
+            "scheduled_intents_active": scheduled_intents_active,
+            "queued_outreach": queued_outreach,
+            "reflection_count": reflection_count,
+            "reflection_max": reflection_max,
+            "last_introspection_at": int(idle.get("last_introspection_at", 0) or 0),
+            "last_idle_skip_reason": str(idle.get("last_skip_reason", "") or ""),
+            "last_outreach_outcome": str(idle.get("last_outreach_outcome", "") or ""),
+            "background_llm_calls_today": int(bg.get("llm_calls_today", 0) or 0),
+            "background_llm_budget": int(bg.get("llm_calls_budget_per_day", 80) or 80),
+            "background_tokens_today": int(bg.get("tokens_used_today", 0) or 0),
+            "background_tokens_budget": int(bg.get("tokens_budget_per_day", 30000) or 30000),
+            "last_budget_block_reason": str(bg.get("last_budget_block_reason", "") or ""),
+        }
 
     def _start_background_runner(self) -> None:
         """Development-only inline fallback; not the M14.2 overnight acceptance path."""

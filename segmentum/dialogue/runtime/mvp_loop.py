@@ -5222,6 +5222,27 @@ class MVPDialogueRuntime:
         )
         return dict(initiative)
 
+    def set_initiative_implicit_idle_delivery(self, enabled: bool) -> dict[str, Any]:
+        from segmentum.dialogue.runtime.m13_initiative import set_initiative_implicit_idle_delivery
+
+        state = self.store.load()
+        state["m13_drive_state"] = set_initiative_implicit_idle_delivery(
+            state.get("m13_drive_state", {}),
+            enabled=enabled,
+        )
+        self.store.save(state)
+        initiative = normalize_initiative_state(
+            normalize_m13_drive_state(state.get("m13_drive_state")).get("initiative")
+        )
+        return dict(initiative)
+
+    def read_initiative_status(self) -> dict[str, Any]:
+        state = self.store.load()
+        initiative = normalize_initiative_state(
+            normalize_m13_drive_state(state.get("m13_drive_state")).get("initiative")
+        )
+        return dict(initiative)
+
     def set_idle_introspection_opt_in(self, enabled: bool) -> dict[str, Any]:
         state = self.store.load()
         state["m13_drive_state"] = set_idle_introspection_user_opt_in(

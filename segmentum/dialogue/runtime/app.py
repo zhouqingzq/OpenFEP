@@ -1123,6 +1123,30 @@ def render_sidebar() -> None:
                 chat_iface.set_bounded_proactive_opt_in(proactive_opt_in)
                 st.session_state.m13_initiative_opt_in_synced = proactive_opt_in
             st.session_state.m13_initiative_opt_in = proactive_opt_in
+            initiative_status = chat_iface.read_initiative_status() if chat_iface.has_agent() else {}
+            implicit_idle_default = bool(
+                initiative_status.get("implicit_idle_delivery")
+                if initiative_status
+                else st.session_state.get("m13_implicit_idle_delivery", False)
+            )
+            implicit_idle_disabled = not proactive_opt_in
+            implicit_idle_delivery = st.sidebar.checkbox(
+                "Enable implicit idle delivery (隐式空闲送达)",
+                value=implicit_idle_default,
+                key="m13_implicit_idle_delivery_checkbox",
+                disabled=implicit_idle_disabled,
+                help=(
+                    "When idle introspection selects outreach, deliver a bounded proactive message "
+                    "without pressing Manual continue. Requires bounded proactive + idle introspection. "
+                    "Maps to initiative.implicit_idle_delivery."
+                ),
+            )
+            if implicit_idle_disabled:
+                implicit_idle_delivery = False
+            if implicit_idle_delivery != bool(st.session_state.get("m13_implicit_idle_delivery_synced", False)):
+                chat_iface.set_implicit_idle_delivery(implicit_idle_delivery)
+                st.session_state.m13_implicit_idle_delivery_synced = implicit_idle_delivery
+            st.session_state.m13_implicit_idle_delivery = implicit_idle_delivery
             idle_intro_disabled = not proactive_opt_in
             idle_intro_opt_in = st.sidebar.checkbox(
                 "Enable idle introspection (experimental)",
@@ -1213,22 +1237,18 @@ def render_sidebar() -> None:
                     if any(bg_status.get(k) != v for k, v in desired_bg.items()):
                         bg_status = chat_iface.update_background_continuity_config(**desired_bg)
             if bg_status and bg_opt_in:
-                daemon = chat_iface.read_self_loop_daemon_status()
+                m14 = chat_iface.read_m14_2_observability_summary()
+                daemon = _as_dict(m14.get("daemon"))
                 daemon_status = str(daemon.get("status", "stopped"))
                 daemon_pid = int(daemon.get("pid", 0) or 0)
-                runner_kind = str(
-                    daemon.get("runner_kind") or bg_status.get("runner_kind", "") or "none"
-                )
                 st.sidebar.caption(
                     "Self-loop daemon: "
                     f"status={daemon_status} "
-                    f"kind={runner_kind} "
                     f"pid={daemon_pid} "
-                    f"ticks_today={bg_status.get('ticks_today', 0)}/"
-                    f"{bg_status.get('max_ticks_per_day', '?')} "
-                    f"llm={bg_status.get('llm_calls_today', 0)}/"
-                    f"{bg_status.get('llm_calls_budget_per_day', '?')} "
-                    f"lifetime_idle={bg_status.get('idle_ticks_lifetime', 0)}"
+                    f"health_today={m14.get('health_ticks_today', 0)} "
+                    f"reflect={m14.get('reflection_count', 0)}/"
+                    f"{m14.get('reflection_max', '?')} "
+                    f"msg_pending={m14.get('user_message_pending', 0)}"
                 )
                 start_col, stop_col = st.sidebar.columns(2)
                 if bool(daemon.get("running")):
@@ -1836,6 +1856,22 @@ def _yes_no(flag: object) -> str:
     return "是" if bool(flag) else "否"
 
 
+def _m14_2_event_consumer_note(event_type: object, status: object) -> str:
+    et = str(event_type or "")
+    if et in {"ClockWakeEvent", "UserMessageCommittedEvent", "ScheduledIntentDueEvent"}:
+        return "daemon 消费"
+    if et in {"UIPingEvent", "OutboxDeliverySurfaceAvailableEvent", "UISessionClosedEvent"}:
+        return "仅审计"
+    if et in {"RunnerStartedEvent", "RunnerStoppedEvent"}:
+        return "runner 生命周期"
+    st = str(status or "")
+    if st == "pending":
+        return "待处理"
+    if st == "acked":
+        return "已处理"
+    return st or "—"
+
+
 def _bullet_lines(items: object, *, limit: int = 8) -> str:
     if not isinstance(items, list):
         return "—"
@@ -2030,35 +2066,46 @@ def render_dashboard() -> None:
     self_continuity = _as_dict(self_cognition.get("self_continuity"))
     bg_ui = bool(st.session_state.get("m14_1_background_opt_in", False))
 
-    if bg_ui and bg:
-        daemon = chat_iface.read_self_loop_daemon_status()
+    if idle_ui or bg_ui:
+        m14 = chat_iface.read_m14_2_observability_summary()
+        daemon = _as_dict(m14.get("daemon"))
         daemon_line = (
             f"Self-loop daemon: **{daemon.get('status', 'stopped')}** "
-            f"(kind={daemon.get('runner_kind') or bg.get('runner_kind', 'none')}, "
-            f"pid={daemon.get('pid', 0)})"
+            f"(pid={daemon.get('pid', 0)})"
         )
         st.caption(daemon_line)
         b1, b2, b3, b4, b5, b6 = st.columns(6)
-        b1.metric("自我思考(今日)", str(bg.get("ticks_today", 0)))
-        b2.metric("自我思考(累计)", str(bg.get("idle_ticks_lifetime", 0)))
-        b3.metric("自我审视(今日)", str(bg.get("self_reviews_today", 0)))
-        b4.metric(
-            "LLM请求(今日)",
-            f"{bg.get('llm_calls_today', 0)}/{bg.get('llm_calls_budget_per_day', '?')}",
+        b1.metric("Daemon 心跳(今日)", str(m14.get("health_ticks_today", 0)))
+        b2.metric(
+            "空闲反思(会话)",
+            f"{m14.get('reflection_count', 0)}/{m14.get('reflection_max', '?')}",
         )
-        b5.metric("LLM请求(累计)", str(bg.get("llm_calls_lifetime", 0)))
-        b6.metric("上次自我思考", _format_unix_time(bg.get("last_tick_at")))
-        st.caption(
-            f"tokens 今日 {bg.get('tokens_used_today', 0)}/{bg.get('tokens_budget_per_day', '?')} "
-            f"｜ 预算阻断 {bg.get('last_budget_block_reason') or '—'}"
-        )
-
-        bg_events = [
-            row for row in chat_iface.read_conversation_log(limit=80)
-            if str(row.get("event", "")) == "m14_1_background_audit"
+        b3.metric("待处理用户消息", str(m14.get("user_message_pending", 0)))
+        b4.metric("活跃定时 intent", str(m14.get("scheduled_intents_active", 0)))
+        b5.metric("队列 outreach", str(m14.get("queued_outreach", 0)))
+        b6.metric("上次空闲内省", _format_unix_time(m14.get("last_introspection_at")))
+        caption_parts = [
+            f"ClockWake ack 今日 {m14.get('clock_wake_acked_today', 0)}",
+            f"上次心跳 {_format_unix_time(m14.get('last_health_at'))}",
+            f"空闲跳过 {_clip_text(m14.get('last_idle_skip_reason'), limit=40)}",
+            f"UI 仅审计 pending {m14.get('ui_audit_pending', 0)}",
         ]
-        with st.expander("Background audit events", expanded=False):
-            st.json(bg_events[-5:], expanded=False)
+        if bg_ui:
+            caption_parts.append(
+                f"后台 LLM {m14.get('background_llm_calls_today', 0)}/"
+                f"{m14.get('background_llm_budget', '?')}"
+            )
+            caption_parts.append(f"预算阻断 {m14.get('last_budget_block_reason') or '—'}")
+        st.caption(" ｜ ".join(caption_parts))
+
+        if bg_ui:
+            bg_events = [
+                row for row in chat_iface.read_conversation_log(limit=80)
+                if str(row.get("event", "")) == "m14_1_background_audit"
+            ]
+            if bg_events:
+                with st.expander("M14.1 legacy background audit", expanded=False):
+                    st.json(bg_events[-5:], expanded=False)
         queue_rows = chat_iface.read_queued_outreach() if hasattr(chat_iface, "read_queued_outreach") else []
         if queue_rows:
             st.markdown("**Queued outreach (background)**")
@@ -2093,6 +2140,9 @@ def render_dashboard() -> None:
                                     {
                                         "type": row.get("event_type", ""),
                                         "status": row.get("status", ""),
+                                        "说明": _m14_2_event_consumer_note(
+                                            row.get("event_type"), row.get("status")
+                                        ),
                                         "source": row.get("source", ""),
                                         "at": _format_unix_time(row.get("at")),
                                     }

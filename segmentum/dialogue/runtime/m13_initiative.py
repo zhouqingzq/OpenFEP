@@ -877,9 +877,21 @@ def set_initiative_user_opt_in(m13_state: dict[str, Any], *, enabled: bool) -> d
     initiative["user_opt_in"] = bool(enabled)
     initiative["enabled"] = bool(enabled)
     if not enabled:
+        initiative["implicit_idle_delivery"] = False
         initiative["pending_proactive_proposal"] = {}
         initiative["last_suppression_reason"] = "not_opted_in"
         state["initiative"] = initiative
         return disable_idle_introspection_on_proactive_off(state)
+    state["initiative"] = initiative
+    return state
+
+
+def set_initiative_implicit_idle_delivery(m13_state: dict[str, Any], *, enabled: bool) -> dict[str, Any]:
+    state = merge_initiative_into_m13_state(m13_state)
+    initiative = normalize_initiative_state(state.get("initiative"))
+    if not initiative.get("user_opt_in"):
+        initiative["implicit_idle_delivery"] = False
+    else:
+        initiative["implicit_idle_delivery"] = bool(enabled)
     state["initiative"] = initiative
     return state
