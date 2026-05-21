@@ -10,6 +10,7 @@ from typing import Any, Mapping
 
 from segmentum.dialogue.runtime.m13_boredom import boredom_band, normalize_boredom_state
 from segmentum.dialogue.runtime.m13_drive import _bounded_float, _mapping, _string_list, normalize_m13_drive_state
+from segmentum.dialogue.runtime.m13_memory_efe import normalize_memory_efe_state
 from segmentum.dialogue.runtime.m13_reward import (
     list_assessable_pending_rows,
     normalize_affective_reward_proxy_state,
@@ -179,6 +180,7 @@ def build_idle_context(
 
     initiative = _mapping(_mapping(m13_state.get("initiative")))
     idle = _mapping(initiative.get("idle_introspection"))
+    memory_efe = normalize_memory_efe_state(m13_state.get("memory_efe"))
 
     sig = (
         structural_signals.to_dict()
@@ -187,7 +189,6 @@ def build_idle_context(
         if isinstance(structural_signals, Mapping)
         else {}
     )
-
     return {
         "turn_index": turn_index,
         "open_items": open_rows,
@@ -215,6 +216,18 @@ def build_idle_context(
             "outreach_via_introspection_count": int(
                 idle.get("outreach_via_introspection_count_this_session", 0) or 0
             ),
+        },
+        "memory_efe": {
+            "phase": str(memory_efe.get("phase", "")),
+            "eligible_count": len(memory_efe.get("eligible_for_efe", []) or []),
+            "diagnostic_only_count": len(memory_efe.get("diagnostic_only", []) or []),
+            "selected_policy": str(memory_efe.get("selected_policy", "")),
+            "reply_angle_bias": str(memory_efe.get("reply_angle_bias", "none")),
+            "should_outreach": bool(memory_efe.get("should_outreach")),
+            "suppression_reasons": _string_list(memory_efe.get("suppression_reasons"), limit=6),
+            "traceable_expectation_id": str(memory_efe.get("traceable_expectation_id", ""))[:120],
+            "social_prediction_error": round(_bounded_float(memory_efe.get("social_prediction_error")), 4),
+            "epistemic_prediction_error": round(_bounded_float(memory_efe.get("epistemic_prediction_error")), 4),
         },
         "structural_signals": sig,
         "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
@@ -418,17 +431,21 @@ def apply_idle_drive_rules(
     merged = normalize_conscious_idle_plan(plan)
     boredom = _mapping(idle_context.get("boredom"))
     reward = _mapping(idle_context.get("affective_reward_proxy"))
+    memory_efe = _mapping(idle_context.get("memory_efe"))
     band = str(boredom.get("band", "low"))
     outreach = dict(merged["outreach_recommendation"])
+    hard_reflection_only = False
 
     if bool(reward.get("path_feels_stale")):
         outreach["should_outreach"] = False
         outreach["reason"] = "reflection_only"
+        hard_reflection_only = True
 
     pending_count = int(reward.get("pending_settlements_count", 0) or 0)
     if pending_count > 0:
         outreach["should_outreach"] = False
         outreach["reason"] = "reflection_only"
+        hard_reflection_only = True
 
     sig = (
         structural_signals.to_dict()
@@ -437,15 +454,31 @@ def apply_idle_drive_rules(
         if isinstance(structural_signals, Mapping)
         else {}
     )
+    scheduled_owned_outreach = any(
+        isinstance(row, Mapping) and str(row.get("kind", "")) == "scheduled_outreach"
+        for row in sig.get("scheduled_intents", []) or []
+    )
     if bool(sig.get("just_outreached_recently")):
         outreach["should_outreach"] = False
         outreach["reason"] = "already_recent"
+        hard_reflection_only = True
 
     open_items = [row for row in idle_context.get("open_items", []) if isinstance(row, Mapping)]
     has_concrete_next = any(str(row.get("next_check", "")).strip() for row in open_items)
     if band == "low" and outreach.get("should_outreach") and not has_concrete_next:
         outreach["should_outreach"] = False
         outreach["reason"] = "low_value"
+
+    memory_efe_allows_outreach = bool(memory_efe.get("should_outreach"))
+    if outreach.get("should_outreach") and not memory_efe_allows_outreach and not scheduled_owned_outreach:
+        outreach["should_outreach"] = False
+        outreach["reason"] = "reflection_only"
+    elif memory_efe_allows_outreach and not outreach.get("should_outreach") and not hard_reflection_only:
+        outreach["should_outreach"] = True
+        outreach["reason"] = "traceable_focus"
+        trace_id = str(memory_efe.get("traceable_expectation_id", "") or "")[:120]
+        if not outreach.get("suggested_intent"):
+            outreach["suggested_intent"] = f"Follow up on traceable open expectation: {trace_id}"
 
     focus = merged.get("reflection_focus")
     if isinstance(focus, Mapping) and band == "high":

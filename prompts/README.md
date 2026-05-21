@@ -37,6 +37,7 @@ M13.1: MVP-Local Boredom And Exploration Bias
 M13.2: MVP-Local Affective Reward Proxy And Tolerance
 M13.3: UI-Level Bounded Initiative
 M13.4: UI Idle Tick And Introspection Entry Point
+M13.6: Memory-Backed Expected Free Energy Bridge
 M14.0: Conscious Idle Reflector And Self-Cognition Patch
 M14.1: Background Self-Continuity And Persistent Idle Loop
 M14.2: Decoupled Environment Loop And Durable Overnight Outreach
@@ -48,7 +49,7 @@ M11.0 was repurposed from the earlier "Conscious Projection Runtime" scope to th
 
 M13 is an MVP-local drive layer for the real UI chat path. It intentionally does not wait for full Path A / Path B unification. The sequence is M13.0 behavioral pull, M13.1 boredom and exploration bias, M13.2 affective reward proxy and tolerance, M13.3 bounded UI initiative, and M13.4 the UI idle tick plus introspection entry point.
 
-M14.0 builds on the M13.4 plumbing to add the conscious idle reflector: idle ticks can trigger a JSON-only conscious plan that proposes self-cognition patches, memory consolidation intents, and open-item updates, and may optionally hand off to the existing M13.3 outreach pipeline. M14.1 makes that loop budgeted and persistent. M14.2 separates environment observation, event storage, self-loop preparation, and delivery; UI renders and reports runtime state, it is not the lifecycle owner for overnight self-continuity. Explicit later-message requests must become durable scheduled intents plus outbox entries, never just natural-language follow-up notes. Path A and M10 are explicitly out of scope.
+M13.6 adds a memory-backed expected-free-energy bridge between traceable pending expectations/open items and bounded Path B policy guidance. Silence is not a direct boredom or outreach input: it only matters when it leaves a concrete memory-backed expectation due or unresolved. M14.0 builds on the M13.4 plumbing to add the conscious idle reflector: idle ticks can trigger a JSON-only conscious plan that proposes self-cognition patches, memory consolidation intents, and open-item updates, and may hand off to the existing M13.3 outreach pipeline only when M13.6 allows outreach. M14.1 makes that loop budgeted and persistent. M14.2 separates environment observation, event storage, self-loop preparation, and delivery; UI renders and reports runtime state, it is not the lifecycle owner for overnight self-continuity. Explicit later-message requests must become durable scheduled intents plus outbox entries, never just natural-language follow-up notes. Path A and M10 are explicitly out of scope.
 
 ## Migration Note
 

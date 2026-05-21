@@ -97,6 +97,15 @@ from segmentum.dialogue.runtime.m13_initiative import (
     proactive_delivered_text_is_safe,
     set_initiative_user_opt_in,
 )
+from segmentum.dialogue.runtime.m13_memory_efe import (
+    apply_memory_efe_state,
+    build_memory_efe_outreach_proposal,
+    evaluate_memory_efe,
+    merge_memory_efe_guidance_into_control,
+    prompt_safe_m13_memory_efe_diagnostics,
+    register_memory_efe_outreach_settlement,
+    settle_memory_efe_outreach,
+)
 from segmentum.dialogue.runtime.m14_idle_owners import (
     MemoryConsolidationOwner,
     OpenItemPatchOwner,
@@ -120,6 +129,7 @@ from segmentum.dialogue.runtime.m14_1_background_continuity import (
     M14_1_ENGINEERING_PROXY_LABEL,
     check_background_budgets,
     enqueue_outreach_proposal,
+    load_queued_outreach,
     maybe_rollover_daily_counters,
     merge_background_continuity_into_initiative,
     normalize_background_continuity_state,
@@ -4349,6 +4359,15 @@ class MVPDialogueRuntime:
             entity_binding=entity_binding,
         )
         conscious = self.llm.complete_json(system_prompt=conscious_system, user_prompt=conscious_user)
+        m13_state, m13_memory_efe_settlement_events = settle_memory_efe_outreach(
+            m13_state,
+            conscious_plan=conscious,
+            turn_index=turn_index,
+            now=now,
+        )
+        state["m13_drive_state"] = m13_state
+        for m13_memory_efe_settlement_event in m13_memory_efe_settlement_events:
+            bus.append(m13_memory_efe_settlement_event)
         memory_dynamics = build_memory_dynamics_guidance(
             state,
             user_text,
@@ -4676,6 +4695,26 @@ class MVPDialogueRuntime:
         for m13_reward_event in m13_reward_pre_turn.events:
             bus.append(m13_reward_event)
         merge_affective_guidance_into_control(memory_dynamics, m13_reward_pre_turn)
+        m13_memory_efe_evaluation = evaluate_memory_efe(
+            state,
+            phase="in_turn",
+            now=now,
+            turn_index=turn_index,
+            user_active=True,
+            memory_dynamics=memory_dynamics,
+            retrieved_memories=retrieved,
+            m13_boredom_evaluation=m13_boredom_evaluation,
+            m13_reward_evaluation=m13_reward_pre_turn,
+            conscious_plan=conscious,
+        )
+        m13_state, _m13_memory_efe_apply_events = apply_memory_efe_state(
+            m13_state,
+            m13_memory_efe_evaluation,
+        )
+        state["m13_drive_state"] = m13_state
+        for m13_memory_efe_event in m13_memory_efe_evaluation.events:
+            bus.append(m13_memory_efe_event)
+        merge_memory_efe_guidance_into_control(memory_dynamics, m13_memory_efe_evaluation)
 
         thinking_system, thinking_user = build_thinking_prompt(
             state=_prompt_safe_state(state, user_id=user_id),
@@ -4972,6 +5011,7 @@ class MVPDialogueRuntime:
             "m13_drive_evaluation": prompt_safe_m13_turn_diagnostics(m13_evaluation),
             "m13_boredom_evaluation": prompt_safe_m13_boredom_diagnostics(m13_boredom_evaluation),
             "m13_reward_evaluation": prompt_safe_m13_reward_diagnostics(m13_reward_evaluation),
+            "m13_memory_efe_evaluation": prompt_safe_m13_memory_efe_diagnostics(m13_memory_efe_evaluation),
             "m13_reward_ui_labels": prompt_safe_m13_reward_ui_labels(),
             "m13_drive_state": prompt_safe_m13_state_summary(m13_state, user_id=user_id),
             "retrieved_memories": retrieved,
@@ -5792,10 +5832,42 @@ class MVPDialogueRuntime:
             },
         ]
 
+        try:
+            from segmentum.dialogue.runtime.m14_2_scheduled_intents import ScheduledIntentStore
+
+            scheduled_store = ScheduledIntentStore(
+                self.store.root,
+                persona_id=self.persona_name or "default",
+                session_id=str(self.store.root.resolve()),
+            )
+            sig_dict["scheduled_intents"] = scheduled_store.list_intents()
+        except Exception:
+            sig_dict["scheduled_intents"] = []
+        try:
+            sig_dict["queued_outreach"] = load_queued_outreach(self.store.root)
+        except Exception:
+            sig_dict["queued_outreach"] = []
+
+        m13_memory_efe_evaluation = evaluate_memory_efe(
+            state,
+            phase="idle",
+            now=now,
+            turn_index=turn_index,
+            user_active=False,
+            structural_signals=sig_dict,
+        )
+        m13_state, _m13_memory_efe_apply_events = apply_memory_efe_state(
+            m13_state,
+            m13_memory_efe_evaluation,
+        )
+        state["m13_drive_state"] = m13_state
+        self.store.save(state)
+        audit_events.extend(m13_memory_efe_evaluation.events)
+
         idle_context = build_idle_context(
             state,
             m13_state=m13_state,
-            structural_signals=structural_signals,
+            structural_signals=sig_dict,
             turn_index=turn_index,
             now=now,
         )
@@ -5857,10 +5929,12 @@ class MVPDialogueRuntime:
             if normalized_probe == empty_conscious_idle_plan() and retrieved_ids:
                 raw_plan = build_structural_idle_plan(idle_context, retrieved_ids=retrieved_ids)
 
+        normalized_plan = normalize_conscious_idle_plan(raw_plan)
+
         plan = apply_idle_drive_rules(
-            normalize_conscious_idle_plan(raw_plan),
+            normalized_plan,
             idle_context=idle_context,
-            structural_signals=structural_signals,
+            structural_signals=sig_dict,
         )
 
         audit_events.append(
@@ -5980,13 +6054,21 @@ class MVPDialogueRuntime:
                 outreach.get("evidence_refs"), limit=8
             )
             topic = str(focus.get("topic", "") or "")[:120]
-            locked = build_reflection_outreach_proposal(
-                suggested_intent=str(outreach.get("suggested_intent", "") or ""),
-                evidence_refs=refs,
-                proposed_topic=topic,
-                now=now,
-                initiative=initiative,
-            )
+            locked = None
+            if m13_memory_efe_evaluation.should_outreach:
+                locked = build_memory_efe_outreach_proposal(
+                    m13_memory_efe_evaluation,
+                    now=now,
+                    initiative=initiative,
+                )
+            if locked is None:
+                locked = build_reflection_outreach_proposal(
+                    suggested_intent=str(outreach.get("suggested_intent", "") or ""),
+                    evidence_refs=refs,
+                    proposed_topic=topic,
+                    now=now,
+                    initiative=initiative,
+                )
             audit_events.append(
                 {
                     "type": "IdleOutreachProposalEvent",
@@ -6008,8 +6090,20 @@ class MVPDialogueRuntime:
                     proposal=locked.to_dict(),
                     now=now,
                     ttl_seconds=ttl,
-                    drive_snapshot={"boredom_band": sig_dict.get("boredom_band")},
+                    drive_snapshot={
+                        "boredom_band": sig_dict.get("boredom_band"),
+                        "memory_efe_should_outreach": m13_memory_efe_evaluation.should_outreach,
+                    },
                 )
+                m13_state, settlement_events = register_memory_efe_outreach_settlement(
+                    m13_state,
+                    evaluation=m13_memory_efe_evaluation,
+                    proposal_id=locked.proposal_id,
+                    delivery_status="queued",
+                    now=now,
+                )
+                state["m13_drive_state"] = m13_state
+                audit_events.extend(settlement_events)
                 audit_events.append(
                     {
                         "type": "QueuedOutreachProposalEvent",
@@ -6064,6 +6158,15 @@ class MVPDialogueRuntime:
                         m13_state = mark_outreach_via_introspection(
                             merge_initiative_into_m13_state(self.store.load().get("m13_drive_state", {}))
                         )
+                        m13_state, settlement_events = register_memory_efe_outreach_settlement(
+                            m13_state,
+                            evaluation=m13_memory_efe_evaluation,
+                            proposal_id=locked.proposal_id,
+                            delivery_status="delivered",
+                            now=now,
+                        )
+                        state["m13_drive_state"] = m13_state
+                        audit_events.extend(settlement_events)
                 else:
                     outreach_outcome = check.suppression_reason or "suppressed"
         else:
@@ -6092,6 +6195,7 @@ class MVPDialogueRuntime:
             "conscious_idle_plan": plan,
             "outreach_outcome": outreach_outcome,
             "structural_signals": sig_dict,
+            "m13_memory_efe": prompt_safe_m13_memory_efe_diagnostics(m13_memory_efe_evaluation),
             "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
         }
         return MVPIdleResult(

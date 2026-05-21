@@ -151,6 +151,7 @@ def _new_id(prefix: str) -> str:
 def default_m13_drive_state() -> dict[str, Any]:
     from segmentum.dialogue.runtime.m13_boredom import default_boredom_state
     from segmentum.dialogue.runtime.m13_initiative import default_initiative_state
+    from segmentum.dialogue.runtime.m13_memory_efe import default_memory_efe_state
     from segmentum.dialogue.runtime.m13_reward import default_affective_reward_proxy_state
 
     return copy.deepcopy(
@@ -169,6 +170,7 @@ def default_m13_drive_state() -> dict[str, Any]:
             "boredom": default_boredom_state(),
             "affective_reward_proxy": default_affective_reward_proxy_state(),
             "initiative": default_initiative_state(),
+            "memory_efe": default_memory_efe_state(),
         }
     )
 
@@ -195,10 +197,12 @@ def normalize_m13_drive_state(raw: Any) -> dict[str, Any]:
     merged["last_patch_id"] = str(merged.get("last_patch_id", "") or "")
     from segmentum.dialogue.runtime.m13_boredom import normalize_boredom_state
     from segmentum.dialogue.runtime.m13_initiative import normalize_initiative_state
+    from segmentum.dialogue.runtime.m13_memory_efe import normalize_memory_efe_state
     from segmentum.dialogue.runtime.m13_reward import normalize_affective_reward_proxy_state
 
     merged["boredom"] = normalize_boredom_state(merged.get("boredom"))
     merged["initiative"] = normalize_initiative_state(merged.get("initiative"))
+    merged["memory_efe"] = normalize_memory_efe_state(merged.get("memory_efe"))
     reward_proxy = normalize_affective_reward_proxy_state(merged.get("affective_reward_proxy"))
     legacy_pending = merged.get("pending_settlements") or []
     legacy_tolerance = merged.get("tolerance_by_path") or []

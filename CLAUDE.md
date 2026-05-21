@@ -120,6 +120,7 @@ M13.1: Boredom / Exploration Bias
 M13.2: Affective Reward Proxy And Settlement
 M13.3: UI-Level Bounded Initiative
 M13.4: UI Idle Tick And Introspection Entry Point
+M13.6: Memory-Backed Expected Free Energy Bridge (Path B advisory only)
 M14.0: Conscious Idle Reflector And Self-Cognition Patch
 M14.1: Background Self-Continuity And Persistent Idle Loop
 M14.2: Decoupled Environment Loop And Durable Overnight Outreach
@@ -159,6 +160,10 @@ self-thought producers) for new Hu Tao / MVP chat behavior.
   overnight self-continuity. Explicit later-message requests must become
   durable scheduled intents plus outbox entries, never just natural-language
   follow-up notes.
+- M13.6 memory-EFE guidance is an MVP-local engineering proxy. Silence,
+  repetition, or boredom alone must not trigger outreach; outreach requires a
+  traceable memory-backed expectation/open item, bounded EFE comparison, M13.6
+  allowance, and final M13.3 delivery gates.
 
 ---
 

@@ -67,6 +67,7 @@ _ALLOWED_TRIGGERS: frozenset[str] = frozenset(
         "explicit_remind_request",
         "reflection_outreach",
         "scheduled_outreach",
+        "memory_efe_outreach",
     }
 )
 
@@ -152,9 +153,13 @@ class ProactiveTurnProposal:
     ordinary_language_intent: str
     expires_at: int
     cooldown_cost: int
+    traceable_expectation_id: str = ""
+    expected_resolution_prior: float = 0.0
+    efe_by_policy: dict[str, float] = field(default_factory=dict)
+    suppression_reasons: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        payload = {
             "proposal_id": self.proposal_id,
             "created_at": self.created_at,
             "source": self.source,
@@ -170,6 +175,12 @@ class ProactiveTurnProposal:
             "cooldown_cost": self.cooldown_cost,
             "engineering_proxy_label": "mvp_local_m13_initiative",
         }
+        if self.trigger == "memory_efe_outreach" or self.traceable_expectation_id:
+            payload["traceable_expectation_id"] = self.traceable_expectation_id
+            payload["expected_resolution_prior"] = round(_bounded_float(self.expected_resolution_prior), 6)
+            payload["efe_by_policy"] = dict(self.efe_by_policy)
+            payload["suppression_reasons"] = _string_list(self.suppression_reasons, limit=8)
+        return payload
 
 
 @dataclass
@@ -501,15 +512,25 @@ def _correction_followup_target(m13_state: Mapping[str, Any]) -> tuple[str, str,
     return None
 
 
+def _memory_efe_blocks_boredom_proactive(m13_state: Mapping[str, Any]) -> bool:
+    from segmentum.dialogue.runtime.m13_memory_efe import normalize_memory_efe_state
+
+    memory_efe = normalize_memory_efe_state(normalize_m13_drive_state(m13_state).get("memory_efe"))
+    eligible = memory_efe.get("eligible_for_efe") or []
+    return bool(memory_efe.get("traceable_expectation_id")) and isinstance(eligible, list) and len(eligible) > 0
+
+
 def _pick_structural_target(
     state: Mapping[str, Any],
     m13_state: Mapping[str, Any],
 ) -> tuple[str, str, str, list[str]] | None:
-    for finder in (
+    finders: list[Any] = [
         _open_item_target,
-        lambda s: _boredom_target(m13_state),
         lambda s: _correction_followup_target(m13_state),
-    ):
+    ]
+    if not _memory_efe_blocks_boredom_proactive(m13_state):
+        finders.append(lambda s: _boredom_target(m13_state))
+    for finder in finders:
         found = finder(state)
         if found:
             return found
@@ -676,7 +697,8 @@ def evaluate_proactive_initiative(
                 "risk_band": locked_proposal.risk_band,
                 "ordinary_language_intent": locked_proposal.ordinary_language_intent,
                 "engineering_proxy_label": "mvp_local_m13_initiative",
-                "source": "m14_reflection_outreach",
+                "source": locked_proposal.source,
+                "traceable_expectation_id": locked_proposal.traceable_expectation_id,
             }
         )
         return state, ProactiveInitiativeCheckResult(
@@ -784,6 +806,10 @@ def proposal_from_initiative_state(initiative: Mapping[str, Any], *, now: int) -
         ordinary_language_intent=str(pending.get("ordinary_language_intent", "")),
         expires_at=expires,
         cooldown_cost=int(pending.get("cooldown_cost", DEFAULT_COOLDOWN_TURNS) or DEFAULT_COOLDOWN_TURNS),
+        traceable_expectation_id=str(pending.get("traceable_expectation_id", "")),
+        expected_resolution_prior=_bounded_float(pending.get("expected_resolution_prior")),
+        efe_by_policy=dict(_mapping(pending.get("efe_by_policy"))),
+        suppression_reasons=_string_list(pending.get("suppression_reasons"), limit=8),
     )
 
 
