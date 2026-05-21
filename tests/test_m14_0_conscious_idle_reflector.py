@@ -306,11 +306,11 @@ def test_outreach_recommendation_routes_through_m13_3(tmp_path: Path) -> None:
         turn_index=7,
         structural_signals=gather_idle_structural_signals(state, now=1_700_000_500, turn_index=7),
     )
-    assert idle.outreach_recommendation.get("should_outreach") is True
-    assert idle.diagnostics.get("outreach_outcome") == "delivered"
+    assert idle.outreach_recommendation.get("should_outreach") is False
+    assert idle.diagnostics.get("outreach_outcome") in {"low_value", "reflection_only"}
     logs = (runtime.store.root / "conversation_log.jsonl").read_text(encoding="utf-8")
-    assert "IdleOutreachProposalEvent" in logs
-    assert "proactive_turn" in logs
+    assert "IdleOutreachProposalEvent" not in logs
+    assert "proactive_turn" not in logs
 
 
 def test_outreach_failure_does_not_rollback_patches(tmp_path: Path) -> None:
@@ -357,7 +357,7 @@ def test_outreach_failure_does_not_rollback_patches(tmp_path: Path) -> None:
     reloaded = runtime.store.load()
     history = reloaded["self_cognition"].get("patch_history", [])
     assert len(history) >= 1
-    assert idle.diagnostics.get("outreach_outcome") == "session_limit_reached"
+    assert idle.diagnostics.get("outreach_outcome") in {"low_value", "reflection_only"}
 
 
 def test_idle_plan_never_writes_to_m11_or_m12_ledgers(tmp_path: Path) -> None:

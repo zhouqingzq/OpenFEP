@@ -48,7 +48,9 @@ def _full_opted_state(**overrides: object) -> dict[str, object]:
                 "id": "item_bg_1",
                 "title": "follow up",
                 "status": "open",
-                "next_check": "later",
+                "next_check": "next_user_turn",
+                "evidence_refs": ["item_bg_1"],
+                "created_at": int(time.time()) - 1000,
             }
         ],
         "short_term_memory": [],
@@ -56,8 +58,8 @@ def _full_opted_state(**overrides: object) -> dict[str, object]:
         "pending_expectations": [],
         "self_cognition": {"patch_history": [], "self_continuity": default_self_continuity_state()},
         "temporal_state": {
-            "last_turn_at": int(time.time()) - 300,
-            "last_user_turn_at": int(time.time()) - 300,
+            "last_turn_at": int(time.time()) - 7200,
+            "last_user_turn_at": int(time.time()) - 7200,
             "last_turn_index": 2,
             "last_reply": "ok",
         },
@@ -66,6 +68,7 @@ def _full_opted_state(**overrides: object) -> dict[str, object]:
     m13 = set_initiative_user_opt_in(state["m13_drive_state"], enabled=True)  # type: ignore[arg-type]
     m13 = set_idle_introspection_user_opt_in(m13, enabled=True)
     m13 = set_background_continuity_opt_in(m13, enabled=True, runner_kind="inline")
+    m13["initiative"]["implicit_idle_delivery"] = True
     state["m13_drive_state"] = m13
     state.update(overrides)
     return state

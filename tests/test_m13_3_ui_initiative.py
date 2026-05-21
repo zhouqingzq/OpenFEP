@@ -37,6 +37,15 @@ def _opted_in_state(**overrides: object) -> dict[str, object]:
     return state
 
 
+def _enable_legacy_open_item_proactive(state: dict[str, object]) -> dict[str, object]:
+    m13 = normalize_m13_drive_state(state["m13_drive_state"])
+    initiative = normalize_initiative_state(m13["initiative"])
+    initiative["legacy_vague_open_item_proactive"] = True
+    m13["initiative"] = initiative
+    state["m13_drive_state"] = m13
+    return state
+
+
 class _ContextUnsafeLLM:
     def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
         if CONTEXT_ASSESSOR_MARKER in system_prompt:
@@ -91,7 +100,7 @@ def test_no_proactive_message_without_user_opt_in() -> None:
     assert check.suppression_reason == "not_opted_in"
 
 
-def test_idle_tick_creates_proposal_for_high_value_open_target() -> None:
+def test_vague_open_item_does_not_create_default_proactive_target() -> None:
     state = _opted_in_state(
         open_items=[
             {
@@ -109,9 +118,35 @@ def test_idle_tick_creates_proposal_for_high_value_open_target() -> None:
         manual_continue=True,
         llm=_ContextUnsafeLLM(),
     )
+    assert check.proposal is None
+    assert check.suppression_reason == "no_high_value_target"
+    suppression = [event for event in check.events if event.get("type") == "M13ProactiveSuppressionEvent"][-1]
+    assert suppression["reason_code"] == "no_traceable_proactive_target"
+
+
+def test_legacy_flag_can_still_create_open_item_proposal_for_compatibility() -> None:
+    state = _enable_legacy_open_item_proactive(
+        _opted_in_state(
+            open_items=[
+                {
+                    "id": "oi_1",
+                    "status": "open",
+                    "title": "M13 split",
+                    "next_check": "sketch test gates for path pull vs boredom",
+                }
+            ],
+        )
+    )
+    _, check = evaluate_proactive_initiative(
+        state,
+        now=1_700_000_100,
+        turn_index=3,
+        manual_continue=True,
+        llm=_ContextUnsafeLLM(),
+    )
     assert check.proposal is not None
     assert check.proposal.trigger == "open_item_next_check"
-    assert any(event.get("type") == "M13ProactiveProposalEvent" for event in check.events)
+    assert check.proposal.selection_reason_codes == ["legacy_vague_open_item_proactive"]
 
 
 def test_cooldown_and_session_cap_suppress_repeated_proactive_turns() -> None:
@@ -214,9 +249,9 @@ def test_first_version_uses_manual_continue_not_implicit_idle_delivery() -> None
     initiative = default_initiative_state()
     assert initiative["manual_continue_button"] is True
     assert initiative["implicit_idle_delivery"] is False
-    state = _opted_in_state(
+    state = _enable_legacy_open_item_proactive(_opted_in_state(
         open_items=[{"id": "x", "status": "open", "title": "t", "next_check": "step"}],
-    )
+    ))
     _, check = evaluate_proactive_initiative(
         state,
         now=1_700_000_400,
@@ -235,6 +270,7 @@ def test_implicit_idle_delivery_requires_explicit_opt_in_when_enabled() -> None:
     m13 = normalize_m13_drive_state(state["m13_drive_state"])
     initiative = normalize_initiative_state(m13["initiative"])
     initiative["implicit_idle_delivery"] = True
+    initiative["legacy_vague_open_item_proactive"] = True
     m13["initiative"] = initiative
     state["m13_drive_state"] = m13
     _, check = evaluate_proactive_initiative(
@@ -373,6 +409,7 @@ def test_proactive_turn_is_not_logged_as_user_message(tmp_path: Path) -> None:
         {"id": "oi_1", "status": "open", "title": "plan", "next_check": "draft gates"}
     ]
     state["m13_drive_state"] = set_initiative_user_opt_in(state.get("m13_drive_state", {}), enabled=True)
+    state = _enable_legacy_open_item_proactive(state)  # type: ignore[arg-type]
     runtime.store.save(state)
 
     check = runtime.maybe_propose_proactive_turn(turn_index=0, manual_continue=True)
@@ -398,6 +435,7 @@ def test_proactive_generation_uses_safety_and_reply_validation(tmp_path: Path) -
     state = runtime.store.load()
     state["open_items"] = [{"id": "oi", "status": "open", "title": "t", "next_check": "n"}]
     state["m13_drive_state"] = set_initiative_user_opt_in(state.get("m13_drive_state", {}), enabled=True)
+    state = _enable_legacy_open_item_proactive(state)  # type: ignore[arg-type]
     runtime.store.save(state)
     check = runtime.maybe_propose_proactive_turn(turn_index=0, manual_continue=True)
     result = runtime.run_proactive_turn(
@@ -420,6 +458,7 @@ def test_blocked_proactive_turn_rolls_back_state_and_skips_delivery_log(tmp_path
     state["temporal_state"] = {"last_user_text": "real user question about M13"}
     state["open_items"] = [{"id": "oi", "status": "open", "title": "t", "next_check": "n"}]
     state["m13_drive_state"] = set_initiative_user_opt_in(state.get("m13_drive_state", {}), enabled=True)
+    state = _enable_legacy_open_item_proactive(state)  # type: ignore[arg-type]
     runtime.store.save(state)
 
     check = runtime.maybe_propose_proactive_turn(turn_index=0, manual_continue=True)
@@ -450,6 +489,7 @@ def test_mvp_runtime_maybe_and_run_proactive_audit_events(tmp_path: Path) -> Non
     state = runtime.store.load()
     state["open_items"] = [{"id": "oi", "status": "open", "title": "t", "next_check": "n"}]
     state["m13_drive_state"] = set_initiative_user_opt_in(state.get("m13_drive_state", {}), enabled=True)
+    state = _enable_legacy_open_item_proactive(state)  # type: ignore[arg-type]
     runtime.store.save(state)
     check = runtime.maybe_propose_proactive_turn(turn_index=1, manual_continue=True)
     types = [event.get("type") for event in check.get("events", [])]
@@ -487,6 +527,7 @@ def test_chat_interface_proactive_does_not_append_user_transcript(tmp_path: Path
     state = runtime.store.load()
     state["open_items"] = [{"id": "oi", "status": "open", "title": "t", "next_check": "n"}]
     state["m13_drive_state"] = set_initiative_user_opt_in(state.get("m13_drive_state", {}), enabled=True)
+    state = _enable_legacy_open_item_proactive(state)  # type: ignore[arg-type]
     runtime.store.save(state)
 
     iface = ChatInterface(use_llm=False, session_id="test_sess")

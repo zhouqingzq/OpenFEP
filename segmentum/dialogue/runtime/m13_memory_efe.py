@@ -463,10 +463,8 @@ def _normalize_open_item(
     next_kind = _open_item_next_check_kind(next_check)
     scheduled_id = str(row.get("scheduled_intent_id", row.get("intent_id", "")) or "").strip()
     due_at = _epoch(row.get("due_at_epoch") or row.get("due_at"))
-    window = int(
-        row.get("expected_window_seconds", row.get("due_window_seconds", 0))
-        or DUE_AT_EXPECTED_WINDOW_SECONDS
-    )
+    explicit_window = int(row.get("expected_window_seconds", row.get("due_window_seconds", 0)) or 0)
+    window = explicit_window or DUE_AT_EXPECTED_WINDOW_SECONDS
     status = str(row.get("status", "open") or "open").strip().lower()
     temporal = _mapping(state.get("temporal_state"))
     last_user = _epoch(temporal.get("last_user_turn_at"))
@@ -480,7 +478,7 @@ def _normalize_open_item(
         eligible = True
     elif next_kind == "next_user_turn":
         created = _created_at(row) or last_user
-        window = window or NEXT_USER_TURN_EXPECTED_WINDOW_SECONDS
+        window = explicit_window or NEXT_USER_TURN_EXPECTED_WINDOW_SECONDS
         due_at = due_at or (created + ACTIVE_GRACE_SECONDS if created else 0)
         if phase == "in_turn":
             eligible = bool(due_at)
@@ -1008,7 +1006,7 @@ def evaluate_memory_efe(
         if bool(policy_costs.get("relationship_cost_high")):
             suppression.append("relationship_cost_high")
         if float(policy_costs.get("risk_penalty", 0.0) or 0.0) >= 0.30:
-            suppression.append("safety_risk")
+            suppression.append("memory_efe_opponent_risk")
         if expected_resolution <= 0.0:
             suppression.append("insufficient_expected_resolution")
         if outreach_margin < MINIMUM_OUTREACH_MARGIN:
@@ -1184,17 +1182,30 @@ def build_memory_efe_outreach_proposal_input(
 ) -> dict[str, Any] | None:
     if not evaluation.should_outreach or not evaluation.traceable_expectation_id:
         return None
+    expectation = next(
+        (
+            row
+            for row in evaluation.eligible_for_efe
+            if row.expectation_id == evaluation.traceable_expectation_id
+        ),
+        None,
+    )
+    summary = str(getattr(expectation, "content_summary", "") or "").strip()
+    intent = (
+        f"Follow up on the unresolved expectation: {summary[:180]}"
+        if summary
+        else "Offer one short follow-up tied to the unresolved traceable expectation."
+    )
     return {
         "trigger": "memory_efe_outreach",
         "source": "memory_efe",
         "trigger_evidence_refs": list(evaluation.evidence_refs[:8]),
         "traceable_expectation_id": evaluation.traceable_expectation_id,
-        "ordinary_language_intent": (
-            "Offer one short follow-up tied to the unresolved traceable expectation."
-        ),
+        "ordinary_language_intent": intent,
         "expected_resolution_prior": _round(evaluation.policy_costs.get("expected_outreach_resolution", 0.0)),
         "efe_by_policy": dict(evaluation.efe_by_policy),
         "suppression_reasons": list(evaluation.suppression_reasons[:12]),
+        "source_kind": str(getattr(expectation, "source_kind", "") or ""),
     }
 
 
@@ -1227,6 +1238,8 @@ def build_memory_efe_outreach_proposal(
         expected_resolution_prior=float(proposal_input["expected_resolution_prior"]),
         efe_by_policy=dict(evaluation.efe_by_policy),
         suppression_reasons=list(evaluation.suppression_reasons[:12]),
+        source_kind=str(proposal_input.get("source_kind", "")),
+        selection_reason_codes=["memory_efe_should_outreach"],
     )
 
 

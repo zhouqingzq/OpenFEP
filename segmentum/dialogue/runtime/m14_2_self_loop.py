@@ -150,7 +150,14 @@ class M142SelfLoopDaemon:
         claimed = self.event_store.claim_events(
             self.consumer_id,
             limit=16,
-            event_types={"UserMessageCommittedEvent", "ClockWakeEvent", "ScheduledIntentDueEvent"},
+            event_types={
+                "UserMessageCommittedEvent",
+                "ClockWakeEvent",
+                "ScheduledIntentDueEvent",
+                "UIPingEvent",
+                "OutboxDeliverySurfaceAvailableEvent",
+                "UISessionClosedEvent",
+            },
             lease_seconds=60,
         )
         event_results: list[dict[str, Any]] = []
@@ -163,15 +170,25 @@ class M142SelfLoopDaemon:
                 self.event_store.fail_event(str(event.get("event_id")), self.consumer_id, str(exc), retryable=True)
                 event_results.append({"event_id": event.get("event_id"), "error": type(exc).__name__})
         prepared = self.prepare_due_intents(now=now)
+        all_events = self.event_store.query_events(limit=400)
+        terminal = sum(1 for row in all_events if str(row.get("status", "")) in {"acked", "expired"})
+        pending_like = sum(1 for row in all_events if str(row.get("status", "")) in {"pending", "claimed", "failed"})
+        acked_ratio = round(terminal / max(1, terminal + pending_like), 4)
         self._audit(
             {
                 "type": "SelfLoopDaemonHealthEvent",
                 "at": now,
                 "claimed_events": len(claimed),
                 "prepared_due_intents": len(prepared),
+                "environment_events_pending_acked_ratio": acked_ratio,
             }
         )
-        return {"claimed_events": len(claimed), "event_results": event_results, "prepared_intents": prepared}
+        return {
+            "claimed_events": len(claimed),
+            "event_results": event_results,
+            "prepared_intents": prepared,
+            "environment_events_pending_acked_ratio": acked_ratio,
+        }
 
     def prepare_due_intents(self, *, now: int | None = None) -> list[dict[str, Any]]:
         ts = int(now if now is not None else self._now())
@@ -430,6 +447,9 @@ class M142SelfLoopDaemon:
             if intent:
                 prepared = self.prepare_intent(intent, now=now)
                 return {"prepared": bool(prepared), "intent_id": intent_id}
+            return {"introspection": "skipped", "reason": "intent_not_found", "intent_id": intent_id}
+        if event_type in {"UIPingEvent", "OutboxDeliverySurfaceAvailableEvent", "UISessionClosedEvent"}:
+            return {"introspection": "skipped", "reason": "environment_audit_event"}
         return {"ignored": True}
 
     def _turn_index(self, state: Mapping[str, Any]) -> int:

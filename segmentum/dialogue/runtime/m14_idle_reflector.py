@@ -15,6 +15,7 @@ from segmentum.dialogue.runtime.m13_reward import (
     list_assessable_pending_rows,
     normalize_affective_reward_proxy_state,
 )
+from segmentum.dialogue.runtime.m14_3_proactive_alignment import is_traceable_open_item
 
 M14_ENGINEERING_PROXY_LABEL = "mvp_local_conscious_idle_reflector"
 IDLE_INTROSPECTION_MARKER = "M14 空闲内省意识主循环"
@@ -115,6 +116,10 @@ def build_idle_context(
                 "title": str(item.get("title", item.get("summary", "")) or "")[:120],
                 "next_check": next_check[:140],
                 "status": status[:32],
+                "evidence_refs": _string_list(item.get("evidence_refs"), limit=8),
+                "bound_memory_ids": _string_list(item.get("bound_memory_ids"), limit=8),
+                "scheduled_intent_id": str(item.get("scheduled_intent_id", item.get("intent_id", "")) or "")[:120],
+                "due_at_epoch": int(item.get("due_at_epoch", 0) or 0),
             }
         )
         if len(open_rows) >= MAX_IDLE_CONTEXT_OPEN_ITEMS:
@@ -411,11 +416,11 @@ def build_structural_idle_plan(
     if open_items and not bool(reward.get("path_feels_stale")):
         first = open_items[0]
         item_id = str(first.get("id", ""))
-        if item_id in retrieved_ids:
+        if item_id in retrieved_ids and is_traceable_open_item(first):
             plan["outreach_recommendation"] = {
                 "should_outreach": True,
                 "reason": "open_item_followup",
-                "suggested_intent": f"Follow up on open item: {str(first.get('next_check', ''))[:140]}",
+                "suggested_intent": f"Follow up on open item: {str(first.get('title') or first.get('next_check', ''))[:140]}",
                 "trigger": "reflection_outreach",
             }
     return plan
@@ -464,8 +469,8 @@ def apply_idle_drive_rules(
         hard_reflection_only = True
 
     open_items = [row for row in idle_context.get("open_items", []) if isinstance(row, Mapping)]
-    has_concrete_next = any(str(row.get("next_check", "")).strip() for row in open_items)
-    if band == "low" and outreach.get("should_outreach") and not has_concrete_next:
+    has_traceable_open_item = any(is_traceable_open_item(row) for row in open_items)
+    if band == "low" and outreach.get("should_outreach") and not has_traceable_open_item:
         outreach["should_outreach"] = False
         outreach["reason"] = "low_value"
 

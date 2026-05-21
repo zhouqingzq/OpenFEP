@@ -965,8 +965,23 @@ class ChatInterface:
 
         health_ticks_today = 0
         last_health_at = 0
+        last_proactive_target: dict[str, object] = {}
+        last_proactive_suppression: dict[str, object] = {}
         for row in self.read_conversation_log(limit=300):
             if str(row.get("event", "")) != "m14_2_audit":
+                if str(row.get("type", "")) == "M13ProactiveProposalEvent":
+                    last_proactive_target = {
+                        "trigger": str(row.get("trigger", "") or ""),
+                        "traceable_expectation_id": str(row.get("traceable_expectation_id", "") or ""),
+                        "ordinary_language_intent": str(row.get("ordinary_language_intent", "") or "")[:160],
+                        "source_kind": str(row.get("source_kind", "") or ""),
+                    }
+                if str(row.get("type", "")) == "M13ProactiveSuppressionEvent":
+                    last_proactive_suppression = {
+                        "reason": str(row.get("reason", "") or ""),
+                        "reason_code": str(row.get("reason_code", row.get("reason", "")) or ""),
+                        "reason_stage": str(row.get("reason_stage", "") or ""),
+                    }
                 continue
             if str(row.get("type", "")) != "SelfLoopDaemonHealthEvent":
                 continue
@@ -977,6 +992,24 @@ class ChatInterface:
 
         reflection_count = int(idle.get("reflection_count_this_session", 0) or 0)
         reflection_max = int(idle.get("max_per_session", 4) or 4)
+        m14_3_traceability_suggestions = 0
+        legacy_vague_open_item_proactive = False
+        try:
+            from segmentum.dialogue.runtime.m14_3_open_item_migration import audit_open_items_for_efe
+
+            state = self._mvp_runtime.store.load() if self._mvp_runtime is not None else {}
+            m13_state = state.get("m13_drive_state", {}) if isinstance(state, dict) else {}
+            initiative = (
+                m13_state.get("initiative", {})
+                if isinstance(m13_state, dict)
+                else {}
+            )
+            legacy_vague_open_item_proactive = bool(
+                initiative.get("legacy_vague_open_item_proactive")
+            ) if isinstance(initiative, dict) else False
+            m14_3_traceability_suggestions = len(audit_open_items_for_efe(state.get("open_items", []))) if isinstance(state, dict) else 0
+        except Exception:
+            m14_3_traceability_suggestions = 0
 
         return {
             "daemon": daemon,
@@ -998,6 +1031,10 @@ class ChatInterface:
             "background_tokens_today": int(bg.get("tokens_used_today", 0) or 0),
             "background_tokens_budget": int(bg.get("tokens_budget_per_day", 30000) or 30000),
             "last_budget_block_reason": str(bg.get("last_budget_block_reason", "") or ""),
+            "m14_3_last_proactive_target": last_proactive_target,
+            "m14_3_last_proactive_suppression": last_proactive_suppression,
+            "m14_3_open_item_traceability_suggestions": m14_3_traceability_suggestions,
+            "m14_3_legacy_vague_open_item_proactive": legacy_vague_open_item_proactive,
         }
 
     def _start_background_runner(self) -> None:

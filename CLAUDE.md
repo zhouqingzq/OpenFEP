@@ -124,6 +124,7 @@ M13.6: Memory-Backed Expected Free Energy Bridge (Path B advisory only)
 M14.0: Conscious Idle Reflector And Self-Cognition Patch
 M14.1: Background Self-Continuity And Persistent Idle Loop
 M14.2: Decoupled Environment Loop And Durable Overnight Outreach
+M14.3: Traceable Proactive Delivery Alignment And Safety Diagnostics
 ```
 
 Deferred or non-active for new implementation unless explicitly revived:
@@ -164,6 +165,10 @@ self-thought producers) for new Hu Tao / MVP chat behavior.
   repetition, or boredom alone must not trigger outreach; outreach requires a
   traceable memory-backed expectation/open item, bounded EFE comparison, M13.6
   allowance, and final M13.3 delivery gates.
+- Proactive outreach on Path B must anchor to a traceable expectation with
+  evidence refs. Vague open-item `next_check` tokens alone must not trigger
+  M13.3 proposals. Blocked proactive delivery must emit structured
+  `reason_code` audit events, not only a generic `safety_risk` label.
 
 ---
 

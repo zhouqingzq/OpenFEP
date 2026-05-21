@@ -219,7 +219,7 @@ def test_due_preparation_defers_idle_outreach_instead_of_direct_delivery(tmp_pat
     text = log_path.read_text(encoding="utf-8") if log_path.is_file() else ""
     assert '"event": "proactive_turn"' not in text
     assert "DIRECT_VISIBLE_REPLY_SHOULD_NOT_HAPPEN" not in text
-    assert "IdleOutreachDeferredEvent" in text
+    assert "ScheduledIntentPreparedEvent" in text
     rows = load_queued_outreach(tmp_path)
     assert len([row for row in rows if row.get("source_intent_id") == intent["intent_id"]]) == 1
 

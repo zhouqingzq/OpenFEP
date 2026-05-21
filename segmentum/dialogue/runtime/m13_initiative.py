@@ -13,7 +13,6 @@ import json
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Protocol
 
-from segmentum.dialogue.runtime.m13_boredom import boredom_band, normalize_boredom_state
 from segmentum.dialogue.runtime.m13_drive import (
     _bounded_float,
     _mapping,
@@ -22,6 +21,10 @@ from segmentum.dialogue.runtime.m13_drive import (
     normalize_m13_drive_state,
 )
 from segmentum.dialogue.runtime.m13_reward import normalize_affective_reward_proxy_state
+from segmentum.dialogue.runtime.m14_3_proactive_alignment import (
+    ProactiveTarget,
+    select_proactive_target,
+)
 
 PROACTIVE_SOURCE = "m13_initiative_policy"
 PROACTIVE_SURROGATE_USER_TEXT = (
@@ -36,6 +39,7 @@ PROPOSAL_TTL_SECONDS = 300
 MAX_EVIDENCE_REFS = 8
 MIN_CONTEXT_ASSESSMENT_CONFIDENCE = 0.55
 MIN_DELIVERY_ASSESSMENT_CONFIDENCE = 0.5
+DEFAULT_OPPONENT_STRENGTH_BLOCK_THRESHOLD = 0.5
 
 CONTEXT_ASSESSOR_MARKER = "M13 有界主动续写上下文语义评估"
 DELIVERY_ASSESSOR_MARKER = "M13 有界主动续写送达语义评估"
@@ -54,6 +58,14 @@ SUPPRESSION_REASONS: frozenset[str] = frozenset(
         "implicit_idle_disabled",
         "proposal_expired",
         "proposal_not_found",
+        "opponent_strength_pre_block",
+        "context_assessment_unsafe",
+        "delivery_channel_unavailable",
+        "no_traceable_proactive_target",
+        "delivery_assessor_reject",
+        "delivery_assessor_low_confidence",
+        "reply_validation_fail",
+        "empty_generation",
     }
 )
 
@@ -97,6 +109,10 @@ def default_initiative_state() -> dict[str, Any]:
         "last_proactive_turn_index": -1,
         "pending_proactive_proposal": {},
         "last_suppression_reason": "",
+        "last_suppression_reason_code": "",
+        "legacy_vague_open_item_proactive": False,
+        "opponent_strength_block_threshold": DEFAULT_OPPONENT_STRENGTH_BLOCK_THRESHOLD,
+        "delivery_assessor_min_confidence": MIN_DELIVERY_ASSESSMENT_CONFIDENCE,
         "engineering_proxy_label": "mvp_local_m13_initiative",
     }
 
@@ -124,6 +140,16 @@ def normalize_initiative_state(raw: Any) -> dict[str, Any]:
     pending = merged.get("pending_proactive_proposal")
     merged["pending_proactive_proposal"] = dict(pending) if isinstance(pending, Mapping) else {}
     merged["last_suppression_reason"] = str(merged.get("last_suppression_reason", "") or "")[:64]
+    merged["last_suppression_reason_code"] = str(merged.get("last_suppression_reason_code", "") or "")[:96]
+    merged["legacy_vague_open_item_proactive"] = bool(merged.get("legacy_vague_open_item_proactive"))
+    merged["opponent_strength_block_threshold"] = _bounded_float(
+        merged.get("opponent_strength_block_threshold"),
+        default=DEFAULT_OPPONENT_STRENGTH_BLOCK_THRESHOLD,
+    )
+    merged["delivery_assessor_min_confidence"] = _bounded_float(
+        merged.get("delivery_assessor_min_confidence"),
+        default=MIN_DELIVERY_ASSESSMENT_CONFIDENCE,
+    )
     from segmentum.dialogue.runtime.m13_idle import normalize_idle_introspection_state
     from segmentum.dialogue.runtime.m14_1_background_continuity import merge_background_continuity_into_initiative
 
@@ -157,6 +183,8 @@ class ProactiveTurnProposal:
     expected_resolution_prior: float = 0.0
     efe_by_policy: dict[str, float] = field(default_factory=dict)
     suppression_reasons: list[str] = field(default_factory=list)
+    source_kind: str = ""
+    selection_reason_codes: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         payload = {
@@ -180,6 +208,10 @@ class ProactiveTurnProposal:
             payload["expected_resolution_prior"] = round(_bounded_float(self.expected_resolution_prior), 6)
             payload["efe_by_policy"] = dict(self.efe_by_policy)
             payload["suppression_reasons"] = _string_list(self.suppression_reasons, limit=8)
+        if self.source_kind:
+            payload["source_kind"] = self.source_kind
+        if self.selection_reason_codes:
+            payload["selection_reason_codes"] = _string_list(self.selection_reason_codes, limit=8)
         return payload
 
 
@@ -455,11 +487,20 @@ def _open_items_summary(state: Mapping[str, Any]) -> list[dict[str, Any]]:
     return rows
 
 
-def _safety_risk_from_state(state: Mapping[str, Any], m13_state: Mapping[str, Any]) -> bool:
+def _opponent_strength_from_state(m13_state: Mapping[str, Any]) -> float:
     reward = normalize_affective_reward_proxy_state(
         normalize_m13_drive_state(m13_state).get("affective_reward_proxy")
     )
-    return _bounded_float(reward.get("opponent_strength")) >= 0.5
+    return _bounded_float(reward.get("opponent_strength"))
+
+
+def _safety_risk_from_state(state: Mapping[str, Any], m13_state: Mapping[str, Any]) -> bool:
+    initiative = normalize_initiative_state(normalize_m13_drive_state(m13_state).get("initiative"))
+    threshold = _bounded_float(
+        initiative.get("opponent_strength_block_threshold"),
+        default=DEFAULT_OPPONENT_STRENGTH_BLOCK_THRESHOLD,
+    )
+    return _opponent_strength_from_state(m13_state) >= threshold
 
 
 def _open_item_target(state: Mapping[str, Any]) -> tuple[str, str, str, list[str]] | None:
@@ -481,61 +522,42 @@ def _open_item_target(state: Mapping[str, Any]) -> tuple[str, str, str, list[str
     return None
 
 
-def _boredom_target(m13_state: Mapping[str, Any]) -> tuple[str, str, str, list[str]] | None:
-    boredom = normalize_boredom_state(normalize_m13_drive_state(m13_state).get("boredom"))
-    level = _bounded_float(boredom.get("boredom_level"))
-    band = boredom_band(level)
-    target = str(boredom.get("last_exploration_target", "") or "").strip()
-    if band not in {"medium", "high"} or not target:
-        return None
-    if level < 0.35:
-        return None
-    intent = f"Offer a small fresh angle on: {target[:140]}"
-    return ("boredom_exploration_target", target[:120], intent, _string_list(boredom.get("recent_plan_terms"), limit=4))
-
-
-def _correction_followup_target(m13_state: Mapping[str, Any]) -> tuple[str, str, str, list[str]] | None:
-    reward = normalize_affective_reward_proxy_state(
-        normalize_m13_drive_state(m13_state).get("affective_reward_proxy")
+def _pick_structural_target_details(
+    state: Mapping[str, Any],
+    m13_state: Mapping[str, Any],
+) -> ProactiveTarget | None:
+    target = select_proactive_target(
+        state,
+        m13_state,
+        memory_efe_evaluation=None,
+        structural_signals={},
     )
-    if _bounded_float(reward.get("opponent_strength")) < 0.35:
-        return None
-    pending = reward.get("pending_settlements", []) or []
-    for row in pending:
-        if not isinstance(row, Mapping):
-            continue
-        if bool(row.get("prior_safety_repair")):
-            topic = str(row.get("prior_topic_fingerprint", "repair_thread"))[:120]
-            intent = "Offer a concise clarification after the prior repair pressure."
-            pid = str(row.get("pending_id", ""))
-            return ("correction_followup", topic, intent, [pid] if pid else [])
+    if target is not None:
+        return target
+    initiative = normalize_initiative_state(normalize_m13_drive_state(m13_state).get("initiative"))
+    if initiative.get("legacy_vague_open_item_proactive"):
+        legacy = _open_item_target(state)
+        if legacy is not None:
+            trigger, topic, intent, refs = legacy
+            return ProactiveTarget(
+                trigger=trigger,
+                evidence_refs=refs,
+                proposed_topic=topic,
+                ordinary_language_intent=intent,
+                source_kind="legacy_open_item",
+                selection_reason_codes=["legacy_vague_open_item_proactive"],
+            )
     return None
-
-
-def _memory_efe_blocks_boredom_proactive(m13_state: Mapping[str, Any]) -> bool:
-    from segmentum.dialogue.runtime.m13_memory_efe import normalize_memory_efe_state
-
-    memory_efe = normalize_memory_efe_state(normalize_m13_drive_state(m13_state).get("memory_efe"))
-    eligible = memory_efe.get("eligible_for_efe") or []
-    return bool(memory_efe.get("traceable_expectation_id")) and isinstance(eligible, list) and len(eligible) > 0
 
 
 def _pick_structural_target(
     state: Mapping[str, Any],
     m13_state: Mapping[str, Any],
 ) -> tuple[str, str, str, list[str]] | None:
-    finders: list[Any] = [
-        _open_item_target,
-        lambda s: _correction_followup_target(m13_state),
-    ]
-    if not _memory_efe_blocks_boredom_proactive(m13_state):
-        finders.append(lambda s: _boredom_target(m13_state))
-    for finder in finders:
-        found = finder(state)
-        if found:
-            return found
+    target = _pick_structural_target_details(state, m13_state)
+    if target is not None:
+        return (target.trigger, target.proposed_topic, target.ordinary_language_intent, list(target.evidence_refs))
     return None
-
 
 def _target_from_context_assessment(assessment: Mapping[str, Any]) -> tuple[str, str, str, list[str]] | None:
     trigger = str(assessment.get("trigger", "none") or "none")
@@ -567,9 +589,12 @@ def _build_proposal(
     expected_user_value_band: str = "medium",
     risk_band: str = "low",
     proposed_action: str = "answer",
+    traceable_expectation_id: str = "",
+    source_kind: str = "",
+    selection_reason_codes: list[str] | None = None,
 ) -> ProactiveTurnProposal:
     if trigger not in _ALLOWED_TRIGGERS:
-        trigger = "open_item_next_check"
+        trigger = "manual_continue"
     return ProactiveTurnProposal(
         proposal_id=_new_id("m13_prop"),
         created_at=now,
@@ -584,6 +609,9 @@ def _build_proposal(
         ordinary_language_intent=ordinary_language_intent[:240],
         expires_at=now + PROPOSAL_TTL_SECONDS,
         cooldown_cost=int(initiative.get("cooldown_turns", DEFAULT_COOLDOWN_TURNS) or DEFAULT_COOLDOWN_TURNS),
+        traceable_expectation_id=str(traceable_expectation_id or "")[:120],
+        source_kind=str(source_kind or "")[:64],
+        selection_reason_codes=_string_list(selection_reason_codes, limit=8),
     )
 
 
@@ -625,8 +653,16 @@ def evaluate_proactive_initiative(
         }
     ]
 
-    def suppress(reason: str, *, extra: Mapping[str, Any] | None = None) -> ProactiveInitiativeCheckResult:
+    def suppress(
+        reason: str,
+        *,
+        reason_code: str | None = None,
+        reason_stage: str = "pre_proposal",
+        extra: Mapping[str, Any] | None = None,
+    ) -> ProactiveInitiativeCheckResult:
+        code = str(reason_code or reason)[:96]
         initiative["last_suppression_reason"] = reason
+        initiative["last_suppression_reason_code"] = code
         initiative["pending_proactive_proposal"] = {}
         m13_state["initiative"] = initiative
         state["m13_drive_state"] = m13_state
@@ -634,6 +670,8 @@ def evaluate_proactive_initiative(
             "type": "M13ProactiveSuppressionEvent",
             "turn_index": turn_index,
             "reason": reason,
+            "reason_code": code,
+            "reason_stage": reason_stage,
             "user_opt_in": initiative.get("user_opt_in"),
             "proactive_count_this_session": initiative.get("proactive_count_this_session"),
             "engineering_proxy_label": "mvp_local_m13_initiative",
@@ -651,7 +689,7 @@ def evaluate_proactive_initiative(
     if not initiative.get("user_opt_in"):
         return state, suppress("not_opted_in")
     if not initiative.get("enabled"):
-        return state, suppress("disabled")
+        return state, suppress("disabled", reason_code="initiative_disabled")
     if user_typing:
         return state, suppress("user_active")
     queued_delivery = locked_proposal is not None and str(locked_proposal.source) == "queued_outreach"
@@ -673,16 +711,23 @@ def evaluate_proactive_initiative(
 
     if implicit_idle_request:
         if not initiative.get("implicit_idle_delivery"):
-            return state, suppress("implicit_idle_disabled")
+            return state, suppress("implicit_idle_disabled", reason_code="delivery_channel_unavailable")
         threshold = float(initiative.get("idle_threshold_seconds", DEFAULT_IDLE_THRESHOLD_SECONDS))
         if idle_seconds < threshold:
             return state, suppress("idle_time_too_short")
 
     if locked_proposal is not None:
         if locked_proposal.trigger not in _ALLOWED_TRIGGERS:
-            return state, suppress("no_high_value_target")
+            return state, suppress("no_high_value_target", reason_code="no_traceable_proactive_target")
         if _safety_risk_from_state(state, m13_state):
-            return state, suppress("safety_risk")
+            return state, suppress(
+                "safety_risk",
+                reason_code="opponent_strength_pre_block",
+                extra={
+                    "opponent_strength": round(_opponent_strength_from_state(m13_state), 6),
+                    "threshold": initiative.get("opponent_strength_block_threshold"),
+                },
+            )
         initiative["pending_proactive_proposal"] = locked_proposal.to_dict()
         initiative["last_suppression_reason"] = ""
         m13_state["initiative"] = initiative
@@ -699,6 +744,8 @@ def evaluate_proactive_initiative(
                 "engineering_proxy_label": "mvp_local_m13_initiative",
                 "source": locked_proposal.source,
                 "traceable_expectation_id": locked_proposal.traceable_expectation_id,
+                "source_kind": locked_proposal.source_kind,
+                "selection_reason_codes": list(locked_proposal.selection_reason_codes[:8]),
             }
         )
         return state, ProactiveInitiativeCheckResult(
@@ -709,10 +756,17 @@ def evaluate_proactive_initiative(
         )
 
     if not manual_continue and not implicit_idle_request:
-        return state, suppress("implicit_idle_disabled")
+        return state, suppress("implicit_idle_disabled", reason_code="delivery_channel_unavailable")
 
     if _safety_risk_from_state(state, m13_state):
-        return state, suppress("safety_risk")
+        return state, suppress(
+            "safety_risk",
+            reason_code="opponent_strength_pre_block",
+            extra={
+                "opponent_strength": round(_opponent_strength_from_state(m13_state), 6),
+                "threshold": initiative.get("opponent_strength_block_threshold"),
+            },
+        )
 
     recent = _recent_user_text(state)
     last_reply = str(_mapping(state.get("temporal_state")).get("last_reply", "") or "")[:240]
@@ -736,19 +790,28 @@ def evaluate_proactive_initiative(
         if bool(context_assessment.get("context_unsafe")):
             return state, suppress(
                 "safety_risk",
+                reason_code="context_assessment_unsafe",
                 extra={
                     "unsafe_reason_codes": context_assessment.get("unsafe_reason_codes", []),
                     "semantic_gate": "context_assessor",
                 },
             )
 
-    target = _pick_structural_target(state, m13_state)
+    target_detail = _pick_structural_target_details(state, m13_state)
+    target = None
+    if target_detail is not None:
+        target = (
+            target_detail.trigger,
+            target_detail.proposed_topic,
+            target_detail.ordinary_language_intent,
+            list(target_detail.evidence_refs),
+        )
     if target is None and context_assessment is not None:
         target = _target_from_context_assessment(context_assessment)
     if target is None:
         if llm is None and recent.strip():
             return state, suppress("insufficient_evidence")
-        return state, suppress("no_high_value_target")
+        return state, suppress("no_high_value_target", reason_code="no_traceable_proactive_target")
 
     trigger, topic, intent, refs = target
     proposal = _build_proposal(
@@ -759,6 +822,9 @@ def evaluate_proactive_initiative(
         now=now,
         initiative=initiative,
         urgency_band="high" if manual_continue else "medium",
+        traceable_expectation_id=target_detail.traceable_expectation_id if target_detail else "",
+        source_kind=target_detail.source_kind if target_detail else "",
+        selection_reason_codes=target_detail.selection_reason_codes if target_detail else [],
     )
     initiative["pending_proactive_proposal"] = proposal.to_dict()
     initiative["last_suppression_reason"] = ""
@@ -774,6 +840,9 @@ def evaluate_proactive_initiative(
             "risk_band": proposal.risk_band,
             "ordinary_language_intent": proposal.ordinary_language_intent,
             "engineering_proxy_label": "mvp_local_m13_initiative",
+            "traceable_expectation_id": proposal.traceable_expectation_id,
+            "source_kind": proposal.source_kind,
+            "selection_reason_codes": list(proposal.selection_reason_codes[:8]),
         }
     )
     return state, ProactiveInitiativeCheckResult(
@@ -810,6 +879,8 @@ def proposal_from_initiative_state(initiative: Mapping[str, Any], *, now: int) -
         expected_resolution_prior=_bounded_float(pending.get("expected_resolution_prior")),
         efe_by_policy=dict(_mapping(pending.get("efe_by_policy"))),
         suppression_reasons=_string_list(pending.get("suppression_reasons"), limit=8),
+        source_kind=str(pending.get("source_kind", "")),
+        selection_reason_codes=_string_list(pending.get("selection_reason_codes"), limit=8),
     )
 
 

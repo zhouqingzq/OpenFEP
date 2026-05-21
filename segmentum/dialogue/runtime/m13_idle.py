@@ -200,6 +200,8 @@ class IdleStructuralSignals:
 
 
 def _open_item_has_concrete_next_check(item: Mapping[str, Any]) -> bool:
+    from segmentum.dialogue.runtime.m14_3_proactive_alignment import is_traceable_open_item
+
     status = str(item.get("status", "open")).strip().lower()
     if status not in {"open", "pending", "active", ""}:
         return False
@@ -207,7 +209,7 @@ def _open_item_has_concrete_next_check(item: Mapping[str, Any]) -> bool:
     if not next_check:
         return False
     if next_check in _NEXT_USER_TURN_MARKERS:
-        return False
+        return is_traceable_open_item(item)
     return True
 
 

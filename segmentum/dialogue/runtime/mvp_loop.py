@@ -86,6 +86,7 @@ from segmentum.dialogue.runtime.m13_idle import (
 from segmentum.dialogue.runtime.m13_initiative import (
     PROACTIVE_SURROGATE_USER_TEXT,
     ProactiveTurnProposal,
+    assess_proactive_delivery_semantics,
     build_proactive_thinking_user_text,
     build_reflection_outreach_proposal,
     evaluate_proactive_initiative,
@@ -94,7 +95,6 @@ from segmentum.dialogue.runtime.m13_initiative import (
     merge_initiative_into_m13_state,
     normalize_initiative_state,
     proposal_from_initiative_state,
-    proactive_delivered_text_is_safe,
     set_initiative_user_opt_in,
 )
 from segmentum.dialogue.runtime.m13_memory_efe import (
@@ -105,6 +105,7 @@ from segmentum.dialogue.runtime.m13_memory_efe import (
     prompt_safe_m13_memory_efe_diagnostics,
     register_memory_efe_outreach_settlement,
     settle_memory_efe_outreach,
+    normalize_expectations_for_efe,
 )
 from segmentum.dialogue.runtime.m14_idle_owners import (
     MemoryConsolidationOwner,
@@ -1690,6 +1691,26 @@ def retrieve_memories(state: Mapping[str, Any], keywords: list[str], *, limit: i
             scored.append((score, payload))
     scored.sort(key=lambda row: row[0], reverse=True)
     return [item for _, item in scored[:limit]]
+
+
+def retrieve_memories_by_ids(state: Mapping[str, Any], memory_ids: list[str], *, limit: int = 8) -> list[dict[str, Any]]:
+    wanted = {str(item).strip() for item in memory_ids if str(item).strip()}
+    if not wanted:
+        return []
+    rows: list[dict[str, Any]] = []
+    for key in ("short_term_memory", "long_term_memory", "open_items", "pending_expectations"):
+        value = state.get(key, [])
+        if not isinstance(value, list):
+            continue
+        for item in value:
+            if isinstance(item, Mapping) and str(item.get("id", item.get("expectation_id", ""))).strip() in wanted:
+                payload = dict(item)
+                payload["_source_file"] = key
+                payload["_retrieval_score"] = 9.0
+                rows.append(payload)
+                if len(rows) >= max(1, int(limit)):
+                    return rows
+    return rows
 
 
 def _unique_strings(*values: Any, limit: int = 16) -> list[str]:
@@ -5111,6 +5132,8 @@ class MVPDialogueRuntime:
                     "event": "m13_proactive_audit",
                     "type": "M13ProactiveSuppressionEvent",
                     "reason": reason,
+                    "reason_code": reason,
+                    "reason_stage": "pre_proposal",
                     "proposal_id": proposal_id,
                     "turn_index": turn_index,
                 }
@@ -5132,18 +5155,42 @@ class MVPDialogueRuntime:
         )
         reply = str(result.reply or "").strip()
         followup_replies = list(getattr(result, "followup_replies", []) or [])
-        if reply and not proactive_delivered_text_is_safe(
-            reply,
-            followup_replies,
-            llm=self.llm,
-            ordinary_language_intent=proposal.ordinary_language_intent,
-            trigger=proposal.trigger,
-            turn_index=turn_index,
-        ):
+        delivery_assessment: dict[str, Any] = {}
+        if reply and self.llm is not None:
+            delivery_assessment = assess_proactive_delivery_semantics(
+                self.llm,
+                reply=reply,
+                followup_replies=followup_replies,
+                ordinary_language_intent=proposal.ordinary_language_intent,
+                trigger=proposal.trigger,
+                turn_index=turn_index,
+            )
+            self.store.append_log(
+                {
+                    "event": "m13_proactive_audit",
+                    "type": "ProactiveDeliveryAssessmentEvent",
+                    "proposal_id": proposal_id,
+                    "turn_index": turn_index,
+                    "assessment": delivery_assessment,
+                    "engineering_proxy_label": "mvp_local_proactive_alignment",
+                }
+            )
+            delivery_ok = bool(delivery_assessment.get("allow_delivery")) and _bounded_float(
+                delivery_assessment.get("confidence")
+            ) >= _bounded_float(initiative.get("delivery_assessor_min_confidence"), default=0.5)
+        else:
+            delivery_ok = bool(reply)
+        if not delivery_ok:
             self.store.save(state_snapshot)
             m13_state = merge_initiative_into_m13_state(state_snapshot.get("m13_drive_state"))
             initiative = normalize_initiative_state(m13_state.get("initiative"))
-            initiative["last_suppression_reason"] = "safety_risk"
+            reason_code = "empty_generation" if not reply else "delivery_assessor_reject"
+            if reply and delivery_assessment and _bounded_float(delivery_assessment.get("confidence")) < _bounded_float(
+                initiative.get("delivery_assessor_min_confidence"), default=0.5
+            ):
+                reason_code = "delivery_assessor_low_confidence"
+            initiative["last_suppression_reason"] = "safety_risk" if reply else "empty_generation"
+            initiative["last_suppression_reason_code"] = reason_code
             m13_state["initiative"] = initiative
             state_snapshot["m13_drive_state"] = m13_state
             self.store.save(state_snapshot)
@@ -5151,10 +5198,13 @@ class MVPDialogueRuntime:
                 {
                     "event": "m13_proactive_audit",
                     "type": "M13ProactiveSuppressionEvent",
-                    "reason": "safety_risk",
+                    "reason": "safety_risk" if reply else "empty_generation",
+                    "reason_code": reason_code,
+                    "reason_stage": "post_generation",
                     "proposal_id": proposal_id,
                     "turn_index": turn_index,
-                    "proactive_text_blocked": True,
+                    "proactive_text_blocked": bool(reply),
+                    "assessment": delivery_assessment,
                 }
             )
             return MVPTurnResult(
@@ -5162,8 +5212,10 @@ class MVPDialogueRuntime:
                 action="proactive_suppressed",
                 diagnostics={
                     **result.diagnostics,
-                    "suppression_reason": "safety_risk",
-                    "proactive_text_blocked": True,
+                    "suppression_reason": "safety_risk" if reply else "empty_generation",
+                    "reason_code": reason_code,
+                    "reason_stage": "post_generation",
+                    "proactive_text_blocked": bool(reply),
                     "proactive_turn": True,
                 },
                 followup_replies=[],
@@ -5536,6 +5588,9 @@ class MVPDialogueRuntime:
             ordinary_language_intent=str(entry.get("ordinary_language_intent", "") or ""),
             expires_at=int(entry.get("expires_at", now) or now),
             cooldown_cost=0,
+            traceable_expectation_id=str(entry.get("traceable_expectation_id", entry.get("source_intent_id", "")) or ""),
+            source_kind=str(entry.get("source_kind", "scheduled_intent") or "scheduled_intent"),
+            selection_reason_codes=[str(r) for r in entry.get("selection_reason_codes", []) or []][:8],
         )
         record_queued_outreach_delivery_attempt(self.store.root, proposal.proposal_id, now=now)
         self.store.append_log(
@@ -5869,6 +5924,60 @@ class MVPDialogueRuntime:
         except Exception:
             sig_dict["queued_outreach"] = []
 
+        idle_context = build_idle_context(
+            state,
+            m13_state=m13_state,
+            structural_signals=sig_dict,
+            turn_index=turn_index,
+            now=now,
+        )
+        keywords = idle_retrieval_keywords(idle_context)
+        retrieved = retrieve_memories(state, keywords, limit=8)
+        expectation_set = normalize_expectations_for_efe(
+            state,
+            now=now,
+            phase="idle",
+            structural_signals=sig_dict,
+        )
+        bound_ids: list[str] = []
+        for expectation in expectation_set.eligible_for_efe:
+            bound_ids.extend(list(expectation.bound_memory_ids[:8]))
+            bound_ids.extend(list(expectation.evidence_refs[:8]))
+        if bound_ids:
+            by_id = retrieve_memories_by_ids(state, bound_ids, limit=8)
+            seen = {str(item.get("id", "")) for item in retrieved if item.get("id")}
+            for item in by_id:
+                item_id = str(item.get("id", ""))
+                if item_id and item_id not in seen:
+                    retrieved.append(item)
+                    seen.add(item_id)
+                if len(retrieved) >= 8:
+                    break
+        retrieved_ids = {str(item.get("id", "")) for item in retrieved if item.get("id")}
+
+        audit_events.append(
+            {
+                "type": "IdleEfeRecallOrderEvent",
+                "turn_index": turn_index,
+                "at": now,
+                "order": "retrieve_before_memory_efe",
+                "bounded_retrieve_ids": list(dict.fromkeys(bound_ids))[:12],
+                "retrieved_ids": sorted(retrieved_ids)[:12],
+                "engineering_proxy_label": "mvp_local_proactive_alignment",
+            }
+        )
+
+        audit_events.append(
+            {
+                "type": "MemoryDynamicsIdleSummaryEvent",
+                "turn_index": turn_index,
+                "at": now,
+                "retrieval_keywords": keywords[:12],
+                "retrieved_ids": sorted(retrieved_ids)[:12],
+                "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
+            }
+        )
+
         m13_memory_efe_evaluation = evaluate_memory_efe(
             state,
             phase="idle",
@@ -5876,6 +5985,7 @@ class MVPDialogueRuntime:
             turn_index=turn_index,
             user_active=False,
             structural_signals=sig_dict,
+            retrieved_memories=retrieved,
         )
         m13_state, _m13_memory_efe_apply_events = apply_memory_efe_state(
             m13_state,
@@ -5891,20 +6001,6 @@ class MVPDialogueRuntime:
             structural_signals=sig_dict,
             turn_index=turn_index,
             now=now,
-        )
-        keywords = idle_retrieval_keywords(idle_context)
-        retrieved = retrieve_memories(state, keywords, limit=8)
-        retrieved_ids = {str(item.get("id", "")) for item in retrieved if item.get("id")}
-
-        audit_events.append(
-            {
-                "type": "MemoryDynamicsIdleSummaryEvent",
-                "turn_index": turn_index,
-                "at": now,
-                "retrieval_keywords": keywords[:12],
-                "retrieved_ids": sorted(retrieved_ids)[:12],
-                "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
-            }
         )
 
         continuity = get_self_continuity_from_state(state)

@@ -2098,6 +2098,25 @@ def render_dashboard() -> None:
             caption_parts.append(f"预算阻断 {m14.get('last_budget_block_reason') or '—'}")
         st.caption(" ｜ ".join(caption_parts))
 
+        m14_3_target = _as_dict(m14.get("m14_3_last_proactive_target"))
+        m14_3_suppression = _as_dict(m14.get("m14_3_last_proactive_suppression"))
+        traceability_count = int(m14.get("m14_3_open_item_traceability_suggestions", 0) or 0)
+        if m14_3_target or m14_3_suppression or traceability_count:
+            with st.expander("M14.3 proactive alignment", expanded=False):
+                st.markdown(
+                    "\n".join(
+                        [
+                            f"- trigger: `{_clip_text(m14_3_target.get('trigger'), limit=80)}`",
+                            f"- traceable_expectation_id: `{_clip_text(m14_3_target.get('traceable_expectation_id'), limit=100)}`",
+                            f"- intent: {_clip_text(m14_3_target.get('ordinary_language_intent'), limit=180)}",
+                            f"- last_suppression: `{_clip_text(m14_3_suppression.get('reason_code'), limit=80)}` "
+                            f"stage=`{_clip_text(m14_3_suppression.get('reason_stage'), limit=40)}`",
+                            f"- open_item_traceability_suggestions: {traceability_count}",
+                            f"- legacy_vague_open_item_proactive: {bool(m14.get('m14_3_legacy_vague_open_item_proactive'))}",
+                        ]
+                    )
+                )
+
         if bg_ui:
             bg_events = [
                 row for row in chat_iface.read_conversation_log(limit=80)
