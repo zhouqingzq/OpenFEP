@@ -95,6 +95,7 @@ from segmentum.dialogue.runtime.m13_initiative import (
     merge_initiative_into_m13_state,
     normalize_initiative_state,
     proposal_from_initiative_state,
+    set_initiative_proactive_policy_profile,
     set_initiative_user_opt_in,
 )
 from segmentum.dialogue.runtime.m14_3_proactive_alignment import (
@@ -5218,12 +5219,14 @@ class MVPDialogueRuntime:
             initiative = normalize_initiative_state(m13_state.get("initiative"))
             if not reply:
                 reason_code = "empty_generation"
-            elif not grounded:
-                reason_code = "delivery_ungrounded_reply"
+            elif delivery_assessment and not bool(delivery_assessment.get("allow_delivery")):
+                reason_code = "delivery_assessor_reject"
             elif delivery_assessment and _bounded_float(delivery_assessment.get("confidence")) < _bounded_float(
                 initiative.get("delivery_assessor_min_confidence"), default=0.5
             ):
                 reason_code = "delivery_assessor_low_confidence"
+            elif not grounded:
+                reason_code = "delivery_ungrounded_reply"
             else:
                 reason_code = "delivery_assessor_reject"
             initiative["last_suppression_reason"] = reason_code
@@ -5318,6 +5321,18 @@ class MVPDialogueRuntime:
         state["m13_drive_state"] = set_initiative_implicit_idle_delivery(
             state.get("m13_drive_state", {}),
             enabled=enabled,
+        )
+        self.store.save(state)
+        initiative = normalize_initiative_state(
+            normalize_m13_drive_state(state.get("m13_drive_state")).get("initiative")
+        )
+        return dict(initiative)
+
+    def set_initiative_proactive_policy_profile(self, profile: str) -> dict[str, Any]:
+        state = self.store.load()
+        state["m13_drive_state"] = set_initiative_proactive_policy_profile(
+            state.get("m13_drive_state", {}),
+            profile=profile,
         )
         self.store.save(state)
         initiative = normalize_initiative_state(

@@ -7,6 +7,7 @@ from collections.abc import Mapping
 import hashlib
 import json
 import logging
+import os
 import shutil
 import sys
 import uuid
@@ -50,6 +51,7 @@ from segmentum.dialogue.runtime.m14_1_background_continuity import (
     MIN_QUEUED_OUTREACH_TTL_SECONDS,
     MIN_TICK_SECONDS,
 )
+from segmentum.dialogue.runtime.m14_4_implicit_idle import run_streamlit_implicit_idle_proactive
 
 _DIALOGUE_PREF_FIELDS: tuple[str, ...] = (
     "current_speaker_name",
@@ -1113,68 +1115,48 @@ def render_sidebar() -> None:
         else:
             st.sidebar.error("MVP loop: inactive")
         if chat_iface.has_agent() and getattr(chat_iface, "mvp_runtime_active", False):
-            proactive_opt_in = st.sidebar.checkbox(
-                "Enable bounded proactive messages",
-                value=bool(st.session_state.get("m13_initiative_opt_in", False)),
-                key="m13_initiative_opt_in_checkbox",
-                help="Off by default. Manual continue; background self-continuity (M14.1) is separate opt-in.",
-            )
-            if proactive_opt_in != bool(st.session_state.get("m13_initiative_opt_in_synced", False)):
-                chat_iface.set_bounded_proactive_opt_in(proactive_opt_in)
-                st.session_state.m13_initiative_opt_in_synced = proactive_opt_in
-            st.session_state.m13_initiative_opt_in = proactive_opt_in
             initiative_status = chat_iface.read_initiative_status() if chat_iface.has_agent() else {}
-            implicit_idle_default = bool(
-                initiative_status.get("implicit_idle_delivery")
-                if initiative_status
-                else st.session_state.get("m13_implicit_idle_delivery", False)
-            )
-            implicit_idle_disabled = not proactive_opt_in
-            implicit_idle_delivery = st.sidebar.checkbox(
-                "Enable implicit idle delivery (隐式空闲送达)",
-                value=implicit_idle_default,
-                key="m13_implicit_idle_delivery_checkbox",
-                disabled=implicit_idle_disabled,
-                help=(
-                    "When idle introspection selects outreach, deliver a bounded proactive message "
-                    "without pressing Manual continue. Requires bounded proactive + idle introspection. "
-                    "Maps to initiative.implicit_idle_delivery."
-                ),
-            )
-            if implicit_idle_disabled:
-                implicit_idle_delivery = False
-            if implicit_idle_delivery != bool(st.session_state.get("m13_implicit_idle_delivery_synced", False)):
-                chat_iface.set_implicit_idle_delivery(implicit_idle_delivery)
-                st.session_state.m13_implicit_idle_delivery_synced = implicit_idle_delivery
-            st.session_state.m13_implicit_idle_delivery = implicit_idle_delivery
-            idle_intro_disabled = not proactive_opt_in
-            idle_intro_opt_in = st.sidebar.checkbox(
-                "Enable idle introspection (experimental)",
-                value=bool(st.session_state.get("m13_idle_introspection_opt_in", False)),
-                key="m13_idle_introspection_opt_in_checkbox",
-                disabled=idle_intro_disabled,
-                help="Requires bounded proactive messages. Overnight work uses the M14.2 daemon path.",
-            )
-            if idle_intro_disabled:
-                idle_intro_opt_in = False
-            if idle_intro_opt_in != bool(st.session_state.get("m13_idle_introspection_opt_in_synced", False)):
-                chat_iface.set_idle_introspection_opt_in(idle_intro_opt_in)
-                st.session_state.m13_idle_introspection_opt_in_synced = idle_intro_opt_in
-            st.session_state.m13_idle_introspection_opt_in = idle_intro_opt_in
-            bg_disabled = not (proactive_opt_in and idle_intro_opt_in)
-            bg_opt_in = st.sidebar.checkbox(
-                "Enable background self-continuity (experimental)",
-                value=bool(st.session_state.get("m14_1_background_opt_in", False)),
-                key="m14_1_background_opt_in_checkbox",
-                disabled=bg_disabled,
-                help="Opt-in budgets for the M14.2 daemon. Inline execution is only a development fallback.",
-            )
-            if bg_disabled:
-                bg_opt_in = False
-            if bg_opt_in != bool(st.session_state.get("m14_1_background_opt_in_synced", False)):
-                chat_iface.set_background_continuity_opt_in(bg_opt_in)
-                st.session_state.m14_1_background_opt_in_synced = bg_opt_in
-            st.session_state.m14_1_background_opt_in = bg_opt_in
+            if not (
+                bool(initiative_status.get("user_opt_in"))
+                and bool(initiative_status.get("enabled"))
+            ):
+                initiative_status = chat_iface.set_bounded_proactive_opt_in(True)
+            proactive_opt_in = True
+            st.session_state.m13_initiative_opt_in = True
+            st.session_state.m13_initiative_opt_in_synced = True
+
+            if not bool(initiative_status.get("implicit_idle_delivery")):
+                initiative_status = chat_iface.set_implicit_idle_delivery(True)
+            implicit_idle_delivery = True
+            st.session_state.m13_implicit_idle_delivery = True
+            st.session_state.m13_implicit_idle_delivery_synced = True
+            desired_profile = str(os.environ.get("SEGMENTUM_PROACTIVE_PROFILE", "") or "").strip().lower()
+            if desired_profile != "streamlit_open_chat":
+                desired_profile = "bounded_default"
+            if str(initiative_status.get("proactive_policy_profile", "bounded_default")) != desired_profile:
+                initiative_status = chat_iface.set_proactive_policy_profile(desired_profile)
+            st.session_state.m13_proactive_policy_profile = desired_profile
+
+            idle_status = chat_iface.read_idle_introspection_status()
+            if not (
+                bool(idle_status.get("user_opt_in"))
+                and bool(idle_status.get("enabled"))
+            ):
+                idle_status = chat_iface.set_idle_introspection_opt_in(True)
+            idle_intro_opt_in = True
+            st.session_state.m13_idle_introspection_opt_in = True
+            st.session_state.m13_idle_introspection_opt_in_synced = True
+
+            bg_status = chat_iface.read_background_continuity_status()
+            if not (
+                bool(bg_status.get("user_opt_in"))
+                and bool(bg_status.get("enabled"))
+            ):
+                bg_status = chat_iface.set_background_continuity_opt_in(True)
+            bg_opt_in = True
+            bg_disabled = False
+            st.session_state.m14_1_background_opt_in = True
+            st.session_state.m14_1_background_opt_in_synced = True
             bg_status = chat_iface.read_background_continuity_status()
             if not bg_disabled and bg_status:
                 with st.sidebar.expander("Background budgets", expanded=False):
@@ -1639,68 +1621,11 @@ def render_chat() -> None:
         pending=pending_text,
     )
 
-    pending_proactive = bool(st.session_state.get("pending_proactive_continue"))
-    if pending_proactive and chat_iface.has_agent() and not pending_text:
-        speaker = (
-            st.session_state.pending_speaker_name
-            or st.session_state.current_speaker_name
-            or "测试用户"
-        )
-        st.session_state.m13_ui_turn_in_progress = True
-        with st.spinner("胡桃正在主动续写..."):
-            try:
-                check = chat_iface.maybe_propose_proactive_turn(
-                    manual_continue=True,
-                    user_typing=bool(pending_text),
-                )
-                proposal = check.get("proposal") if isinstance(check, dict) else None
-                if isinstance(proposal, dict) and proposal.get("proposal_id"):
-                    resp = chat_iface.run_proactive_turn(
-                        str(proposal["proposal_id"]),
-                        speaker_name=str(speaker).strip() or "测试用户",
-                    )
-                    if str(resp.reply or "").strip():
-                        append_assistant_response_messages(st.session_state.messages, resp)
-                    else:
-                        reason = ""
-                        if isinstance(resp.diagnostics, dict):
-                            reason = str(
-                                resp.diagnostics.get("reason_code")
-                                or resp.diagnostics.get("suppression_reason", "")
-                                or ""
-                            )
-                        st.session_state.messages.append(
-                            {
-                                "role": "assistant",
-                                "text": (
-                                    "本轮未发送主动消息"
-                                    + (f"（{reason}）" if reason else "。")
-                                ),
-                            }
-                        )
-                else:
-                    reason = str(
-                        check.get("suppression_reason_code")
-                        or check.get("suppression_reason", "")
-                        if isinstance(check, dict)
-                        else ""
-                    )
-                    st.session_state.messages.append(
-                        {
-                            "role": "assistant",
-                            "text": f"当前不适合主动续写（{reason or '已抑制'}）。",
-                        }
-                    )
-            except Exception as exc:  # pragma: no cover - UI guardrail
-                st.session_state.messages.append(
-                    {"role": "assistant", "text": f"主动续写失败：{exc}"}
-                )
-            finally:
-                st.session_state.pending_proactive_continue = False
-                st.session_state.pending_speaker_name = None
-                st.session_state.m13_ui_turn_in_progress = False
-        st.rerun()
-    elif pending_text and chat_iface.has_agent():
+    if bool(st.session_state.get("pending_proactive_continue")):
+        st.session_state.pending_proactive_continue = False
+        st.session_state.pending_speaker_name = None
+    pending_proactive = False
+    if pending_text and chat_iface.has_agent():
         chat_iface.sync_transcript_from_messages(
             st.session_state.messages,
             pending_user_text=pending_text,
@@ -1729,24 +1654,6 @@ def render_chat() -> None:
         st.session_state.pending_speaker_name = None
 
     disabled = not chat_iface.has_agent() or pending_text is not None
-    if (
-        chat_iface.has_agent()
-        and getattr(chat_iface, "mvp_runtime_active", False)
-        and bool(st.session_state.get("m13_initiative_opt_in", False))
-        and not pending_text
-        and not pending_proactive
-    ):
-        if st.button(
-            "让胡桃继续",
-            key="btn_manual_proactive_continue",
-            disabled=disabled,
-            help="Manual bounded proactive message (requires opt-in above).",
-        ):
-            st.session_state.pending_proactive_continue = True
-            st.session_state.pending_speaker_name = (
-                str(st.session_state.current_speaker_name or "").strip() or "测试用户"
-            )
-            st.rerun()
     user_input = st.chat_input(
         "发消息" if not disabled else "先加载一个 persona...",
         disabled=disabled,
@@ -1771,11 +1678,6 @@ def render_chat() -> None:
             chat_iface.record_background_streamlit_ping()
         except Exception:  # pragma: no cover
             pass
-    _maybe_run_streamlit_idle_introspection(
-        chat_iface,
-        pending_text=pending_text,
-        pending_proactive=pending_proactive,
-    )
     if (
         chat_iface.has_agent()
         and getattr(chat_iface, "mvp_runtime_active", False)
@@ -1801,6 +1703,34 @@ def render_chat() -> None:
                 st.rerun()
         except Exception as exc:  # pragma: no cover
             _logger.exception("queued outreach drain failed: %s", exc)
+    _maybe_run_streamlit_idle_introspection(
+        chat_iface,
+        pending_text=pending_text,
+        pending_proactive=pending_proactive,
+    )
+    if (
+        chat_iface.has_agent()
+        and getattr(chat_iface, "mvp_runtime_active", False)
+        and bool(st.session_state.get("m13_initiative_opt_in", False))
+        and bool(st.session_state.get("m13_implicit_idle_delivery", False))
+        and not pending_text
+        and not pending_proactive
+        and not bool(st.session_state.get("m13_ui_turn_in_progress", False))
+    ):
+        try:
+            result = run_streamlit_implicit_idle_proactive(
+                chat_iface,
+                session_state=st.session_state,
+                pending_user_message=pending_text,
+                pending_proactive=pending_proactive,
+                user_typing=False,
+                speaker_name=str(st.session_state.current_speaker_name or "").strip() or "测试用户",
+            )
+            if result.delivered and result.response is not None:
+                append_assistant_response_messages(st.session_state.messages, result.response)
+                st.rerun()
+        except Exception as exc:  # pragma: no cover
+            _logger.exception("implicit idle proactive delivery failed: %s", exc)
 
 
 _MIND_BUS_EVENT_PREFIXES = (
@@ -2198,7 +2128,7 @@ def render_dashboard() -> None:
                             hide_index=True,
                         )
 
-    c1, c2, c3, c4, c5 = st.columns(5)
+    c1, c2, c3, c4, c5, c6 = st.columns(6)
     c1.metric("最近轮次", str(temporal_state.get("last_turn_index") or "—"))
     c2.metric("主动续写 opt-in", _yes_no(proactive_ui))
     c3.metric("空闲内省 opt-in", _yes_no(idle_ui))
@@ -2206,6 +2136,10 @@ def render_dashboard() -> None:
     c5.metric(
         "会话主动次数",
         str(initiative.get("proactive_count_this_session", 0)),
+    )
+    c6.metric(
+        "隐式 idle 检查",
+        str(st.session_state.get("idle_seconds_at_last_check", "—")),
     )
 
     st.markdown(
@@ -2215,6 +2149,7 @@ def render_dashboard() -> None:
                 f"（{_format_unix_time(temporal_state.get('last_turn_at'))}）",
                 f"**主动抑制原因** {_clip_text(initiative.get('last_suppression_reason'), limit=120)}",
                 f"**空闲内省跳过** {_clip_text(idle.get('last_skip_reason'), limit=120)}",
+                f"**隐式 idle 抑制** {_clip_text(st.session_state.get('last_implicit_idle_suppression_reason_code'), limit=120)}",
             ]
         )
     )
@@ -2277,8 +2212,10 @@ def render_dashboard() -> None:
                     f"- 已启用：{_yes_no(initiative.get('enabled'))}",
                     f"- 用户 opt-in：{_yes_no(initiative.get('user_opt_in'))}",
                     f"- 隐式空闲送达：{_yes_no(initiative.get('implicit_idle_delivery'))}",
+                    f"- 策略 profile：`{_clip_text(initiative.get('proactive_policy_profile'), limit=40)}`",
                     f"- 冷却轮次：{initiative.get('cooldown_turns', '—')}",
                     f"- 上次主动：{_format_unix_time(initiative.get('last_proactive_turn_at'))}",
+                    f"- 上次隐式 idle 检查：{_format_unix_time(st.session_state.get('last_implicit_idle_attempt_at'))}",
                 ]
             )
         )

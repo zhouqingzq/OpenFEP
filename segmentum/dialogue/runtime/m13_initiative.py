@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Protocol
 
@@ -41,6 +42,9 @@ MAX_EVIDENCE_REFS = 8
 MIN_CONTEXT_ASSESSMENT_CONFIDENCE = 0.55
 MIN_DELIVERY_ASSESSMENT_CONFIDENCE = 0.5
 DEFAULT_OPPONENT_STRENGTH_BLOCK_THRESHOLD = 0.5
+BOUNDED_DEFAULT_PROFILE = "bounded_default"
+STREAMLIT_OPEN_CHAT_PROFILE = "streamlit_open_chat"
+PROACTIVE_POLICY_PROFILES = frozenset({BOUNDED_DEFAULT_PROFILE, STREAMLIT_OPEN_CHAT_PROFILE})
 
 CONTEXT_ASSESSOR_MARKER = "M13 有界主动续写上下文语义评估"
 DELIVERY_ASSESSOR_MARKER = "M13 有界主动续写送达语义评估"
@@ -96,10 +100,13 @@ def _json_text(payload: Any) -> str:
 
 
 def default_initiative_state() -> dict[str, Any]:
+    env_profile = str(os.environ.get("SEGMENTUM_PROACTIVE_PROFILE", "") or "").strip().lower()
+    profile = env_profile if env_profile in PROACTIVE_POLICY_PROFILES else BOUNDED_DEFAULT_PROFILE
     return {
         "enabled": False,
         "user_opt_in": False,
         "implicit_idle_delivery": False,
+        "proactive_policy_profile": profile,
         "manual_continue_button": True,
         "idle_threshold_seconds": DEFAULT_IDLE_THRESHOLD_SECONDS,
         "cooldown_turns": DEFAULT_COOLDOWN_TURNS,
@@ -126,6 +133,8 @@ def normalize_initiative_state(raw: Any) -> dict[str, Any]:
     merged["enabled"] = bool(merged.get("enabled"))
     merged["user_opt_in"] = bool(merged.get("user_opt_in"))
     merged["implicit_idle_delivery"] = bool(merged.get("implicit_idle_delivery"))
+    profile = str(merged.get("proactive_policy_profile", BOUNDED_DEFAULT_PROFILE) or "").strip().lower()
+    merged["proactive_policy_profile"] = profile if profile in PROACTIVE_POLICY_PROFILES else BOUNDED_DEFAULT_PROFILE
     merged["manual_continue_button"] = bool(merged.get("manual_continue_button", True))
     merged["idle_threshold_seconds"] = max(
         30, int(merged.get("idle_threshold_seconds", DEFAULT_IDLE_THRESHOLD_SECONDS) or DEFAULT_IDLE_THRESHOLD_SECONDS)
@@ -691,6 +700,8 @@ def evaluate_proactive_initiative(
             "idle_seconds": round(float(idle_seconds), 3),
             "manual_continue": manual_continue,
             "implicit_idle_request": implicit_idle_request,
+            "idle_threshold_seconds": initiative.get("idle_threshold_seconds"),
+            "proactive_policy_profile": initiative.get("proactive_policy_profile"),
             "semantic_assessor": llm is not None,
             "engineering_proxy_label": "mvp_local_m13_initiative",
         }
@@ -737,17 +748,19 @@ def evaluate_proactive_initiative(
     if user_typing:
         return state, suppress("user_active")
     queued_delivery = locked_proposal is not None and str(locked_proposal.source) == "queued_outreach"
-    if not queued_delivery and int(initiative.get("proactive_count_this_session", 0) or 0) >= int(
+    relaxed_profile = str(initiative.get("proactive_policy_profile", BOUNDED_DEFAULT_PROFILE)) == STREAMLIT_OPEN_CHAT_PROFILE
+    if not queued_delivery and not relaxed_profile and int(initiative.get("proactive_count_this_session", 0) or 0) >= int(
         initiative.get("max_proactive_per_session", DEFAULT_MAX_PROACTIVE_PER_SESSION) or 1
     ):
         return state, suppress("session_limit_reached")
     cooldown_until = int(initiative.get("cooldown_until_timestamp", 0) or 0)
-    if cooldown_until > now:
+    if not relaxed_profile and cooldown_until > now:
         return state, suppress("cooldown_active")
     last_turn = int(initiative.get("last_proactive_turn_index", -1) or -1)
     cooldown_turns = int(initiative.get("cooldown_turns", DEFAULT_COOLDOWN_TURNS) or DEFAULT_COOLDOWN_TURNS)
     if (
         not queued_delivery
+        and not relaxed_profile
         and last_turn >= 0
         and turn_index - last_turn <= cooldown_turns
     ):
@@ -995,6 +1008,7 @@ def set_initiative_user_opt_in(m13_state: dict[str, Any], *, enabled: bool) -> d
     initiative["enabled"] = bool(enabled)
     if not enabled:
         initiative["implicit_idle_delivery"] = False
+        initiative["proactive_policy_profile"] = BOUNDED_DEFAULT_PROFILE
         initiative["pending_proactive_proposal"] = {}
         initiative["last_suppression_reason"] = "not_opted_in"
         state["initiative"] = initiative
@@ -1010,5 +1024,16 @@ def set_initiative_implicit_idle_delivery(m13_state: dict[str, Any], *, enabled:
         initiative["implicit_idle_delivery"] = False
     else:
         initiative["implicit_idle_delivery"] = bool(enabled)
+    state["initiative"] = initiative
+    return state
+
+
+def set_initiative_proactive_policy_profile(m13_state: dict[str, Any], *, profile: str) -> dict[str, Any]:
+    state = merge_initiative_into_m13_state(m13_state)
+    initiative = normalize_initiative_state(state.get("initiative"))
+    normalized = str(profile or "").strip().lower()
+    if normalized not in PROACTIVE_POLICY_PROFILES:
+        normalized = BOUNDED_DEFAULT_PROFILE
+    initiative["proactive_policy_profile"] = normalized
     state["initiative"] = initiative
     return state

@@ -394,8 +394,11 @@ def build_structural_idle_plan(
     reward = _mapping(idle_context.get("affective_reward_proxy"))
     band = str(boredom.get("band", "low"))
 
-    if traceable_open_items:
-        first = traceable_open_items[0]
+    focus_open_items = traceable_open_items or [
+        row for row in open_items if str(row.get("id", "")) in retrieved_ids
+    ]
+    if focus_open_items:
+        first = focus_open_items[0]
         item_id = str(first.get("id", ""))
         refs = [item_id] if item_id in retrieved_ids else [rid for rid in retrieved_ids][:1]
         if refs:

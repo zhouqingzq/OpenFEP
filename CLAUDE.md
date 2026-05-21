@@ -169,6 +169,11 @@ self-thought producers) for new Hu Tao / MVP chat behavior.
   evidence refs. Vague open-item `next_check` tokens alone must not trigger
   M13.3 proposals. Blocked proactive delivery must emit structured
   `reason_code` audit events, not only a generic `safety_risk` label.
+- Streamlit implicit idle delivery uses the existing M13.3 proposal and
+  `run_proactive_turn` path only. Fresh initiative state remains conservative
+  (`bounded_default`, implicit idle off); local Streamlit may auto-enable hidden
+  MVP chat toggles, and `streamlit_open_chat` cap/cooldown relaxation requires
+  an explicit env flag or setter.
 
 ---
 

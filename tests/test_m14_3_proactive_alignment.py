@@ -106,6 +106,27 @@ def test_traceable_reply_grounding_rejects_generic_sunset() -> None:
         ordinary_language_intent=intent,
         trigger="memory_efe_outreach",
     ) is True
+    assert traceable_proactive_reply_grounded(
+        "I was lonely and needed you.",
+        ordinary_language_intent="Follow up on the unresolved expectation: Li An'an thread follow-up",
+        trigger="memory_efe_outreach",
+    ) is False
+
+
+def test_scheduled_outreach_grounding_accepts_short_cross_language_delivery() -> None:
+    assert traceable_proactive_reply_grounded(
+        "短跟进：这是昨晚请求的简短留言。",
+        ordinary_language_intent="Prepare one short approved follow-up for the user's scheduled request.",
+        trigger="scheduled_outreach",
+    ) is True
+
+
+def test_memory_efe_grounding_filters_generic_follow_up_tokens() -> None:
+    assert traceable_proactive_reply_grounded(
+        "我需要想一下这个。",
+        ordinary_language_intent="Follow up on the unresolved expectation: follow up",
+        trigger="memory_efe_outreach",
+    ) is True
 
 
 def test_boredom_target_blocked_when_memory_efe_eligible() -> None:

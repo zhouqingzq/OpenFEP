@@ -658,12 +658,30 @@ class ChatInterface:
             return {}
         return dict(self._mvp_runtime.set_initiative_implicit_idle_delivery(bool(enabled)))
 
+    def set_proactive_policy_profile(self, profile: str) -> dict[str, object]:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return {}
+        return dict(self._mvp_runtime.set_initiative_proactive_policy_profile(str(profile)))
+
     def read_initiative_status(self) -> dict[str, object]:
         self._ensure_runtime_fields()
         self._maybe_enable_mvp_llm_runtime()
         if self._mvp_runtime is None:
             return {}
         return dict(self._mvp_runtime.read_initiative_status())
+
+    def append_m14_4_implicit_idle_audit(self, event: dict[str, object]) -> None:
+        self._ensure_runtime_fields()
+        runtime = self._mvp_runtime
+        store = getattr(runtime, "store", None) if runtime is not None else None
+        if store is None:
+            return
+        try:
+            store.append_log({"event": "m14_4_implicit_idle_audit", **dict(event)})
+        except Exception as exc:  # pragma: no cover - UI guardrail
+            _logger.warning("failed to append M14.4 implicit idle audit: %s", exc)
 
     def set_idle_introspection_opt_in(self, enabled: bool) -> dict[str, object]:
         self._ensure_runtime_fields()
