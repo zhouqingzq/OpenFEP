@@ -21,10 +21,24 @@ from segmentum.dialogue.runtime.m14_1_background_continuity import (
 from segmentum.dialogue.runtime.m14_2_event_bus import EnvironmentEventStore
 from segmentum.dialogue.runtime.m14_2_scheduled_intents import (
     ScheduledIntentStore,
-    _looks_like_scheduled_outreach,
 )
 from segmentum.dialogue.runtime.m14_2_self_loop import M142SelfLoopDaemon
 from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore
+
+
+def _structured_payload(text: str = "sleep on it and tell me tomorrow morning") -> dict[str, object]:
+    return {
+        "user_text": text,
+        "scheduled_outreach_requests": [
+            {
+                "kind": "scheduled_outreach",
+                "should_schedule": True,
+                "basis": "user_explicit_request",
+                "ordinary_language_intent": "Send the user-requested scheduled follow-up.",
+                "due_at": "2026-05-20T09:00:00+08:00",
+            }
+        ],
+    }
 
 
 def _full_opted_state(**overrides: object) -> dict[str, object]:
@@ -82,29 +96,25 @@ class _ScheduledLLM:
         }
 
 
-def test_keyword_cue_rejects_weather_smalltalk() -> None:
-    assert _looks_like_scheduled_outreach("Tomorrow morning tell me the weather") is False
-
-
-def test_keyword_cue_accepts_remember_to_say_when_i_come_back() -> None:
-    text = "tonight mull it over; remember to say something when I come back"
-    assert _looks_like_scheduled_outreach(text) is True
-
-
-def test_keyword_cue_accepts_chinese_leave_message_phrase() -> None:
-    assert _looks_like_scheduled_outreach("睡一晚，醒来给我留句话") is True
-
-
-def test_keyword_cue_rejects_reflection_or_reminder_without_message_request() -> None:
-    assert _looks_like_scheduled_outreach("think about this tomorrow") is False
-    assert _looks_like_scheduled_outreach("keep thinking about this overnight") is False
-    assert _looks_like_scheduled_outreach("remind me tomorrow about the meeting") is False
-    assert _looks_like_scheduled_outreach("follow up tomorrow on the report") is False
-
-
-def test_keyword_cue_rejects_chinese_immediate_info_request_without_message_leave() -> None:
-    assert _looks_like_scheduled_outreach("明天早上告诉我会议几点") is False
-    assert _looks_like_scheduled_outreach("明天早上议程有三项") is False
+def test_raw_text_semantics_do_not_create_scheduled_intent_without_llm_structured_output(tmp_path: Path) -> None:
+    store = ScheduledIntentStore(tmp_path, persona_id="p", session_id="s")
+    now = datetime(2026, 5, 19, 20, 0, tzinfo=ZoneInfo("Asia/Shanghai"))
+    for index, text in enumerate(
+        [
+            "Tomorrow morning tell me the weather",
+            "tonight mull it over; remember to say something when I come back",
+            "睡一晚，醒来给我留句话",
+            "think about this tomorrow",
+            "remind me tomorrow about the meeting",
+            "明天早上告诉我会议几点",
+        ]
+    ):
+        event = {
+            "event_id": f"env_raw_semantics_{index}",
+            "event_type": "UserMessageCommittedEvent",
+            "payload": {"user_text": text},
+        }
+        assert store.create_from_user_message_event(event, now=now) is None
 
 
 def test_delivery_surface_unavailable_is_transient_suppression() -> None:
@@ -142,7 +152,7 @@ def test_opt_out_blocks_preparation_but_preserves_audit(tmp_path: Path) -> None:
     daemon = M142SelfLoopDaemon(runtime, persona_id="p", session_id="s")
     intent_store = ScheduledIntentStore(tmp_path, persona_id="p", session_id="s")
     intent = intent_store.create_from_user_message_event(
-        {"event_id": "env_opt", "payload": {"user_text": "sleep on it and tell me tomorrow morning"}},
+        {"event_id": "env_opt", "payload": _structured_payload()},
         now=datetime(2026, 5, 19, 20, 0, tzinfo=ZoneInfo("Asia/Shanghai")),
     )
     assert intent is not None
@@ -168,7 +178,7 @@ def test_budget_exhaustion_records_scheduled_intent_suppression(tmp_path: Path) 
     daemon = M142SelfLoopDaemon(runtime, persona_id="p", session_id="s")
     intent_store = ScheduledIntentStore(tmp_path, persona_id="p", session_id="s")
     intent = intent_store.create_from_user_message_event(
-        {"event_id": "env_budget", "payload": {"user_text": "sleep on it and tell me tomorrow morning"}},
+        {"event_id": "env_budget", "payload": _structured_payload()},
         now=datetime(2026, 5, 19, 20, 0, tzinfo=ZoneInfo("Asia/Shanghai")),
     )
     assert intent is not None
@@ -187,7 +197,7 @@ def test_due_intent_preparation_runs_idle_reflection(tmp_path: Path) -> None:
     daemon = M142SelfLoopDaemon(runtime, persona_id="p", session_id="s")
     intent_store = ScheduledIntentStore(tmp_path, persona_id="p", session_id="s")
     intent = intent_store.create_from_user_message_event(
-        {"event_id": "env_reflect", "payload": {"user_text": "sleep on it and tell me tomorrow morning"}},
+        {"event_id": "env_reflect", "payload": _structured_payload()},
         now=datetime(2026, 5, 19, 20, 0, tzinfo=ZoneInfo("Asia/Shanghai")),
     )
     assert intent is not None
@@ -206,7 +216,7 @@ def test_outbox_recovery_after_crash_before_intent_prepared(tmp_path: Path) -> N
     daemon = M142SelfLoopDaemon(runtime, persona_id="p", session_id="s")
     intent_store = ScheduledIntentStore(tmp_path, persona_id="p", session_id="s")
     intent = intent_store.create_from_user_message_event(
-        {"event_id": "env_crash", "payload": {"user_text": "sleep on it and tell me tomorrow morning"}},
+        {"event_id": "env_crash", "payload": _structured_payload()},
         now=datetime(2026, 5, 19, 20, 0, tzinfo=ZoneInfo("Asia/Shanghai")),
     )
     assert intent is not None
@@ -252,7 +262,7 @@ def test_transient_delivery_suppression_keeps_outbox_pending(tmp_path: Path) -> 
     daemon = M142SelfLoopDaemon(runtime, persona_id="p", session_id="s")
     intent_store = ScheduledIntentStore(tmp_path, persona_id="p", session_id="s")
     intent = intent_store.create_from_user_message_event(
-        {"event_id": "env_transient", "payload": {"user_text": "sleep on it and tell me tomorrow morning"}},
+        {"event_id": "env_transient", "payload": _structured_payload()},
         now=datetime(2026, 5, 19, 20, 0, tzinfo=ZoneInfo("Asia/Shanghai")),
     )
     assert intent is not None
@@ -278,7 +288,7 @@ def test_hard_delivery_suppression_marks_outbox_suppressed(tmp_path: Path) -> No
     daemon = M142SelfLoopDaemon(runtime, persona_id="p", session_id="s")
     intent_store = ScheduledIntentStore(tmp_path, persona_id="p", session_id="s")
     intent = intent_store.create_from_user_message_event(
-        {"event_id": "env_hard", "payload": {"user_text": "sleep on it and tell me tomorrow morning"}},
+        {"event_id": "env_hard", "payload": _structured_payload()},
         now=datetime(2026, 5, 19, 20, 0, tzinfo=ZoneInfo("Asia/Shanghai")),
     )
     assert intent is not None

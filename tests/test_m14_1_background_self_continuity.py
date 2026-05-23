@@ -303,6 +303,43 @@ def test_queued_outreach_drain_uses_delivery_path_and_counts_llm(tmp_path: Path)
     assert bg["tokens_used_today"] > 1
 
 
+def test_current_session_can_relay_due_outbox_from_sibling_session(tmp_path: Path) -> None:
+    persona_root = tmp_path / "persona"
+    source_root = persona_root / "sessions" / "old_tab"
+    current_root = persona_root / "sessions" / "current_tab"
+    source_root.mkdir(parents=True)
+    store = MVPStateStore(current_root, shared_root=persona_root)
+    store.save(_full_opted_state())
+    now = int(time.time())
+    enqueue_outreach_proposal(
+        source_root,
+        proposal={
+            "proposal_id": "prop_old_tab",
+            "trigger": "scheduled_outreach",
+            "ordinary_language_intent": "follow up from old tab",
+            "proposed_topic": "scheduled outreach",
+            "persona_id": "胡桃",
+            "session_id": "old_tab",
+        },
+        now=now - 120,
+        ttl_seconds=3600,
+        due_at=now - 60,
+        source_intent_id="sint_old_tab",
+    )
+    runtime = MVPDialogueRuntime(store=store, llm=_BgIdleLLM())
+
+    result = runtime.maybe_drain_queued_outreach(turn_index=5, now=now)
+
+    assert result["drained"] is True
+    source_rows = load_queued_outreach(source_root)
+    current_rows = load_queued_outreach(current_root)
+    assert source_rows[0]["status"] == "relayed"
+    assert source_rows[0]["relayed_to_session_id"] == "current_tab"
+    assert current_rows[0]["status"] == "delivered"
+    log = (current_root / "conversation_log.jsonl").read_text(encoding="utf-8")
+    assert "OutboxEntryRelayedEvent" in log
+
+
 def test_background_tick_records_estimated_tokens_not_constant_one(tmp_path: Path) -> None:
     store = MVPStateStore(tmp_path)
     store.save(_full_opted_state())

@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 import json
-import re
 import time
 import uuid
 from pathlib import Path
@@ -18,7 +17,6 @@ from segmentum.dialogue.runtime.m14_2_event_bus import (
 )
 
 DEFAULT_DUE_WINDOW_SECONDS = 4 * 3600
-DEFAULT_MORNING_HOUR = 9
 
 
 def _read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -63,111 +61,54 @@ def _epoch(text: str) -> int:
     return int(datetime.fromisoformat(text).timestamp())
 
 
-def _extract_hour(text: str) -> int | None:
-    lowered = text.casefold()
-    match = re.search(r"\b(?:at|around|by)\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b", lowered)
-    if not match:
-        match = re.search(r"\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b", lowered)
-    if not match:
-        return None
-    hour = int(match.group(1))
-    meridian = str(match.group(3) or "").lower()
-    if meridian == "pm" and hour < 12:
-        hour += 12
-    if meridian == "am" and hour == 12:
-        hour = 0
-    if 0 <= hour <= 23:
-        return hour
+def _structured_scheduled_outreach_request(payload: Mapping[str, Any]) -> dict[str, Any] | None:
+    raw_candidates: list[Any] = []
+    many = payload.get("scheduled_outreach_requests")
+    if isinstance(many, list):
+        raw_candidates.extend(many)
+    one = payload.get("scheduled_outreach_request")
+    if one is not None:
+        raw_candidates.append(one)
+    for candidate in raw_candidates:
+        if not isinstance(candidate, Mapping):
+            continue
+        kind = str(candidate.get("kind", "scheduled_outreach") or "scheduled_outreach")
+        if kind != "scheduled_outreach":
+            continue
+        if candidate.get("should_schedule") is False:
+            continue
+        basis = str(candidate.get("basis", "") or "")
+        if basis and basis != "user_explicit_request":
+            continue
+        has_due_after = candidate.get("due_after_seconds") is not None
+        has_due_at = bool(str(candidate.get("due_at", "") or "").strip())
+        if not (has_due_after or has_due_at):
+            continue
+        return dict(candidate)
     return None
 
 
-def _looks_like_scheduled_outreach(text: str) -> bool:
-    lowered = str(text or "").casefold()
-    if not lowered.strip():
-        return False
-    english_schedule = any(
-        phrase in lowered
-        for phrase in (
-            "tomorrow morning",
-            "tomorrow",
-            "tonight",
-            "sleep on it",
-            "overnight",
-            "when i come back",
-        )
-    )
-    english_outreach = any(
-        phrase in lowered
-        for phrase in (
-            "leave me a message",
-            "message me",
-            "tell me tomorrow",
-            "tell me at",
-            "tell me when",
-            "say something",
-            "remember to say",
-            "remember to tell",
-        )
-    )
-    chinese_schedule = any(
-        phrase in lowered
-        for phrase in (
-            "明早",
-            "明天早上",
-            "明天上午",
-            "今晚",
-            "今夜",
-            "睡一晚",
-            "醒来",
-            "回来时",
-        )
-    )
-    chinese_message_leave = any(
-        phrase in lowered
-        for phrase in (
-            "留言",
-            "留句话",
-            "留一句",
-            "留句",
-            "给我留言",
-            "给我留",
-        )
-    )
-    chinese_overnight_reflect = any(
-        phrase in lowered for phrase in ("想想", "睡一晚", "琢磨", "考虑一晚")
-    )
-    chinese_tell_with_reflect = "告诉我" in lowered and chinese_overnight_reflect
-    chinese_outreach = chinese_message_leave or chinese_tell_with_reflect
-    return (english_schedule and english_outreach) or (chinese_schedule and chinese_outreach)
-
-
-def resolve_due_at(text: str, *, now: datetime | int | float | None = None, timezone_name: str = "Asia/Shanghai") -> tuple[datetime, int]:
+def _resolve_structured_due_at(
+    request: Mapping[str, Any],
+    *,
+    now: datetime | int | float | None,
+    timezone_name: str,
+) -> datetime | None:
     tz = ZoneInfo(timezone_name)
     base = _now_dt(now, tz)
-    lowered = str(text or "").casefold()
-    hour = _extract_hour(lowered)
-    minute = 0
-    wants_morning = any(
-        phrase in lowered
-        for phrase in ("morning", "明早", "明天早上", "明天上午")
-    )
-    explicit_hour = hour is not None
-    if hour is None:
-        hour = DEFAULT_MORNING_HOUR if wants_morning or "tomorrow" in lowered or "明天" in lowered else base.hour
-    if "tomorrow" in lowered or "明天" in lowered or wants_morning:
-        due = (base + timedelta(days=1)).replace(hour=hour, minute=minute, second=0, microsecond=0)
-    elif any(phrase in lowered for phrase in ("tonight", "今晚", "今夜")):
-        due = base.replace(hour=max(hour, 21), minute=0, second=0, microsecond=0)
-    elif explicit_hour:
-        due = base.replace(hour=hour, minute=minute, second=0, microsecond=0)
-    else:
-        due = base + timedelta(hours=12)
-        due = due.replace(minute=0, second=0, microsecond=0)
-    adjusted = 0
-    if due <= base:
-        due = due + timedelta(days=1)
-        adjusted = 1
-    return due, adjusted
+    due_at_text = str(request.get("due_at", "") or "").strip()
+    if due_at_text:
+        try:
+            due = datetime.fromisoformat(due_at_text)
+        except ValueError:
+            return None
+        return due.astimezone(tz) if due.tzinfo else due.replace(tzinfo=tz)
+    try:
+        seconds = int(request.get("due_after_seconds"))
+    except (TypeError, ValueError):
+        return None
+    seconds = max(30, min(seconds, 24 * 3600))
+    return base + timedelta(seconds=seconds)
 
 
 @dataclass(frozen=True)
@@ -192,13 +133,20 @@ class ScheduledIntentStore:
     ) -> dict[str, Any] | None:
         payload = event.get("payload", {}) if isinstance(event.get("payload"), Mapping) else {}
         text = str(payload.get("user_text", payload.get("text", "")) or "")
-        if not _looks_like_scheduled_outreach(text):
+        structured_request = _structured_scheduled_outreach_request(payload)
+        if structured_request is None:
             return None
         source_event_id = str(event.get("event_id", ""))
         existing = self.intent_for_source_event(source_event_id)
         if existing is not None:
             return existing
-        due, adjusted = resolve_due_at(text, now=now, timezone_name=self.timezone_name)
+        due = _resolve_structured_due_at(structured_request, now=now, timezone_name=self.timezone_name)
+        if due is None:
+            return None
+        adjusted = 0
+        ordinary_language_intent = str(
+            structured_request.get("ordinary_language_intent", "") or _ordinary_language_intent(text)
+        )[:240]
         created = _now_dt(now, ZoneInfo(self.timezone_name))
         intent_id = f"sint_{uuid.uuid4().hex}"
         row = {
@@ -213,7 +161,7 @@ class ScheduledIntentStore:
             "source_event_id": source_event_id,
             "source_turn_id": str(payload.get("turn_id", payload.get("turn_index", "")) or ""),
             "user_request_excerpt": text[:240],
-            "ordinary_language_intent": _ordinary_language_intent(text),
+            "ordinary_language_intent": ordinary_language_intent,
             "status": "pending",
             "delivery_policy": {
                 "require_m13_3_assessor": True,
@@ -414,5 +362,4 @@ __all__ = [
     "ScheduledIntentStore",
     "close_scheduled_open_item",
     "ensure_scheduled_open_item",
-    "resolve_due_at",
 ]

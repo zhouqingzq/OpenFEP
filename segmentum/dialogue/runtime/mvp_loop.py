@@ -144,6 +144,7 @@ from segmentum.dialogue.runtime.m14_1_background_continuity import (
     pop_next_pending_outreach,
     record_queued_outreach_delivery_attempt,
     record_background_tick,
+    save_queued_outreach,
     session_file_lock,
     set_background_continuity_opt_in,
     update_queued_outreach_status,
@@ -1407,11 +1408,16 @@ reply 字段只能包含会直接显示给用户的自然对话文本；禁止�
   "open_item_writes": [
     {{"id": "item_...", "content": "未完结事项", "status": "open", "next_check": "何时再看"}}
   ],
+  "scheduled_outreach_requests": [
+    {{"kind": "scheduled_outreach", "should_schedule": true, "basis": "user_explicit_request", "ordinary_language_intent": "用户明确要求稍后由我主动回访时才写入", "due_after_seconds": 120, "due_at": ""}}
+  ],
   "habit_updates": [
     {{"content": "从用户反馈或反复证据中学到的表达习惯", "evidence": "支持这个习惯的用户原话或记忆", "confidence": 0.0}}
   ],
   "memory_dynamics_note": "哪些记忆被唤起、为什么、是否强化或衰减"
 }}
+
+scheduled_outreach_requests 是给 M14.2 的结构化语义结果，不是关键词命中结果。只有当用户明确要求“由我在未来某个时间或静默间隔后主动发一条消息/回访”，才写入一条；普通提醒、当前轮追问、模糊的 later、仅仅说自己要休息、或没有要求我未来主动发起消息时，必须返回空列表。due_after_seconds / due_at 由你根据整句语义和时间语境给出；工程层不会再从用户原文用关键词猜这个意图。
 """
     return system_prompt, user_prompt
 
@@ -5766,6 +5772,8 @@ class MVPDialogueRuntime:
     def _maybe_drain_queued_outreach_locked(self, *, turn_index: int, now: int) -> dict[str, Any]:
         entry = pop_next_pending_outreach(self.store.root, now=now)
         if entry is None:
+            entry = self._relay_due_outreach_from_sibling_session_locked(now=now)
+        if entry is None:
             return {"drained": False, "reason": "empty_queue"}
         proposal = ProactiveTurnProposal(
             proposal_id=str(entry.get("proposal_id", "")),
@@ -5912,6 +5920,115 @@ class MVPDialogueRuntime:
         )
         return {"drained": False, "reason": reason}
 
+    def _relay_due_outreach_from_sibling_session_locked(self, *, now: int) -> dict[str, Any] | None:
+        shared_root = self.store.shared_root
+        if shared_root is None:
+            return None
+        sessions_dir = shared_root / "sessions"
+        if not sessions_dir.is_dir():
+            return None
+        current_root = self.store.root.resolve()
+        current_session_id = self.store.root.name
+        candidates: list[tuple[int, int, Path, dict[str, Any]]] = []
+        for queue_path in sessions_dir.glob("*/queued_outreach.jsonl"):
+            source_root = queue_path.parent
+            try:
+                if source_root.resolve() == current_root:
+                    continue
+            except OSError:
+                continue
+            for row in load_queued_outreach(source_root):
+                if str(row.get("status", "")) != "pending":
+                    continue
+                due_at = int(row.get("due_at", row.get("created_at", 0)) or 0)
+                if due_at > now:
+                    continue
+                expires_at = int(row.get("expires_at", 0) or 0)
+                if expires_at and expires_at <= now:
+                    continue
+                candidates.append(
+                    (
+                        due_at,
+                        int(row.get("created_at", 0) or 0),
+                        source_root,
+                        dict(row),
+                    )
+                )
+        if not candidates:
+            return None
+        candidates.sort(key=lambda item: (item[0], item[1], str(item[2])))
+        for _due_at, _created_at, source_root, candidate in candidates:
+            with session_file_lock(source_root):
+                rows = load_queued_outreach(source_root)
+                selected_index = -1
+                for index, row in enumerate(rows):
+                    if str(row.get("proposal_id", "")) != str(candidate.get("proposal_id", "")):
+                        continue
+                    if str(row.get("status", "")) != "pending":
+                        continue
+                    due_at = int(row.get("due_at", row.get("created_at", 0)) or 0)
+                    if due_at > now:
+                        continue
+                    selected_index = index
+                    candidate = dict(row)
+                    break
+                if selected_index < 0:
+                    continue
+                source_session_id = str(candidate.get("session_id", "") or source_root.name)
+                rows[selected_index]["status"] = "relayed"
+                rows[selected_index]["relayed_at"] = now
+                rows[selected_index]["relayed_to_session_id"] = current_session_id
+                save_queued_outreach(source_root, rows)
+                relayed = dict(candidate)
+                relayed["status"] = "pending"
+                relayed["relayed_from_session_id"] = source_session_id
+                relayed["relayed_from_session_root"] = str(source_root)
+                relayed["session_id"] = current_session_id
+                current_rows = load_queued_outreach(self.store.root)
+                existing_ids = {
+                    str(row.get("source_intent_id", "") or row.get("proposal_id", ""))
+                    for row in current_rows
+                }
+                relay_id = str(relayed.get("source_intent_id", "") or relayed.get("proposal_id", ""))
+                if relay_id in existing_ids:
+                    self.store.append_log(
+                        {
+                            "event": "m14_2_audit",
+                            "type": "OutboxRelayDuplicateSkippedEvent",
+                            "at": now,
+                            "proposal_id": str(relayed.get("proposal_id", "")),
+                            "source_intent_id": str(relayed.get("source_intent_id", "")),
+                            "from_session_id": source_session_id,
+                            "to_session_id": current_session_id,
+                            "runner_kind": "delivery_surface",
+                            "persona_id": str(relayed.get("persona_id", "default") or "default"),
+                            "session_id": current_session_id,
+                            "correlation_id": "",
+                            "engineering_proxy_label": "mvp_local_decoupled_self_loop",
+                        }
+                    )
+                    continue
+                current_rows.append(relayed)
+                save_queued_outreach(self.store.root, current_rows)
+                self.store.append_log(
+                    {
+                        "event": "m14_2_audit",
+                        "type": "OutboxEntryRelayedEvent",
+                        "at": now,
+                        "proposal_id": str(relayed.get("proposal_id", "")),
+                        "source_intent_id": str(relayed.get("source_intent_id", "")),
+                        "from_session_id": source_session_id,
+                        "to_session_id": current_session_id,
+                        "runner_kind": "delivery_surface",
+                        "persona_id": str(relayed.get("persona_id", "default") or "default"),
+                        "session_id": current_session_id,
+                        "correlation_id": "",
+                        "engineering_proxy_label": "mvp_local_decoupled_self_loop",
+                    }
+                )
+                return relayed
+        return None
+
     def _close_m14_2_delivery_links(self, entry: Mapping[str, Any], *, now: int) -> None:
         intent_id = str(entry.get("source_intent_id", "") or "")
         if not intent_id:
@@ -5922,10 +6039,18 @@ class MVPDialogueRuntime:
                 close_scheduled_open_item,
             )
 
+            intent_root_raw = str(entry.get("relayed_from_session_root", "") or "")
+            intent_root = Path(intent_root_raw) if intent_root_raw else self.store.root
+            intent_session_id = str(
+                entry.get("relayed_from_session_id")
+                or entry.get("session_id")
+                or intent_root.name
+                or self.store.root.name
+            )
             intent_store = ScheduledIntentStore(
-                self.store.root,
+                intent_root,
                 persona_id=str(entry.get("persona_id", "default") or "default"),
-                session_id=str(entry.get("session_id", self.store.root.name) or self.store.root.name),
+                session_id=intent_session_id,
             )
             intent_store.mark_status(
                 intent_id,
@@ -5933,9 +6058,15 @@ class MVPDialogueRuntime:
                 now=now,
                 proposal_id=str(entry.get("proposal_id", "")),
             )
-            state = self.store.load()
+            target_store = self.store
+            try:
+                if intent_root.resolve() != self.store.root.resolve():
+                    target_store = MVPStateStore(intent_root, shared_root=self.store.shared_root)
+            except OSError:
+                target_store = self.store
+            state = target_store.load()
             if close_scheduled_open_item(state, intent_id, status="closed"):
-                self.store.save(state)
+                target_store.save(state)
             self.store.append_log(
                 {
                     "event": "m14_2_audit",

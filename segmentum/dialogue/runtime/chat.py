@@ -912,7 +912,28 @@ class ChatInterface:
             return []
         from segmentum.dialogue.runtime.m14_1_background_continuity import load_queued_outreach
 
-        return [dict(row) for row in load_queued_outreach(self._mvp_runtime.store.root)]
+        rows: list[dict[str, object]] = []
+        seen: set[str] = set()
+        roots = [self._mvp_runtime.store.root]
+        shared_root = self._mvp_runtime.store.shared_root
+        if shared_root is not None:
+            sessions_dir = shared_root / "sessions"
+            if sessions_dir.is_dir():
+                roots.extend(path for path in sessions_dir.iterdir() if path.is_dir())
+        for root in roots:
+            try:
+                root_key = str(root.resolve())
+            except OSError:
+                root_key = str(root)
+            if root_key in seen:
+                continue
+            seen.add(root_key)
+            for row in load_queued_outreach(root):
+                item = dict(row)
+                item.setdefault("session_id", root.name)
+                item.setdefault("source_session_id", root.name)
+                rows.append(item)
+        return rows
 
     def read_m14_2_environment_events(self, *, limit: int = 20) -> list[dict[str, object]]:
         self._ensure_runtime_fields()
@@ -1346,12 +1367,26 @@ class ChatInterface:
             self._transcript.append(TranscriptUtterance(role="agent", text=followup))
         self._dashboard.snapshot(self._agent)
         self._turn_index += 1
+        scheduled_outreach_requests: list[dict[str, object]] = []
+        thinking_payload = diagnostics.get("thinking") if isinstance(diagnostics, dict) else None
+        if isinstance(thinking_payload, dict):
+            raw_requests = thinking_payload.get("scheduled_outreach_requests")
+            if isinstance(raw_requests, dict):
+                raw_iterable = [raw_requests]
+            elif isinstance(raw_requests, list):
+                raw_iterable = raw_requests
+            else:
+                raw_iterable = []
+            for raw_request in raw_iterable[:3]:
+                if isinstance(raw_request, dict):
+                    scheduled_outreach_requests.append(dict(raw_request))
         self._append_m14_2_environment_event(
             "UserMessageCommittedEvent",
             {
                 "user_text": request.user_text,
                 "speaker_name": request.speaker_name,
                 "turn_index": self._turn_index,
+                "scheduled_outreach_requests": scheduled_outreach_requests,
             },
             source="streamlit",
             correlation_id=(

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+import time
 from types import MethodType
 
 from segmentum.dialogue.runtime.chat import ChatInterface
@@ -8,7 +8,7 @@ from segmentum.dialogue.runtime.chat import ChatInterface
 
 def test_observability_summary_counts_active_intents_and_pending_outreach_only() -> None:
     chat = ChatInterface.__new__(ChatInterface)
-    now = int(datetime(2026, 5, 21, 10, 0).timestamp())
+    now = int(time.time())
 
     chat.read_self_loop_daemon_status = MethodType(lambda self: {"status": "running"}, chat)
     chat.read_idle_introspection_status = MethodType(

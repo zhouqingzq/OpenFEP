@@ -161,6 +161,14 @@ self-thought producers) for new Hu Tao / MVP chat behavior.
   overnight self-continuity. Explicit later-message requests must become
   durable scheduled intents plus outbox entries, never just natural-language
   follow-up notes.
+- Semantic decisions must not be implemented as keyword/regex cue lists in the
+  engineering layer. When a feature needs semantic interpretation (for example:
+  whether the user asked for future proactive outreach, reminder-like behavior,
+  intent type, affective state, or relationship meaning), ask the active LLM
+  request/prompt to return bounded structured fields. Engineering code may only
+  validate those fields, clamp mechanical values such as `due_after_seconds` or
+  ISO `due_at`, persist state, and audit the result. Raw user text may be stored
+  as evidence/excerpt, but must not be parsed by ad hoc semantic keyword cues.
 - M13.6 memory-EFE guidance is an MVP-local engineering proxy. Silence,
   repetition, or boredom alone must not trigger outreach; outreach requires a
   traceable memory-backed expectation/open item, bounded EFE comparison, M13.6

@@ -1100,6 +1100,36 @@ def append_assistant_response_messages(
             messages.append({"role": "assistant", "text": text})
 
 
+def _install_m14_delivery_autorefresh(chat_iface: ChatInterface) -> None:
+    if (
+        not chat_iface.has_agent()
+        or not getattr(chat_iface, "mvp_runtime_active", False)
+        or not bool(st.session_state.get("m13_initiative_opt_in", False))
+        or bool(st.session_state.get("m13_ui_turn_in_progress", False))
+    ):
+        return
+    try:
+        m14 = chat_iface.read_m14_2_observability_summary()
+    except Exception:
+        return
+    pending_user = int(m14.get("user_message_pending", 0) or 0)
+    active = int(m14.get("scheduled_intents_active", 0) or 0)
+    queued = int(m14.get("queued_outreach", 0) or 0)
+    if pending_user <= 0 and active <= 0 and queued <= 0:
+        return
+    components.html(
+        """
+        <script>
+        window.setTimeout(function () {
+          window.parent.location.reload();
+        }, 5000);
+        </script>
+        """,
+        height=0,
+        width=0,
+    )
+
+
 def render_sidebar() -> None:
     st.sidebar.header("Persona Management")
 
@@ -1678,6 +1708,7 @@ def render_chat() -> None:
             chat_iface.record_background_streamlit_ping()
         except Exception:  # pragma: no cover
             pass
+    _install_m14_delivery_autorefresh(chat_iface)
     if (
         chat_iface.has_agent()
         and getattr(chat_iface, "mvp_runtime_active", False)

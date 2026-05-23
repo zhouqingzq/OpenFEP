@@ -19,6 +19,21 @@ from segmentum.dialogue.runtime.m14_2_self_loop import M142SelfLoopDaemon
 from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore
 
 
+def _structured_payload(text: str = "sleep on it and tell me tomorrow morning") -> dict[str, object]:
+    return {
+        "user_text": text,
+        "scheduled_outreach_requests": [
+            {
+                "kind": "scheduled_outreach",
+                "should_schedule": True,
+                "basis": "user_explicit_request",
+                "ordinary_language_intent": "Send the user-requested scheduled follow-up.",
+                "due_at": "2026-05-20T09:00:00+08:00",
+            }
+        ],
+    }
+
+
 def _full_opted_state() -> dict[str, object]:
     state: dict[str, object] = {
         "open_items": [],
@@ -131,7 +146,7 @@ def test_user_message_event_creates_scheduled_intent_and_open_item(tmp_path: Pat
     event_store = EnvironmentEventStore(tmp_path, persona_id="p", session_id="s", clock=lambda: 1_800_000_000)
     event_store.append_event(
         "UserMessageCommittedEvent",
-        {"user_text": "think about this tonight and leave me a message tomorrow morning", "turn_index": 3},
+        {**_structured_payload("think about this tonight and leave me a message tomorrow morning"), "turn_index": 3},
         source="test",
         correlation_id="turn-scheduled",
     )
@@ -149,7 +164,7 @@ def test_due_scheduled_intent_prepares_one_outbox_entry(tmp_path: Path) -> None:
     intent_store = ScheduledIntentStore(tmp_path, persona_id="p", session_id="s")
     event = {
         "event_id": "env_due",
-        "payload": {"user_text": "sleep on it and tell me tomorrow morning", "turn_index": 3},
+        "payload": {**_structured_payload(), "turn_index": 3},
     }
     intent = intent_store.create_from_user_message_event(
         event,
@@ -172,7 +187,7 @@ def test_outbox_drain_uses_m13_3_and_closes_intent_and_open_item(tmp_path: Path)
     daemon = M142SelfLoopDaemon(runtime, persona_id="p", session_id="s")
     intent_store = ScheduledIntentStore(tmp_path, persona_id="p", session_id="s")
     intent = intent_store.create_from_user_message_event(
-        {"event_id": "env_delivery", "payload": {"user_text": "sleep on it and tell me tomorrow morning"}},
+        {"event_id": "env_delivery", "payload": _structured_payload()},
         now=datetime(2026, 5, 19, 20, 0, tzinfo=ZoneInfo("Asia/Shanghai")),
     )
     assert intent is not None
@@ -192,7 +207,7 @@ def test_runner_never_writes_visible_assistant_text_directly(tmp_path: Path) -> 
     daemon = M142SelfLoopDaemon(runtime, persona_id="p", session_id="s")
     intent_store = ScheduledIntentStore(tmp_path, persona_id="p", session_id="s")
     intent = intent_store.create_from_user_message_event(
-        {"event_id": "env_direct", "payload": {"user_text": "sleep on it and tell me tomorrow morning"}},
+        {"event_id": "env_direct", "payload": _structured_payload()},
         now=datetime(2026, 5, 19, 20, 0, tzinfo=ZoneInfo("Asia/Shanghai")),
     )
     assert intent is not None
@@ -210,7 +225,7 @@ def test_due_preparation_defers_idle_outreach_instead_of_direct_delivery(tmp_pat
     daemon = M142SelfLoopDaemon(runtime, persona_id="p", session_id="s")
     intent_store = ScheduledIntentStore(tmp_path, persona_id="p", session_id="s")
     intent = intent_store.create_from_user_message_event(
-        {"event_id": "env_direct_branch", "payload": {"user_text": "sleep on it and tell me tomorrow morning"}},
+        {"event_id": "env_direct_branch", "payload": _structured_payload()},
         now=datetime(2026, 5, 19, 20, 0, tzinfo=ZoneInfo("Asia/Shanghai")),
     )
     assert intent is not None
