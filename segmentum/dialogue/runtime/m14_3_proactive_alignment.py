@@ -74,6 +74,48 @@ def _content_summary(row: Mapping[str, Any]) -> str:
     return ""
 
 
+def _generic_open_item_summary(text: str) -> bool:
+    normalized = " ".join(str(text or "").strip().casefold().split())
+    if not normalized:
+        return True
+    generic_markers = (
+        "用户未明确说明来意",
+        "未明确说明来意",
+        "unclear user intent",
+        "user intent unclear",
+        "ask what the user wants",
+        "clarify what the user wants",
+    )
+    return any(marker in normalized for marker in generic_markers)
+
+
+def _open_item_external_refs(
+    *,
+    refs: list[str],
+    trace_id: str,
+    selected_row: Mapping[str, Any] | None,
+) -> list[str]:
+    self_ids = {
+        _clean_id(trace_id),
+        _clean_id(selected_row.get("id") if selected_row else ""),
+        _clean_id(selected_row.get("expectation_id") if selected_row else ""),
+    }
+    return [ref for ref in refs if _clean_id(ref) and _clean_id(ref) not in self_ids]
+
+
+def _self_only_generic_open_item(
+    *,
+    source_kind: str,
+    topic: str,
+    refs: list[str],
+    trace_id: str,
+    selected_row: Mapping[str, Any] | None,
+) -> bool:
+    if source_kind != "open_item":
+        return False
+    return not _open_item_external_refs(refs=refs, trace_id=trace_id, selected_row=selected_row) or _generic_open_item_summary(topic)
+
+
 def _evidence_refs(row: Mapping[str, Any]) -> list[str]:
     refs = _string_list(row.get("evidence_refs"), limit=8)
     refs.extend(_string_list(row.get("bound_memory_ids"), limit=8))
@@ -145,39 +187,84 @@ def build_traceable_proactive_intent(expectation: Mapping[str, Any]) -> str:
     return f"Follow up on traceable expectation {trace_id}" if trace_id else ""
 
 
-def _target_from_memory_efe(memory_efe_evaluation: Any | None, m13_state: Mapping[str, Any]) -> ProactiveTarget | None:
+def _memory_efe_fields(
+    memory_efe_evaluation: Any | None,
+    m13_state: Mapping[str, Any],
+) -> tuple[bool, str, list[str], list[str], list[Any]]:
     if memory_efe_evaluation is None:
         memory_efe = normalize_memory_efe_state(normalize_m13_drive_state(m13_state).get("memory_efe"))
-        should = bool(memory_efe.get("should_outreach"))
-        trace_id = _clean_id(memory_efe.get("traceable_expectation_id"))
-        refs = _string_list(memory_efe.get("evidence_refs"), limit=8)
-        reason_codes = _string_list(memory_efe.get("reason_codes"), limit=8)
-        intent = ""
-        eligible = memory_efe.get("eligible_for_efe", []) or []
-    else:
-        should = bool(getattr(memory_efe_evaluation, "should_outreach", False))
-        trace_id = _clean_id(getattr(memory_efe_evaluation, "traceable_expectation_id", ""))
-        refs = _string_list(getattr(memory_efe_evaluation, "evidence_refs", []), limit=8)
-        reason_codes = _string_list(getattr(memory_efe_evaluation, "reason_codes", []), limit=8)
-        eligible = [getattr(row, "to_dict", lambda: row)() for row in getattr(memory_efe_evaluation, "eligible_for_efe", []) or []]
-        intent = ""
-    if not should or not refs:
-        return None
-    if not trace_id:
+        return (
+            bool(memory_efe.get("should_outreach")),
+            _clean_id(memory_efe.get("traceable_expectation_id")),
+            _string_list(memory_efe.get("evidence_refs"), limit=8),
+            _string_list(memory_efe.get("reason_codes"), limit=8),
+            list(memory_efe.get("eligible_for_efe", []) or []),
+        )
+    return (
+        bool(getattr(memory_efe_evaluation, "should_outreach", False)),
+        _clean_id(getattr(memory_efe_evaluation, "traceable_expectation_id", "")),
+        _string_list(getattr(memory_efe_evaluation, "evidence_refs", []), limit=8),
+        _string_list(getattr(memory_efe_evaluation, "reason_codes", []), limit=8),
+        [getattr(row, "to_dict", lambda: row)() for row in getattr(memory_efe_evaluation, "eligible_for_efe", []) or []],
+    )
+
+
+def _memory_efe_selected_row(
+    eligible: list[Any],
+    trace_id: str,
+) -> tuple[str, Mapping[str, Any] | None]:
+    selected_trace_id = trace_id
+    if not selected_trace_id:
         for row in eligible:
             if isinstance(row, Mapping):
-                trace_id = _clean_id(row.get("expectation_id") or row.get("id"))
-                if trace_id:
+                selected_trace_id = _clean_id(row.get("expectation_id") or row.get("id"))
+                if selected_trace_id:
                     break
     for row in eligible:
-        if trace_id and isinstance(row, Mapping) and _clean_id(row.get("expectation_id") or row.get("id")) == trace_id:
-            intent = build_traceable_proactive_intent(row)
-            topic = _content_summary(row) or trace_id
-            source_kind = str(row.get("source_kind", "pending_expectation") or "pending_expectation")
-            break
+        if selected_trace_id and isinstance(row, Mapping) and _clean_id(row.get("expectation_id") or row.get("id")) == selected_trace_id:
+            return selected_trace_id, row
+    return selected_trace_id, None
+
+
+def _memory_efe_rejected_generic_open_item(memory_efe_evaluation: Any | None, m13_state: Mapping[str, Any]) -> bool:
+    should, trace_id, refs, _, eligible = _memory_efe_fields(memory_efe_evaluation, m13_state)
+    if not should or not refs:
+        return False
+    trace_id, selected_row = _memory_efe_selected_row(eligible, trace_id)
+    if selected_row is None:
+        return False
+    source_kind = str(selected_row.get("source_kind", "pending_expectation") or "pending_expectation")
+    topic = _content_summary(selected_row) or trace_id
+    return _self_only_generic_open_item(
+        source_kind=source_kind,
+        topic=topic,
+        refs=refs,
+        trace_id=trace_id,
+        selected_row=selected_row,
+    )
+
+
+def _target_from_memory_efe(memory_efe_evaluation: Any | None, m13_state: Mapping[str, Any]) -> ProactiveTarget | None:
+    should, trace_id, refs, reason_codes, eligible = _memory_efe_fields(memory_efe_evaluation, m13_state)
+    intent = ""
+    if not should or not refs:
+        return None
+    trace_id, selected_row = _memory_efe_selected_row(eligible, trace_id)
+    if selected_row is not None:
+        intent = build_traceable_proactive_intent(selected_row)
+        topic = _content_summary(selected_row) or trace_id
+        source_kind = str(selected_row.get("source_kind", "pending_expectation") or "pending_expectation")
     else:
         topic = trace_id or refs[0]
         source_kind = "memory_efe_bound_memory"
+    if _self_only_generic_open_item(
+        source_kind=source_kind,
+        topic=topic,
+        refs=refs,
+        trace_id=trace_id,
+        selected_row=selected_row,
+    ):
+        return None
     return ProactiveTarget(
         trigger="memory_efe_outreach",
         traceable_expectation_id=trace_id,
@@ -397,13 +484,15 @@ def select_proactive_target(
     mem = _target_from_memory_efe(memory_efe_evaluation, m13_state)
     if mem is not None:
         return mem
+    rejected_generic_open_item = _memory_efe_rejected_generic_open_item(memory_efe_evaluation, m13_state)
     if memory_efe_evaluation is None:
         memory_efe = normalize_memory_efe_state(normalize_m13_drive_state(m13_state).get("memory_efe"))
-        if memory_efe.get("traceable_expectation_id") or memory_efe.get("eligible_for_efe"):
+        if not rejected_generic_open_item and (memory_efe.get("traceable_expectation_id") or memory_efe.get("eligible_for_efe")):
             return None
     else:
-        if getattr(memory_efe_evaluation, "traceable_expectation_id", "") or getattr(
-            memory_efe_evaluation, "eligible_for_efe", []
+        if not rejected_generic_open_item and (
+            getattr(memory_efe_evaluation, "traceable_expectation_id", "")
+            or getattr(memory_efe_evaluation, "eligible_for_efe", [])
         ):
             return None
     correction = _target_from_correction(m13_state)

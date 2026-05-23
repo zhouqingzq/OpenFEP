@@ -74,7 +74,7 @@ def _read_query_did() -> str:
 def ensure_dialogue_client_id() -> None:
     """Assign a stable per-tab ``did`` query param so parallel browsers do not share MVP files."""
     s = _read_query_did()
-    if len(s) >= 8:
+    if s:
         old = st.session_state.get("dialogue_client_id")
         st.session_state.dialogue_client_id = s
         if old is not None and old != s:
@@ -1101,6 +1101,9 @@ def append_assistant_response_messages(
 
 
 def _install_m14_delivery_autorefresh(chat_iface: ChatInterface) -> None:
+    # A hard browser reload drops Streamlit's in-memory chat state. Keep the
+    # helper disabled until this can be replaced with an in-session rerun tick.
+    return
     if (
         not chat_iface.has_agent()
         or not getattr(chat_iface, "mvp_runtime_active", False)

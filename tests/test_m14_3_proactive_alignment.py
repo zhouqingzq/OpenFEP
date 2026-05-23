@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 from segmentum.dialogue.runtime.m13_drive import default_m13_drive_state, normalize_m13_drive_state
 from segmentum.dialogue.runtime.m13_idle import set_idle_introspection_user_opt_in
@@ -262,6 +263,80 @@ def test_memory_efe_outreach_idle() -> None:
     assert target.trigger == "memory_efe_outreach"
     assert target.source_kind != "boredom_exploration"
     assert "mem_bound" in target.evidence_refs
+
+
+def test_generic_self_only_open_item_does_not_become_memory_efe_target() -> None:
+    m13 = _opted_m13()
+    evaluation = SimpleNamespace(
+        should_outreach=True,
+        traceable_expectation_id="item_001",
+        evidence_refs=["item_001"],
+        reason_codes=["memory_backed_social_prediction_error"],
+        eligible_for_efe=[
+            {
+                "id": "item_001",
+                "expectation_id": "item_001",
+                "source_kind": "open_item",
+                "content_summary": "unclear user intent",
+                "evidence_refs": ["item_001"],
+            }
+        ],
+    )
+    target = select_proactive_target(
+        {"open_items": [], "pending_expectations": []},
+        m13,
+        memory_efe_evaluation=evaluation,
+        structural_signals={},
+    )
+    assert target is None
+
+
+def test_generic_open_item_does_not_shadow_relationship_pull() -> None:
+    m13 = _opted_m13()
+    normalized = normalize_m13_drive_state(m13)
+    normalized["traction_by_action"] = {"empathize|zq": 0.72}
+    normalized["relation_path_precision"] = {"zq": 0.58}
+    reward = normalized["affective_reward_proxy"]
+    reward["path_feels_stale_proxy"] = True
+    normalized["affective_reward_proxy"] = reward
+    evaluation = SimpleNamespace(
+        should_outreach=True,
+        traceable_expectation_id="item_001",
+        evidence_refs=["item_001"],
+        reason_codes=["memory_backed_social_prediction_error"],
+        eligible_for_efe=[
+            {
+                "id": "item_001",
+                "expectation_id": "item_001",
+                "source_kind": "open_item",
+                "content_summary": "unclear user intent",
+                "evidence_refs": ["item_001"],
+            }
+        ],
+    )
+    state = {
+        "open_items": [],
+        "pending_expectations": [],
+        "relationship_value_memories": {
+            "by_user": {
+                "zq": [
+                    {
+                        "id": "rvm_zq_1",
+                        "summary": "zq values plain direct warmth when returning to a thread.",
+                        "prediction_constraint": "A concise warm continuation lowers relationship friction.",
+                        "priority": "high",
+                        "confidence": 0.86,
+                    }
+                ]
+            }
+        },
+        "temporal_state": {"last_share_trace": {"user_id": "zq"}},
+        "m13_drive_state": normalized,
+    }
+    target = select_proactive_target(state, normalized, memory_efe_evaluation=evaluation, structural_signals={})
+    assert target is not None
+    assert target.trigger == "relationship_reconnect_pull"
+    assert target.source_kind != "open_item"
 
 
 def test_silence_alone_does_not_raise_any_drive_scalar(tmp_path: Path) -> None:

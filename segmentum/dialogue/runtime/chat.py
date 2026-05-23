@@ -1019,6 +1019,8 @@ class ChatInterface:
                         "evidence_refs": row.get("trigger_evidence_refs", []),
                     }
                 if str(row.get("type", "")) == "M13ProactiveSuppressionEvent":
+                    if str(row.get("reason_stage", "") or "") == "pre_proposal":
+                        last_proactive_target = {}
                     last_proactive_suppression = {
                         "reason": str(row.get("reason", "") or ""),
                         "reason_code": str(row.get("reason_code", row.get("reason", "")) or ""),
