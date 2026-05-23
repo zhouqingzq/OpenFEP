@@ -7,7 +7,6 @@ is traceable enough to become a proactive proposal.
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass, field
 from typing import Any, Mapping
 
@@ -18,31 +17,6 @@ from segmentum.dialogue.runtime.m13_reward import normalize_affective_reward_pro
 
 VAGUE_NEXT_CHECKS = frozenset({"", "later", "regular", "someday", "soon", "next", "follow_up", "check_later"})
 TRACEABLE_NEXT_CHECKS = frozenset({"next_user_turn", "next_turn", "after_next_user_message"})
-TRACEABLE_DELIVERY_TRIGGERS = frozenset(
-    {
-        "memory_efe_outreach",
-        "scheduled_outreach",
-        "correction_followup",
-        "relationship_reconnect_pull",
-        "affective_path_stale_proactive",
-    }
-)
-GENERIC_INTENT_TOKENS = frozenset(
-    {
-        "follow",
-        "up",
-        "unresolved",
-        "expectation",
-        "traceable",
-        "pending",
-        "open",
-        "item",
-        "the",
-        "on",
-        "a",
-        "an",
-    }
-)
 
 
 @dataclass(frozen=True)
@@ -140,43 +114,6 @@ def is_traceable_open_item(row: Mapping[str, Any]) -> bool:
     if next_check not in TRACEABLE_NEXT_CHECKS:
         return False
     return bool(_evidence_refs(row) and _content_summary(row))
-
-
-def traceable_proactive_reply_grounded(
-    reply: str,
-    *,
-    ordinary_language_intent: str,
-    trigger: str,
-) -> bool:
-    """Deterministic post-generation check for traceable outreach triggers."""
-    if trigger not in TRACEABLE_DELIVERY_TRIGGERS:
-        return True
-    text = str(reply or "").strip()
-    if not text:
-        return False
-    if trigger == "scheduled_outreach":
-        return len(text) >= 8
-    intent = str(ordinary_language_intent or "").strip()
-    prefix = "Follow up on the unresolved expectation: "
-    if intent.startswith(prefix):
-        summary = intent[len(prefix) :].strip()
-        if len(summary) >= 6:
-            tokens = [
-                token
-                for token in re.findall(r"[\w一-龥]{2,}", summary)
-                if token.casefold() not in GENERIC_INTENT_TOKENS
-            ]
-            if not tokens:
-                return len(text) >= 8
-            return any(token.casefold() in text.casefold() for token in tokens if len(token) >= 2)
-    intent_tokens = [
-        token
-        for token in re.findall(r"[\w一-龥]{2,}", intent)
-        if len(token) >= 2 and token.casefold() not in GENERIC_INTENT_TOKENS
-    ][:8]
-    if intent_tokens:
-        return any(token.casefold() in text.casefold() for token in intent_tokens)
-    return len(text) >= 8
 
 
 def build_traceable_proactive_intent(expectation: Mapping[str, Any]) -> str:

@@ -22,10 +22,16 @@ from segmentum.dialogue.runtime.m13_drive import (
     normalize_m13_drive_state,
 )
 from segmentum.dialogue.runtime.m13_reward import normalize_affective_reward_proxy_state
-from segmentum.dialogue.runtime.m14_3_proactive_alignment import (
-    ProactiveTarget,
-    TRACEABLE_DELIVERY_TRIGGERS,
-    select_proactive_target,
+from segmentum.dialogue.runtime.m14_3_proactive_alignment import ProactiveTarget, select_proactive_target
+
+TRACEABLE_DELIVERY_TRIGGERS = frozenset(
+    {
+        "memory_efe_outreach",
+        "scheduled_outreach",
+        "correction_followup",
+        "relationship_reconnect_pull",
+        "affective_path_stale_proactive",
+    }
 )
 
 PROACTIVE_SOURCE = "m13_initiative_policy"

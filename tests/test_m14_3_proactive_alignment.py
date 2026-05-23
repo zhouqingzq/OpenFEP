@@ -25,7 +25,6 @@ from segmentum.dialogue.runtime.m14_3_proactive_alignment import (
     ProactiveTarget,
     build_traceable_proactive_intent,
     select_proactive_target,
-    traceable_proactive_reply_grounded,
 )
 from segmentum.dialogue.runtime.m14_idle_reflector import build_structural_idle_plan
 from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore
@@ -92,43 +91,6 @@ def test_opponent_strength_pre_block_emits_reason_code() -> None:
         llm=None,
     )
     assert check.suppression_reason_code == "opponent_strength_pre_block"
-
-
-def test_traceable_reply_grounding_rejects_generic_sunset() -> None:
-    intent = build_traceable_proactive_intent(
-        {"id": "item_001", "content": "Who is 老爹 in the prior thread?"}
-    )
-    assert traceable_proactive_reply_grounded(
-        "晚霞的颜色真好看～",
-        ordinary_language_intent=intent,
-        trigger="memory_efe_outreach",
-    ) is False
-    assert traceable_proactive_reply_grounded(
-        "你上次提到的老爹，我还不太确定是指谁。",
-        ordinary_language_intent=intent,
-        trigger="memory_efe_outreach",
-    ) is True
-    assert traceable_proactive_reply_grounded(
-        "I was lonely and needed you.",
-        ordinary_language_intent="Follow up on the unresolved expectation: Li An'an thread follow-up",
-        trigger="memory_efe_outreach",
-    ) is False
-
-
-def test_scheduled_outreach_grounding_accepts_short_cross_language_delivery() -> None:
-    assert traceable_proactive_reply_grounded(
-        "短跟进：这是昨晚请求的简短留言。",
-        ordinary_language_intent="Prepare one short approved follow-up for the user's scheduled request.",
-        trigger="scheduled_outreach",
-    ) is True
-
-
-def test_memory_efe_grounding_filters_generic_follow_up_tokens() -> None:
-    assert traceable_proactive_reply_grounded(
-        "我需要想一下这个。",
-        ordinary_language_intent="Follow up on the unresolved expectation: follow up",
-        trigger="memory_efe_outreach",
-    ) is True
 
 
 def test_boredom_target_blocked_when_memory_efe_eligible() -> None:

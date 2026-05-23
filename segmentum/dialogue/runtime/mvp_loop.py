@@ -99,10 +99,7 @@ from segmentum.dialogue.runtime.m13_initiative import (
     set_initiative_proactive_policy_profile,
     set_initiative_user_opt_in,
 )
-from segmentum.dialogue.runtime.m14_3_proactive_alignment import (
-    select_proactive_target,
-    traceable_proactive_reply_grounded,
-)
+from segmentum.dialogue.runtime.m14_3_proactive_alignment import select_proactive_target
 from segmentum.dialogue.runtime.m13_memory_efe import (
     apply_memory_efe_state,
     evaluate_memory_efe,
@@ -5361,11 +5358,6 @@ class MVPDialogueRuntime:
         reply = str(result.reply or "").strip()
         followup_replies = list(getattr(result, "followup_replies", []) or [])
         delivery_assessment: dict[str, Any] = {}
-        grounded = traceable_proactive_reply_grounded(
-            reply,
-            ordinary_language_intent=proposal.ordinary_language_intent,
-            trigger=proposal.trigger,
-        )
         if reply and self.llm is not None:
             delivery_assessment = assess_proactive_delivery_semantics(
                 self.llm,
@@ -5388,9 +5380,8 @@ class MVPDialogueRuntime:
             delivery_ok = bool(delivery_assessment.get("allow_delivery")) and _bounded_float(
                 delivery_assessment.get("confidence")
             ) >= _bounded_float(initiative.get("delivery_assessor_min_confidence"), default=0.5)
-            delivery_ok = delivery_ok and grounded
         else:
-            delivery_ok = bool(reply) and grounded
+            delivery_ok = bool(reply)
         if not delivery_ok:
             self.store.save(state_snapshot)
             m13_state = merge_initiative_into_m13_state(state_snapshot.get("m13_drive_state"))
@@ -5403,8 +5394,6 @@ class MVPDialogueRuntime:
                 initiative.get("delivery_assessor_min_confidence"), default=0.5
             ):
                 reason_code = "delivery_assessor_low_confidence"
-            elif not grounded:
-                reason_code = "delivery_ungrounded_reply"
             else:
                 reason_code = "delivery_assessor_reject"
             initiative["last_suppression_reason"] = reason_code
