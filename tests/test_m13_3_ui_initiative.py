@@ -343,6 +343,23 @@ def test_build_proactive_thinking_user_text_includes_intent() -> None:
     assert "非用户输入" in block
 
 
+def test_proactive_generation_prompt_carries_traceable_delivery_anchor() -> None:
+    block = build_proactive_thinking_user_text(
+        surrogate=PROACTIVE_SURROGATE_USER_TEXT,
+        trigger="memory_efe_outreach",
+        proposed_topic="用户会回应是否理解了这个转机",
+        ordinary_language_intent="Follow up on the unresolved expectation: 用户会回应是否理解了这个转机",
+        evidence_refs=["stm_turn_1", "exp_1"],
+        source_kind="memory_dynamics_expectation",
+    )
+    assert "trigger: memory_efe_outreach" in block
+    assert "source_kind: memory_dynamics_expectation" in block
+    assert "evidence_refs: stm_turn_1, exp_1" in block
+    assert "delivery_anchor:" in block
+    assert "必须直接接住 topic/intent" in block
+    assert "不要只寒暄" in block
+
+
 def test_turn_cooldown_suppresses_repeated_proactive_turns() -> None:
     state = _opted_in_state(
         open_items=[{"id": "oi_1", "status": "open", "title": "t", "next_check": "n"}],
@@ -452,6 +469,8 @@ def test_proactive_generation_uses_safety_and_reply_validation(tmp_path: Path) -
     )
     assert PROACTIVE_SURROGATE_USER_TEXT in str(bus_msg.get("surrogate_context", ""))
     assert "Follow up on the open item" in str(bus_msg.get("ordinary_language_intent", ""))
+    assert bus_msg.get("source_kind") == "legacy_open_item"
+    assert "oi" in bus_msg.get("trigger_evidence_refs", [])
 
 
 def test_blocked_proactive_turn_rolls_back_state_and_skips_delivery_log(tmp_path: Path) -> None:

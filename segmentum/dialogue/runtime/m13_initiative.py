@@ -496,18 +496,26 @@ def build_proactive_thinking_user_text(
     ordinary_language_intent: str,
     proposed_topic: str,
     trigger: str,
+    evidence_refs: list[str] | None = None,
+    source_kind: str = "",
 ) -> str:
     """Prompt-facing user block for proactive generation (not logged as user speech)."""
     intent = str(ordinary_language_intent or "").strip()[:240]
     topic = str(proposed_topic or "").strip()[:120]
     trig = str(trigger or "manual_continue").strip()[:64]
     guard = str(surrogate or PROACTIVE_SURROGATE_USER_TEXT).strip()[:240]
+    refs = ", ".join(_string_list(evidence_refs or [], limit=4))
+    source = str(source_kind or "").strip()[:80]
     return (
         "[系统主动续写轮 — 非用户输入]\n"
         f"engineering_guard: {guard}\n"
         f"trigger: {trig}\n"
+        f"source_kind: {source or 'unspecified'}\n"
+        f"evidence_refs: {refs or 'none'}\n"
         f"topic: {topic or 'current_thread'}\n"
         f"intent: {intent or 'Offer one short, useful proactive message.'}\n"
+        "delivery_anchor: 展示文案必须直接接住 topic/intent 的具体线程；"
+        "至少触及其中一个非泛化关键词；不要只寒暄、改天再讲、在吗，或离开该线程。\n"
         "要求: 一条简短有用消息；不要求回复；不声称主观需求；可引用 open items 或已讨论上下文。"
     )
 

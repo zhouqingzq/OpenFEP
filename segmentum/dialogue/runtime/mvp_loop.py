@@ -4200,6 +4200,12 @@ class MVPDialogueRuntime:
                 ordinary_language_intent=str(proactive_context.get("ordinary_language_intent", "") or ""),
                 proposed_topic=str(proactive_context.get("proposed_topic", "") or ""),
                 trigger=str(proactive_context.get("trigger", "") or ""),
+                evidence_refs=[
+                    str(ref)
+                    for ref in proactive_context.get("trigger_evidence_refs", []) or []
+                    if str(ref).strip()
+                ],
+                source_kind=str(proactive_context.get("source_kind", "") or ""),
             )
         sharing_regret_feedback: dict[str, Any] = {}
         if not proactive_turn:
@@ -4227,6 +4233,12 @@ class MVPDialogueRuntime:
                     "ordinary_language_intent": str(
                         proactive_context.get("ordinary_language_intent", "") or ""
                     )[:240],
+                    "trigger_evidence_refs": [
+                        str(ref)
+                        for ref in proactive_context.get("trigger_evidence_refs", []) or []
+                        if str(ref).strip()
+                    ][:8],
+                    "source_kind": str(proactive_context.get("source_kind", "") or "")[:80],
                     "surrogate_context": str(proactive_surrogate_text or "")[:240],
                     "at": now,
                 }
