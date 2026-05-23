@@ -58,6 +58,7 @@ from segmentum.reciprocal_role import (
 from segmentum.dialogue.runtime.m13_boredom import (
     M13BoredomEvaluator,
     apply_post_turn_boredom_state,
+    boredom_band,
     prompt_safe_control_guidance_for_thinking,
     prompt_safe_m13_boredom_diagnostics,
 )
@@ -5101,6 +5102,134 @@ class MVPDialogueRuntime:
             sig["queued_outreach"] = []
         return sig
 
+    def _idle_drive_band_summary(
+        self,
+        m13_state: Mapping[str, Any],
+        *,
+        state: Mapping[str, Any],
+    ) -> dict[str, Any]:
+        normalized = normalize_m13_drive_state(m13_state)
+        boredom = _mapping(normalized.get("boredom"))
+        reward = normalize_affective_reward_proxy_state(normalized.get("affective_reward_proxy"))
+        temporal = _mapping(state.get("temporal_state"))
+        share_trace = _mapping(temporal.get("last_share_trace"))
+        user_id = str(share_trace.get("user_id", "") or "").strip()
+        rel_map = _mapping(normalized.get("relation_path_precision"))
+        rel_precision = _bounded_float(rel_map.get(user_id), default=0.0) if user_id else 0.0
+        traction = _mapping(normalized.get("traction_by_action"))
+        best_action = ""
+        best_pull = 0.0
+        suffix = f"|{user_id}" if user_id else ""
+        for key, value in traction.items():
+            key_text = str(key)
+            if suffix and not key_text.endswith(suffix):
+                continue
+            action = key_text.split("|", 1)[0].strip()
+            pull = _bounded_float(value, default=0.0)
+            if action and pull > best_pull:
+                best_action = action
+                best_pull = pull
+
+        def band(value: float) -> str:
+            if value >= 0.67:
+                return "high"
+            if value >= 0.35:
+                return "medium"
+            return "low"
+
+        boredom_level = _bounded_float(boredom.get("boredom_level"), default=0.0)
+        reward_net = _bounded_float(reward.get("last_net_reward_proxy"), default=0.0)
+        return {
+            "boredom_band": boredom_band(boredom_level),
+            "behavioral_pull_band": band(best_pull),
+            "top_behavioral_pull_action": best_action,
+            "affective_reward_band": band(reward_net),
+            "path_feels_stale_proxy": bool(reward.get("path_feels_stale_proxy")),
+            "relation_path_precision_band": band(rel_precision),
+        }
+
+    def _refresh_idle_proactive_drive_context(
+        self,
+        state: dict[str, Any],
+        *,
+        now: int,
+        turn_index: int,
+        structural_signals: Mapping[str, Any],
+    ) -> tuple[dict[str, Any], dict[str, Any], Any, list[dict[str, Any]]]:
+        """Refresh traceable idle signals before M13.3 target selection.
+
+        The elapsed silence opens the idle phase only. It does not add to any
+        drive scalar; this refresh reads persisted M13 state, performs bounded
+        recall, evaluates memory EFE for the idle phase, and records compact
+        drive bands for observability.
+        """
+        m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+        sig_dict = dict(structural_signals)
+        idle_context = build_idle_context(
+            state,
+            m13_state=m13_state,
+            structural_signals=sig_dict,
+            turn_index=turn_index,
+            now=now,
+        )
+        keywords = idle_retrieval_keywords(idle_context)
+        retrieved = retrieve_memories(state, keywords, limit=8)
+        expectation_set = normalize_expectations_for_efe(
+            state,
+            now=now,
+            phase="idle",
+            structural_signals=sig_dict,
+        )
+        bound_ids: list[str] = []
+        for expectation in expectation_set.eligible_for_efe:
+            bound_ids.extend(list(expectation.bound_memory_ids[:8]))
+            bound_ids.extend(list(expectation.evidence_refs[:8]))
+        if bound_ids:
+            by_id = retrieve_memories_by_ids(state, bound_ids, limit=8)
+            seen = {str(item.get("id", "")) for item in retrieved if item.get("id")}
+            for item in by_id:
+                item_id = str(item.get("id", ""))
+                if item_id and item_id not in seen:
+                    retrieved.append(item)
+                    seen.add(item_id)
+                if len(retrieved) >= 8:
+                    break
+        retrieved_ids = sorted({str(item.get("id", "")) for item in retrieved if item.get("id")})
+        memory_efe_evaluation = evaluate_memory_efe(
+            state,
+            phase="idle",
+            now=now,
+            turn_index=turn_index,
+            user_active=False,
+            structural_signals=sig_dict,
+            retrieved_memories=retrieved,
+        )
+        m13_state, memory_efe_events = apply_memory_efe_state(m13_state, memory_efe_evaluation)
+        state["m13_drive_state"] = m13_state
+        band_summary = self._idle_drive_band_summary(m13_state, state=state)
+        sig_dict.update(
+            {
+                "memory_efe_should_outreach": bool(memory_efe_evaluation.should_outreach),
+                "memory_efe_traceable_expectation_id": str(memory_efe_evaluation.traceable_expectation_id or ""),
+                "idle_drive_band_summary": band_summary,
+            }
+        )
+        events = [
+            {
+                "type": "IdleProactiveDriveRefreshEvent",
+                "turn_index": turn_index,
+                "at": now,
+                "order": "recall_then_memory_efe_then_m13_drive_bands_before_target_selection",
+                "retrieved_ids": retrieved_ids[:12],
+                "bounded_retrieve_ids": list(dict.fromkeys(bound_ids))[:12],
+                "drive_band_summary": band_summary,
+                "engineering_proxy_label": "mvp_local_proactive_alignment",
+            },
+            *memory_efe_events,
+            *memory_efe_evaluation.events,
+        ]
+        return state, sig_dict, memory_efe_evaluation, events
+
     def maybe_propose_proactive_turn(
         self,
         *,
@@ -5113,6 +5242,15 @@ class MVPDialogueRuntime:
         state = self.store.load()
         now = _utc_timestamp()
         structural_signals = self._initiative_structural_signals(state)
+        memory_efe_evaluation = None
+        refresh_events: list[dict[str, Any]] = []
+        if implicit_idle_request:
+            state, structural_signals, memory_efe_evaluation, refresh_events = self._refresh_idle_proactive_drive_context(
+                state,
+                now=now,
+                turn_index=turn_index,
+                structural_signals=structural_signals,
+            )
         state, check = evaluate_proactive_initiative(
             state,
             now=now,
@@ -5123,15 +5261,18 @@ class MVPDialogueRuntime:
             implicit_idle_request=implicit_idle_request,
             llm=self.llm,
             structural_signals=structural_signals,
+            memory_efe_evaluation=memory_efe_evaluation,
         )
         self.store.save(state)
+        for event in refresh_events:
+            self.store.append_log({"event": "m13_proactive_audit", **event})
         for event in check.events:
             self.store.append_log({"event": "m13_proactive_audit", **event})
         return {
             "proposal": check.proposal.to_dict() if check.proposal else None,
             "suppression_reason": check.suppression_reason,
             "suppression_reason_code": check.suppression_reason_code or check.suppression_reason,
-            "events": check.events,
+            "events": [*refresh_events, *check.events],
             "state_fields_read": check.state_fields_read,
         }
 
@@ -6047,6 +6188,21 @@ class MVPDialogueRuntime:
         state["m13_drive_state"] = m13_state
         self.store.save(state)
         audit_events.extend(m13_memory_efe_evaluation.events)
+        idle_drive_band_summary = self._idle_drive_band_summary(m13_state, state=state)
+        sig_dict["idle_drive_band_summary"] = idle_drive_band_summary
+        sig_dict["memory_efe_should_outreach"] = bool(m13_memory_efe_evaluation.should_outreach)
+        audit_events.append(
+            {
+                "type": "IdleProactiveDriveRefreshEvent",
+                "turn_index": turn_index,
+                "at": now,
+                "order": "recall_then_memory_efe_then_m13_drive_bands_before_target_selection",
+                "retrieved_ids": sorted(retrieved_ids)[:12],
+                "bounded_retrieve_ids": list(dict.fromkeys(bound_ids))[:12],
+                "drive_band_summary": idle_drive_band_summary,
+                "engineering_proxy_label": "mvp_local_proactive_alignment",
+            }
+        )
 
         idle_context = build_idle_context(
             state,

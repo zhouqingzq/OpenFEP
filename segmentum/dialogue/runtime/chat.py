@@ -985,6 +985,7 @@ class ChatInterface:
         last_health_at = 0
         last_proactive_target: dict[str, object] = {}
         last_proactive_suppression: dict[str, object] = {}
+        last_drive_band_summary: dict[str, object] = {}
         for row in self.read_conversation_log(limit=300):
             if str(row.get("event", "")) != "m14_2_audit":
                 if str(row.get("type", "")) == "M13ProactiveProposalEvent":
@@ -993,6 +994,8 @@ class ChatInterface:
                         "traceable_expectation_id": str(row.get("traceable_expectation_id", "") or ""),
                         "ordinary_language_intent": str(row.get("ordinary_language_intent", "") or "")[:160],
                         "source_kind": str(row.get("source_kind", "") or ""),
+                        "selection_reason_codes": row.get("selection_reason_codes", []),
+                        "evidence_refs": row.get("trigger_evidence_refs", []),
                     }
                 if str(row.get("type", "")) == "M13ProactiveSuppressionEvent":
                     last_proactive_suppression = {
@@ -1000,6 +1003,9 @@ class ChatInterface:
                         "reason_code": str(row.get("reason_code", row.get("reason", "")) or ""),
                         "reason_stage": str(row.get("reason_stage", "") or ""),
                     }
+                if str(row.get("type", "")) == "IdleProactiveDriveRefreshEvent":
+                    summary = row.get("drive_band_summary", {})
+                    last_drive_band_summary = dict(summary) if isinstance(summary, dict) else {}
                 continue
             if str(row.get("type", "")) != "SelfLoopDaemonHealthEvent":
                 continue
@@ -1051,6 +1057,7 @@ class ChatInterface:
             "last_budget_block_reason": str(bg.get("last_budget_block_reason", "") or ""),
             "m14_3_last_proactive_target": last_proactive_target,
             "m14_3_last_proactive_suppression": last_proactive_suppression,
+            "m14_3_last_drive_band_summary": last_drive_band_summary,
             "m14_3_open_item_traceability_suggestions": m14_3_traceability_suggestions,
             "m14_3_legacy_vague_open_item_proactive": legacy_vague_open_item_proactive,
         }

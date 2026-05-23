@@ -153,6 +153,187 @@ def test_boredom_target_blocked_when_memory_efe_eligible() -> None:
     assert target is None
 
 
+def test_boredom_target_without_agreement() -> None:
+    m13 = _opted_m13()
+    boredom = normalize_m13_drive_state(m13)["boredom"]
+    boredom.update(
+        {
+            "boredom_level": 0.42,
+            "last_exploration_target": "small parser cleanup",
+            "recent_plan_terms": ["parser", "cleanup"],
+        }
+    )
+    m13["boredom"] = boredom
+    state = {"open_items": [], "pending_expectations": [], "temporal_state": {}, "m13_drive_state": m13}
+    _, check = evaluate_proactive_initiative(
+        state,
+        now=NOW,
+        turn_index=4,
+        idle_seconds=999,
+        implicit_idle_request=True,
+        llm=None,
+    )
+    assert check.proposal is not None
+    assert check.proposal.trigger == "boredom_exploration_target"
+    assert check.proposal.source_kind == "boredom_exploration"
+
+
+def test_relationship_pull_proactive_without_agreement() -> None:
+    m13 = _opted_m13()
+    normalized = normalize_m13_drive_state(m13)
+    normalized["traction_by_action"] = {"empathize|zq": 0.72, "answer|zq": 0.2}
+    normalized["relation_path_precision"] = {"zq": 0.58}
+    reward = normalized["affective_reward_proxy"]
+    reward["path_feels_stale_proxy"] = True
+    normalized["affective_reward_proxy"] = reward
+    state = {
+        "open_items": [],
+        "pending_expectations": [],
+        "relationship_value_memories": {
+            "by_user": {
+                "zq": [
+                    {
+                        "id": "rvm_zq_1",
+                        "summary": "zq values plain direct warmth when returning to a thread.",
+                        "prediction_constraint": "A concise warm continuation lowers relationship friction.",
+                        "priority": "high",
+                        "confidence": 0.86,
+                    }
+                ]
+            }
+        },
+        "temporal_state": {"last_share_trace": {"user_id": "zq"}},
+        "m13_drive_state": normalized,
+    }
+    _, check = evaluate_proactive_initiative(
+        state,
+        now=NOW,
+        turn_index=4,
+        idle_seconds=999,
+        implicit_idle_request=True,
+        llm=None,
+    )
+    assert check.proposal is not None
+    assert check.proposal.trigger == "relationship_reconnect_pull"
+    assert check.proposal.source_kind != "boredom_exploration"
+    assert "rvm_zq_1" in check.proposal.trigger_evidence_refs
+    assert "active_relationship_value_memory" in check.proposal.selection_reason_codes
+
+
+def test_memory_efe_outreach_idle() -> None:
+    m13 = _opted_m13()
+    boredom = normalize_m13_drive_state(m13)["boredom"]
+    boredom.update(
+        {
+            "boredom_level": 0.8,
+            "last_exploration_target": "fallback boredom topic",
+            "recent_plan_terms": ["fallback"],
+        }
+    )
+    m13["boredom"] = boredom
+    state = {
+        "pending_expectations": [],
+        "open_items": [
+            {
+                "id": "exp_mem",
+                "status": "open",
+                "title": "check the bound memory tension",
+                "scheduled_intent_id": "intent_mem",
+                "due_at_epoch": NOW - 10_000,
+                "expected_window_seconds": 900,
+                "evidence_refs": ["mem_bound"],
+                "bound_memory_ids": ["mem_bound"],
+                "confidence": 0.95,
+            }
+        ],
+        "temporal_state": {"last_user_turn_at": NOW - 7200, "last_turn_at": NOW - 7200},
+        "m13_drive_state": m13,
+    }
+    evaluation = evaluate_memory_efe(
+        state,
+        phase="idle",
+        now=NOW,
+        turn_index=5,
+        user_active=False,
+        retrieved_memories=[{"id": "mem_bound", "content": "bound memory tension"}],
+    )
+    target = select_proactive_target(state, m13, memory_efe_evaluation=evaluation, structural_signals={})
+    assert target is not None
+    assert target.trigger == "memory_efe_outreach"
+    assert target.source_kind != "boredom_exploration"
+    assert "mem_bound" in target.evidence_refs
+
+
+def test_silence_alone_does_not_raise_any_drive_scalar(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "silence"), llm=None)
+    state = runtime.store.load()
+    m13 = _opted_m13()
+    normalized = normalize_m13_drive_state(m13)
+    normalized["boredom"]["boredom_level"] = 0.12
+    normalized["traction_by_action"] = {"answer|zq": 0.21}
+    normalized["relation_path_precision"] = {"zq": 0.18}
+    normalized["affective_reward_proxy"]["last_net_reward_proxy"] = 0.22
+    state.update(
+        {
+            "open_items": [],
+            "pending_expectations": [],
+            "temporal_state": {"last_user_turn_at": NOW - 7200, "last_turn_at": NOW - 7200},
+            "m13_drive_state": normalized,
+        }
+    )
+    runtime.store.save(state)
+    before = normalize_m13_drive_state(runtime.store.load()["m13_drive_state"])
+    check = runtime.maybe_propose_proactive_turn(
+        turn_index=8,
+        idle_seconds=999,
+        implicit_idle_request=True,
+    )
+    after = normalize_m13_drive_state(runtime.store.load()["m13_drive_state"])
+    assert check["proposal"] is None
+    assert after["boredom"]["boredom_level"] == before["boredom"]["boredom_level"]
+    assert after["affective_reward_proxy"]["last_net_reward_proxy"] == before["affective_reward_proxy"]["last_net_reward_proxy"]
+    assert after["traction_by_action"] == before["traction_by_action"]
+    assert after["relation_path_precision"] == before["relation_path_precision"]
+
+
+def test_no_duplicate_proactive_when_scheduled_active() -> None:
+    m13 = _opted_m13()
+    boredom = normalize_m13_drive_state(m13)["boredom"]
+    boredom.update(
+        {
+            "boredom_level": 0.9,
+            "last_exploration_target": "should lose to schedule",
+            "recent_plan_terms": ["schedule"],
+        }
+    )
+    m13["boredom"] = boredom
+    state = {"open_items": [], "pending_expectations": [], "temporal_state": {}, "m13_drive_state": m13}
+    structural = {
+        "queued_outreach": [
+            {
+                "status": "pending",
+                "trigger": "scheduled_outreach",
+                "source_intent_id": "intent_scheduled",
+                "ordinary_language_intent": "Follow up on the scheduled outreach request.",
+                "evidence_refs": ["intent_scheduled"],
+            }
+        ]
+    }
+    _, check = evaluate_proactive_initiative(
+        state,
+        now=NOW,
+        turn_index=7,
+        idle_seconds=999,
+        implicit_idle_request=True,
+        llm=None,
+        structural_signals=structural,
+    )
+    proposals = [row for row in check.events if row.get("type") == "M13ProactiveProposalEvent"]
+    assert check.proposal is not None
+    assert check.proposal.trigger == "scheduled_outreach"
+    assert len(proposals) == 1
+
+
 def test_open_item_migration_promotes_only_traceable_vague_items() -> None:
     rows = [
         {

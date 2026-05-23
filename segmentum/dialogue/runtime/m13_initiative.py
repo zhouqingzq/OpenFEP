@@ -85,6 +85,8 @@ _ALLOWED_TRIGGERS: frozenset[str] = frozenset(
         "reflection_outreach",
         "scheduled_outreach",
         "memory_efe_outreach",
+        "relationship_reconnect_pull",
+        "affective_path_stale_proactive",
     }
 )
 
@@ -798,6 +800,7 @@ def evaluate_proactive_initiative(
                 "urgency_band": locked_proposal.urgency_band,
                 "risk_band": locked_proposal.risk_band,
                 "ordinary_language_intent": locked_proposal.ordinary_language_intent,
+                "trigger_evidence_refs": list(locked_proposal.trigger_evidence_refs[:MAX_EVIDENCE_REFS]),
                 "engineering_proxy_label": "mvp_local_m13_initiative",
                 "source": locked_proposal.source,
                 "traceable_expectation_id": locked_proposal.traceable_expectation_id,
@@ -897,6 +900,7 @@ def evaluate_proactive_initiative(
             "urgency_band": proposal.urgency_band,
             "risk_band": proposal.risk_band,
             "ordinary_language_intent": proposal.ordinary_language_intent,
+            "trigger_evidence_refs": list(proposal.trigger_evidence_refs[:MAX_EVIDENCE_REFS]),
             "engineering_proxy_label": "mvp_local_m13_initiative",
             "traceable_expectation_id": proposal.traceable_expectation_id,
             "source_kind": proposal.source_kind,
@@ -1013,6 +1017,7 @@ def set_initiative_user_opt_in(m13_state: dict[str, Any], *, enabled: bool) -> d
         initiative["last_suppression_reason"] = "not_opted_in"
         state["initiative"] = initiative
         return disable_idle_introspection_on_proactive_off(state)
+    initiative["implicit_idle_delivery"] = True
     state["initiative"] = initiative
     return state
 

@@ -19,7 +19,13 @@ from segmentum.dialogue.runtime.m13_reward import normalize_affective_reward_pro
 VAGUE_NEXT_CHECKS = frozenset({"", "later", "regular", "someday", "soon", "next", "follow_up", "check_later"})
 TRACEABLE_NEXT_CHECKS = frozenset({"next_user_turn", "next_turn", "after_next_user_message"})
 TRACEABLE_DELIVERY_TRIGGERS = frozenset(
-    {"memory_efe_outreach", "scheduled_outreach", "correction_followup"}
+    {
+        "memory_efe_outreach",
+        "scheduled_outreach",
+        "correction_followup",
+        "relationship_reconnect_pull",
+        "affective_path_stale_proactive",
+    }
 )
 GENERIC_INTENT_TOKENS = frozenset(
     {
@@ -155,23 +161,34 @@ def _target_from_memory_efe(memory_efe_evaluation: Any | None, m13_state: Mappin
         reason_codes = _string_list(getattr(memory_efe_evaluation, "reason_codes", []), limit=8)
         eligible = [getattr(row, "to_dict", lambda: row)() for row in getattr(memory_efe_evaluation, "eligible_for_efe", []) or []]
         intent = ""
-    if not should or not trace_id or not refs:
+    if not should or not refs:
         return None
+    if not trace_id:
+        for row in eligible:
+            if isinstance(row, Mapping):
+                trace_id = _clean_id(row.get("expectation_id") or row.get("id"))
+                if trace_id:
+                    break
     for row in eligible:
-        if isinstance(row, Mapping) and _clean_id(row.get("expectation_id")) == trace_id:
+        if trace_id and isinstance(row, Mapping) and _clean_id(row.get("expectation_id") or row.get("id")) == trace_id:
             intent = build_traceable_proactive_intent(row)
             topic = _content_summary(row) or trace_id
             source_kind = str(row.get("source_kind", "pending_expectation") or "pending_expectation")
             break
     else:
-        topic = trace_id
-        source_kind = "pending_expectation"
+        topic = trace_id or refs[0]
+        source_kind = "memory_efe_bound_memory"
     return ProactiveTarget(
         trigger="memory_efe_outreach",
         traceable_expectation_id=trace_id,
         evidence_refs=refs,
         proposed_topic=topic[:120],
-        ordinary_language_intent=intent or f"Follow up on traceable expectation {trace_id}",
+        ordinary_language_intent=intent
+        or (
+            f"Follow up on traceable expectation {trace_id}"
+            if trace_id
+            else f"Reconnect around the memory dynamics tension bound to recalled evidence {refs[0]}"
+        ),
         source_kind=source_kind,
         urgency_band="medium",
         risk_band="low",
@@ -216,6 +233,127 @@ def _target_from_boredom(m13_state: Mapping[str, Any]) -> ProactiveTarget | None
         urgency_band="low",
         risk_band="low",
         selection_reason_codes=["boredom_band_with_evidence_refs"],
+    )
+
+
+def _current_user_id(state: Mapping[str, Any]) -> str:
+    temporal = _mapping(state.get("temporal_state"))
+    share_trace = _mapping(temporal.get("last_share_trace"))
+    user_id = _clean_id(share_trace.get("user_id"))
+    if user_id:
+        return user_id
+    rel_store = _mapping(_mapping(state.get("relationship_value_memories")).get("by_user"))
+    if len(rel_store) == 1:
+        return _clean_id(next(iter(rel_store.keys())))
+    return ""
+
+
+def _relationship_value_rows(state: Mapping[str, Any], user_id: str) -> list[dict[str, Any]]:
+    rel_store = _mapping(_mapping(state.get("relationship_value_memories")).get("by_user"))
+    raw_rows = rel_store.get(user_id, [])
+    if not isinstance(raw_rows, list):
+        return []
+    rows: list[dict[str, Any]] = []
+    for item in raw_rows:
+        if not isinstance(item, Mapping):
+            continue
+        confidence = _bounded_float(item.get("confidence"), default=0.0)
+        priority = str(item.get("priority", "medium") or "medium").strip().lower()
+        summary = str(item.get("summary", "") or "").strip()
+        if confidence < 0.6 or priority not in {"high", "medium"} or not summary:
+            continue
+        rows.append(
+            {
+                "id": _clean_id(item.get("id")),
+                "summary": summary[:180],
+                "prediction_constraint": str(item.get("prediction_constraint", "") or "").strip()[:240],
+                "priority": priority,
+                "confidence": confidence,
+            }
+        )
+    rows.sort(key=lambda row: (row["priority"] == "high", row["confidence"]), reverse=True)
+    return rows[:4]
+
+
+def _top_traction_action_for_user(m13_state: Mapping[str, Any], user_id: str) -> tuple[str, float]:
+    traction = _mapping(normalize_m13_drive_state(m13_state).get("traction_by_action"))
+    suffix = f"|{user_id}" if user_id else ""
+    best_action = ""
+    best_value = 0.0
+    for key, value in traction.items():
+        key_text = str(key)
+        if suffix and not key_text.endswith(suffix):
+            continue
+        action = key_text.split("|", 1)[0].strip()
+        score = _bounded_float(value)
+        if action and score > best_value:
+            best_action = action
+            best_value = score
+    return best_action, best_value
+
+
+def _target_from_relationship_pull(state: Mapping[str, Any], m13_state: Mapping[str, Any]) -> ProactiveTarget | None:
+    normalized = normalize_m13_drive_state(m13_state)
+    user_id = _current_user_id(state)
+    rel_rows = _relationship_value_rows(state, user_id) if user_id else []
+    relation_map = _mapping(normalized.get("relation_path_precision"))
+    relation_precision = _bounded_float(relation_map.get(user_id)) if user_id else 0.0
+    relationship_context = bool(rel_rows) or relation_precision >= 0.35
+    if not relationship_context:
+        return None
+
+    reward = normalize_affective_reward_proxy_state(normalized.get("affective_reward_proxy"))
+    pending = [row for row in reward.get("pending_settlements", []) or [] if isinstance(row, Mapping)]
+    path_feels_stale = bool(reward.get("path_feels_stale_proxy"))
+    unsettled_reward = bool(pending) or (
+        _bounded_float(reward.get("last_relief_proxy")) >= 0.25
+        and _bounded_float(reward.get("last_net_reward_proxy")) < 0.35
+    )
+    top_action, _top_pull = _top_traction_action_for_user(normalized, user_id)
+    relationship_action = top_action in {"empathize", "ask_question", "clarify", "self_disclose"}
+    if not (relationship_action or path_feels_stale or unsettled_reward):
+        return None
+
+    refs = [row["id"] for row in rel_rows if row.get("id")]
+    refs.extend(
+        _clean_id(row.get("pending_id") or row.get("settlement_id"))
+        for row in pending[:4]
+        if _clean_id(row.get("pending_id") or row.get("settlement_id"))
+    )
+    if not refs and user_id and relation_precision >= 0.35:
+        refs.append(f"relation_path_precision:{user_id}")
+    refs = list(dict.fromkeys(refs))[:8]
+    if not refs:
+        return None
+
+    summary = rel_rows[0]["summary"] if rel_rows else "stable relationship path"
+    topic = summary[:120]
+    reason_codes: list[str] = []
+    if rel_rows:
+        reason_codes.append("active_relationship_value_memory")
+    if relation_precision >= 0.35:
+        reason_codes.append("relation_path_precision_high")
+    if relationship_action:
+        reason_codes.append("relationship_action_top")
+    if path_feels_stale:
+        reason_codes.append("path_feels_stale_proxy")
+    if unsettled_reward:
+        reason_codes.append("unsettled_affective_path")
+
+    trigger = "relationship_reconnect_pull" if relationship_action or rel_rows else "affective_path_stale_proactive"
+    source_kind = "relationship_reconnect_pull" if trigger == "relationship_reconnect_pull" else "affective_path_stale"
+    return ProactiveTarget(
+        trigger=trigger,
+        evidence_refs=refs,
+        proposed_topic=topic,
+        ordinary_language_intent=(
+            "Reconnect around the active relationship value context: "
+            f"{summary[:150]}. Offer one short concrete continuation without pressure."
+        ),
+        source_kind=source_kind,
+        urgency_band="low",
+        risk_band="low",
+        selection_reason_codes=list(dict.fromkeys(reason_codes))[:8],
     )
 
 
@@ -271,6 +409,9 @@ def select_proactive_target(
     correction = _target_from_correction(m13_state)
     if correction is not None:
         return correction
+    relationship = _target_from_relationship_pull(state, m13_state)
+    if relationship is not None:
+        return relationship
     if mem is None:
         return _target_from_boredom(m13_state)
     return None

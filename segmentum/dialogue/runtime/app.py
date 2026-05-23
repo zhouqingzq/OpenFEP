@@ -2039,15 +2039,23 @@ def render_dashboard() -> None:
 
         m14_3_target = _as_dict(m14.get("m14_3_last_proactive_target"))
         m14_3_suppression = _as_dict(m14.get("m14_3_last_proactive_suppression"))
+        m14_3_bands = _as_dict(m14.get("m14_3_last_drive_band_summary"))
         traceability_count = int(m14.get("m14_3_open_item_traceability_suggestions", 0) or 0)
-        if m14_3_target or m14_3_suppression or traceability_count:
+        if m14_3_target or m14_3_suppression or m14_3_bands or traceability_count:
             with st.expander("M14.3 proactive alignment", expanded=False):
                 st.markdown(
                     "\n".join(
                         [
                             f"- trigger: `{_clip_text(m14_3_target.get('trigger'), limit=80)}`",
+                            f"- source_kind: `{_clip_text(m14_3_target.get('source_kind'), limit=80)}`",
+                            f"- selection_reason_codes: `{_join_values(m14_3_target.get('selection_reason_codes'))}`",
                             f"- traceable_expectation_id: `{_clip_text(m14_3_target.get('traceable_expectation_id'), limit=100)}`",
+                            f"- evidence_refs: `{_join_values(m14_3_target.get('evidence_refs'))}`",
                             f"- intent: {_clip_text(m14_3_target.get('ordinary_language_intent'), limit=180)}",
+                            f"- drive_bands: behavior=`{_clip_text(m14_3_bands.get('behavioral_pull_band'), limit=40)}` "
+                            f"boredom=`{_clip_text(m14_3_bands.get('boredom_band'), limit=40)}` "
+                            f"reward=`{_clip_text(m14_3_bands.get('affective_reward_band'), limit=40)}` "
+                            f"relation=`{_clip_text(m14_3_bands.get('relation_path_precision_band'), limit=40)}`",
                             f"- last_suppression: `{_clip_text(m14_3_suppression.get('reason_code'), limit=80)}` "
                             f"stage=`{_clip_text(m14_3_suppression.get('reason_stage'), limit=40)}`",
                             f"- open_item_traceability_suggestions: {traceability_count}",

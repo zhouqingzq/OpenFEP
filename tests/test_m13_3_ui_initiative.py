@@ -246,7 +246,7 @@ def test_context_assessor_no_longer_creates_proposal_without_traceable_target() 
     assert any(event.get("type") == "M13ProactiveContextAssessmentEvent" for event in check.events)
 
 
-def test_first_version_uses_manual_continue_not_implicit_idle_delivery() -> None:
+def test_enabled_initiative_defaults_to_implicit_idle_delivery() -> None:
     initiative = default_initiative_state()
     assert initiative["manual_continue_button"] is True
     assert initiative["implicit_idle_delivery"] is False
@@ -261,7 +261,8 @@ def test_first_version_uses_manual_continue_not_implicit_idle_delivery() -> None
         implicit_idle_request=True,
         llm=_ContextUnsafeLLM(),
     )
-    assert check.suppression_reason == "delivery_channel_unavailable"
+    assert check.proposal is not None
+    assert check.proposal.trigger == "open_item_next_check"
 
 
 def test_implicit_idle_delivery_requires_explicit_opt_in_when_enabled() -> None:
