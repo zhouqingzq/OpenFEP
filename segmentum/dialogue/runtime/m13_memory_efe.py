@@ -402,13 +402,31 @@ def _normalize_pending_expectation(
     now: int,
     phase: str,
 ) -> NormalizedExpectation:
+    source_kind = (
+        "memory_dynamics_expectation"
+        if str(row.get("source", "") or "").strip() == "memory_dynamics_adapter"
+        else "pending_expectation"
+    )
     verify_on = str(row.get("verify_on", row.get("verify", "")) or "").strip().lower()
     due_at = _epoch(row.get("due_at_epoch") or row.get("due_at"))
     scheduled_id = str(row.get("scheduled_intent_id", "") or "").strip()
     window = int(row.get("expected_window_seconds", 0) or 0)
     eligible = False
     reason = ""
-    if verify_on in _ELIGIBLE_NEXT_USER:
+    if source_kind == "memory_dynamics_expectation" and (
+        verify_on in _VAGUE_NEXT_CHECKS or verify_on in _ELIGIBLE_NEXT_USER or verify_on == "memory_dynamics_idle"
+    ):
+        created = _created_at(row)
+        due_at = due_at or (created + ACTIVE_GRACE_SECONDS if created else 0)
+        window = window or ACTIVE_GRACE_SECONDS
+        if phase == "in_turn":
+            eligible = bool(due_at)
+        elif phase == "idle" and due_at:
+            eligible = now >= due_at + window
+            reason = "" if eligible else "memory_dynamics_tension_not_idle_long_enough"
+        else:
+            reason = "missing_memory_dynamics_anchor"
+    elif verify_on in _ELIGIBLE_NEXT_USER:
         if phase == "in_turn":
             due_at = due_at or _created_at(row)
             window = window or NEXT_USER_TURN_EXPECTED_WINDOW_SECONDS
@@ -431,7 +449,7 @@ def _normalize_pending_expectation(
         state=state,
         now=now,
         phase=phase,
-        source_kind="pending_expectation",
+        source_kind=source_kind,
         due_at=due_at,
         expected_window_seconds=window or DUE_AT_EXPECTED_WINDOW_SECONDS,
         eligible=eligible,
@@ -849,7 +867,7 @@ def _compute_idle_efe(
         0.38 * traceable * evidence_strength * boundary_allowance,
     )
     expected_information_gain = min(0.25, f_memory * 0.16)
-    if expectation and expectation.source_kind in {"open_item", "scheduled_outreach"}:
+    if expectation and expectation.source_kind in {"open_item", "scheduled_outreach", "memory_dynamics_expectation"}:
         expected_information_gain = max(expected_information_gain, 0.25)
     efe = {
         "wait": f_memory + float(costs["wait_decay_risk"]) + float(costs["low_control_cost"]),

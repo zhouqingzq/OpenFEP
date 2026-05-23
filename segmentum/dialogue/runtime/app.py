@@ -1133,6 +1133,51 @@ def _install_m14_delivery_autorefresh(chat_iface: ChatInterface) -> None:
     )
 
 
+def _run_streamlit_implicit_idle_delivery_check(chat_iface: ChatInterface) -> None:
+    """Run the M14.4 implicit idle delivery check without a browser reload."""
+    pending_text = st.session_state.get("pending_user_message")
+    pending_proactive = bool(st.session_state.get("pending_proactive_continue", False))
+    if (
+        chat_iface.has_agent()
+        and getattr(chat_iface, "mvp_runtime_active", False)
+        and bool(st.session_state.get("m13_initiative_opt_in", False))
+        and bool(st.session_state.get("m13_implicit_idle_delivery", False))
+        and not pending_text
+        and not pending_proactive
+        and not bool(st.session_state.get("m13_ui_turn_in_progress", False))
+    ):
+        try:
+            result = run_streamlit_implicit_idle_proactive(
+                chat_iface,
+                session_state=st.session_state,
+                pending_user_message=pending_text,
+                pending_proactive=pending_proactive,
+                user_typing=False,
+                speaker_name=str(st.session_state.current_speaker_name or "").strip() or "娴嬭瘯鐢ㄦ埛",
+            )
+            if result.delivered and result.response is not None:
+                append_assistant_response_messages(st.session_state.messages, result.response)
+                st.rerun(scope="app")
+        except Exception as exc:  # pragma: no cover
+            _logger.exception("implicit idle proactive delivery failed: %s", exc)
+
+
+if hasattr(st, "fragment"):
+
+    @st.fragment(run_every="5s")
+    def _run_streamlit_implicit_idle_delivery_tick() -> None:
+        chat_iface = st.session_state.get("chat_iface")
+        if chat_iface is not None:
+            _run_streamlit_implicit_idle_delivery_check(chat_iface)
+
+else:  # pragma: no cover - Streamlit versions before fragments.
+
+    def _run_streamlit_implicit_idle_delivery_tick() -> None:
+        chat_iface = st.session_state.get("chat_iface")
+        if chat_iface is not None:
+            _run_streamlit_implicit_idle_delivery_check(chat_iface)
+
+
 def render_sidebar() -> None:
     st.sidebar.header("Persona Management")
 
@@ -1743,7 +1788,8 @@ def render_chat() -> None:
         pending_proactive=pending_proactive,
     )
     if (
-        chat_iface.has_agent()
+        not hasattr(st, "fragment")
+        and chat_iface.has_agent()
         and getattr(chat_iface, "mvp_runtime_active", False)
         and bool(st.session_state.get("m13_initiative_opt_in", False))
         and bool(st.session_state.get("m13_implicit_idle_delivery", False))
@@ -1765,6 +1811,7 @@ def render_chat() -> None:
                 st.rerun()
         except Exception as exc:  # pragma: no cover
             _logger.exception("implicit idle proactive delivery failed: %s", exc)
+    _run_streamlit_implicit_idle_delivery_tick()
 
 
 _MIND_BUS_EVENT_PREFIXES = (

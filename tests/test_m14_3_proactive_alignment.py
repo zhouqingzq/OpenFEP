@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -263,6 +264,134 @@ def test_memory_efe_outreach_idle() -> None:
     assert target.trigger == "memory_efe_outreach"
     assert target.source_kind != "boredom_exploration"
     assert "mem_bound" in target.evidence_refs
+
+
+def test_memory_efe_proactive_without_explicit_agreement_from_idle_recall(tmp_path: Path) -> None:
+    now = int(time.time())
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "memory_efe_no_agreement"), llm=None)
+    state = runtime.store.load()
+    m13 = _opted_m13()
+    normalized = normalize_m13_drive_state(m13)
+    normalized["boredom"]["boredom_level"] = 0.0
+    normalized["affective_reward_proxy"]["last_net_reward_proxy"] = 0.0
+    state.update(
+        {
+            "open_items": [],
+            "pending_expectations": [
+                {
+                    "id": "mem_dyn_topic_1",
+                    "source": "memory_dynamics_adapter",
+                    "verify_on": "later",
+                    "status": "pending",
+                    "content": "reconnect around zq's science-and-ghost-hunting curiosity from the remembered thread",
+                    "confidence": 0.95,
+                    "due_at_epoch": now - 7200,
+                    "expected_window_seconds": 900,
+                    "evidence_refs": ["mem_science_ghost_thread"],
+                    "bound_memory_ids": ["mem_science_ghost_thread"],
+                },
+                {
+                    "id": "mem_dyn_topic_2",
+                    "source": "memory_dynamics_adapter",
+                    "verify_on": "later",
+                    "status": "pending",
+                    "content": "reconnect around zq's earlier Li An'an investigation thread",
+                    "confidence": 0.95,
+                    "due_at_epoch": now - 7100,
+                    "expected_window_seconds": 900,
+                    "evidence_refs": ["mem_li_anan_thread"],
+                    "bound_memory_ids": ["mem_li_anan_thread"],
+                }
+            ],
+            "short_term_memory": [],
+            "long_term_memory": [
+                {
+                    "id": "mem_science_ghost_thread",
+                    "content": "zq was curious about the boundary between science and ghost-hunting stories.",
+                    "keywords": ["science", "ghost-hunting", "zq"],
+                    "salience": 0.9,
+                },
+                {
+                    "id": "mem_li_anan_thread",
+                    "content": "zq had an unresolved Li An'an investigation thread with Hu Tao.",
+                    "keywords": ["Li An'an", "investigation", "zq"],
+                    "salience": 0.9,
+                }
+            ],
+            "temporal_state": {
+                "last_user_turn_at": now - 7200,
+                "last_turn_at": now - 7200,
+                "last_turn_index": 4,
+                "last_user_text": "",
+            },
+            "m13_drive_state": normalized,
+        }
+    )
+    runtime.store.save(state)
+
+    check = runtime.maybe_propose_proactive_turn(
+        turn_index=8,
+        idle_seconds=999,
+        implicit_idle_request=True,
+    )
+
+    proposal = check["proposal"]
+    assert proposal is not None
+    assert proposal["trigger"] == "memory_efe_outreach"
+    assert proposal["source_kind"] == "memory_dynamics_expectation"
+    assert proposal["traceable_expectation_id"] == "mem_dyn_topic_1"
+    assert "mem_science_ghost_thread" in proposal["trigger_evidence_refs"]
+    assert "memory_efe_should_outreach" in proposal["selection_reason_codes"]
+    assert "boredom" not in proposal["source_kind"]
+    assert not state["open_items"]
+    assert all(not row.get("scheduled_intent_id") for row in state["pending_expectations"])
+
+    events = check["events"]
+    refresh = next(row for row in events if row.get("type") == "IdleProactiveDriveRefreshEvent")
+    memory_event = next(row for row in events if row.get("type") == "MemoryEfeEvaluationEvent")
+    assert refresh["order"] == "recall_then_memory_efe_then_m13_drive_bands_before_target_selection"
+    assert "mem_science_ghost_thread" in refresh["retrieved_ids"]
+    assert "mem_li_anan_thread" in refresh["retrieved_ids"]
+    assert memory_event["should_outreach"] is True
+    assert memory_event["selected_policy"] == "outreach"
+    assert memory_event["traceable_expectation_id"] == "mem_dyn_topic_1"
+
+
+def test_tension_backed_new_expectation_gets_memory_dynamics_trace_in_path_b(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "trace"), llm=None)
+    state = runtime.store.load()
+    runtime._apply_thinking_writes(
+        state,
+        {
+            "reply": "short",
+            "new_expectations": [
+                {
+                    "id": "exp_tension",
+                    "content": "continue the science versus supernatural tension",
+                    "confidence": 0.8,
+                    "verify_on": "next_user_turn",
+                }
+            ],
+        },
+        user_text="I am stuck on this unresolved tension.",
+        now=3001,
+        memory_dynamics={
+            "write_candidates": [
+                {
+                    "content": "The user is stuck on a science versus supernatural tension.",
+                    "confidence": 0.8,
+                    "evidence": "user_text",
+                }
+            ]
+        },
+    )
+
+    row = state["pending_expectations"][-1]
+    assert row["id"] == "exp_tension"
+    assert row["source"] == "memory_dynamics_adapter"
+    assert row["verify_on"] == "memory_dynamics_idle"
+    assert row["evidence_refs"] == ["stm_turn_3001"]
+    assert row["bound_memory_ids"] == ["stm_turn_3001"]
 
 
 def test_generic_self_only_open_item_does_not_become_memory_efe_target() -> None:

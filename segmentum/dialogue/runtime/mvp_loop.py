@@ -2481,6 +2481,25 @@ _CASUAL_MARKERS = (
 )
 
 
+_MEMORY_DYNAMICS_TENSION_MARKERS = (
+    "\u5361\u5728",
+    "\u77db\u76fe",
+    "\u60f3\u4e0d\u660e\u767d",
+    "\u89e3\u91ca\u4e0d\u4e86",
+    "\u89e3\u91ca\u4e0d\u901a",
+    "\u8bf4\u4e0d\u4e0a\u6765",
+    "\u8fd8\u6ca1\u60f3\u660e\u767d",
+    "stuck",
+    "tension",
+    "unresolved",
+)
+
+
+def _has_memory_dynamics_tension_cue(*texts: Any) -> bool:
+    joined = " ".join(str(text or "") for text in texts).casefold()
+    return any(marker.casefold() in joined for marker in _MEMORY_DYNAMICS_TENSION_MARKERS)
+
+
 def _has_any_marker(text: str, markers: tuple[str, ...]) -> bool:
     lowered = str(text or "").casefold()
     return any(marker.casefold() in lowered for marker in markers)
@@ -4787,6 +4806,7 @@ class MVPDialogueRuntime:
             user_id=user_id,
             display_name=display_name,
             explicit_secrecy=bool(_mapping(_mapping(memory_dynamics.get("control_guidance")).get("sharing_policy")).get("explicit_secrecy_detected")),
+            memory_dynamics=memory_dynamics,
         )
         memory_candidates_applied = self._apply_memory_write_candidates(
             state,
@@ -7014,6 +7034,7 @@ class MVPDialogueRuntime:
         user_id: str = "",
         display_name: str = "",
         explicit_secrecy: bool = False,
+        memory_dynamics: Mapping[str, Any] | None = None,
     ) -> None:
         short = state.setdefault("short_term_memory", [])
         if isinstance(short, list):
@@ -7095,11 +7116,38 @@ class MVPDialogueRuntime:
         if isinstance(new_expectations, list):
             pending = state.setdefault("pending_expectations", [])
             if isinstance(pending, list):
+                turn_memory_id = f"stm_turn_{now}"
+                tension_backed = _has_memory_dynamics_tension_cue(
+                    user_text,
+                    thinking.get("memory_dynamics_note"),
+                    *[
+                        item.get("content", "")
+                        for item in new_expectations
+                        if isinstance(item, Mapping)
+                    ],
+                )
+                dynamics = _mapping(memory_dynamics)
+                write_candidates = dynamics.get("write_candidates", [])
+                has_memory_candidate = isinstance(write_candidates, list) and any(
+                    isinstance(candidate, Mapping) and str(candidate.get("content", "")).strip()
+                    for candidate in write_candidates
+                )
                 for item in new_expectations:
                     if isinstance(item, Mapping) and str(item.get("content", "")).strip():
                         payload = dict(item)
                         payload.setdefault("id", f"exp_{now}_{len(pending)}")
                         payload.setdefault("created_at", now)
+                        if tension_backed and has_memory_candidate:
+                            payload.setdefault("source", "memory_dynamics_adapter")
+                            payload["verify_on"] = "memory_dynamics_idle"
+                            refs = _string_list(payload.get("evidence_refs"), limit=8)
+                            if turn_memory_id not in refs:
+                                refs.append(turn_memory_id)
+                            payload["evidence_refs"] = list(dict.fromkeys(refs))[:8]
+                            bound = _string_list(payload.get("bound_memory_ids"), limit=8)
+                            if turn_memory_id not in bound:
+                                bound.append(turn_memory_id)
+                            payload["bound_memory_ids"] = list(dict.fromkeys(bound))[:8]
                         pending.append(payload)
 
         open_items = thinking.get("open_item_writes")

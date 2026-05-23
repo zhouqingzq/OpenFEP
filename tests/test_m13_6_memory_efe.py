@@ -174,6 +174,35 @@ def test_idle_next_user_turn_over_response_window_is_eligible() -> None:
     assert result.social_prediction_error > 0
 
 
+def test_memory_dynamics_idle_expectation_becomes_eligible_without_scheduled_due() -> None:
+    state = _state(
+        pending_expectations=[
+            {
+                "id": "exp_mem_dyn",
+                "source": "memory_dynamics_adapter",
+                "verify_on": "memory_dynamics_idle",
+                "status": "pending",
+                "content": "continue the unresolved science versus supernatural tension",
+                "confidence": 0.95,
+                "created_at": NOW - 120,
+                "evidence_refs": ["stm_turn_mem_dyn"],
+                "bound_memory_ids": ["stm_turn_mem_dyn"],
+            }
+        ],
+        short_term_memory=[
+            {
+                "id": "stm_turn_mem_dyn",
+                "content": "The user is stuck on the science versus supernatural tension.",
+                "salience": 0.8,
+            }
+        ],
+        temporal_state={"last_user_turn_at": NOW - 120, "last_turn_at": NOW - 120},
+    )
+    normalized = normalize_expectations_for_efe(state, now=NOW, phase="idle")
+    assert [e.expectation_id for e in normalized.eligible_for_efe] == ["exp_mem_dyn"]
+    assert normalized.eligible_for_efe[0].source_kind == "memory_dynamics_expectation"
+
+
 def test_in_turn_violation_repairs_and_never_outreaches() -> None:
     state = _state(pending_expectations=[_overdue_expectation(status="violated")])
     result = evaluate_memory_efe(
