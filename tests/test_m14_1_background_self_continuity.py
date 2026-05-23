@@ -49,11 +49,11 @@ def _full_opted_state(**overrides: object) -> dict[str, object]:
                 "title": "follow up",
                 "status": "open",
                 "next_check": "next_user_turn",
-                "evidence_refs": ["item_bg_1"],
+                "evidence_refs": ["mem_bg_1"],
                 "created_at": int(time.time()) - 1000,
             }
         ],
-        "short_term_memory": [],
+        "short_term_memory": [{"id": "mem_bg_1", "content": "traceable background follow-up memory"}],
         "long_term_memory": [],
         "pending_expectations": [],
         "self_cognition": {"patch_history": [], "self_continuity": default_self_continuity_state()},
@@ -81,7 +81,7 @@ class _BgIdleLLM:
                 "mode": "idle_introspection",
                 "reflection_focus": {
                     "topic": "open item",
-                    "evidence_refs": ["item_bg_1"],
+                    "evidence_refs": ["mem_bg_1"],
                     "reflection_kind": "open_item",
                 },
                 "self_cognition_patch_proposal": {
@@ -205,6 +205,29 @@ def test_queued_outreach_default_ttl_is_24_hours(tmp_path: Path) -> None:
         ttl_seconds=DEFAULT_QUEUED_OUTREACH_TTL_SECONDS,
     )
     assert int(entry["expires_at"]) == now + 24 * 3600
+
+
+def test_queued_outreach_preserves_traceability_fields(tmp_path: Path) -> None:
+    now = 1_700_000_000
+    entry = enqueue_outreach_proposal(
+        tmp_path,
+        proposal={
+            "proposal_id": "prop_trace",
+            "trigger": "memory_efe_outreach",
+            "ordinary_language_intent": "Follow up on the unresolved expectation: traceable memory",
+            "proposed_topic": "traceable memory",
+            "trigger_evidence_refs": ["mem_1", "exp_1"],
+            "traceable_expectation_id": "exp_1",
+            "source_kind": "pending_expectation",
+            "selection_reason_codes": ["memory_efe_should_outreach"],
+        },
+        now=now,
+        ttl_seconds=3600,
+    )
+    assert entry["evidence_refs"] == ["mem_1", "exp_1"]
+    assert entry["traceable_expectation_id"] == "exp_1"
+    assert entry["source_kind"] == "pending_expectation"
+    assert entry["selection_reason_codes"] == ["memory_efe_should_outreach"]
 
 
 def test_queued_outreach_ttl_clamped() -> None:

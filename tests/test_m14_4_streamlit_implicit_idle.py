@@ -88,6 +88,54 @@ def test_streamlit_open_chat_profile_skips_session_limit_for_explicit_profile() 
     assert check.proposal.proposal_id == "prop_locked"
 
 
+def test_locked_memory_efe_without_refs_rejected_as_untraceable() -> None:
+    state = {
+        "open_items": [],
+        "temporal_state": {"last_user_text": ""},
+        "m13_drive_state": _m13_enabled(profile=STREAMLIT_OPEN_CHAT_PROFILE),
+    }
+    proposal = _locked_proposal()
+    proposal.source = "queued_outreach"
+    proposal.trigger_evidence_refs = []
+    _, check = evaluate_proactive_initiative(
+        state,
+        now=NOW,
+        turn_index=3,
+        implicit_idle_request=True,
+        idle_seconds=999,
+        locked_proposal=proposal,
+        llm=None,
+    )
+    assert check.proposal is None
+    assert check.suppression_reason_code == "no_traceable_proactive_target"
+
+
+def test_locked_generic_open_item_memory_efe_rejected_as_untraceable() -> None:
+    state = {
+        "open_items": [],
+        "temporal_state": {"last_user_text": ""},
+        "m13_drive_state": _m13_enabled(profile=STREAMLIT_OPEN_CHAT_PROFILE),
+    }
+    proposal = _locked_proposal()
+    proposal.source = "queued_outreach"
+    proposal.traceable_expectation_id = "item_001"
+    proposal.trigger_evidence_refs = ["item_001"]
+    proposal.source_kind = "open_item"
+    proposal.proposed_topic = "unclear user intent"
+    proposal.ordinary_language_intent = "Follow up on the unresolved expectation: unclear user intent"
+    _, check = evaluate_proactive_initiative(
+        state,
+        now=NOW,
+        turn_index=3,
+        implicit_idle_request=True,
+        idle_seconds=999,
+        locked_proposal=proposal,
+        llm=None,
+    )
+    assert check.proposal is None
+    assert check.suppression_reason_code == "no_traceable_proactive_target"
+
+
 def test_streamlit_open_chat_profile_skips_cooldown_turns_and_timestamp() -> None:
     state = {
         "open_items": [],

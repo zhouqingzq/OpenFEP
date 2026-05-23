@@ -398,7 +398,10 @@ def enqueue_outreach_proposal(
         "session_id": str(proposal.get("session_id", "") or ""),
         "ordinary_language_intent": str(proposal.get("ordinary_language_intent", "") or "")[:240],
         "proposed_topic": str(proposal.get("proposed_topic", "") or "")[:120],
-        "evidence_refs": list(proposal.get("evidence_refs", []) or [])[:8],
+        "evidence_refs": list(proposal.get("evidence_refs") or proposal.get("trigger_evidence_refs") or [])[:8],
+        "traceable_expectation_id": str(proposal.get("traceable_expectation_id", "") or ""),
+        "source_kind": str(proposal.get("source_kind", "") or ""),
+        "selection_reason_codes": list(proposal.get("selection_reason_codes", []) or [])[:8],
         "drive_snapshot_compact": dict(drive_snapshot or {}),
         "status": "pending",
         "delivery_policy": {

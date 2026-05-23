@@ -105,7 +105,6 @@ from segmentum.dialogue.runtime.m14_3_proactive_alignment import (
 )
 from segmentum.dialogue.runtime.m13_memory_efe import (
     apply_memory_efe_state,
-    build_memory_efe_outreach_proposal,
     evaluate_memory_efe,
     merge_memory_efe_guidance_into_control,
     prompt_safe_m13_memory_efe_diagnostics,
@@ -5780,7 +5779,9 @@ class MVPDialogueRuntime:
             created_at=int(entry.get("created_at", now) or now),
             source="queued_outreach",
             trigger=str(entry.get("trigger", "reflection_outreach") or "reflection_outreach"),
-            trigger_evidence_refs=[str(r) for r in entry.get("evidence_refs", []) or []][:8],
+            trigger_evidence_refs=[
+                str(r) for r in (entry.get("evidence_refs") or entry.get("trigger_evidence_refs") or []) or []
+            ][:8],
             urgency_band="medium",
             expected_user_value_band="medium",
             risk_band="low",
@@ -5789,8 +5790,11 @@ class MVPDialogueRuntime:
             ordinary_language_intent=str(entry.get("ordinary_language_intent", "") or ""),
             expires_at=int(entry.get("expires_at", now) or now),
             cooldown_cost=0,
-            traceable_expectation_id=str(entry.get("traceable_expectation_id", entry.get("source_intent_id", "")) or ""),
-            source_kind=str(entry.get("source_kind", "scheduled_intent") or "scheduled_intent"),
+            traceable_expectation_id=str(entry.get("traceable_expectation_id") or entry.get("source_intent_id", "") or ""),
+            source_kind=str(
+                entry.get("source_kind")
+                or ("scheduled_intent" if str(entry.get("trigger", "")) == "scheduled_outreach" else "")
+            ),
             selection_reason_codes=[str(r) for r in entry.get("selection_reason_codes", []) or []][:8],
         )
         record_queued_outreach_delivery_attempt(self.store.root, proposal.proposal_id, now=now)
@@ -6516,12 +6520,6 @@ class MVPDialogueRuntime:
             if target is not None:
                 locked = build_proposal_from_target(
                     target,
-                    now=now,
-                    initiative=initiative,
-                )
-            elif m13_memory_efe_evaluation.should_outreach:
-                locked = build_memory_efe_outreach_proposal(
-                    m13_memory_efe_evaluation,
                     now=now,
                     initiative=initiative,
                 )

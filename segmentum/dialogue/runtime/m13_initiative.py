@@ -227,6 +227,39 @@ class ProactiveTurnProposal:
         return payload
 
 
+GENERIC_LOCKED_OPEN_ITEM_MARKERS = (
+    "用户未明确说明来意",
+    "未明确说明来意",
+    "unclear user intent",
+    "user intent unclear",
+    "ask what the user wants",
+    "clarify what the user wants",
+)
+
+
+def _untraceable_locked_memory_efe_proposal(proposal: ProactiveTurnProposal) -> bool:
+    if proposal.trigger != "memory_efe_outreach":
+        return False
+    refs = _string_list(proposal.trigger_evidence_refs, limit=MAX_EVIDENCE_REFS)
+    if not refs:
+        return True
+    if str(proposal.source_kind or "") != "open_item":
+        return False
+    self_ids = {
+        str(proposal.traceable_expectation_id or "").strip(),
+        str(proposal.proposal_id or "").strip(),
+    }
+    external_refs = [ref for ref in refs if str(ref or "").strip() and str(ref or "").strip() not in self_ids]
+    text = " ".join(
+        (
+            str(proposal.proposed_topic or ""),
+            str(proposal.ordinary_language_intent or ""),
+        )
+    ).casefold()
+    generic = any(marker in text for marker in GENERIC_LOCKED_OPEN_ITEM_MARKERS)
+    return not external_refs or generic
+
+
 @dataclass
 class ProactiveInitiativeCheckResult:
     proposal: ProactiveTurnProposal | None
@@ -778,6 +811,15 @@ def evaluate_proactive_initiative(
     if locked_proposal is not None:
         if locked_proposal.trigger not in _ALLOWED_TRIGGERS:
             return state, suppress("no_high_value_target", reason_code="no_traceable_proactive_target")
+        if _untraceable_locked_memory_efe_proposal(locked_proposal):
+            return state, suppress(
+                "no_traceable_proactive_target",
+                reason_code="no_traceable_proactive_target",
+                extra={
+                    "trigger": locked_proposal.trigger,
+                    "source_kind": locked_proposal.source_kind,
+                },
+            )
         if _safety_risk_from_state(state, m13_state):
             return state, suppress(
                 "opponent_strength_pre_block",
