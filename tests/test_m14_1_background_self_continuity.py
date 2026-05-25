@@ -428,6 +428,47 @@ def test_background_runner_collision_event_without_starting_second_thread(tmp_pa
     assert read_runner_lock(tmp_path) is None
 
 
+def test_inline_dev_fallback_runner_bumps_background_ticks_each_iteration(tmp_path: Path) -> None:
+    """Field gap reproduction: the inline_dev_fallback runner must call
+    ``run_background_self_tick`` each loop iteration in addition to the M14.2
+    event-driven ``tick_once``. Without this wiring,
+    ``background_ticks_today`` stays at 0 unless a ``ScheduledIntent`` is due —
+    the failure mode seen on Hu Tao live sessions (M15.3 prompt §6 out-of-scope
+    list).
+    """
+    state = _full_opted_state()
+    state["open_items"] = []
+    store = MVPStateStore(tmp_path)
+    store.save(state)
+    runtime = MVPDialogueRuntime(store=store, llm=_BgIdleLLM())
+    runner = BackgroundSelfRunner(
+        runtime,
+        session_root=tmp_path,
+        persona_id="p",
+        session_id="s",
+        runner_kind="inline_dev_fallback",
+        tick_interval_seconds=30,
+    )
+    runner.start()
+    try:
+        deadline = time.monotonic() + 8.0
+        ticks_today = 0
+        while time.monotonic() < deadline:
+            bg = (
+                store.load()
+                .get("m13_drive_state", {})
+                .get("initiative", {})
+                .get("background_continuity", {})
+            )
+            ticks_today = int(bg.get("ticks_today", 0) or 0)
+            if ticks_today >= 1:
+                break
+            time.sleep(0.05)
+        assert ticks_today >= 1, "inline_dev_fallback runner did not bump background_ticks_today"
+    finally:
+        runner.stop(drain_wait_seconds=2.0)
+
+
 def test_cli_accepts_persona_session_contract() -> None:
     result = subprocess.run(
         [

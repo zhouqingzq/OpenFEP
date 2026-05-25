@@ -500,7 +500,8 @@
           ],
           "source_extractors": [
             "first_order",
-            "second_order"
+            "second_order",
+            "validation_errors"
           ],
           "user_id": "acceptance-user"
         },
@@ -647,7 +648,8 @@
             "uncertainty_band": "high"
           }
         ]
-      }
+      },
+      "validation_errors": []
     },
     "replay_determinism": {
       "result_byte_identical": true,

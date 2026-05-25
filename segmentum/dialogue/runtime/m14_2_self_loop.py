@@ -134,9 +134,31 @@ class M142SelfLoopDaemon:
         try:
             while not self._stop:
                 self.tick_once(record_clock_wake=True)
+                self._run_background_self_tick_safely()
                 time.sleep(max(1, int(self.tick_interval_seconds)))
         finally:
             self.stop(reason="loop_exit")
+
+    def _run_background_self_tick_safely(self) -> dict[str, Any]:
+        """Drive the M14.1 periodic background self/reflection tick alongside the
+        M14.2 event-driven loop. Without this, ``background_ticks_today`` only
+        increments when a scheduled intent comes due, so a daemon with no due
+        intents looks alive (``SelfLoopDaemonHealthEvent``) but the M14.1
+        counters stay at zero. Exceptions are caught so a single tick failure
+        cannot kill the event loop.
+        """
+        try:
+            return dict(self.runtime.run_background_self_tick(runner_kind=self.runner_kind))
+        except Exception as exc:
+            self._audit(
+                {
+                    "type": "BackgroundIdleTickEvent",
+                    "at": self._now(),
+                    "skip_reason": "tick_error",
+                    "detail": str(exc)[:240],
+                }
+            )
+            return {"skip_reason": "tick_error", "ran_introspection": False}
 
     def tick_once(self, *, record_clock_wake: bool = True) -> dict[str, Any]:
         now = self._now()

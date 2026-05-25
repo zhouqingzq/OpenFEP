@@ -118,6 +118,7 @@ class BackgroundSelfRunner:
                         runner_kind=self._runner_kind,
                     )
                     daemon.tick_once(record_clock_wake=True)
+                    self._runtime.run_background_self_tick(runner_kind=self._runner_kind)
                 else:
                     self._runtime.run_background_self_tick(runner_kind=self._runner_kind)
             except Exception as exc:  # pragma: no cover - runner resilience

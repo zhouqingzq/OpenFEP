@@ -239,6 +239,54 @@ def test_due_preparation_defers_idle_outreach_instead_of_direct_delivery(tmp_pat
     assert len([row for row in rows if row.get("source_intent_id") == intent["intent_id"]]) == 1
 
 
+def test_run_forever_drives_background_self_tick_even_without_due_intents(tmp_path: Path) -> None:
+    """Field gap reproduction: the standalone daemon must call
+    ``run_background_self_tick`` each loop iteration so ``background_ticks_today``
+    increments on plain periodic wakes, not only when a ``ScheduledIntent`` is
+    prepared. Without this wiring, daemons appear alive (`SelfLoopDaemonHealthEvent`)
+    but `m13_drive_state.background_continuity.ticks_today` stays at 0.
+    """
+    store = MVPStateStore(tmp_path)
+    store.save(_full_opted_state())
+    runtime = MVPDialogueRuntime(store=store, llm=_DeliveryLLM())  # type: ignore[arg-type]
+    daemon = M142SelfLoopDaemon(runtime, persona_id="p", session_id="s")
+
+    bg_before = store.load()["m13_drive_state"]["initiative"]["background_continuity"]
+    assert int(bg_before.get("ticks_today", 0) or 0) == 0
+
+    result = daemon._run_background_self_tick_safely()
+
+    bg_after = store.load()["m13_drive_state"]["initiative"]["background_continuity"]
+    assert int(bg_after.get("ticks_today", 0) or 0) >= 1
+    assert int(bg_after.get("last_tick_at", 0) or 0) > 0
+    assert result.get("ran_introspection") is False
+    log_text = (tmp_path / "conversation_log.jsonl").read_text(encoding="utf-8")
+    assert "BackgroundIdleTickEvent" in log_text
+
+
+def test_run_forever_background_self_tick_safely_swallows_exceptions(tmp_path: Path) -> None:
+    """A single faulty background self-tick must not break the M14.2 event loop;
+    the daemon should audit a ``BackgroundIdleTickEvent`` with ``skip_reason='tick_error'``
+    and keep running.
+    """
+    store = MVPStateStore(tmp_path)
+    store.save(_full_opted_state())
+    runtime = MVPDialogueRuntime(store=store, llm=_DeliveryLLM())  # type: ignore[arg-type]
+
+    def _boom(*, runner_kind: str) -> dict[str, object]:
+        raise RuntimeError("simulated background tick failure")
+
+    runtime.run_background_self_tick = _boom  # type: ignore[assignment]
+    daemon = M142SelfLoopDaemon(runtime, persona_id="p", session_id="s")
+
+    result = daemon._run_background_self_tick_safely()
+
+    assert result == {"skip_reason": "tick_error", "ran_introspection": False}
+    log_text = (tmp_path / "conversation_log.jsonl").read_text(encoding="utf-8")
+    assert "tick_error" in log_text
+    assert "simulated background tick failure" in log_text
+
+
 def test_self_loop_daemon_cli_accepts_persona_session_contract() -> None:
     result = subprocess.run(
         [sys.executable, "-m", "segmentum.dialogue.runtime.m14_2_self_loop", "--help"],
