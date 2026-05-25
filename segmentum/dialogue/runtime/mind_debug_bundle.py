@@ -18,6 +18,7 @@ from segmentum.dialogue.runtime.m14_1_background_continuity import (
 )
 from segmentum.dialogue.runtime.m14_3_open_item_migration import audit_open_items_for_efe
 from segmentum.dialogue.runtime.m14_4_implicit_idle import compute_idle_seconds
+from segmentum.dialogue.runtime.m15_3_cleanup_control import is_strictly_traceable, summarize_strict_traceability
 
 
 AUDIT_TYPES_OF_INTEREST = frozenset(
@@ -133,6 +134,7 @@ def _open_items_section(open_items: Any) -> list[str]:
         suggestion = suggestion_by_id.get(str(row.get("id", "") or "").strip())
         lines.append(
             f"- `{item_id}` title=`{title}` "
+            f"strict_trace={is_strictly_traceable(row)} "
             f"next_check=`{_clip(row.get('next_check') or row.get('next_step'), limit=40)}` "
             f"evidence_refs=[{_join(row.get('evidence_refs'))}] "
             f"bound_memory_ids=[{_join(row.get('bound_memory_ids'))}] "
@@ -163,22 +165,39 @@ def _expectations_section(expectations: Any) -> list[str]:
     return lines
 
 
-def _queued_outreach_section(rows: Any) -> list[str]:
-    lines = ["## Queued outreach"]
+def _queued_outreach_section(rows: Any, *, session_id: str = "") -> list[str]:
+    lines = ["## Queued outreach (this session)"]
     items = rows if isinstance(rows, list) else []
     pending = [row for row in items if isinstance(row, Mapping) and str(row.get("status", "")) == "pending"]
+    foreign = [row for row in items if isinstance(row, Mapping) and str(row.get("source_session_id", row.get("session_id", ""))) not in {"", session_id}]
+    if foreign:
+        lines.extend(["", "## Queued outreach (other sessions)", f"- foreign_session_excluded: {len(foreign)}"])
     if not pending:
-        lines.append("- (none pending)")
+        lines.append("- pending=0")
         return lines
+    lines.append(f"- pending={len(pending)}")
     for row in pending[:8]:
         lines.append(
             f"- proposal_id=`{_clip(row.get('proposal_id'), limit=60)}` "
+            f"session_id=`{_clip(row.get('session_id') or row.get('source_session_id'), limit=40)}` "
             f"trigger=`{_clip(row.get('trigger'), limit=60)}` "
-            f"source_kind=`{_clip(row.get('source_kind'), limit=40)}` "
             f"evidence_refs=[{_join(row.get('trigger_evidence_refs') or row.get('evidence_refs'))}] "
             f"intent=`{_clip(row.get('ordinary_language_intent'), limit=120)}`"
         )
     return lines
+
+
+def _strict_traceability_section(state: Mapping[str, Any]) -> list[str]:
+    summary = summarize_strict_traceability(state)
+    return [
+        "## Traceability (strict)",
+        f"- open_items: total={summary.get('open_items_total', 0)} "
+        f"strict_trace={summary.get('open_items_strict_trace', 0)} "
+        f"duplicate_ids={summary.get('open_items_duplicate_local_ids', 0)}",
+        f"- pending_expectations: total={summary.get('pending_expectations_total', 0)} "
+        f"strict_trace={summary.get('pending_expectations_strict_trace', 0)} "
+        f"duplicate_ids={summary.get('pending_expectations_duplicate_local_ids', 0)}",
+    ]
 
 
 def build_mind_debug_bundle_text(
@@ -377,11 +396,13 @@ def build_mind_debug_bundle_text(
     lines.extend(
         [
             "",
+            *_strict_traceability_section(state),
+            "",
             *_open_items_section(state.get("open_items")),
             "",
             *_expectations_section(state.get("pending_expectations")),
             "",
-            *_queued_outreach_section(ui_hints.get("queued_outreach")),
+            *_queued_outreach_section(ui_hints.get("queued_outreach"), session_id=session_id),
             "",
             "## Log channel counts (full scan)",
         ]

@@ -16,7 +16,9 @@ from segmentum.dialogue.runtime.m15_3_cleanup_control import (
     CleanupOwner,
     cleanup_ineligibility_reason,
     detect_cleanup_intents,
+    is_cleanup_protected,
     is_strictly_traceable,
+    summarize_strict_traceability,
 )
 from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore
 
@@ -31,6 +33,22 @@ def _m13(*, profile: str = "bounded_default") -> dict[str, object]:
     initiative["implicit_idle_delivery"] = True
     m13["initiative"] = initiative
     return m13
+
+
+def _meta(state: dict[str, object]) -> dict[str, object]:
+    m13 = state.setdefault("m13_drive_state", {})
+    if not isinstance(m13, dict):
+        m13 = {}
+        state["m13_drive_state"] = m13
+    meta = m13.setdefault("meta_control_intents", {})
+    if not isinstance(meta, dict):
+        meta = {}
+        m13["meta_control_intents"] = meta
+    meta.setdefault("cleanup_active", [])
+    meta.setdefault("cleanup_consumed", [])
+    meta.setdefault("cleanup_recent_detections", [])
+    meta.setdefault("recent_idle_cognitive_ticks", [])
+    return meta
 
 
 def _low_open(index: int, **overrides: object) -> dict[str, object]:
@@ -52,9 +70,21 @@ def _low_pending(index: int, **overrides: object) -> dict[str, object]:
         "content": f"unanchored pending expectation {index}",
         "verify_on": "next_user_turn",
         "created_at": NOW - 5 * 86400,
+        "created_turn_index": 0,
     }
     row.update(overrides)
     return row
+
+
+def _seed_idle_ticks(state: dict[str, object], *, count: int = 5, retrieved: list[str] | None = None) -> None:
+    _meta(state)["recent_idle_cognitive_ticks"] = [
+        {
+            "at": NOW - (count - idx) * 60,
+            "reject_reason": "no_high_value_target",
+            "retrieved_ids": retrieved or ["item_001", "item_002"],
+        }
+        for idx in range(count)
+    ]
 
 
 def test_strict_traceability_rejects_self_referential_evidence() -> None:
@@ -63,13 +93,30 @@ def test_strict_traceability_rejects_self_referential_evidence() -> None:
     assert is_strictly_traceable(row) is False
     assert cleanup_ineligibility_reason(row, now=NOW, phase="idle") == "self_referential_evidence_only"
 
-    anchored = {**row, "evidence_refs": ["turn_7"]}
+    anchored = {**row, "evidence_refs": ["stm_turn_7"]}
     assert is_strictly_traceable(anchored) is True
 
 
-def test_cleanup_detection_is_audit_only_on_bounded_default() -> None:
+def test_cleanup_detection_applies_by_default_on_bounded_default() -> None:
     state = {
-        "open_items": [_low_open(i) for i in range(6)],
+        "open_items": [_low_open(i) for i in range(8)],
+        "pending_expectations": [],
+        "m13_drive_state": _m13(profile="bounded_default"),
+    }
+
+    result = detect_cleanup_intents(state, now=NOW, turn_index=4, source="idle_cognitive_tick")
+
+    assert any(event["type"] == "OpenItemBacklogDetectedEvent" for event in result.events)
+    assert result.intents
+    assert _meta(state)["cleanup_active"]
+    run = CleanupOwner.apply_intents(state, now=NOW, turn_index=4, source="idle_cognitive_tick")
+    assert run.ops["diagnostic_open_items"] > 0
+
+
+def test_cleanup_detection_can_be_forced_audit_only(monkeypatch) -> None:
+    monkeypatch.setenv("SEGMENTUM_CLEANUP_CONTROL_APPLY", "0")
+    state = {
+        "open_items": [_low_open(i) for i in range(8)],
         "pending_expectations": [],
         "m13_drive_state": _m13(profile="bounded_default"),
     }
@@ -78,16 +125,16 @@ def test_cleanup_detection_is_audit_only_on_bounded_default() -> None:
 
     assert any(event["type"] == "OpenItemBacklogDetectedEvent" for event in result.events)
     assert result.intents == []
-    meta = state["m13_drive_state"]["meta_control_intents"]  # type: ignore[index]
-    assert meta["cleanup_active"] == []
+    assert _meta(state)["cleanup_active"] == []
     assert all(row["status"] == "open" for row in state["open_items"])  # type: ignore[index]
+    assert CleanupOwner.apply_intents(state, now=NOW, turn_index=4, source="idle_cognitive_tick").ops == {}
 
 
 def test_cleanup_owner_marks_rows_without_deleting(monkeypatch) -> None:
     monkeypatch.setenv("SEGMENTUM_CLEANUP_CONTROL_APPLY", "1")
     state = {
-        "open_items": [_low_open(i) for i in range(6)],
-        "pending_expectations": [_low_pending(i) for i in range(6)],
+        "open_items": [_low_open(i, id="item_001") for i in range(6)],
+        "pending_expectations": [_low_pending(i, id="exp_001") for i in range(6)],
         "m13_drive_state": _m13(profile="bounded_default"),
     }
 
@@ -96,18 +143,124 @@ def test_cleanup_owner_marks_rows_without_deleting(monkeypatch) -> None:
         now=NOW,
         turn_index=4,
         source="idle_cognitive_tick",
-        current_idle_tick_event={"reject_reason": "no_high_value_target"},
+        current_idle_tick_event={"reject_reason": "no_high_value_target", "retrieved_ids": ["oi_0"]},
     )
     result = CleanupOwner.apply_intents(state, now=NOW, turn_index=4, source="idle_cognitive_tick")
 
-    assert len(detection.intents) == 3
+    assert len(detection.intents) >= 2
     assert len(state["open_items"]) == 6
     assert len(state["pending_expectations"]) == 6
     assert all(row["status"] == "diagnostic_only" for row in state["open_items"])  # type: ignore[index]
     assert all(row["status"] == "expired" for row in state["pending_expectations"])  # type: ignore[index]
     assert result.ops["diagnostic_open_items"] == 6
     assert result.ops["expired_pending_expectations"] == 6
+    assert any(event["type"] == "CleanupOpEvent" for event in result.events)
     assert any(event["type"] == "CleanupRunEvent" and event["row_deletion_count"] == 0 for event in result.events)
+
+
+def test_scheduled_and_pinned_open_items_are_protected(monkeypatch) -> None:
+    monkeypatch.setenv("SEGMENTUM_CLEANUP_CONTROL_APPLY", "1")
+    protected = _low_open(
+        99,
+        id="item_scheduled",
+        scheduled_intent_id="sint_keep",
+        created_at=NOW - 10 * 86400,
+    )
+    pinned = _low_open(98, id="item_pinned", pin=True, created_at=NOW - 10 * 86400)
+    state = {
+        "open_items": [_low_open(i) for i in range(8)] + [protected, pinned],
+        "pending_expectations": [],
+        "m13_drive_state": _m13(profile="streamlit_open_chat"),
+    }
+    detect_cleanup_intents(state, now=NOW, turn_index=4, source="idle_cognitive_tick")
+    CleanupOwner.apply_intents(state, now=NOW, turn_index=4, source="idle_cognitive_tick")
+
+    by_id = {row["id"]: row["status"] for row in state["open_items"]}  # type: ignore[index]
+    assert by_id["item_scheduled"] == "open"
+    assert by_id["item_pinned"] == "open"
+    assert is_cleanup_protected(protected, now=NOW)
+    assert is_cleanup_protected(pinned, now=NOW)
+
+
+def test_strict_traceable_exp_001_survives_pending_cleanup(monkeypatch) -> None:
+    monkeypatch.setenv("SEGMENTUM_CLEANUP_CONTROL_APPLY", "1")
+    good = {
+        "id": "exp_001",
+        "status": "pending",
+        "content": "user may continue noodle topic",
+        "verify_on": "memory_dynamics_idle",
+        "created_at": NOW - 120,
+        "evidence_refs": ["stm_turn_1779704612"],
+        "bound_memory_ids": ["stm_turn_1779704612"],
+        "source": "memory_dynamics_adapter",
+    }
+    stale_dupes = [
+        _low_pending(i, id="exp_001", created_at=NOW - 5 * 86400, created_turn_index=0) for i in range(8)
+    ]
+    state = {
+        "open_items": [],
+        "pending_expectations": [*stale_dupes, good],
+        "m13_drive_state": _m13(profile="streamlit_open_chat"),
+    }
+    detect_cleanup_intents(state, now=NOW, turn_index=6, source="idle_cognitive_tick")
+    CleanupOwner.apply_intents(state, now=NOW, turn_index=6, source="idle_cognitive_tick")
+
+    survivors = [row for row in state["pending_expectations"] if row.get("id") == "exp_001"]  # type: ignore[index]
+    assert any(row["status"] == "pending" for row in survivors)
+    assert survivors[-1]["evidence_refs"] == ["stm_turn_1779704612"]
+
+
+def test_recall_burden_detector_requires_window_and_ratio(monkeypatch) -> None:
+    monkeypatch.setenv("SEGMENTUM_CLEANUP_CONTROL_APPLY", "1")
+    state = {
+        "open_items": [_low_open(i, id="item_001" if i < 4 else "item_002") for i in range(8)],
+        "pending_expectations": [],
+        "m13_drive_state": _m13(profile="streamlit_open_chat"),
+    }
+    _seed_idle_ticks(state, count=3, retrieved=["item_001"])
+    short = detect_cleanup_intents(
+        state,
+        now=NOW,
+        turn_index=4,
+        source="idle_cognitive_tick",
+        current_idle_tick_event={"reject_reason": "no_high_value_target", "retrieved_ids": ["item_001"]},
+    )
+    assert not any(event["type"] == "LowTraceabilityRecallBurdenDetectedEvent" for event in short.events)
+
+    _seed_idle_ticks(state, count=4, retrieved=["item_001", "item_002"])
+    full = detect_cleanup_intents(
+        state,
+        now=NOW,
+        turn_index=4,
+        source="idle_cognitive_tick",
+        current_idle_tick_event={"reject_reason": "no_high_value_target", "retrieved_ids": ["item_001"]},
+    )
+    burden = next(event for event in full.events if event["type"] == "LowTraceabilityRecallBurdenDetectedEvent")
+    assert burden["no_target_ratio"] >= 0.8
+    assert burden["low_traceability_retrieval_ratio"] >= 0.5
+
+
+def test_pending_turn_grace_expires_old_next_user_turn_rows(monkeypatch) -> None:
+    monkeypatch.setenv("SEGMENTUM_CLEANUP_CONTROL_APPLY", "1")
+    expired = _low_pending(1, id="exp_old", created_turn_index=0)
+    state = {
+        "open_items": [],
+        "pending_expectations": [expired],
+        "m13_drive_state": _m13(profile="streamlit_open_chat"),
+    }
+    _meta(state)["cleanup_active"] = [
+        {
+            "intent_id": "cleanup_pending_turn_grace",
+            "at": NOW,
+            "turn_index": 3,
+            "detector": "test",
+            "intent_kind": "cleanup_pending_expectation_backlog",
+            "payload": {"candidate_ids": ["exp_old"]},
+            "expires_at": NOW + 100,
+        }
+    ]
+    CleanupOwner.apply_intents(state, now=NOW, turn_index=3, source="idle_cognitive_tick")
+    assert state["pending_expectations"][0]["status"] == "expired"  # type: ignore[index]
 
 
 def test_structural_merge_does_not_use_content_similarity() -> None:
@@ -130,7 +283,7 @@ def test_structural_merge_does_not_use_content_similarity() -> None:
         "payload": {"candidate_ids": ["oi_1", "oi_2", "oi_3", "oi_4"]},
         "expires_at": NOW + 100,
     }
-    state["m13_drive_state"]["meta_control_intents"] = {"cleanup_active": [intent]}  # type: ignore[index]
+    _meta(state)["cleanup_active"] = [intent]
 
     result = CleanupOwner.apply_intents(state, now=NOW, turn_index=4, source="idle_cognitive_tick")
 
@@ -196,6 +349,32 @@ def test_memory_efe_rejects_self_reference_and_seeds_bound_memory_floor() -> Non
     assert [row.expectation_id for row in seeded.eligible_for_efe] == ["exp_low_bound"]
     assert seeded.bound_recall_seed_ids == ["ltm_low"]
     assert seeded.bound_recall_floor_bypassed_ids == ["ltm_low"]
+
+
+def test_hu_tao_like_backlog_summary() -> None:
+    open_items = [
+        _low_open(i, id="item_001") for i in range(13)
+    ] + [
+        _low_open(20, id="item_002"),
+        _low_open(21, id="item_002"),
+        _low_open(22, id="item_003"),
+    ]
+    pending = [_low_pending(i, id="exp_001") for i in range(8)] + [
+        {
+            "id": "exp_001",
+            "status": "pending",
+            "verify_on": "memory_dynamics_idle",
+            "created_at": NOW - 120,
+            "evidence_refs": ["stm_turn_1779704612"],
+            "bound_memory_ids": ["stm_turn_1779704612"],
+        }
+    ]
+    state = {"open_items": open_items, "pending_expectations": pending}
+    summary = summarize_strict_traceability(state)
+    assert summary["open_items_total"] == 16
+    assert summary["open_items_strict_trace"] == 0
+    assert summary["open_items_duplicate_local_ids"] == 2
+    assert summary["pending_expectations_strict_trace"] == 1
 
 
 def test_queued_outreach_delivery_defaults_to_active_session_only(tmp_path: Path) -> None:

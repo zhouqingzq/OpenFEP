@@ -1209,8 +1209,8 @@ def render_sidebar() -> None:
             st.session_state.m13_implicit_idle_delivery = True
             st.session_state.m13_implicit_idle_delivery_synced = True
             desired_profile = str(os.environ.get("SEGMENTUM_PROACTIVE_PROFILE", "") or "").strip().lower()
-            if desired_profile != "streamlit_open_chat":
-                desired_profile = "bounded_default"
+            if desired_profile not in {"bounded_default", "streamlit_open_chat"}:
+                desired_profile = "streamlit_open_chat"
             if str(initiative_status.get("proactive_policy_profile", "bounded_default")) != desired_profile:
                 initiative_status = chat_iface.set_proactive_policy_profile(desired_profile)
             st.session_state.m13_proactive_policy_profile = desired_profile

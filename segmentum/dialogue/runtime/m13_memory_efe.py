@@ -607,7 +607,12 @@ def normalize_expectations_for_efe(
                     for row in bound_rows
                 ]
                 if scores and max(scores) < MEMORY_EFE_RECALL_FLOOR:
-                    if phase == "idle" and (expectation.evidence_refs or expectation.bound_memory_ids):
+                    if (
+                        phase == "idle"
+                        and expectation.bound_memory_ids
+                        and expectation.evidence_refs
+                        and expectation.ineligibility_reason != "self_referential_evidence_only"
+                    ):
                         for bound_id in expectation.bound_memory_ids:
                             if bound_id in memory_by_id and bound_id not in bound_recall_seed_ids:
                                 bound_recall_seed_ids.append(bound_id)
@@ -636,8 +641,8 @@ def normalize_expectations_for_efe(
     return NormalizedExpectationSet(
         eligible_for_efe=eligible,
         diagnostic_only=diagnostic,
-        bound_recall_seed_ids=bound_recall_seed_ids[:12],
-        bound_recall_floor_bypassed_ids=bound_recall_floor_bypassed_ids[:12],
+        bound_recall_seed_ids=bound_recall_seed_ids[:4],
+        bound_recall_floor_bypassed_ids=bound_recall_floor_bypassed_ids[:4],
     )
 
 

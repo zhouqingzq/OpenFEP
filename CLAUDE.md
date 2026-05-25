@@ -133,6 +133,7 @@ M14.7: Path B Memory Gate, Decay, And Precision-Weighted Recall
 M15.0: Episode Ledger And Free-Energy Proxy Trajectory
 M15.1: Consolidation And Forgetting Loop
 M15.2: Meta-Control Intervention Layer (engineering scheduler)
+M15.3: Open-Item And Pending-Expectation Cleanup Meta-Control
 ```
 
 Deferred or non-active for new implementation unless explicitly revived:
@@ -148,7 +149,7 @@ M12 is split into M12.0 (identity continuity) and M12.1 (mechanistic personality
 The M9 series ends at M9.0. Path B memory gate, decay, and precision-weighted
 recall completion lives in M14.7. The three-timescale memory-dynamics loop
 (fast idle refresh, slow consolidation, meta-control intervention) spans
-M13.5, M14.6–M14.7, and M15.0–M15.2. M15.2 applies intervention intents on
+M13.5, M14.6–M14.7, and M15.0–M15.3. M15.2 applies intervention intents on
 the local Streamlit demo path (`streamlit_open_chat`); production
 (`bounded_default`) remains detection-audit-only unless explicitly enabled.
 

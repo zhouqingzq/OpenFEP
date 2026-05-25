@@ -5624,6 +5624,8 @@ class MVPDialogueRuntime:
         for expectation in expectation_set.eligible_for_efe:
             bound_ids.extend(list(expectation.bound_memory_ids[:8]))
             bound_ids.extend(list(expectation.evidence_refs[:8]))
+        bound_ids.extend(list(expectation_set.bound_recall_seed_ids[:4]))
+        bound_ids = list(dict.fromkeys(item for item in bound_ids if item))[:4]
         if bound_ids:
             by_id = retrieve_memories_by_ids(state, bound_ids, limit=8)
             seen = {str(item.get("id", "")) for item in retrieved if item.get("id")}

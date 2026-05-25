@@ -45,7 +45,9 @@ def _created_at(row: Mapping[str, Any]) -> int:
 
 
 def _has_traceable_evidence(row: Mapping[str, Any]) -> bool:
-    return bool(_string_list(row.get("evidence_refs"), limit=8) or _string_list(row.get("bound_memory_ids"), limit=8))
+    from segmentum.dialogue.runtime.m15_3_cleanup_control import is_strictly_traceable
+
+    return is_strictly_traceable(row)
 
 
 def audit_open_items_for_efe(open_items: Any) -> list[OpenItemMigrationSuggestion]:
