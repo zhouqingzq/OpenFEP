@@ -14,6 +14,12 @@ import re
 import uuid
 from typing import Any, Mapping
 
+from segmentum.dialogue.runtime.m15_episode_ledger import (
+    EpisodeLedger,
+    MemoryDynamicsEpisode,
+    drive_pull_bonus_for_action,
+)
+
 M13_STATE_VERSION = 1
 
 CANDIDATE_REPLY_ACTIONS: tuple[str, ...] = (
@@ -607,6 +613,8 @@ class M13DriveEvaluator:
         m13_state: Mapping[str, Any],
         entity_binding: Mapping[str, Any] | None = None,
         evidence_judgment: Mapping[str, Any] | None = None,
+        episode_ledger: EpisodeLedger | None = None,
+        current_state_fingerprint: str = "",
     ) -> M13EvaluationResult:
         del response_style_prior
         topic = build_topic_fingerprint(
@@ -625,6 +633,9 @@ class M13DriveEvaluator:
             candidates = ["clarify", "deflect"]
 
         scores: dict[str, dict[str, float]] = {}
+        fingerprint_episodes: list[MemoryDynamicsEpisode] = []
+        if episode_ledger is not None and current_state_fingerprint:
+            fingerprint_episodes = episode_ledger.by_fingerprint(current_state_fingerprint, limit=16)
         for action in candidates:
             scores[action] = _score_candidate(
                 action=action,
@@ -636,6 +647,18 @@ class M13DriveEvaluator:
                 habit_traits=habit_traits,
                 relationship_value_context=relationship_value_context,
             )
+            if fingerprint_episodes:
+                bonus = drive_pull_bonus_for_action(
+                    fingerprint_episodes,
+                    state_fingerprint=current_state_fingerprint,
+                    action=action,
+                )
+                if bonus:
+                    scores[action]["m15_episode_ledger_pull_bonus"] = bonus
+                    scores[action]["behavioral_pull"] = round(
+                        max(0.0, min(1.0, scores[action]["behavioral_pull"] + bonus)),
+                        6,
+                    )
 
         ranked = sorted(
             candidates,
@@ -685,6 +708,11 @@ class M13DriveEvaluator:
             "scores_summary": {
                 "top": top_action,
                 "runner_up": ranked[1] if len(ranked) > 1 else "",
+            },
+            "m15_episode_ledger": {
+                "state_fingerprint": current_state_fingerprint,
+                "matched_recent_episodes": len(fingerprint_episodes),
+                "bounded_adjustment": True,
             },
         }
         return M13EvaluationResult(

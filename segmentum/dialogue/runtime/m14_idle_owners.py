@@ -12,6 +12,11 @@ from segmentum.dialogue.runtime.m14_idle_reflector import (
     subjective_language_violations,
 )
 from segmentum.dialogue.runtime.m13_drive import _bounded_float, _mapping, _new_id, _string_list
+from segmentum.dialogue.runtime.m14_7_memory_gate import (
+    MemoryGate,
+    MemoryWriteIntent,
+    memory_gate_event,
+)
 
 MAX_SELF_COGNITION_PATCHES_PER_SESSION = 2
 MAX_OPEN_ITEM_PATCHES_PER_SESSION = 5
@@ -336,6 +341,41 @@ class MemoryConsolidationOwner:
                   }
               )
               break
+          gate_intent = MemoryWriteIntent(
+              target=intent.target if intent.target in {"short_term", "long_term"} else "short_term",
+              kind=intent.kind,
+              content=intent.content,
+              confidence=intent.confidence,
+              evidence_refs=list(intent.evidence_refs),
+              identity_relevance=0.0,
+              value_proxy=max(0.45, intent.confidence),
+              surprise_proxy=max(0.35, intent.confidence * 0.75),
+              source="idle_consolidation",
+              proposer="MemoryConsolidationOwner",
+              audit_reason=intent.reason,
+              intent_id=intent.intent_id,
+          )
+          decision = MemoryGate().evaluate(gate_intent, proposer_commits_this_session=session_count + applied)
+          if not decision.commit:
+              events.append(
+                  memory_gate_event(
+                      event_type="MemoryGateRejectedEvent",
+                      intent=gate_intent,
+                      decision=decision,
+                      turn_index=turn_index,
+                      now=now,
+                  )
+              )
+              events.append(
+                  {
+                      "type": "MemoryConsolidationIntentEvent",
+                      **base,
+                      "intent_id": intent.intent_id,
+                      "committed": False,
+                      "violation_codes": decision.violation_codes,
+                  }
+              )
+              continue
           row = {
               "id": _new_id("stm"),
               "kind": intent.kind,
@@ -346,6 +386,7 @@ class MemoryConsolidationOwner:
               "created_at": now,
               "turn_index": turn_index,
               "evidence_refs": list(intent.evidence_refs),
+              "memory_gate_decision": decision.to_dict(),
           }
           if intent.target == "long_term":
               state.setdefault("long_term_memory", []).append(row)
@@ -353,6 +394,17 @@ class MemoryConsolidationOwner:
               state.setdefault("short_term_memory", []).append(row)
           applied += 1
           committed = True
+          events.append(
+              memory_gate_event(
+                  event_type="MemoryGateCommitEvent",
+                  intent=gate_intent,
+                  decision=decision,
+                  turn_index=turn_index,
+                  now=now,
+                  store_target=intent.target,
+                  store_id=str(row["id"]),
+              )
+          )
           events.append(
               {
                   "type": "MemoryConsolidationIntentEvent",

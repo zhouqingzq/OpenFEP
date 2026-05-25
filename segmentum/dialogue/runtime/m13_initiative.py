@@ -23,6 +23,7 @@ from segmentum.dialogue.runtime.m13_drive import (
 )
 from segmentum.dialogue.runtime.m13_reward import normalize_affective_reward_proxy_state
 from segmentum.dialogue.runtime.m14_3_proactive_alignment import ProactiveTarget, select_proactive_target
+from segmentum.dialogue.runtime.m15_meta_control import apply_trigger_suppression_intent
 
 TRACEABLE_DELIVERY_TRIGGERS = frozenset(
     {
@@ -834,6 +835,21 @@ def evaluate_proactive_initiative(
                     "source_kind": locked_proposal.source_kind,
                 },
             )
+        state, meta_intent, meta_events = apply_trigger_suppression_intent(
+            state,
+            action_trigger=locked_proposal.trigger,
+            now=now,
+            turn_index=turn_index,
+        )
+        events.extend(meta_events)
+        if meta_intent is not None:
+            return state, suppress(
+                "meta_control_trigger_suppressed",
+                reason_code="meta_control_trigger_suppressed",
+                extra={"linked_intent_id": str(meta_intent.get("intent_id", ""))},
+            )
+        m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+        initiative = normalize_initiative_state(m13_state.get("initiative"))
         if _safety_risk_from_state(state, m13_state):
             return state, suppress(
                 "opponent_strength_pre_block",
@@ -925,6 +941,21 @@ def evaluate_proactive_initiative(
             return state, suppress("insufficient_evidence", reason_code="no_traceable_proactive_target")
         return state, suppress("no_traceable_proactive_target", reason_code="no_traceable_proactive_target")
 
+    state, meta_intent, meta_events = apply_trigger_suppression_intent(
+        state,
+        action_trigger=target_detail.trigger,
+        now=now,
+        turn_index=turn_index,
+    )
+    events.extend(meta_events)
+    if meta_intent is not None:
+        return state, suppress(
+            "meta_control_trigger_suppressed",
+            reason_code="meta_control_trigger_suppressed",
+            extra={"linked_intent_id": str(meta_intent.get("intent_id", ""))},
+        )
+    m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+    initiative = normalize_initiative_state(m13_state.get("initiative"))
     proposal = build_proposal_from_target(
         target_detail,
         now=now,

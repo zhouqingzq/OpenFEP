@@ -120,11 +120,19 @@ M13.1: Boredom / Exploration Bias
 M13.2: Affective Reward Proxy And Settlement
 M13.3: UI-Level Bounded Initiative
 M13.4: UI Idle Tick And Introspection Entry Point
+M13.5: Idle Cognitive Refresh Tick (silence-period fast loop)
 M13.6: Memory-Backed Expected Free Energy Bridge (Path B advisory only)
 M14.0: Conscious Idle Reflector And Self-Cognition Patch
 M14.1: Background Self-Continuity And Persistent Idle Loop
 M14.2: Decoupled Environment Loop And Durable Overnight Outreach
 M14.3: Traceable Proactive Delivery Alignment And Safety Diagnostics
+M14.4: Streamlit Implicit Idle Proactive Delivery
+M14.5: Production Proactive Policy Hardening
+M14.6: Idle Plan And Structural Selector Alignment, Diagnose Observability
+M14.7: Path B Memory Gate, Decay, And Precision-Weighted Recall
+M15.0: Episode Ledger And Free-Energy Proxy Trajectory
+M15.1: Consolidation And Forgetting Loop
+M15.2: Meta-Control Intervention Layer (engineering scheduler)
 ```
 
 Deferred or non-active for new implementation unless explicitly revived:
@@ -136,6 +144,13 @@ M10.0:  Self-Initiated Exploration Agenda (superseded by M13 + conscious idle wo
 
 M11 “Conscious Projection Runtime” remains deferred; M11.0 owns user modeling.
 M12 is split into M12.0 (identity continuity) and M12.1 (mechanistic personality).
+
+The M9 series ends at M9.0. Path B memory gate, decay, and precision-weighted
+recall completion lives in M14.7. The three-timescale memory-dynamics loop
+(fast idle refresh, slow consolidation, meta-control intervention) spans
+M13.5, M14.6–M14.7, and M15.0–M15.2. M15.2 applies intervention intents on
+the local Streamlit demo path (`streamlit_open_chat`); production
+(`bounded_default`) remains detection-audit-only unless explicitly enabled.
 
 ---
 

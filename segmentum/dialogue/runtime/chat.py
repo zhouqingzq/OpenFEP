@@ -12,7 +12,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Mapping
 
 from ..conversation_loop import run_conversation
 from ..fep_prompt import normalize_dialogue_outcome
@@ -27,6 +27,7 @@ from .mvp_loop import (
     SHARED_STATE_KEYS,
     SYSTEM_FILE_NAMES,
 )
+from .m15_episode_ledger import EpisodeLedger
 
 if TYPE_CHECKING:
     from ...agent import SegmentAgent
@@ -1007,8 +1008,70 @@ class ChatInterface:
         last_proactive_target: dict[str, object] = {}
         last_proactive_suppression: dict[str, object] = {}
         last_drive_band_summary: dict[str, object] = {}
+        last_idle_cognitive_tick: dict[str, object] = {}
+        last_idle_plan_mismatch: dict[str, object] = {}
+        mvp_runtime = getattr(self, "_mvp_runtime", None)
+        m15_delta_f_trail: list[dict[str, object]] = []
+        if mvp_runtime is not None:
+            try:
+                ledger = EpisodeLedger(mvp_runtime.store.root)
+                m15_delta_f_trail = [
+                    {
+                        "turn_index": episode.turn_index,
+                        "phase": episode.phase,
+                        "action": episode.action,
+                        "delta_fe_proxy": episode.delta_fe_proxy,
+                        "outcome_summary": episode.outcome_summary,
+                    }
+                    for episode in reversed(ledger.recent(5))
+                ]
+            except Exception:
+                m15_delta_f_trail = []
         for row in self.read_conversation_log(limit=300):
             if str(row.get("event", "")) != "m14_2_audit":
+                if str(row.get("type", "")) == "IdleCognitiveTickEvent":
+                    target = row.get("selected_target", {})
+                    bands = row.get("bands", {})
+                    last_idle_cognitive_tick = {
+                        "at": int(row.get("at", 0) or 0),
+                        "idle_seconds": row.get("idle_seconds", 0),
+                        "retrieved_ids": row.get("retrieved_ids", []),
+                        "bounded_retrieve_ids": row.get("bounded_retrieve_ids", []),
+                        "recall_top_k": row.get("recall_top_k", 0),
+                        "memory_efe_should_outreach": bool(row.get("memory_efe_should_outreach", False)),
+                        "memory_efe_selected_policy": str(row.get("memory_efe_selected_policy", "") or ""),
+                        "reject_reason": str(row.get("reject_reason", "") or ""),
+                        "selected_target": dict(target) if isinstance(target, dict) else {},
+                        "bands": dict(bands) if isinstance(bands, dict) else {},
+                    }
+                    if isinstance(target, dict) and target:
+                        last_proactive_target = {
+                            "trigger": str(target.get("trigger", "") or ""),
+                            "traceable_expectation_id": str(target.get("traceable_expectation_id", "") or ""),
+                            "source_kind": str(target.get("source_kind", "") or ""),
+                            "selection_reason_codes": target.get("selection_reason_codes", []),
+                            "evidence_refs": target.get("evidence_refs", []),
+                        }
+                    elif str(row.get("reject_reason", "") or ""):
+                        last_proactive_suppression = {
+                            "reason": str(row.get("reject_reason", "") or ""),
+                            "reason_code": str(row.get("reject_reason", "") or ""),
+                            "reason_stage": "idle_cognitive_tick",
+                        }
+                    if isinstance(bands, dict):
+                        last_drive_band_summary = {
+                            "behavioral_pull_band": bands.get("behavior_band", ""),
+                            "boredom_band": bands.get("boredom_band", ""),
+                            "affective_reward_band": bands.get("reward_band", ""),
+                            "relation_path_precision_band": bands.get("relation_band", ""),
+                        }
+                if str(row.get("type", "")) == "IdlePlanStructuralMismatchEvent":
+                    last_idle_plan_mismatch = {
+                        "at": int(row.get("at", 0) or 0),
+                        "mismatch_reason_code": str(row.get("mismatch_reason_code", "") or ""),
+                        "plan_recommendation_reason": str(row.get("plan_recommendation_reason", "") or ""),
+                        "selection_reason_codes": row.get("selection_reason_codes", []),
+                    }
                 if str(row.get("type", "")) == "M13ProactiveProposalEvent":
                     last_proactive_target = {
                         "trigger": str(row.get("trigger", "") or ""),
@@ -1044,7 +1107,7 @@ class ChatInterface:
         try:
             from segmentum.dialogue.runtime.m14_3_open_item_migration import audit_open_items_for_efe
 
-            state = self._mvp_runtime.store.load() if self._mvp_runtime is not None else {}
+            state = mvp_runtime.store.load() if mvp_runtime is not None else {}
             m13_state = state.get("m13_drive_state", {}) if isinstance(state, dict) else {}
             initiative = (
                 m13_state.get("initiative", {})
@@ -1057,6 +1120,52 @@ class ChatInterface:
             m14_3_traceability_suggestions = len(audit_open_items_for_efe(state.get("open_items", []))) if isinstance(state, dict) else 0
         except Exception:
             m14_3_traceability_suggestions = 0
+            state = mvp_runtime.store.load() if mvp_runtime is not None else {}
+            m13_state = state.get("m13_drive_state", {}) if isinstance(state, dict) else {}
+
+        consolidation = {}
+        if isinstance(m13_state, dict):
+            consolidation = m13_state.get("m15_consolidation", {}) if isinstance(m13_state.get("m15_consolidation"), dict) else {}
+        slow_loop = {
+            "last_run_at": int(consolidation.get("last_run_at", 0) or 0),
+            "last_run_id": str(consolidation.get("last_run_id", "") or ""),
+            "last_ops": dict(consolidation.get("last_ops", {})) if isinstance(consolidation.get("last_ops"), dict) else {},
+            "runs_today": 0,
+            "budget_per_day": 6,
+        }
+        runs_by_day = consolidation.get("runs_by_day", {}) if isinstance(consolidation, dict) else {}
+        if isinstance(runs_by_day, dict):
+            today_key = str(int(time.time()) // 86400)
+            slow_loop["runs_today"] = int(runs_by_day.get(today_key, 0) or 0)
+        meta_control_raw = m13_state.get("meta_control_intents", {}) if isinstance(m13_state, dict) else {}
+        meta_control = {
+            "active": [],
+            "recent_detections": [],
+        }
+        if isinstance(meta_control_raw, dict):
+            meta_control["active"] = [
+                {
+                    "intent_id": str(row.get("intent_id", "") or ""),
+                    "intent_kind": str(row.get("intent_kind", "") or ""),
+                    "detector": str(row.get("detector", "") or ""),
+                    "payload": dict(row.get("payload", {})) if isinstance(row.get("payload"), dict) else {},
+                    "expires_at": int(row.get("expires_at", 0) or 0),
+                }
+                for row in meta_control_raw.get("active", []) or []
+                if isinstance(row, dict)
+            ][-8:]
+            meta_control["recent_detections"] = [
+                {
+                    "type": str(row.get("type", "") or ""),
+                    "action_trigger": str(row.get("action_trigger", "") or ""),
+                    "tension_id": str(row.get("tension_id", "") or ""),
+                    "reject_reason": str(row.get("reject_reason", "") or ""),
+                    "failure_count": row.get("failure_count", ""),
+                    "stable_tick_count": row.get("stable_tick_count", ""),
+                }
+                for row in meta_control_raw.get("recent_detections", []) or []
+                if isinstance(row, dict)
+            ][-8:]
 
         return {
             "daemon": daemon,
@@ -1081,9 +1190,40 @@ class ChatInterface:
             "m14_3_last_proactive_target": last_proactive_target,
             "m14_3_last_proactive_suppression": last_proactive_suppression,
             "m14_3_last_drive_band_summary": last_drive_band_summary,
+            "m13_5_last_idle_cognitive_tick": last_idle_cognitive_tick,
+            "m14_6_last_plan_selector_mismatch": last_idle_plan_mismatch,
+            "m15_delta_f_trail": m15_delta_f_trail,
+            "m15_slow_loop": slow_loop,
+            "m15_meta_control": meta_control,
             "m14_3_open_item_traceability_suggestions": m14_3_traceability_suggestions,
             "m14_3_legacy_vague_open_item_proactive": legacy_vague_open_item_proactive,
         }
+
+    def read_mind_debug_bundle(self, *, ui_hints: Mapping[str, object] | None = None) -> str:
+        """Plain-text debug bundle for operator copy/paste."""
+        from segmentum.dialogue.runtime.mind_debug_bundle import build_mind_debug_bundle_text
+
+        self._ensure_runtime_fields()
+        runtime = self._mvp_runtime
+        if runtime is None:
+            return "# Path B Mind Debug Bundle\n- MVP runtime inactive\n"
+        state = runtime.store.load()
+        observability = self.read_m14_2_observability_summary()
+        hints = dict(ui_hints or {})
+        hints.setdefault("queued_outreach", self.read_queued_outreach())
+        hints.setdefault(
+            "meta_control_apply_env",
+            str(os.environ.get("SEGMENTUM_META_CONTROL_APPLY", "") or "").strip() or "0",
+        )
+        return build_mind_debug_bundle_text(
+            session_root=runtime.store.root,
+            persona_name=self._resolved_persona_id(),
+            session_id=self._session_id,
+            state=state if isinstance(state, dict) else {},
+            observability=observability,
+            ui_hints=hints,
+            turn_index=int(getattr(self, "_turn_index", 0) or 0),
+        )
 
     def _start_background_runner(self) -> None:
         """Development-only inline fallback; not the M14.2 overnight acceptance path."""
@@ -1189,6 +1329,7 @@ class ChatInterface:
         idle_seconds: float = 0.0,
         user_typing: bool = False,
         implicit_idle_request: bool = False,
+        preselected_target: Mapping[str, object] | None = None,
     ) -> dict[str, object]:
         self._ensure_runtime_fields()
         self._maybe_enable_mvp_llm_runtime()
@@ -1201,6 +1342,19 @@ class ChatInterface:
                 manual_continue=manual_continue,
                 user_typing=user_typing,
                 implicit_idle_request=implicit_idle_request,
+                preselected_target=preselected_target,
+            )
+        )
+
+    def run_idle_cognitive_tick(self, *, idle_seconds: float = 0.0) -> dict[str, object]:
+        self._ensure_runtime_fields()
+        self._maybe_enable_mvp_llm_runtime()
+        if self._mvp_runtime is None:
+            return {"selected_target": None, "reject_reason": "disabled", "events": []}
+        return dict(
+            self._mvp_runtime.run_idle_cognitive_tick(
+                turn_index=self._turn_index,
+                idle_seconds=idle_seconds,
             )
         )
 

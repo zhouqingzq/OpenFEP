@@ -99,7 +99,11 @@ from segmentum.dialogue.runtime.m13_initiative import (
     set_initiative_proactive_policy_profile,
     set_initiative_user_opt_in,
 )
-from segmentum.dialogue.runtime.m14_3_proactive_alignment import select_proactive_target
+from segmentum.dialogue.runtime.m14_3_proactive_alignment import (
+    ProactiveTarget,
+    classify_proactive_target_reject_reason,
+    select_proactive_target,
+)
 from segmentum.dialogue.runtime.m13_memory_efe import (
     apply_memory_efe_state,
     evaluate_memory_efe,
@@ -144,6 +148,29 @@ from segmentum.dialogue.runtime.m14_1_background_continuity import (
     session_file_lock,
     set_background_continuity_opt_in,
     update_queued_outreach_status,
+)
+from segmentum.dialogue.runtime.m14_7_memory_decay import apply_memory_decay_tick
+from segmentum.dialogue.runtime.m14_7_memory_gate import (
+    MemoryGate,
+    MemoryWriteIntent,
+    intent_from_mapping,
+    memory_gate_event,
+)
+from segmentum.dialogue.runtime.m14_7_recall_scoring import score_recall_candidate
+from segmentum.dialogue.runtime.m15_episode_ledger import (
+    ENGINEERING_PROXY_LABEL as M15_ENGINEERING_PROXY_LABEL,
+    EpisodeLedger,
+    aggregate_fe_components,
+    aggregate_fe_proxy,
+    build_episode,
+    memory_gate_decision_from_events,
+    state_fingerprint,
+)
+from segmentum.dialogue.runtime.m15_consolidation import ConsolidationOwner
+from segmentum.dialogue.runtime.m15_meta_control import (
+    apply_reflection_focus_intent,
+    consume_recall_breadth_intent,
+    detect_and_emit_intents,
 )
 from segmentum.dialogue.runtime.m14_self_continuity import (
     MIN_BASELINE_UPDATE_CONFIDENCE,
@@ -1390,7 +1417,7 @@ reply 字段只能包含会直接显示给用户的自然对话文本；禁止�
   "reply_action": "answer|ask_question|empathize|clarify|disagree|deflect|self_disclose",
   "disclosure_action": "none|direct_share|abstract_share|truthful_refusal|deflect|deny_knowledge",
   "new_expectations": [
-    {{"id": "exp_...", "content": "我预期接下来会看到/验证什么", "verify_on": "next_user_turn|later", "confidence": 0.0}}
+    {{"id": "exp_...", "content": "我预期接下来会看到/验证什么", "verify_on": "next_user_turn|later", "confidence": 0.0, "memory_dynamics_binding": {{"should_bind_idle": false, "reason_codes": [], "evidence_refs": []}}}}
   ],
   "memory_writes": [
     {{"target": "short_term|long_term", "kind": "episode|fact|preference|relationship|identity|open_item", "content": "要写入的内容；未经证据卡或用户原话支持的候选不能写成事实", "salience": 0.0, "keywords": ["检索词"], "reason": "为什么值得记"}}
@@ -1412,6 +1439,8 @@ reply 字段只能包含会直接显示给用户的自然对话文本；禁止�
   ],
   "memory_dynamics_note": "哪些记忆被唤起、为什么、是否强化或衰减"
 }}
+
+memory_dynamics_binding 是结构化判断，不是关键词命中：只有当这一条 new_expectation 被当前轮的记忆预测张力明确支撑、且沉默后继续悬置会产生可追踪的 social/epistemic prediction error 时，才设置 should_bind_idle=true；否则保持 false。不要把普通 open_item、寒暄、泛泛“用户来意不明”或仅靠文本词面命中的内容设为 true。
 
 scheduled_outreach_requests 是给 M14.2 的结构化语义结果，不是关键词命中结果。只有当用户明确要求“由我在未来某个时间或静默间隔后主动发一条消息/回访”，才写入一条；普通提醒、当前轮追问、模糊的 later、仅仅说自己要休息、或没有要求我未来主动发起消息时，必须返回空列表。due_after_seconds / due_at 由你根据整句语义和时间语境给出；工程层不会再从用户原文用关键词猜这个意图。
 """
@@ -1672,6 +1701,7 @@ reaction 说明:
 
 def retrieve_memories(state: Mapping[str, Any], keywords: list[str], *, limit: int = 8) -> list[dict[str, Any]]:
     needles = [item.lower() for item in _string_list(keywords, limit=16)]
+    now = int(time.time())
     pools: list[tuple[str, Mapping[str, Any]]] = []
     for key in ("short_term_memory", "long_term_memory", "open_items", "pending_expectations"):
         value = state.get(key, [])
@@ -1693,9 +1723,14 @@ def retrieve_memories(state: Mapping[str, Any], keywords: list[str], *, limit: i
                 parts = [p for p in re.split(r"\s+", needle) if p]
                 score += sum(0.4 for p in parts if p in text)
         if score > 0.0:
+            recall_score = score_recall_candidate(item, query=needles, now=now, retrieved_context={})
+            if recall_score <= 0.0:
+                continue
+            score *= max(0.05, recall_score)
             payload = dict(item)
             payload["_source_file"] = source
             payload["_retrieval_score"] = round(score, 3)
+            payload["_m14_7_recall_score"] = recall_score
             scored.append((score, payload))
     scored.sort(key=lambda row: row[0], reverse=True)
     return [item for _, item in scored[:limit]]
@@ -1712,6 +1747,8 @@ def retrieve_memories_by_ids(state: Mapping[str, Any], memory_ids: list[str], *,
             continue
         for item in value:
             if isinstance(item, Mapping) and str(item.get("id", item.get("expectation_id", ""))).strip() in wanted:
+                if str(item.get("status", "") or "") == "archived":
+                    continue
                 payload = dict(item)
                 payload["_source_file"] = key
                 payload["_retrieval_score"] = 9.0
@@ -2478,23 +2515,26 @@ _CASUAL_MARKERS = (
 )
 
 
-_MEMORY_DYNAMICS_TENSION_MARKERS = (
-    "\u5361\u5728",
-    "\u77db\u76fe",
-    "\u60f3\u4e0d\u660e\u767d",
-    "\u89e3\u91ca\u4e0d\u4e86",
-    "\u89e3\u91ca\u4e0d\u901a",
-    "\u8bf4\u4e0d\u4e0a\u6765",
-    "\u8fd8\u6ca1\u60f3\u660e\u767d",
-    "stuck",
-    "tension",
-    "unresolved",
-)
+def _structured_memory_dynamics_binding(row: Mapping[str, Any]) -> bool:
+    binding = _mapping(row.get("memory_dynamics_binding"))
+    return bool(
+        binding.get("should_bind_idle")
+        or row.get("memory_dynamics_idle")
+        or row.get("memory_dynamics_trigger")
+        or str(row.get("source", "") or "").strip() == "memory_dynamics_adapter"
+        or str(row.get("source_kind", "") or "").strip() == "memory_dynamics_expectation"
+        or str(row.get("verify_on", "") or "").strip() == "memory_dynamics_idle"
+    )
 
 
-def _has_memory_dynamics_tension_cue(*texts: Any) -> bool:
-    joined = " ".join(str(text or "") for text in texts).casefold()
-    return any(marker.casefold() in joined for marker in _MEMORY_DYNAMICS_TENSION_MARKERS)
+def _traceable_memory_dynamics_expectation_candidate(row: Mapping[str, Any]) -> bool:
+    content = str(row.get("content", row.get("summary", "")) or "").strip()
+    if len(content) < 8:
+        return False
+    verify_on = str(row.get("verify_on", row.get("verify", "")) or "").strip().casefold()
+    if verify_on and verify_on not in {"next_user_turn", "next_turn", "after_next_user_message", "memory_dynamics_idle"}:
+        return False
+    return _bounded_float(row.get("confidence"), default=0.5) >= 0.35
 
 
 def _has_any_marker(text: str, markers: tuple[str, ...]) -> bool:
@@ -2680,6 +2720,7 @@ def retrieve_memories_for_guidance(
     recall_query: Mapping[str, Any] | None,
     *,
     limit: int = 8,
+    now: int = 0,
 ) -> list[dict[str, Any]]:
     query = _mapping(recall_query)
     expectation_ids = {item.casefold() for item in _string_list(query.get("expectation_ids"), limit=16)}
@@ -2787,6 +2828,15 @@ def retrieve_memories_for_guidance(
             if shareability == "restricted_implicit":
                 score -= 0.8
                 reasons.append("cross_user_implicit_risk")
+        recall_score = score_recall_candidate(
+            item,
+            query=semantic_terms + list(expectation_ids) + list(memory_kinds),
+            now=now,
+            retrieved_context={"source": source, "reasons": reasons},
+        )
+        if recall_score <= 0.0:
+            continue
+        score *= max(0.05, recall_score)
         conflict_note = ""
         if "violated" in status_terms and status in {"violated", "uncertain"}:
             conflict_note = "expectation verification is not settled as a fact"
@@ -2802,6 +2852,7 @@ def retrieve_memories_for_guidance(
         )
         card["audience_user_id"] = current_user_id
         card["is_cross_user"] = bool(cross_user)
+        card["_m14_7_recall_score"] = recall_score
         if cross_user and card.get("shareability") == "restricted_implicit":
             card["epistemic_stance"] = "known_with_caveat"
         scored.append((score, card))
@@ -2833,6 +2884,7 @@ def retrieve_memories_for_guidance(
             )
             card["audience_user_id"] = current_user_id
             card["is_cross_user"] = bool(cross_user)
+            card["_m14_7_recall_score"] = item.get("_m14_7_recall_score", 0.0)
             if cross_user and card.get("shareability") == "restricted_implicit":
                 card["epistemic_stance"] = "known_with_caveat"
             cards.append(card)
@@ -4088,10 +4140,237 @@ class MVPIdleResult:
 
 
 @dataclass
+class IdleCognitiveRefreshResult:
+    retrieved_ids: list[str] = field(default_factory=list)
+    bounded_retrieve_ids: list[str] = field(default_factory=list)
+    memory_efe_evaluation: Any | None = None
+    m13_band_summary: dict[str, Any] = field(default_factory=dict)
+    selected_target: ProactiveTarget | None = None
+    reject_reason: str = ""
+    audit_events: list[dict[str, Any]] = field(default_factory=list)
+
+    def selected_target_dict(self) -> dict[str, Any] | None:
+        if self.selected_target is None:
+            return None
+        target = self.selected_target
+        return {
+            "trigger": target.trigger,
+            "traceable_expectation_id": target.traceable_expectation_id,
+            "evidence_refs": list(target.evidence_refs),
+            "proposed_topic": target.proposed_topic,
+            "ordinary_language_intent": target.ordinary_language_intent,
+            "source_kind": target.source_kind,
+            "urgency_band": target.urgency_band,
+            "risk_band": target.risk_band,
+            "selection_reason_codes": list(target.selection_reason_codes),
+        }
+
+    def to_dict(self) -> dict[str, Any]:
+        memory_efe = self.memory_efe_evaluation
+        return {
+            "retrieved_ids": list(self.retrieved_ids),
+            "bounded_retrieve_ids": list(self.bounded_retrieve_ids),
+            "memory_efe_should_outreach": bool(getattr(memory_efe, "should_outreach", False)),
+            "memory_efe_selected_policy": str(getattr(memory_efe, "selected_policy", "") or ""),
+            "m13_band_summary": dict(self.m13_band_summary),
+            "selected_target": self.selected_target_dict(),
+            "reject_reason": self.reject_reason,
+            "events": [dict(event) for event in self.audit_events],
+        }
+
+
+def _proactive_target_from_mapping(raw: Mapping[str, Any] | None) -> ProactiveTarget | None:
+    if not isinstance(raw, Mapping):
+        return None
+    trigger = str(raw.get("trigger", "") or "").strip()
+    if not trigger:
+        return None
+    return ProactiveTarget(
+        trigger=trigger,
+        traceable_expectation_id=str(raw.get("traceable_expectation_id", "") or "")[:120],
+        evidence_refs=_string_list(raw.get("evidence_refs"), limit=8),
+        proposed_topic=str(raw.get("proposed_topic", "") or "")[:120],
+        ordinary_language_intent=str(raw.get("ordinary_language_intent", "") or "")[:240],
+        source_kind=str(raw.get("source_kind", "") or "")[:80],
+        urgency_band=str(raw.get("urgency_band", "medium") or "medium")[:32],
+        risk_band=str(raw.get("risk_band", "low") or "low")[:32],
+        selection_reason_codes=_string_list(raw.get("selection_reason_codes"), limit=8),
+    )
+
+
+@dataclass
 class MVPDialogueRuntime:
     store: MVPStateStore
     llm: JSONLLMClient
     persona_name: str = ""
+
+    def _episode_ledger(self) -> EpisodeLedger:
+        return EpisodeLedger(self.store.root)
+
+    def _current_state_fingerprint(
+        self,
+        state: Mapping[str, Any],
+        *,
+        memory_efe_evaluation: Any | None = None,
+        band_summary: Mapping[str, Any] | None = None,
+    ) -> str:
+        return state_fingerprint(
+            state,
+            memory_efe_evaluation=memory_efe_evaluation,
+            band_summary=band_summary,
+        )
+
+    @staticmethod
+    def _memory_gate_audit_len(state: Mapping[str, Any]) -> int:
+        events = state.get("memory_gate_audit_tail", [])
+        return len(events) if isinstance(events, list) else 0
+
+    @staticmethod
+    def _memory_gate_events_since(state: Mapping[str, Any], start: int) -> list[dict[str, Any]]:
+        events = state.get("memory_gate_audit_tail", [])
+        if not isinstance(events, list):
+            return []
+        return [dict(event) for event in events[max(0, int(start)) :] if isinstance(event, Mapping)]
+
+    @staticmethod
+    def _outcome_from_conscious_plan(conscious_plan: Mapping[str, Any]) -> str:
+        statuses = [
+            str(item.get("status", "") or "").lower()
+            for item in conscious_plan.get("expectation_results", []) or []
+            if isinstance(item, Mapping)
+        ]
+        if any(status == "violated" for status in statuses):
+            return "violated"
+        if any(status == "uncertain" for status in statuses):
+            return "uncertain"
+        if any(status == "confirmed" for status in statuses):
+            return "confirmed"
+        return "settled"
+
+    @staticmethod
+    def _settled_outcome_from_event(event: Mapping[str, Any]) -> str:
+        event_type = str(event.get("type", "") or "")
+        if event_type == "M13RewardSettlementEvent":
+            band = str(event.get("outcome_band", "") or "")
+            if band == "positive":
+                return "confirmed"
+            if band == "negative":
+                return "violated"
+            return "uncertain"
+        if event_type == "MemoryEfeSettlementEvent":
+            band = str(event.get("outcome_band", "") or "")
+            if band == "resolved":
+                return "confirmed"
+            if band == "unresolved":
+                return "violated"
+            return "uncertain"
+        return "uncertain"
+
+    def _record_episode(self, episode: Any) -> None:
+        ledger = self._episode_ledger()
+        ledger.append(episode)
+        self.store.append_log(
+            {
+                "event": "m15_episode_ledger",
+                "type": "MemoryDynamicsEpisodeEvent",
+                **episode.to_dict(),
+            }
+        )
+
+    def _run_consolidation_cycle(
+        self,
+        state: dict[str, Any],
+        *,
+        now: int,
+        turn_index: int,
+        triggered_by: str,
+    ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        result = ConsolidationOwner.maybe_run(
+            state,
+            now=now,
+            turn_index=turn_index,
+            ledger=self._episode_ledger(),
+            budget={"triggered_by": triggered_by},
+        )
+        events = list(result.events)
+        if triggered_by == "background_tick":
+            meta_result = detect_and_emit_intents(
+                state,
+                self._episode_ledger(),
+                now=now,
+                turn_index=turn_index,
+                source="background_tick",
+            )
+            events.extend(meta_result.events)
+        for event in events:
+            if str(event.get("type", "") or "").startswith("MemoryGate"):
+                self._record_memory_gate_event(state, event)
+            self.store.append_log({"event": "m15_consolidation_audit", **event})
+        return state, events
+
+    def _record_episode_settlements(
+        self,
+        state: Mapping[str, Any],
+        settlement_events: list[Mapping[str, Any]],
+        *,
+        now: int,
+        turn_index: int,
+        memory_dynamics: Mapping[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
+        ledger = self._episode_ledger()
+        addenda: list[dict[str, Any]] = []
+        for event in settlement_events:
+            if not isinstance(event, Mapping):
+                continue
+            if str(event.get("type", "") or "") not in {"M13RewardSettlementEvent", "MemoryEfeSettlementEvent"}:
+                continue
+            episode_id = str(event.get("m15_episode_id", "") or "")
+            episode = ledger.find_episode(episode_id=episode_id) if episode_id else None
+            if episode is None:
+                prior_turn = event.get("prior_turn_index")
+                try:
+                    prior_turn_index = int(prior_turn)
+                except (TypeError, ValueError):
+                    prior_turn_index = -1
+                if prior_turn_index >= 0:
+                    episode = ledger.find_episode(turn_index=prior_turn_index)
+            if episode is None:
+                continue
+            components = aggregate_fe_components(
+                state,
+                memory_dynamics=memory_dynamics,
+                settlement_event=event,
+            )
+            addendum = ledger.append_settlement_event(
+                episode_id=episode.episode_id,
+                at=now,
+                turn_index=turn_index,
+                new_outcome_summary=self._settled_outcome_from_event(event),
+                fe_proxy_after_revised=aggregate_fe_proxy(components),
+                components_after_revised=components,
+                settlement_event=event,
+            )
+            self.store.append_log({"event": "m15_episode_ledger", **addendum})
+            addenda.append(addendum)
+        return addenda
+
+    def _tag_pending_settlements_with_episode(self, state: dict[str, Any], *, episode_id: str, turn_index: int) -> None:
+        m13_state = normalize_m13_drive_state(state.get("m13_drive_state"))
+        reward = normalize_affective_reward_proxy_state(m13_state.get("affective_reward_proxy"))
+        changed = False
+        for row in reward.get("pending_settlements", []) or []:
+            if not isinstance(row, dict):
+                continue
+            try:
+                prior_turn_index = int(row.get("prior_turn_index", -1))
+            except (TypeError, ValueError):
+                prior_turn_index = -1
+            if prior_turn_index == int(turn_index):
+                row["m15_episode_id"] = episode_id
+                changed = True
+        if changed:
+            m13_state["affective_reward_proxy"] = reward
+            state["m13_drive_state"] = m13_state
 
     def analyze_personas_from_materials(self, materials: list[str]) -> list[dict[str, Any]]:
         return analyze_materials_into_personas(
@@ -4185,6 +4464,9 @@ class MVPDialogueRuntime:
     ) -> MVPTurnResult:
         now = _utc_timestamp() if now is None else int(now)
         state = self.store.load()
+        episode_ledger = self._episode_ledger()
+        episode_components_before = aggregate_fe_components(state)
+        memory_gate_audit_start = self._memory_gate_audit_len(state)
         display_name = str(speaker_name or "").strip() or "default_user"
         user_id = _safe_user_id(display_name)
         proactive_turn = isinstance(proactive_context, Mapping) and bool(proactive_context)
@@ -4211,6 +4493,7 @@ class MVPDialogueRuntime:
                 user_text=user_text,
                 current_user_id=user_id,
                 now=now,
+                turn_index=turn_index,
             )
         m11_state = _load_m11_state(state, user_id=user_id, display_name=display_name)
         m11_result_dict: dict[str, Any] = {}
@@ -4408,6 +4691,13 @@ class MVPDialogueRuntime:
         state["m13_drive_state"] = m13_state
         for m13_settlement_event in m13_settlement_events:
             bus.append(m13_settlement_event)
+        for addendum in self._record_episode_settlements(
+            state,
+            m13_settlement_events,
+            now=now,
+            turn_index=turn_index,
+        ):
+            bus.append(addendum)
 
         conscious_system, conscious_user = build_conscious_loop_prompt(
             state=state,
@@ -4428,6 +4718,13 @@ class MVPDialogueRuntime:
         state["m13_drive_state"] = m13_state
         for m13_memory_efe_settlement_event in m13_memory_efe_settlement_events:
             bus.append(m13_memory_efe_settlement_event)
+        for addendum in self._record_episode_settlements(
+            state,
+            m13_memory_efe_settlement_events,
+            now=now,
+            turn_index=turn_index,
+        ):
+            bus.append(addendum)
         memory_dynamics = build_memory_dynamics_guidance(
             state,
             user_text,
@@ -4509,6 +4806,7 @@ class MVPDialogueRuntime:
         retrieved = retrieve_memories_for_guidance(
             state,
             recall_query,
+            now=now,
         )
         if lexical_candidates:
             existing_ids = {str(item.get("id", "")) for item in retrieved if item.get("id")}
@@ -4698,6 +4996,7 @@ class MVPDialogueRuntime:
             )
 
         m13_evaluator = M13DriveEvaluator()
+        m15_state_fingerprint_pre = self._current_state_fingerprint(state)
         m13_evaluation = m13_evaluator.evaluate(
             user_text=user_text,
             user_id=user_id,
@@ -4712,10 +5011,19 @@ class MVPDialogueRuntime:
             m13_state=m13_state,
             entity_binding=entity_binding,
             evidence_judgment=evidence_judgment,
+            episode_ledger=episode_ledger,
+            current_state_fingerprint=m15_state_fingerprint_pre,
         )
         for m13_event in m13_evaluation.events:
             bus.append(m13_event)
         m13_boredom_evaluator = M13BoredomEvaluator()
+        boredom_assessor_llm = self.llm
+        reply_contract = _mapping(_mapping(memory_dynamics.get("control_guidance")).get("reply_contract"))
+        if (
+            str(reply_contract.get("conversation_mode", "")) == "casual_fast"
+            and not retrieved
+        ):
+            boredom_assessor_llm = None
         m13_boredom_evaluation = m13_boredom_evaluator.evaluate(
             user_text=user_text,
             user_id=user_id,
@@ -4731,7 +5039,7 @@ class MVPDialogueRuntime:
             m11_result=m11_result_dict or None,
             m12_payload=m12_pre_result,
             m12_2_result=m12_2_result_dict if m12_2_enabled else None,
-            llm=self.llm,
+            llm=boredom_assessor_llm,
         )
         for m13_boredom_event in m13_boredom_evaluation.events:
             bus.append(m13_boredom_event)
@@ -4766,6 +5074,7 @@ class MVPDialogueRuntime:
             m13_boredom_evaluation=m13_boredom_evaluation,
             m13_reward_evaluation=m13_reward_pre_turn,
             conscious_plan=conscious,
+            episode_ledger=episode_ledger,
         )
         m13_state, _m13_memory_efe_apply_events = apply_memory_efe_state(
             m13_state,
@@ -4803,6 +5112,8 @@ class MVPDialogueRuntime:
         self._apply_expectation_results(
             state,
             conscious.get("expectation_results"),
+            now=now,
+            turn_index=turn_index,
             user_id=user_id,
             display_name=display_name,
             entity_binding=entity_binding,
@@ -4812,6 +5123,7 @@ class MVPDialogueRuntime:
             thinking,
             user_text=user_text,
             now=now,
+            turn_index=turn_index,
             user_id=user_id,
             display_name=display_name,
             explicit_secrecy=bool(_mapping(_mapping(memory_dynamics.get("control_guidance")).get("sharing_policy")).get("explicit_secrecy_detected")),
@@ -4821,6 +5133,7 @@ class MVPDialogueRuntime:
             state,
             memory_dynamics.get("write_candidates"),
             now=now,
+            turn_index=turn_index,
             user_id=user_id,
             display_name=display_name,
             default_shareability=(
@@ -4898,6 +5211,7 @@ class MVPDialogueRuntime:
             state,
             post_reply_observer.get("memory_updates"),
             now=now,
+            turn_index=turn_index,
             user_id=user_id,
             display_name=display_name,
         )
@@ -4906,6 +5220,7 @@ class MVPDialogueRuntime:
             user_text=user_text,
             user_id=user_id,
             now=now,
+            turn_index=turn_index,
         )
         safety_repair = resolve_m13_safety_repair(
             reply_validation=reply_validation,
@@ -5026,7 +5341,50 @@ class MVPDialogueRuntime:
                 ],
             },
         )
+        episode_components_after = aggregate_fe_components(
+            state,
+            memory_dynamics=memory_dynamics,
+            memory_efe_evaluation=m13_memory_efe_evaluation,
+            reward_evaluation=m13_reward_evaluation,
+            conscious_plan=conscious,
+        )
+        episode = build_episode(
+            at=now,
+            turn_index=turn_index,
+            phase="proactive_turn" if proactive_turn else "user_turn",
+            state=state,
+            action="proactive_outreach" if proactive_turn else action,
+            action_trigger=str(proactive_context.get("trigger", "") or "user_message") if proactive_turn else "user_message",
+            evidence_refs=[
+                *m13_evaluation.evidence_refs,
+                *[str(item.get("id", "")) for item in retrieved if item.get("id")],
+                *(
+                    [
+                        str(ref)
+                        for ref in proactive_context.get("trigger_evidence_refs", []) or []
+                        if str(ref).strip()
+                    ]
+                    if proactive_turn
+                    else []
+                ),
+            ],
+            components_before=episode_components_before,
+            components_after=episode_components_after,
+            memory_gate_decision=memory_gate_decision_from_events(
+                self._memory_gate_events_since(state, memory_gate_audit_start)
+            ),
+            outcome_summary="settled" if proactive_turn else self._outcome_from_conscious_plan(conscious),
+            memory_efe_evaluation=m13_memory_efe_evaluation,
+            band_summary=self._idle_drive_band_summary(
+                m13_state,
+                state=state,
+                m13_drive_evaluation=m13_evaluation,
+                m13_reward_evaluation=m13_reward_evaluation,
+            ),
+        )
+        self._tag_pending_settlements_with_episode(state, episode_id=episode.episode_id, turn_index=turn_index)
         self.store.save(state)
+        self._record_episode(episode)
         llm_thinking_result = thinking.get("llm_thinking_result")
         if not isinstance(llm_thinking_result, Mapping):
             legacy_inner_thought = str(thinking.get("inner_thought") or "").strip()
@@ -5075,6 +5433,7 @@ class MVPDialogueRuntime:
             "m13_memory_efe_evaluation": prompt_safe_m13_memory_efe_diagnostics(m13_memory_efe_evaluation),
             "m13_reward_ui_labels": prompt_safe_m13_reward_ui_labels(),
             "m13_drive_state": prompt_safe_m13_state_summary(m13_state, user_id=user_id),
+            "m15_episode": episode.to_dict(),
             "retrieved_memories": retrieved,
             "thinking": thinking,
             "llm_thinking_result": llm_thinking_result,
@@ -5141,6 +5500,8 @@ class MVPDialogueRuntime:
         m13_state: Mapping[str, Any],
         *,
         state: Mapping[str, Any],
+        m13_drive_evaluation: Any | None = None,
+        m13_reward_evaluation: Any | None = None,
     ) -> dict[str, Any]:
         normalized = normalize_m13_drive_state(m13_state)
         boredom = _mapping(normalized.get("boredom"))
@@ -5172,7 +5533,15 @@ class MVPDialogueRuntime:
             return "low"
 
         boredom_level = _bounded_float(boredom.get("boredom_level"), default=0.0)
-        reward_net = _bounded_float(reward.get("last_net_reward_proxy"), default=0.0)
+        reward_net = _bounded_float(
+            getattr(m13_reward_evaluation, "net_affective_reward_proxy", reward.get("last_net_reward_proxy")),
+            default=0.0,
+        )
+        if m13_drive_evaluation is not None:
+            best_action = str(getattr(m13_drive_evaluation, "top_behavioral_pull_action", best_action) or best_action)
+            scores = getattr(m13_drive_evaluation, "scores_by_action", {})
+            if isinstance(scores, Mapping) and best_action:
+                best_pull = _bounded_float(_mapping(scores.get(best_action)).get("behavioral_pull"), default=best_pull)
         return {
             "boredom_band": boredom_band(boredom_level),
             "behavioral_pull_band": band(best_pull),
@@ -5189,16 +5558,25 @@ class MVPDialogueRuntime:
         now: int,
         turn_index: int,
         structural_signals: Mapping[str, Any],
-    ) -> tuple[dict[str, Any], dict[str, Any], Any, list[dict[str, Any]]]:
+        idle_seconds: float = 0.0,
+    ) -> tuple[dict[str, Any], dict[str, Any], Any, list[dict[str, Any]], IdleCognitiveRefreshResult]:
         """Refresh traceable idle signals before M13.3 target selection.
 
         The elapsed silence opens the idle phase only. It does not add to any
         drive scalar; this refresh reads persisted M13 state, performs bounded
-        recall, evaluates memory EFE for the idle phase, and records compact
-        drive bands for observability.
+        recall, re-runs deterministic M13.1/M13.2 evaluators, evaluates memory
+        EFE for the idle phase, and records one canonical tick event.
         """
         m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
         sig_dict = dict(structural_signals)
+        decay_result = apply_memory_decay_tick(state, now=now, turn_index=turn_index)
+        recall_limit, recall_bias_events = consume_recall_breadth_intent(
+            state,
+            now=now,
+            turn_index=turn_index,
+            default_top_k=8,
+        )
+        m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
         idle_context = build_idle_context(
             state,
             m13_state=m13_state,
@@ -5207,7 +5585,7 @@ class MVPDialogueRuntime:
             now=now,
         )
         keywords = idle_retrieval_keywords(idle_context)
-        retrieved = retrieve_memories(state, keywords, limit=8)
+        retrieved = retrieve_memories(state, keywords, limit=recall_limit)
         expectation_set = normalize_expectations_for_efe(
             state,
             now=now,
@@ -5226,9 +5604,73 @@ class MVPDialogueRuntime:
                 if item_id and item_id not in seen:
                     retrieved.append(item)
                     seen.add(item_id)
-                if len(retrieved) >= 8:
+                if len(retrieved) >= recall_limit:
                     break
         retrieved_ids = sorted({str(item.get("id", "")) for item in retrieved if item.get("id")})
+        temporal = _mapping(state.get("temporal_state"))
+        share_trace = _mapping(temporal.get("last_share_trace"))
+        user_id = str(share_trace.get("user_id", "") or "").strip()
+        turn_key = f"idle-{turn_index}"
+        idle_memory_dynamics: dict[str, Any] = {
+            "control_guidance": {},
+            "recall": {"retrieved_ids": retrieved_ids[:12]},
+            "idle_phase": True,
+        }
+        m13_drive_evaluation = M13DriveEvaluator().evaluate(
+            user_text="",
+            user_id=user_id,
+            turn_id=turn_key,
+            turn_index=turn_index,
+            conscious_plan={},
+            memory_dynamics=idle_memory_dynamics,
+            retrieved_memories=retrieved,
+            response_style_prior={},
+            habit_traits={},
+            relationship_value_context={},
+            m13_state=m13_state,
+            episode_ledger=self._episode_ledger(),
+            current_state_fingerprint=self._current_state_fingerprint(state),
+        )
+        m13_boredom_evaluation = M13BoredomEvaluator().evaluate(
+            user_text="",
+            user_id=user_id,
+            turn_id=turn_key,
+            turn_index=turn_index,
+            conscious_plan={},
+            memory_dynamics=idle_memory_dynamics,
+            retrieved_memories=retrieved,
+            m13_state=m13_state,
+            m13_drive_evaluation=m13_drive_evaluation,
+        )
+        prior_boredom = _mapping(normalize_m13_drive_state(m13_state).get("boredom"))
+        silence_only = (
+            not retrieved_ids
+            and not bound_ids
+            and not expectation_set.eligible_for_efe
+            and not sig_dict.get("scheduled_intents")
+            and not sig_dict.get("queued_outreach")
+        )
+        if silence_only and m13_boredom_evaluation.boredom_level > _bounded_float(prior_boredom.get("boredom_level")):
+            boredom_patch_events = []
+        else:
+            m13_state, boredom_patch_events = apply_post_turn_boredom_state(
+                m13_state,
+                boredom=m13_boredom_evaluation,
+                conscious_plan={},
+                retrieved_memories=retrieved,
+                turn_index=turn_index,
+            )
+        m13_reward_pre_turn = evaluate_pre_turn_reward_proxy(
+            turn_id=turn_key,
+            turn_index=turn_index,
+            user_id=user_id,
+            m13_state=m13_state,
+            m13_evaluation=m13_drive_evaluation,
+            information_gain_proxy=m13_boredom_evaluation.information_gain_proxy,
+            repetition_pressure=m13_boredom_evaluation.repetition_pressure,
+            conflict_level=0.0,
+        )
+        state["m13_drive_state"] = m13_state
         memory_efe_evaluation = evaluate_memory_efe(
             state,
             phase="idle",
@@ -5237,10 +5679,18 @@ class MVPDialogueRuntime:
             user_active=False,
             structural_signals=sig_dict,
             retrieved_memories=retrieved,
+            m13_boredom_evaluation=m13_boredom_evaluation,
+            m13_reward_evaluation=m13_reward_pre_turn,
+            episode_ledger=self._episode_ledger(),
         )
         m13_state, memory_efe_events = apply_memory_efe_state(m13_state, memory_efe_evaluation)
         state["m13_drive_state"] = m13_state
-        band_summary = self._idle_drive_band_summary(m13_state, state=state)
+        band_summary = self._idle_drive_band_summary(
+            m13_state,
+            state=state,
+            m13_drive_evaluation=m13_drive_evaluation,
+            m13_reward_evaluation=m13_reward_pre_turn,
+        )
         sig_dict.update(
             {
                 "memory_efe_should_outreach": bool(memory_efe_evaluation.should_outreach),
@@ -5248,7 +5698,56 @@ class MVPDialogueRuntime:
                 "idle_drive_band_summary": band_summary,
             }
         )
+        selected_target = select_proactive_target(
+            state,
+            m13_state,
+            memory_efe_evaluation=memory_efe_evaluation,
+            structural_signals=sig_dict,
+        )
+        reject_reason = ""
+        if selected_target is None:
+            reject_reason = classify_proactive_target_reject_reason(
+                state,
+                m13_state,
+                memory_efe_evaluation=memory_efe_evaluation,
+                structural_signals=sig_dict,
+            )
+        selected_target_payload = None
+        if selected_target is not None:
+            selected_target_payload = {
+                "trigger": selected_target.trigger,
+                "source_kind": selected_target.source_kind,
+                "traceable_expectation_id": selected_target.traceable_expectation_id,
+                "evidence_refs": list(selected_target.evidence_refs[:8]),
+                "selection_reason_codes": list(selected_target.selection_reason_codes[:8]),
+            }
+        tick_event = {
+            "type": "IdleCognitiveTickEvent",
+            "turn_index": turn_index,
+            "at": now,
+            "idle_seconds": round(float(idle_seconds), 3),
+            "retrieved_ids": retrieved_ids[:12],
+            "bounded_retrieve_ids": list(dict.fromkeys(bound_ids))[:12],
+            "recall_top_k": recall_limit,
+            "memory_efe_should_outreach": bool(memory_efe_evaluation.should_outreach),
+            "memory_efe_selected_policy": str(memory_efe_evaluation.selected_policy or ""),
+            "bands": {
+                "boredom_band": band_summary.get("boredom_band", ""),
+                "reward_band": band_summary.get("affective_reward_band", ""),
+                "behavior_band": band_summary.get("behavioral_pull_band", ""),
+                "relation_band": band_summary.get("relation_path_precision_band", ""),
+            },
+            "selected_target": selected_target_payload,
+            "reject_reason": reject_reason,
+            "engineering_proxy_label": "mvp_local_idle_cognitive_tick",
+        }
         events = [
+            *recall_bias_events,
+            *m13_drive_evaluation.events,
+            *decay_result.events,
+            *m13_boredom_evaluation.events,
+            *boredom_patch_events,
+            *m13_reward_pre_turn.events,
             {
                 "type": "IdleProactiveDriveRefreshEvent",
                 "turn_index": turn_index,
@@ -5261,8 +5760,27 @@ class MVPDialogueRuntime:
             },
             *memory_efe_events,
             *memory_efe_evaluation.events,
+            tick_event,
         ]
-        return state, sig_dict, memory_efe_evaluation, events
+        meta_result = detect_and_emit_intents(
+            state,
+            self._episode_ledger(),
+            now=now,
+            turn_index=turn_index,
+            source="idle_cognitive_tick",
+            current_idle_tick_event=tick_event,
+        )
+        events.extend(meta_result.events)
+        result = IdleCognitiveRefreshResult(
+            retrieved_ids=retrieved_ids[:12],
+            bounded_retrieve_ids=list(dict.fromkeys(bound_ids))[:12],
+            memory_efe_evaluation=memory_efe_evaluation,
+            m13_band_summary=band_summary,
+            selected_target=selected_target,
+            reject_reason=reject_reason,
+            audit_events=events,
+        )
+        return state, sig_dict, memory_efe_evaluation, events, result
 
     def maybe_propose_proactive_turn(
         self,
@@ -5272,19 +5790,32 @@ class MVPDialogueRuntime:
         manual_continue: bool = False,
         user_typing: bool = False,
         implicit_idle_request: bool = False,
+        preselected_target: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         state = self.store.load()
         now = _utc_timestamp()
         structural_signals = self._initiative_structural_signals(state)
         memory_efe_evaluation = None
         refresh_events: list[dict[str, Any]] = []
+        locked_proposal = None
         if implicit_idle_request:
-            state, structural_signals, memory_efe_evaluation, refresh_events = self._refresh_idle_proactive_drive_context(
-                state,
-                now=now,
-                turn_index=turn_index,
-                structural_signals=structural_signals,
-            )
+            preselected = _proactive_target_from_mapping(preselected_target)
+            if preselected is not None:
+                m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+                initiative = normalize_initiative_state(m13_state.get("initiative"))
+                locked_proposal = build_proposal_from_target(preselected, now=now, initiative=initiative)
+            else:
+                state, structural_signals, memory_efe_evaluation, refresh_events, tick_result = self._refresh_idle_proactive_drive_context(
+                    state,
+                    now=now,
+                    turn_index=turn_index,
+                    structural_signals=structural_signals,
+                    idle_seconds=idle_seconds,
+                )
+                if tick_result.selected_target is not None:
+                    m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+                    initiative = normalize_initiative_state(m13_state.get("initiative"))
+                    locked_proposal = build_proposal_from_target(tick_result.selected_target, now=now, initiative=initiative)
         state, check = evaluate_proactive_initiative(
             state,
             now=now,
@@ -5294,6 +5825,7 @@ class MVPDialogueRuntime:
             user_typing=user_typing,
             implicit_idle_request=implicit_idle_request,
             llm=self.llm,
+            locked_proposal=locked_proposal,
             structural_signals=structural_signals,
             memory_efe_evaluation=memory_efe_evaluation,
         )
@@ -5310,6 +5842,62 @@ class MVPDialogueRuntime:
             "state_fields_read": check.state_fields_read,
         }
 
+    def run_idle_cognitive_tick(
+        self,
+        *,
+        turn_index: int,
+        idle_seconds: float = 0.0,
+        now: int | None = None,
+    ) -> dict[str, Any]:
+        state = self.store.load()
+        tick_now = int(now if now is not None else _utc_timestamp())
+        components_before = aggregate_fe_components(state)
+        memory_gate_audit_start = self._memory_gate_audit_len(state)
+        structural_signals = self._initiative_structural_signals(state)
+        state, _structural_signals, _memory_efe_evaluation, events, result = self._refresh_idle_proactive_drive_context(
+            state,
+            now=tick_now,
+            turn_index=turn_index,
+            structural_signals=structural_signals,
+            idle_seconds=idle_seconds,
+        )
+        components_after = aggregate_fe_components(
+            state,
+            memory_efe_evaluation=_memory_efe_evaluation,
+        )
+        episode = build_episode(
+            at=tick_now,
+            turn_index=turn_index,
+            phase="idle_tick",
+            state=state,
+            action="idle_wait",
+            action_trigger="idle_cognitive_tick",
+            evidence_refs=[*result.retrieved_ids, *result.bounded_retrieve_ids],
+            components_before=components_before,
+            components_after=components_after,
+            memory_gate_decision=memory_gate_decision_from_events(
+                self._memory_gate_events_since(state, memory_gate_audit_start)
+            ),
+            outcome_summary="settled" if result.selected_target is not None else "ignored",
+            memory_efe_evaluation=_memory_efe_evaluation,
+            band_summary=result.m13_band_summary,
+        )
+        self.store.save(state)
+        for event in events:
+            self.store.append_log({"event": "m13_proactive_audit", **event})
+        self._record_episode(episode)
+        state = self.store.load()
+        state, consolidation_events = self._run_consolidation_cycle(
+            state,
+            now=tick_now,
+            turn_index=turn_index,
+            triggered_by="idle_cognitive_tick",
+        )
+        self.store.save(state)
+        if consolidation_events:
+            result.audit_events.extend(consolidation_events)
+        return result.to_dict()
+
     def run_proactive_turn(
         self,
         *,
@@ -5325,10 +5913,25 @@ class MVPDialogueRuntime:
         proposal = proposal_from_initiative_state(initiative, now=now)
         if proposal is None or str(proposal.proposal_id) != str(proposal_id):
             reason = "proposal_expired" if proposal is None else "proposal_not_found"
+            components = aggregate_fe_components(state)
+            episode = build_episode(
+                at=now,
+                turn_index=turn_index,
+                phase="proactive_turn",
+                state=state,
+                action="proactive_outreach",
+                action_trigger="missing_proposal",
+                evidence_refs=[],
+                components_before=components,
+                components_after=components,
+                memory_gate_decision=memory_gate_decision_from_events([]),
+                outcome_summary="ignored",
+            )
             initiative["last_suppression_reason"] = reason
             m13_state["initiative"] = initiative
             state["m13_drive_state"] = m13_state
             self.store.save(state)
+            self._record_episode(episode)
             self.store.append_log(
                 {
                     "event": "m13_proactive_audit",
@@ -5343,7 +5946,7 @@ class MVPDialogueRuntime:
             return MVPTurnResult(
                 reply="",
                 action="proactive_suppressed",
-                diagnostics={"suppression_reason": reason, "proactive_turn": True},
+                diagnostics={"suppression_reason": reason, "proactive_turn": True, "m15_episode": episode.to_dict()},
             )
 
         state_snapshot = copy.deepcopy(self.store.load())
@@ -5414,6 +6017,27 @@ class MVPDialogueRuntime:
                     "assessment": delivery_assessment,
                 }
             )
+            episode_payload = _mapping(result.diagnostics.get("m15_episode"))
+            episode_id = str(episode_payload.get("episode_id", "") or "")
+            if episode_id:
+                components_revised = aggregate_fe_components(
+                    state_snapshot,
+                    memory_dynamics=_mapping(result.diagnostics.get("memory_dynamics")),
+                )
+                addendum = self._episode_ledger().append_settlement_event(
+                    episode_id=episode_id,
+                    at=now,
+                    turn_index=turn_index,
+                    new_outcome_summary="violated",
+                    fe_proxy_after_revised=aggregate_fe_proxy(components_revised),
+                    components_after_revised=components_revised,
+                    settlement_event={
+                        "type": "M13ProactiveSuppressionEvent",
+                        "reason_code": reason_code,
+                        "reason_stage": "post_generation",
+                    },
+                )
+                self.store.append_log({"event": "m15_episode_ledger", **addendum})
             return MVPTurnResult(
                 reply="",
                 action="proactive_suppressed",
@@ -5730,6 +6354,12 @@ class MVPDialogueRuntime:
             initiative["background_continuity"] = bg
             m13_state["initiative"] = initiative
             state["m13_drive_state"] = m13_state
+            state, consolidation_events = self._run_consolidation_cycle(
+                state,
+                now=now,
+                turn_index=turn_index,
+                triggered_by="background_tick",
+            )
             self.store.save(state)
             self.append_background_audit(
                 {
@@ -5737,6 +6367,7 @@ class MVPDialogueRuntime:
                     "at": now,
                     "ran_introspection": True,
                     "outreach_outcome": idle_result.diagnostics.get("outreach_outcome", ""),
+                    "consolidation_events": len(consolidation_events),
                     "runner_kind": runner_kind,
                     "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
                 }
@@ -6336,6 +6967,7 @@ class MVPDialogueRuntime:
             user_active=False,
             structural_signals=sig_dict,
             retrieved_memories=retrieved,
+            episode_ledger=self._episode_ledger(),
         )
         m13_state, _m13_memory_efe_apply_events = apply_memory_efe_state(
             m13_state,
@@ -6418,6 +7050,84 @@ class MVPDialogueRuntime:
             idle_context=idle_context,
             structural_signals=sig_dict,
         )
+        plan, focus_intent_events = apply_reflection_focus_intent(
+            state,
+            plan,
+            now=now,
+            turn_index=turn_index,
+        )
+        audit_events.extend(focus_intent_events)
+        structural_alignment_events: list[dict[str, Any]] = []
+        outreach_view = _mapping(normalized_plan.get("outreach_recommendation"))
+        plan_should_outreach = bool(outreach_view.get("should_outreach"))
+        plan_recommendation_reason = str(outreach_view.get("reason", "") or "")[:160]
+        structural_target = select_proactive_target(
+            state,
+            m13_state,
+            memory_efe_evaluation=m13_memory_efe_evaluation,
+            structural_signals=sig_dict,
+        )
+        structural_target_payload = None
+        if structural_target is not None:
+            structural_target_payload = {
+                "trigger": structural_target.trigger,
+                "source_kind": structural_target.source_kind,
+                "traceable_expectation_id": structural_target.traceable_expectation_id,
+                "evidence_refs": list(structural_target.evidence_refs[:8]),
+                "selection_reason_codes": list(structural_target.selection_reason_codes[:8]),
+            }
+        if plan_should_outreach and structural_target is None:
+            mismatch_reason = classify_proactive_target_reject_reason(
+                state,
+                m13_state,
+                memory_efe_evaluation=m13_memory_efe_evaluation,
+                structural_signals=sig_dict,
+            )
+            outreach_mut = dict(outreach_view)
+            outreach_mut["should_outreach"] = False
+            outreach_mut["reason"] = "reflection_only"
+            outreach_mut["m14_6_downgraded_by_structural_selector"] = True
+            outreach_mut["mismatch_reason_code"] = mismatch_reason
+            plan = {**plan, "outreach_recommendation": outreach_mut}
+            structural_alignment_events.append(
+                {
+                    "type": "IdlePlanStructuralMismatchEvent",
+                    "turn_index": turn_index,
+                    "at": now,
+                    "selection_reason_codes": list(m13_memory_efe_evaluation.reason_codes[:8]),
+                    "plan_recommendation_reason": plan_recommendation_reason,
+                    "mismatch_reason_code": mismatch_reason,
+                    "engineering_proxy_label": "mvp_local_proactive_alignment",
+                }
+            )
+        elif plan_should_outreach and structural_target is not None:
+            structural_alignment_events.append(
+                {
+                    "type": "IdlePlanStructuralAgreementEvent",
+                    "turn_index": turn_index,
+                    "at": now,
+                    "reason": "plan_and_selector_agree",
+                    "selected_target": structural_target_payload,
+                    "plan_recommendation_reason": plan_recommendation_reason,
+                    "engineering_proxy_label": "mvp_local_proactive_alignment",
+                }
+            )
+        elif not plan_should_outreach and structural_target is not None:
+            outreach_mut = dict(_mapping(plan.get("outreach_recommendation")))
+            outreach_mut["should_outreach"] = False
+            outreach_mut["m14_6_reflect_only_preferred"] = True
+            plan = {**plan, "outreach_recommendation": outreach_mut}
+            structural_alignment_events.append(
+                {
+                    "type": "IdlePlanStructuralAgreementEvent",
+                    "turn_index": turn_index,
+                    "at": now,
+                    "reason": "reflect_only_preferred",
+                    "selected_target": structural_target_payload,
+                    "plan_recommendation_reason": plan_recommendation_reason,
+                    "engineering_proxy_label": "mvp_local_proactive_alignment",
+                }
+            )
 
         audit_events.append(
             {
@@ -6429,6 +7139,7 @@ class MVPDialogueRuntime:
                 "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
             }
         )
+        audit_events.extend(structural_alignment_events)
 
         session_counts = count_session_idle_patches(state)
         patch_proposal = _mapping(plan.get("self_cognition_patch_proposal"))
@@ -6580,6 +7291,7 @@ class MVPDialogueRuntime:
                         proposal_id=locked.proposal_id,
                         delivery_status="queued",
                         now=now,
+                        turn_index=turn_index,
                     )
                     state["m13_drive_state"] = m13_state
                     audit_events.extend(settlement_events)
@@ -6648,6 +7360,10 @@ class MVPDialogueRuntime:
                                 proposal_id=locked.proposal_id,
                                 delivery_status="delivered",
                                 now=now,
+                                turn_index=turn_index,
+                                m15_episode_id=str(
+                                    _mapping(proactive_result.diagnostics.get("m15_episode")).get("episode_id", "")
+                                ),
                             )
                             state["m13_drive_state"] = m13_state
                             audit_events.extend(settlement_events)
@@ -6714,12 +7430,78 @@ class MVPDialogueRuntime:
                     row["recall_count"] = int(row.get("recall_count", 0) or 0) + 1
                     row["salience"] = min(1.0, float(row.get("salience", 0.2) or 0.2) + 0.05)
 
+    def _memory_gate_commit_count(self, state: Mapping[str, Any], proposer: str) -> int:
+        events = state.get("memory_gate_audit_tail", [])
+        if not isinstance(events, list):
+            return 0
+        return sum(
+            1
+            for event in events
+            if isinstance(event, Mapping)
+            and str(event.get("type", "")) == "MemoryGateCommitEvent"
+            and str(event.get("proposer", "")) == proposer
+        )
+
+    def _record_memory_gate_event(self, state: dict[str, Any], event: Mapping[str, Any]) -> None:
+        events = state.setdefault("memory_gate_audit_tail", [])
+        if not isinstance(events, list):
+            events = []
+            state["memory_gate_audit_tail"] = events
+        events.append(dict(event))
+        state["memory_gate_audit_tail"] = events[-80:]
+
+    def _recent_memory_gate_fingerprints(self, state: Mapping[str, Any], intent: MemoryWriteIntent) -> set[str]:
+        events = state.get("memory_gate_audit_tail", [])
+        if not isinstance(events, list):
+            return set()
+        fingerprints: set[str] = set()
+        for event in events[-24:]:
+            if not isinstance(event, Mapping):
+                continue
+            if str(event.get("proposer", "")) != intent.proposer:
+                continue
+            fingerprint = str(event.get("intent_fingerprint", "") or "")
+            if fingerprint:
+                fingerprints.add(fingerprint)
+        return fingerprints
+
+    def _evaluate_memory_gate(
+        self,
+        state: dict[str, Any],
+        intent: MemoryWriteIntent,
+        *,
+        turn_index: int,
+        now: int,
+        store_target: str = "",
+        store_id: str = "",
+    ) -> bool:
+        decision = MemoryGate().evaluate(
+            intent,
+            proposer_commits_this_session=self._memory_gate_commit_count(state, intent.proposer),
+            recent_intent_fingerprints=self._recent_memory_gate_fingerprints(state, intent),
+        )
+        event_type = "MemoryGateCommitEvent" if decision.commit else "MemoryGateRejectedEvent"
+        self._record_memory_gate_event(
+            state,
+            memory_gate_event(
+                event_type=event_type,
+                intent=intent,
+                decision=decision,
+                turn_index=turn_index,
+                now=now,
+                store_target=store_target,
+                store_id=store_id,
+            ),
+        )
+        return decision.commit
+
     def _apply_memory_write_candidates(
         self,
         state: dict[str, Any],
         candidates: Any,
         *,
         now: int,
+        turn_index: int = 0,
         user_id: str = "",
         display_name: str = "",
         default_shareability: str = "default_social",
@@ -6738,6 +7520,9 @@ class MVPDialogueRuntime:
                 continue
             salience = _bounded_float(candidate.get("salience"), default=0.35)
             target = str(candidate.get("target", "short_term")).strip()
+            evidence_refs = _string_list(candidate.get("evidence_refs"), limit=8)
+            if not evidence_refs and evidence:
+                evidence_refs = [f"evidence:{abs(hash(evidence)) % 100000}"]
             row = {
                 "id": f"{'ltm' if target == 'long_term' else 'stm'}_candidate_{now}_{len(applied)}",
                 "kind": str(candidate.get("kind", "episode")).strip() or "episode",
@@ -6747,11 +7532,36 @@ class MVPDialogueRuntime:
                 "keywords": _string_list(candidate.get("keywords"), limit=8),
                 "reason": str(candidate.get("reason", "")),
                 "evidence": evidence,
+                "evidence_refs": evidence_refs,
                 "source": "memory_dynamics_adapter",
                 "created_at": now,
                 "last_recalled_at": None,
                 "recall_count": 0,
             }
+            intent = intent_from_mapping(
+                candidate,
+                target="long_term" if target == "long_term" or salience >= 0.68 else "short_term",
+                kind=str(row["kind"]),
+                content=content,
+                confidence=confidence,
+                evidence_refs=evidence_refs,
+                source="write_candidate",
+                proposer="memory_dynamics_adapter",
+                audit_reason=str(candidate.get("reason", "memory_dynamics_write_candidate") or "memory_dynamics_write_candidate"),
+                value_proxy=salience,
+                surprise_proxy=max(salience, _bounded_float(candidate.get("surprise_proxy"), default=0.35)),
+                identity_relevance=_bounded_float(candidate.get("identity_relevance"), default=0.0),
+            )
+            store_target = "long_term" if target == "long_term" or salience >= 0.68 else "short_term"
+            if not self._evaluate_memory_gate(
+                state,
+                intent,
+                turn_index=turn_index,
+                now=now,
+                store_target=store_target,
+                store_id=str(row["id"]),
+            ):
+                continue
             shareability = _shareability_for_memory_text(
                 content,
                 evidence,
@@ -6769,7 +7579,7 @@ class MVPDialogueRuntime:
                 ),
                 confidence=confidence,
             )
-            if target == "long_term" or salience >= 0.68:
+            if store_target == "long_term":
                 state.setdefault("long_term_memory", []).append(row)
             else:
                 state.setdefault("short_term_memory", []).append(row)
@@ -6782,6 +7592,7 @@ class MVPDialogueRuntime:
         updates: Any,
         *,
         now: int,
+        turn_index: int = 0,
         user_id: str = "",
         display_name: str = "",
         default_shareability: str = "default_social",
@@ -6798,7 +7609,33 @@ class MVPDialogueRuntime:
             kind = str(item.get("kind", "")).strip()
             if not content or not evidence or confidence < 0.60:
                 continue
+            evidence_refs = _string_list(item.get("evidence_refs"), limit=8)
+            if not evidence_refs and evidence:
+                evidence_refs = [f"evidence:{abs(hash(evidence)) % 100000}"]
             if kind == "conversation_habit":
+                intent = intent_from_mapping(
+                    item,
+                    target="short_term",
+                    kind="habit",
+                    content=content,
+                    confidence=confidence,
+                    evidence_refs=evidence_refs,
+                    source="post_reply_observer",
+                    proposer="post_reply_observer",
+                    audit_reason=str(item.get("reason", "post_reply_memory_update") or "post_reply_memory_update"),
+                    value_proxy=_bounded_float(item.get("value_proxy"), default=0.5),
+                    surprise_proxy=_bounded_float(item.get("surprise_proxy"), default=0.35),
+                    identity_relevance=_bounded_float(item.get("identity_relevance"), default=0.0),
+                )
+                if not self._evaluate_memory_gate(
+                    state,
+                    intent,
+                    turn_index=turn_index,
+                    now=now,
+                    store_target="habit_traits",
+                    store_id=f"habit_{now}_{len(applied)}",
+                ):
+                    continue
                 habits = state.setdefault("habit_traits", {})
                 if not isinstance(habits, dict):
                     habits = {}
@@ -6810,6 +7647,7 @@ class MVPDialogueRuntime:
                 row = {
                     "content": content,
                     "evidence": evidence,
+                    "evidence_refs": evidence_refs,
                     "confidence": confidence,
                     "source": "post_reply_observer",
                     "created_at": now,
@@ -6850,10 +7688,34 @@ class MVPDialogueRuntime:
                 "keywords": _string_list(item.get("keywords"), limit=6),
                 "reason": str(item.get("reason", "post_reply_observer")),
                 "evidence": evidence,
+                "evidence_refs": evidence_refs,
                 "source": "post_reply_observer",
                 "created_at": now,
                 "recall_count": 0,
             }
+            intent = intent_from_mapping(
+                item,
+                target="short_term",
+                kind=str(row["kind"]),
+                content=content,
+                confidence=confidence,
+                evidence_refs=evidence_refs,
+                source="post_reply_observer",
+                proposer="post_reply_observer",
+                audit_reason=str(item.get("reason", "post_reply_memory_update") or "post_reply_memory_update"),
+                value_proxy=_bounded_float(item.get("value_proxy"), default=0.45),
+                surprise_proxy=_bounded_float(item.get("surprise_proxy"), default=0.35),
+                identity_relevance=_bounded_float(item.get("identity_relevance"), default=0.0),
+            )
+            if not self._evaluate_memory_gate(
+                state,
+                intent,
+                turn_index=turn_index,
+                now=now,
+                store_target="short_term",
+                store_id=str(row["id"]),
+            ):
+                continue
             shareability = _shareability_for_memory_text(
                 content,
                 evidence,
@@ -6882,6 +7744,7 @@ class MVPDialogueRuntime:
         user_text: str,
         user_id: str = "",
         now: int | None = None,
+        turn_index: int = 0,
     ) -> list[dict[str, Any]]:
         if not _has_any_marker(user_text, _BREVITY_FEEDBACK_MARKERS):
             return []
@@ -6903,6 +7766,32 @@ class MVPDialogueRuntime:
             "confidence": 0.82,
             "source": "pacing_feedback",
         }
+        evidence_ref = f"pacing_feedback_{now or _utc_timestamp()}"
+        intent = intent_from_mapping(
+            row,
+            target="short_term",
+            kind="habit",
+            content=content,
+            confidence=0.82,
+            evidence_refs=[evidence_ref],
+            source="pacing_feedback",
+            proposer="pacing_feedback",
+            audit_reason="pacing_feedback_habit",
+            value_proxy=0.65,
+            surprise_proxy=0.45,
+            identity_relevance=0.2,
+        )
+        if not self._evaluate_memory_gate(
+            state,
+            intent,
+            turn_index=turn_index,
+            now=int(now or _utc_timestamp()),
+            store_target="habit_traits",
+            store_id=evidence_ref,
+        ):
+            return []
+        row["evidence_refs"] = [evidence_ref]
+        row["created_at"] = int(now or _utc_timestamp())
         target.append(row)
         abstract = _abstract_relationship_constraint_from_feedback(content, str(user_text))
         if abstract is not None:
@@ -6925,6 +7814,7 @@ class MVPDialogueRuntime:
         user_text: str,
         current_user_id: str,
         now: int,
+        turn_index: int = 0,
     ) -> dict[str, Any]:
         temporal = _mapping(state.get("temporal_state"))
         trace = _mapping(temporal.get("last_share_trace"))
@@ -6939,15 +7829,38 @@ class MVPDialogueRuntime:
         if had_cross_user_share and same_user and negative:
             updates = social.setdefault("learned_boundaries", [])
             if isinstance(updates, list):
-                updates.append(
-                    {
-                        "content": "跨用户社交转述在负反馈后应显著提高成本，优先抽象化或保留。",
-                        "evidence": str(user_text).strip()[:240],
-                        "confidence": 0.82,
-                        "source": "sharing_regret_feedback",
-                        "created_at": now,
-                    }
+                row = {
+                    "content": "跨用户社交转述在负反馈后应显著提高成本，优先抽象化或保留。",
+                    "evidence": str(user_text).strip()[:240],
+                    "confidence": 0.82,
+                    "source": "sharing_regret_feedback",
+                    "created_at": now,
+                }
+                evidence_ref = f"sharing_regret_{now}_{len(updates)}"
+                intent = intent_from_mapping(
+                    row,
+                    target="short_term",
+                    kind="learned_boundary",
+                    content=str(row["content"]),
+                    confidence=0.82,
+                    evidence_refs=[evidence_ref],
+                    source="sharing_regret_feedback",
+                    proposer="sharing_regret_feedback",
+                    audit_reason="sharing_regret_feedback",
+                    value_proxy=0.75,
+                    surprise_proxy=0.55,
+                    identity_relevance=0.25,
                 )
+                if self._evaluate_memory_gate(
+                    state,
+                    intent,
+                    turn_index=turn_index,
+                    now=now,
+                    store_target="social_sharing_policy.learned_boundaries",
+                    store_id=evidence_ref,
+                ):
+                    row["evidence_refs"] = [evidence_ref]
+                    updates.append(row)
         regret_bias = update_regret_bias(
             previous_regret_bias=regret_bias,
             negative_feedback=negative,
@@ -6967,6 +7880,8 @@ class MVPDialogueRuntime:
         state: dict[str, Any],
         results: Any,
         *,
+        now: int,
+        turn_index: int = 0,
         user_id: str = "",
         display_name: str = "",
         entity_binding: Mapping[str, Any] | None = None,
@@ -7009,21 +7924,52 @@ class MVPDialogueRuntime:
         history = state.setdefault("short_term_memory", [])
         if isinstance(history, list):
             for payload in normalized_results:
-                history.append(
-                    {
-                        "id": f"stm_expectation_{_utc_timestamp()}_{len(history)}",
-                        "kind": "expectation_result",
-                        "content": json.dumps(payload, ensure_ascii=False),
-                        "salience": min(1.0, float(payload.get("self_update_pressure", 0.2) or 0.2)),
-                        "keywords": ["预期验证", str(payload.get("status", ""))],
-                        "source": "conscious_loop",
-                        "created_at": _utc_timestamp(),
-                        "recall_count": 0,
-                        "source_user_id": user_id,
-                        "source_display_name": display_name,
-                        "shareability": "default_social",
-                    }
+                content = json.dumps(payload, ensure_ascii=False)
+                salience = min(1.0, float(payload.get("self_update_pressure", 0.2) or 0.2))
+                evidence_refs = _string_list(payload.get("evidence_refs"), limit=8)
+                if not evidence_refs:
+                    ref = str(payload.get("id", "") or "").strip()
+                    if ref:
+                        evidence_refs = [ref]
+                row = {
+                    "id": f"stm_expectation_{now}_{len(history)}",
+                    "kind": "expectation_result",
+                    "content": content,
+                    "salience": salience,
+                    "keywords": ["预期验证", str(payload.get("status", ""))],
+                    "source": "conscious_loop",
+                    "created_at": now,
+                    "recall_count": 0,
+                    "source_user_id": user_id,
+                    "source_display_name": display_name,
+                    "shareability": "default_social",
+                }
+                if evidence_refs:
+                    row["evidence_refs"] = evidence_refs
+                intent = intent_from_mapping(
+                    payload,
+                    target="short_term",
+                    kind="expectation_result",
+                    content=content,
+                    confidence=_bounded_float(payload.get("confidence"), default=0.72),
+                    evidence_refs=evidence_refs,
+                    source="conscious_loop",
+                    proposer="expectation_result_observer",
+                    audit_reason="expectation_result_observer",
+                    value_proxy=salience,
+                    surprise_proxy=salience,
+                    identity_relevance=_bounded_float(payload.get("identity_relevance"), default=0.0),
                 )
+                if not self._evaluate_memory_gate(
+                    state,
+                    intent,
+                    turn_index=turn_index,
+                    now=now,
+                    store_target="short_term",
+                    store_id=str(row["id"]),
+                ):
+                    continue
+                history.append(row)
 
     def _apply_thinking_writes(
         self,
@@ -7032,6 +7978,7 @@ class MVPDialogueRuntime:
         *,
         user_text: str,
         now: int,
+        turn_index: int = 0,
         user_id: str = "",
         display_name: str = "",
         explicit_secrecy: bool = False,
@@ -7040,8 +7987,9 @@ class MVPDialogueRuntime:
         short = state.setdefault("short_term_memory", [])
         if isinstance(short, list):
             assistant_reply = str(thinking.get("reply", "")).strip()
+            turn_memory_id = f"stm_turn_{now}"
             row = {
-                "id": f"stm_turn_{now}",
+                "id": turn_memory_id,
                 "kind": "dialogue_turn",
                 "content": str(user_text).strip(),
                 "user_text": str(user_text).strip(),
@@ -7049,27 +7997,55 @@ class MVPDialogueRuntime:
                 "assistant_reply_use_as_fact": False,
                 "salience": 0.35,
                 "keywords": _string_list(thinking.get("memory_dynamics_note"), limit=4),
+                "evidence_refs": [turn_memory_id],
                 "source": "dialogue",
                 "created_at": now,
                 "recall_count": 0,
             }
-            shareability = _shareability_for_memory_text(
-                user_text,
-                explicit_secret=explicit_secrecy,
-            )
-            _stamp_memory_policy(
+            intent = intent_from_mapping(
                 row,
-                user_id=user_id,
-                display_name=display_name,
-                shareability=shareability,
-                restriction_reason=_restriction_reason_for_shareability(
-                    shareability,
-                    explicit_secret=explicit_secrecy,
-                ),
+                target="short_term",
+                kind="dialogue_turn",
+                content=str(user_text).strip() or assistant_reply,
                 confidence=0.85,
+                evidence_refs=[turn_memory_id],
+                source="thinking_writes",
+                proposer="dialogue_turn_capture",
+                audit_reason="dialogue_turn_capture",
+                value_proxy=0.4,
+                surprise_proxy=0.4,
             )
-            short.append(row)
-            state["short_term_memory"] = short[-24:]
+            if not self._evaluate_memory_gate(
+                state,
+                intent,
+                turn_index=turn_index,
+                now=now,
+                store_target="short_term",
+                store_id=turn_memory_id,
+            ):
+                short = state.setdefault("short_term_memory", [])
+                if not isinstance(short, list):
+                    state["short_term_memory"] = []
+                short = []
+                state["short_term_memory"] = short
+            else:
+                shareability = _shareability_for_memory_text(
+                    user_text,
+                    explicit_secret=explicit_secrecy,
+                )
+                _stamp_memory_policy(
+                    row,
+                    user_id=user_id,
+                    display_name=display_name,
+                    shareability=shareability,
+                    restriction_reason=_restriction_reason_for_shareability(
+                        shareability,
+                        explicit_secret=explicit_secrecy,
+                    ),
+                    confidence=0.85,
+                )
+                short.append(row)
+                state["short_term_memory"] = short[-24:]
 
         for write in thinking.get("memory_writes", []) or []:
             if not isinstance(write, Mapping):
@@ -7090,6 +8066,34 @@ class MVPDialogueRuntime:
             }
             if not row["content"]:
                 continue
+            evidence_refs = _string_list(write.get("evidence_refs"), limit=8)
+            if not evidence_refs:
+                evidence_refs = [f"stm_turn_{now}"]
+            row["evidence_refs"] = evidence_refs
+            store_target = "long_term" if target == "long_term" or salience >= 0.68 else "short_term"
+            intent = intent_from_mapping(
+                write,
+                target=store_target,
+                kind=str(row["kind"]),
+                content=str(row["content"]),
+                confidence=_bounded_float(write.get("confidence"), default=0.75),
+                evidence_refs=evidence_refs,
+                source="thinking_writes",
+                proposer="thinking_prompt",
+                audit_reason=str(write.get("reason", "thinking_memory_write") or "thinking_memory_write"),
+                value_proxy=salience,
+                surprise_proxy=max(salience, _bounded_float(write.get("surprise_proxy"), default=0.35)),
+                identity_relevance=_bounded_float(write.get("identity_relevance"), default=0.0),
+            )
+            if not self._evaluate_memory_gate(
+                state,
+                intent,
+                turn_index=turn_index,
+                now=now,
+                store_target=store_target,
+                store_id=str(row["id"]),
+            ):
+                continue
             shareability = _shareability_for_memory_text(
                 row["content"],
                 row.get("keywords"),
@@ -7108,7 +8112,7 @@ class MVPDialogueRuntime:
                 ),
                 confidence=_bounded_float(write.get("confidence"), default=0.75),
             )
-            if target == "long_term" or salience >= 0.68:
+            if store_target == "long_term":
                 state.setdefault("long_term_memory", []).append(row)
             else:
                 state.setdefault("short_term_memory", []).append(row)
@@ -7118,15 +8122,6 @@ class MVPDialogueRuntime:
             pending = state.setdefault("pending_expectations", [])
             if isinstance(pending, list):
                 turn_memory_id = f"stm_turn_{now}"
-                tension_backed = _has_memory_dynamics_tension_cue(
-                    user_text,
-                    thinking.get("memory_dynamics_note"),
-                    *[
-                        item.get("content", "")
-                        for item in new_expectations
-                        if isinstance(item, Mapping)
-                    ],
-                )
                 dynamics = _mapping(memory_dynamics)
                 write_candidates = dynamics.get("write_candidates", [])
                 has_memory_candidate = isinstance(write_candidates, list) and any(
@@ -7138,7 +8133,9 @@ class MVPDialogueRuntime:
                         payload = dict(item)
                         payload.setdefault("id", f"exp_{now}_{len(pending)}")
                         payload.setdefault("created_at", now)
-                        if tension_backed and has_memory_candidate:
+                        if _traceable_memory_dynamics_expectation_candidate(payload) and (
+                            has_memory_candidate or _structured_memory_dynamics_binding(payload)
+                        ):
                             payload.setdefault("source", "memory_dynamics_adapter")
                             payload["verify_on"] = "memory_dynamics_idle"
                             refs = _string_list(payload.get("evidence_refs"), limit=8)

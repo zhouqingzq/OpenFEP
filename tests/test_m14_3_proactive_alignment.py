@@ -356,6 +356,92 @@ def test_tension_backed_new_expectation_gets_memory_dynamics_trace_in_path_b(tmp
     assert row["bound_memory_ids"] == ["stm_turn_3001"]
 
 
+def test_structured_memory_dynamics_binding_without_memory_candidate_gets_trace(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "trace_structured"), llm=None)
+    state = runtime.store.load()
+    runtime._apply_thinking_writes(
+        state,
+        {
+            "reply": "想了一整晚还头疼，那说明你拆到真东西了。",
+            "new_expectations": [
+                {
+                    "id": "exp_truth_thread",
+                    "content": "用户会回应是否接受'拆到真东西了'这个说法，或者继续追问'真东西'是什么",
+                    "confidence": 0.6,
+                    "verify_on": "next_user_turn",
+                    "memory_dynamics_binding": {
+                        "should_bind_idle": True,
+                        "reason_codes": ["memory_prediction_tension"],
+                        "evidence_refs": ["stm_turn_4001"],
+                    },
+                }
+            ],
+        },
+        user_text="想了一晚上，想得我头疼，还是想不通",
+        now=4001,
+        memory_dynamics={"write_candidates": []},
+    )
+
+    row = state["pending_expectations"][-1]
+    assert row["id"] == "exp_truth_thread"
+    assert row["source"] == "memory_dynamics_adapter"
+    assert row["verify_on"] == "memory_dynamics_idle"
+    assert row["evidence_refs"] == ["stm_turn_4001"]
+    assert row["bound_memory_ids"] == ["stm_turn_4001"]
+
+
+def test_user_text_tension_words_alone_do_not_create_memory_dynamics_trace(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "trace_no_keyword"), llm=None)
+    state = runtime.store.load()
+    runtime._apply_thinking_writes(
+        state,
+        {
+            "new_expectations": [
+                {
+                    "id": "exp_truth_thread",
+                    "content": "用户会回应是否接受'拆到真东西了'这个说法，或者继续追问'真东西'是什么",
+                    "confidence": 0.6,
+                    "verify_on": "next_user_turn",
+                }
+            ],
+        },
+        user_text="想了一晚上，想得我头疼，还是想不通",
+        now=4003,
+        memory_dynamics={"write_candidates": []},
+    )
+
+    row = state["pending_expectations"][-1]
+    assert row["id"] == "exp_truth_thread"
+    assert row.get("source") != "memory_dynamics_adapter"
+    assert row["verify_on"] == "next_user_turn"
+
+
+def test_generic_unclear_intent_expectation_does_not_get_memory_dynamics_trace(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "trace_generic"), llm=None)
+    state = runtime.store.load()
+    runtime._apply_thinking_writes(
+        state,
+        {
+            "new_expectations": [
+                {
+                    "id": "exp_generic",
+                    "content": "用户未明确说明来意（闲聊、求助还是其他目的）",
+                    "confidence": 0.7,
+                    "verify_on": "next_user_turn",
+                }
+            ],
+        },
+        user_text="想了一晚上，还是想不通",
+        now=4002,
+        memory_dynamics={"write_candidates": []},
+    )
+
+    row = state["pending_expectations"][-1]
+    assert row["id"] == "exp_generic"
+    assert row.get("source") != "memory_dynamics_adapter"
+    assert row["verify_on"] == "next_user_turn"
+
+
 def test_generic_self_only_open_item_does_not_become_memory_efe_target() -> None:
     m13 = _opted_m13()
     evaluation = SimpleNamespace(

@@ -522,7 +522,10 @@ def settle_pending_m13_actions(
 
     for row in pending_rows:
         pending_id = str(row.get("pending_id", ""))
-        prior_turn = int(row.get("prior_turn_index", -1) or -1)
+        try:
+            prior_turn = int(row.get("prior_turn_index", -1))
+        except (TypeError, ValueError):
+            prior_turn = -1
         expires = int(row.get("expires_after_turns", PENDING_SETTLEMENT_TTL) or PENDING_SETTLEMENT_TTL)
         row_generation = int(row.get("settlement_generation", generation) or generation)
         if row_generation != generation:
@@ -637,6 +640,9 @@ def settle_pending_m13_actions(
                     "pending_id": pending_id,
                     "turn_id": turn_id,
                     "turn_index": turn_index,
+                    "prior_turn_index": prior_turn,
+                    "prior_action": str(row.get("prior_action", "")),
+                    "m15_episode_id": str(row.get("m15_episode_id", "")),
                     "observed_reward_proxy": round(observed, 6),
                     "prediction_error_proxy": prediction_error,
                     "relief_proxy": round(relief, 6),

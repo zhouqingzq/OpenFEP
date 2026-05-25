@@ -37,6 +37,7 @@ M13.1: MVP-Local Boredom And Exploration Bias
 M13.2: MVP-Local Affective Reward Proxy And Tolerance
 M13.3: UI-Level Bounded Initiative
 M13.4: UI Idle Tick And Introspection Entry Point
+M13.5: Idle Cognitive Refresh Tick
 M13.6: Memory-Backed Expected Free Energy Bridge
 M14.0: Conscious Idle Reflector And Self-Cognition Patch
 M14.1: Background Self-Continuity And Persistent Idle Loop
@@ -44,6 +45,11 @@ M14.2: Decoupled Environment Loop And Durable Overnight Outreach
 M14.3: Traceable Proactive Delivery Alignment And Safety Diagnostics
 M14.4: Streamlit Implicit Idle Proactive Delivery
 M14.5: Production Proactive Policy Hardening
+M14.6: Idle Plan And Structural Selector Alignment, Diagnose Observability
+M14.7: Path B Memory Gate, Decay, And Precision-Weighted Recall
+M15.0: Episode Ledger And Free-Energy Proxy Trajectory
+M15.1: Consolidation And Forgetting Loop
+M15.2: Meta-Control Intervention Layer
 ```
 
 M8.9 is a bridge milestone. It does not replace the original roadmap; it locks state ownership, memory write intent, and generation evidence boundaries before M9-M12 expand the system.
@@ -52,7 +58,7 @@ M11.0 was repurposed from the earlier "Conscious Projection Runtime" scope to th
 
 M13 is an MVP-local drive layer for the real UI chat path. It intentionally does not wait for full Path A / Path B unification. The sequence is M13.0 behavioral pull, M13.1 boredom and exploration bias, M13.2 affective reward proxy and tolerance, M13.3 bounded UI initiative, and M13.4 the UI idle tick plus introspection entry point.
 
-M13.6 adds a memory-backed expected-free-energy bridge between traceable pending expectations/open items and bounded Path B policy guidance. Silence is not a direct boredom or outreach input: it only matters when it leaves a concrete memory-backed expectation due or unresolved. M14.0 builds on the M13.4 plumbing to add the conscious idle reflector: idle ticks can trigger a JSON-only conscious plan that proposes self-cognition patches, memory consolidation intents, and open-item updates, and may hand off to the existing M13.3 outreach pipeline only when M13.6 allows outreach. M14.1 makes that loop budgeted and persistent. M14.2 separates environment observation, event storage, self-loop preparation, and delivery; UI renders and reports runtime state, it is not the lifecycle owner for overnight self-continuity. Explicit later-message requests must become durable scheduled intents plus outbox entries, never just natural-language follow-up notes. M14.3 aligns proactive delivery around traceable expectations with evidence refs; vague open-item `next_check` tokens alone must not trigger M13.3 proposals, and blocked proactive delivery must emit structured `reason_code` audit events. M14.4 wires Streamlit reruns to `evaluate_proactive_initiative(implicit_idle_request=True)` so an open chat page can deliver a proactive bubble after silence without manual continue; it adds `proactive_policy_profile=streamlit_open_chat` to relax session/cooldown caps for demos only. M14.5 restores conservative defaults for production. Path A and M10 are explicitly out of scope.
+M13.6 adds a memory-backed expected-free-energy bridge between traceable pending expectations/open items and bounded Path B policy guidance. Silence is not a direct boredom or outreach input: it only matters when it leaves a concrete memory-backed expectation due or unresolved. M14.0 builds on the M13.4 plumbing to add the conscious idle reflector: idle ticks can trigger a JSON-only conscious plan that proposes self-cognition patches, memory consolidation intents, and open-item updates, and may hand off to the existing M13.3 outreach pipeline only when M13.6 allows outreach. M14.1 makes that loop budgeted and persistent. M14.2 separates environment observation, event storage, self-loop preparation, and delivery; UI renders and reports runtime state, it is not the lifecycle owner for overnight self-continuity. Explicit later-message requests must become durable scheduled intents plus outbox entries, never just natural-language follow-up notes. M14.3 aligns proactive delivery around traceable expectations with evidence refs; vague open-item `next_check` tokens alone must not trigger M13.3 proposals, and blocked proactive delivery must emit structured `reason_code` audit events. M14.4 wires Streamlit reruns to `evaluate_proactive_initiative(implicit_idle_request=True)` so an open chat page can deliver a proactive bubble after silence without manual continue; it adds `proactive_policy_profile=streamlit_open_chat` to relax session/cooldown caps for demos only. M14.5 restores conservative defaults for production. M13.5 adds the silence-period idle cognitive refresh tick (recall, memory EFE, M13 band re-eval, target selection). M14.6 aligns idle reflector plans with `select_proactive_target` and fixes diagnose/UI observability. M14.7 completes Path B memory gate, decay, and precision-weighted recall (M9 series ends at M9.0). M15.0 adds the episode ledger and free-energy proxy trajectory. M15.1 adds consolidation and forgetting. M15.2 adds meta-control intervention intents (demo applies on `streamlit_open_chat`; production audit-only by default). Path A and M10 are explicitly out of scope.
 
 ## Migration Note
 

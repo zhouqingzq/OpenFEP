@@ -8,7 +8,7 @@ initiative, outbox, memory, self-cognition, or visible text.
 from __future__ import annotations
 
 import copy
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime
 import uuid
 from typing import Any, Mapping
@@ -19,6 +19,8 @@ from segmentum.dialogue.runtime.m13_drive import (
     _string_list,
     normalize_m13_drive_state,
 )
+from segmentum.dialogue.runtime.m14_7_recall_scoring import MEMORY_EFE_RECALL_FLOOR, score_recall_candidate
+from segmentum.dialogue.runtime.m15_episode_ledger import EpisodeLedger, outreach_margin_history_adjustment
 
 ENGINEERING_PROXY_LABEL = "mvp_local_memory_efe_bridge"
 
@@ -565,8 +567,36 @@ def normalize_expectations_for_efe(
 ) -> NormalizedExpectationSet:
     eligible: list[NormalizedExpectation] = []
     diagnostic: list[NormalizedExpectation] = []
+    memory_by_id: dict[str, Mapping[str, Any]] = {}
+    for key in ("short_term_memory", "long_term_memory"):
+        rows = state.get(key, [])
+        if not isinstance(rows, list):
+            continue
+        for row in rows:
+            if isinstance(row, Mapping):
+                row_id = str(row.get("id", "") or "").strip()
+                if row_id:
+                    memory_by_id[row_id] = row
 
     def add(expectation: NormalizedExpectation) -> None:
+        if expectation.eligible and expectation.bound_memory_ids:
+            bound_rows = [memory_by_id[item] for item in expectation.bound_memory_ids if item in memory_by_id]
+            if bound_rows and all(str(row.get("status", "") or "") == "archived" for row in bound_rows):
+                diagnostic.append(replace(expectation, eligible=False, ineligibility_reason="bound_memories_archived"))
+                return
+            if bound_rows:
+                scores = [
+                    score_recall_candidate(
+                        row,
+                        query=[expectation.content_summary, *expectation.recall_keys, *expectation.evidence_refs],
+                        now=now,
+                        retrieved_context={},
+                    )
+                    for row in bound_rows
+                ]
+                if scores and max(scores) < MEMORY_EFE_RECALL_FLOOR:
+                    diagnostic.append(replace(expectation, eligible=False, ineligibility_reason="bound_memory_recall_score_below_floor"))
+                    return
         if expectation.eligible:
             eligible.append(expectation)
         else:
@@ -949,6 +979,7 @@ def evaluate_memory_efe(
     m13_reward_evaluation: Any | None = None,
     structural_signals: Mapping[str, Any] | None = None,
     conscious_plan: Mapping[str, Any] | None = None,
+    episode_ledger: EpisodeLedger | None = None,
 ) -> M13MemoryEfeEvaluationResult:
     phase = "idle" if phase == "idle" else "in_turn"
     temporal = _mapping(state.get("temporal_state"))
@@ -982,6 +1013,7 @@ def evaluate_memory_efe(
     suppression: list[str] = []
     should_outreach = False
     outreach_margin = 0.0
+    ledger_margin_requirement_delta = 0.0
     reply_angle_bias = "none"
     selected_policy = ""
     expected_resolution = 0.0
@@ -1013,6 +1045,12 @@ def evaluate_memory_efe(
         )
         selected_policy = min(efe_by_policy, key=lambda key: (efe_by_policy[key], key)) if efe_by_policy else "wait"
         outreach_margin = _round(efe_by_policy.get("wait", 0.0) - efe_by_policy.get("outreach", 0.0))
+        if episode_ledger is not None:
+            ledger_margin_requirement_delta = outreach_margin_history_adjustment(
+                episode_ledger.search("memory_efe_outreach", limit=8)
+            )
+            if ledger_margin_requirement_delta > 0:
+                policy_costs["ledger_outreach_margin_requirement_delta"] = ledger_margin_requirement_delta
         if active:
             suppression.append("user_active")
         if not expectations.eligible_for_efe:
@@ -1027,7 +1065,8 @@ def evaluate_memory_efe(
             suppression.append("memory_efe_opponent_risk")
         if expected_resolution <= 0.0:
             suppression.append("insufficient_expected_resolution")
-        if outreach_margin < MINIMUM_OUTREACH_MARGIN:
+        required_margin = MINIMUM_OUTREACH_MARGIN + ledger_margin_requirement_delta
+        if outreach_margin < required_margin:
             suppression.append("outreach_margin_too_small")
         memory_efe_state = normalize_memory_efe_state(
             normalize_m13_drive_state(state.get("m13_drive_state")).get("memory_efe")
@@ -1070,6 +1109,7 @@ def evaluate_memory_efe(
         "should_outreach": should_outreach,
         "traceable_expectation_id": traceable_id,
         "suppression_reasons": list(dict.fromkeys(suppression))[:12],
+        "ledger_outreach_margin_requirement_delta": ledger_margin_requirement_delta,
         "engineering_proxy_label": ENGINEERING_PROXY_LABEL,
     }
     if traceable and traceable.precision_approx:
@@ -1268,6 +1308,8 @@ def register_memory_efe_outreach_settlement(
     proposal_id: str,
     delivery_status: str,
     now: int,
+    turn_index: int | None = None,
+    m15_episode_id: str = "",
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     state = normalize_m13_drive_state(m13_state)
     memory_efe = normalize_memory_efe_state(state.get("memory_efe"))
@@ -1282,6 +1324,8 @@ def register_memory_efe_outreach_settlement(
         "expected_resolution": _round(evaluation.policy_costs.get("expected_outreach_resolution", 0.0)),
         "proposal_id": str(proposal_id),
         "delivery_status": str(delivery_status or "unknown"),
+        "created_turn_index": int(turn_index) if turn_index is not None else 0,
+        "m15_episode_id": str(m15_episode_id or ""),
         "created_at": now,
         "expires_at": now + MEMORY_EFE_SETTLEMENT_TTL_SECONDS,
         "expires_after_turns": MEMORY_EFE_SETTLEMENT_TTL_TURNS,
@@ -1300,6 +1344,8 @@ def register_memory_efe_outreach_settlement(
             "pending_id": row["pending_id"],
             "traceable_expectation_id": row["traceable_expectation_id"],
             "delivery_status": row["delivery_status"],
+            "created_turn_index": row["created_turn_index"],
+            "m15_episode_id": row["m15_episode_id"],
             "created_at": now,
             "engineering_proxy_label": ENGINEERING_PROXY_LABEL,
         }
@@ -1367,6 +1413,8 @@ def settle_memory_efe_outreach(
                 "type": "MemoryEfeSettlementEvent",
                 "settlement_id": settlement_id,
                 "pending_id": pending_id,
+                "m15_episode_id": str(row.get("m15_episode_id", "")),
+                "prior_turn_index": int(row.get("created_turn_index", 0) or 0),
                 "observed_resolution": _round(observed),
                 "remaining_prediction_error": remaining_error,
                 "outcome_band": outcome,

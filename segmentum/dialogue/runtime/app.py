@@ -1862,6 +1862,39 @@ def _clip_text(value: object, *, limit: int = 160) -> str:
     return text[: limit - 1] + "…"
 
 
+def _render_clipboard_copy_button(text: str, *, key: str, label: str = "复制快照") -> None:
+    """One-click copy via browser clipboard API (Streamlit iframe)."""
+    payload = json.dumps(text, ensure_ascii=False)
+    button_id = f"mind_copy_{key}"
+    components.html(
+        f"""
+        <button id="{button_id}" style="
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.35rem;
+            border: 1px solid #ccc;
+            background: #f7f7f7;
+            cursor: pointer;
+            font-size: 0.9rem;
+        ">{label}</button>
+        <script>
+        (function() {{
+            const btn = document.getElementById("{button_id}");
+            const text = {payload};
+            btn.onclick = function() {{
+                navigator.clipboard.writeText(text).then(function() {{
+                    btn.innerText = "已复制";
+                    setTimeout(function() {{ btn.innerText = {json.dumps(label, ensure_ascii=False)}; }}, 1800);
+                }}).catch(function() {{
+                    btn.innerText = "复制失败，请手动选中文本";
+                }});
+            }};
+        }})();
+        </script>
+        """,
+        height=46,
+    )
+
+
 def _format_unix_time(value: object) -> str:
     try:
         ts = int(value)
@@ -2064,6 +2097,39 @@ def render_dashboard() -> None:
         st.warning("当前未启用 MVP 循环（需 LLM 模式）。内心活动记录仅在 MVP 路径写入。")
         return
 
+    debug_bundle = chat_iface.read_mind_debug_bundle(
+        ui_hints={
+            "pending_user_message": st.session_state.get("pending_user_message"),
+            "m13_ui_turn_in_progress": bool(st.session_state.get("m13_ui_turn_in_progress", False)),
+            "last_implicit_idle_suppression_reason_code": st.session_state.get(
+                "last_implicit_idle_suppression_reason_code"
+            ),
+            "idle_seconds_at_last_check": st.session_state.get("idle_seconds_at_last_check"),
+        }
+    )
+    with st.expander("调试快照（复制给 Agent）", expanded=False):
+        st.caption(
+            "聚合 diagnose verdict、M13.5 tick、open_items traceability、queued outreach、"
+            "plan/selector mismatch 与 recent audit tail。可直接粘贴给调试 Agent。"
+        )
+        snap_left, snap_right = st.columns([1, 4])
+        with snap_left:
+            _render_clipboard_copy_button(debug_bundle, key="mind_debug_bundle")
+            st.download_button(
+                "下载 .txt",
+                data=debug_bundle.encode("utf-8"),
+                file_name="mind_debug_bundle.txt",
+                mime="text/plain",
+                key="mind_debug_download",
+            )
+        with snap_right:
+            st.text_area(
+                "mind_debug_bundle",
+                value=debug_bundle,
+                height=360,
+                label_visibility="collapsed",
+            )
+
     mvp_state = chat_iface.read_mvp_state_dict() or {}
     diagnostics = chat_iface.latest_response_diagnostics()
     conscious_plan = _as_dict(diagnostics.get("conscious_plan"))
@@ -2121,12 +2187,98 @@ def render_dashboard() -> None:
         m14_3_target = _as_dict(m14.get("m14_3_last_proactive_target"))
         m14_3_suppression = _as_dict(m14.get("m14_3_last_proactive_suppression"))
         m14_3_bands = _as_dict(m14.get("m14_3_last_drive_band_summary"))
+        m13_5_tick = _as_dict(m14.get("m13_5_last_idle_cognitive_tick"))
+        m14_6_mismatch = _as_dict(m14.get("m14_6_last_plan_selector_mismatch"))
+        m15_trail = m14.get("m15_delta_f_trail", [])
+        m15_slow = _as_dict(m14.get("m15_slow_loop"))
+        m15_meta = _as_dict(m14.get("m15_meta_control"))
         traceability_count = int(m14.get("m14_3_open_item_traceability_suggestions", 0) or 0)
-        if m14_3_target or m14_3_suppression or m14_3_bands or traceability_count:
-            with st.expander("M14.3 proactive alignment", expanded=False):
+        if isinstance(m15_trail, list) and m15_trail:
+            with st.expander("M15.0 Delta F trail", expanded=False):
+                lines = []
+                for row in m15_trail[:5]:
+                    if not isinstance(row, dict):
+                        continue
+                    lines.append(
+                        f"- turn {int(row.get('turn_index', 0) or 0)} "
+                        f"`{_clip_text(row.get('action'), limit=40)}` "
+                        f"DeltaF=`{float(row.get('delta_fe_proxy', 0.0) or 0.0):+.3f}` "
+                        f"outcome=`{_clip_text(row.get('outcome_summary'), limit=40)}`"
+                    )
+                if lines:
+                    st.markdown("\n".join(lines))
+        if m15_slow:
+            ops = _as_dict(m15_slow.get("last_ops"))
+            with st.expander("M15.1 Slow loop", expanded=False):
                 st.markdown(
                     "\n".join(
                         [
+                            f"- last_consolidation_run_at: `{_format_unix_time(m15_slow.get('last_run_at'))}`",
+                            f"- ops_this_run: merges=`{int(ops.get('merges', 0) or 0)}` "
+                            f"promote=`{int(ops.get('promote', 0) or 0)}` "
+                            f"abstract=`{int(ops.get('abstract', 0) or 0)}` "
+                            f"decay_touched=`{int(ops.get('decay_touched', 0) or 0)}` "
+                            f"archived=`{int(ops.get('archived', 0) or 0)}`",
+                            f"- budget_today: `{int(m15_slow.get('runs_today', 0) or 0)}/"
+                            f"{int(m15_slow.get('budget_per_day', 6) or 6)}`",
+                        ]
+                    )
+                )
+        if m15_meta:
+            active_meta = m15_meta.get("active", [])
+            recent_meta = m15_meta.get("recent_detections", [])
+            with st.expander("M15.2 Meta-control", expanded=False):
+                lines = []
+                if isinstance(active_meta, list):
+                    for row in active_meta[-5:]:
+                        item = _as_dict(row)
+                        payload = _as_dict(item.get("payload"))
+                        lines.append(
+                            f"- active `{_clip_text(item.get('intent_kind'), limit=60)}` "
+                            f"id=`{_clip_text(item.get('intent_id'), limit=50)}` "
+                            f"trigger=`{_clip_text(payload.get('action_trigger'), limit=60)}` "
+                            f"expires=`{_format_unix_time(item.get('expires_at'))}`"
+                        )
+                if isinstance(recent_meta, list):
+                    for row in recent_meta[-5:]:
+                        item = _as_dict(row)
+                        lines.append(
+                            f"- detected `{_clip_text(item.get('type'), limit=70)}` "
+                            f"trigger=`{_clip_text(item.get('action_trigger'), limit=60)}` "
+                            f"tension_id=`{_clip_text(item.get('tension_id'), limit=60)}` "
+                            f"reject=`{_clip_text(item.get('reject_reason'), limit=60)}`"
+                        )
+                st.markdown("\n".join(lines) if lines else "- active intents: 0")
+        if m14_3_target or m14_3_suppression or m14_3_bands or m13_5_tick or m14_6_mismatch or traceability_count:
+            with st.expander("M14.3 proactive alignment", expanded=False):
+                tick_age_line = ""
+                if m13_5_tick.get("at"):
+                    tick_age_line = (
+                        f"- idle_tick_at: `{_format_unix_time(m13_5_tick.get('at'))}` "
+                        f"idle_seconds=`{_clip_text(m13_5_tick.get('idle_seconds'), limit=40)}` "
+                        f"reject=`{_clip_text(m13_5_tick.get('reject_reason'), limit=80)}`"
+                    )
+                tick_detail_lines = []
+                if m13_5_tick:
+                    tick_detail_lines = [
+                        f"- memory_efe_should_outreach: `{m13_5_tick.get('memory_efe_should_outreach', '—')}` "
+                        f"policy=`{_clip_text(m13_5_tick.get('memory_efe_selected_policy'), limit=40)}`",
+                        f"- retrieved_ids: `{_join_values(m13_5_tick.get('retrieved_ids'))}`",
+                        f"- bounded_retrieve_ids: `{_join_values(m13_5_tick.get('bounded_retrieve_ids'))}`",
+                        f"- recall_top_k: `{m13_5_tick.get('recall_top_k', '—')}`",
+                    ]
+                mismatch_line = ""
+                if m14_6_mismatch:
+                    mismatch_line = (
+                        f"- plan_selector_mismatch: `{_clip_text(m14_6_mismatch.get('mismatch_reason_code'), limit=80)}` "
+                        f"plan_reason=`{_clip_text(m14_6_mismatch.get('plan_recommendation_reason'), limit=120)}`"
+                    )
+                st.markdown(
+                    "\n".join(
+                        [line for line in [
+                            tick_age_line,
+                            *tick_detail_lines,
+                            mismatch_line,
                             f"- trigger: `{_clip_text(m14_3_target.get('trigger'), limit=80)}`",
                             f"- source_kind: `{_clip_text(m14_3_target.get('source_kind'), limit=80)}`",
                             f"- selection_reason_codes: `{_join_values(m14_3_target.get('selection_reason_codes'))}`",
@@ -2141,7 +2293,7 @@ def render_dashboard() -> None:
                             f"stage=`{_clip_text(m14_3_suppression.get('reason_stage'), limit=40)}`",
                             f"- open_item_traceability_suggestions: {traceability_count}",
                             f"- legacy_vague_open_item_proactive: {bool(m14.get('m14_3_legacy_vague_open_item_proactive'))}",
-                        ]
+                        ] if line]
                     )
                 )
 

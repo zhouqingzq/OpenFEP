@@ -214,10 +214,34 @@ def run_streamlit_implicit_idle_proactive(
     _session_set(session_state, "_implicit_idle_last_attempt_mono", now_mono)
     _session_set(session_state, "m13_ui_turn_in_progress", True)
     try:
+        tick: Mapping[str, Any] | None = None
+        run_tick = getattr(chat_iface, "run_idle_cognitive_tick", None)
+        if callable(run_tick):
+            tick = run_tick(idle_seconds=idle_seconds)
+            tick_target = _mapping(_mapping(tick).get("selected_target"))
+            if not tick_target:
+                reason = str(_mapping(tick).get("reject_reason") or "") or "no_high_value_target"
+                event = _event(
+                    idle_seconds=idle_seconds,
+                    idle_threshold_seconds=threshold,
+                    proactive_policy_profile=profile,
+                    suppression_reason_code=reason,
+                )
+                _record_event(chat_iface, event)
+                _session_set(session_state, "last_implicit_idle_suppression_reason_code", reason)
+                return ImplicitIdleProactiveResult(
+                    attempted=True,
+                    idle_seconds=idle_seconds,
+                    idle_threshold_seconds=threshold,
+                    proactive_policy_profile=profile,
+                    suppression_reason_code=reason,
+                    events=[*_mapping(tick).get("events", []), event] if isinstance(_mapping(tick).get("events"), list) else [event],
+                )
         check = chat_iface.maybe_propose_proactive_turn(
             implicit_idle_request=True,
             idle_seconds=idle_seconds,
             user_typing=user_typing,
+            preselected_target=_mapping(_mapping(tick).get("selected_target")) if tick is not None else None,
         )
         proposal = check.get("proposal") if isinstance(check, Mapping) else None
         if not isinstance(proposal, Mapping) or not proposal.get("proposal_id"):

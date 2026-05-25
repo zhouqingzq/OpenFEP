@@ -776,6 +776,39 @@ def test_structured_recall_can_use_expectation_id_without_keyword_match() -> Non
     assert hits[0]["why_relevant"] == ["expectation_id:exp_semantic_followup"]
 
 
+def test_guidance_recall_attaches_m14_7_recall_score() -> None:
+    state = {
+        "short_term_memory": [
+            {
+                "id": "stm_wallet",
+                "kind": "episode",
+                "content": "wallet is in the blue drawer",
+                "salience": 0.8,
+                "precision": 0.9,
+                "created_at": 100,
+                "shareability": "default_social",
+            }
+        ],
+        "long_term_memory": [],
+        "open_items": [],
+        "pending_expectations": [],
+    }
+
+    hits = retrieve_memories_for_guidance(
+        state,
+        {
+            "semantic_terms": ["wallet", "blue drawer"],
+            "memory_kinds": ["episode"],
+            "current_user_id": "zq",
+        },
+        now=110,
+    )
+
+    assert hits
+    assert hits[0]["id"] == "stm_wallet"
+    assert hits[0]["_m14_7_recall_score"] > 0.0
+
+
 def test_prompt_uses_evidence_cards_without_unretrieved_raw_memory(tmp_path: Path) -> None:
     class NoRecallLLM(FakeJSONLLM):
         def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:

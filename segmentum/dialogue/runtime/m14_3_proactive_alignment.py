@@ -441,3 +441,32 @@ def select_proactive_target(
     if mem is None:
         return _target_from_boredom(m13_state)
     return None
+
+
+def classify_proactive_target_reject_reason(
+    state: Mapping[str, Any],
+    m13_state: Mapping[str, Any],
+    *,
+    memory_efe_evaluation: Any | None = None,
+    structural_signals: Mapping[str, Any] | None = None,
+) -> str:
+    """Closed M13.5 reason for why the structural selector produced no target."""
+    del state
+    sig = _mapping(structural_signals)
+    if _target_from_scheduled_signal(sig) is not None:
+        return ""
+
+    should, trace_id, refs, reason_codes, eligible = _memory_efe_fields(memory_efe_evaluation, m13_state)
+    if _memory_efe_rejected_generic_open_item(memory_efe_evaluation, m13_state):
+        return "generic_self_only_open_item"
+    if not eligible:
+        return "no_eligible_expectation"
+    if "recall_failure" in reason_codes:
+        return "no_recall_hit_for_eligible"
+    if not should:
+        if "outreach_margin_too_small" in reason_codes or "insufficient_expected_resolution" in reason_codes:
+            return "memory_efe_below_outreach_margin"
+        return "no_high_value_target"
+    if not refs or not trace_id:
+        return "all_targets_traceability_failed"
+    return "no_high_value_target"
