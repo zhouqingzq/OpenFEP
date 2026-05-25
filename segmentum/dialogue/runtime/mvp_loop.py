@@ -172,6 +172,7 @@ from segmentum.dialogue.runtime.m15_meta_control import (
     consume_recall_breadth_intent,
     detect_and_emit_intents,
 )
+from segmentum.dialogue.runtime.m15_3_cleanup_control import CleanupOwner, detect_cleanup_intents
 from segmentum.dialogue.runtime.m14_self_continuity import (
     MIN_BASELINE_UPDATE_CONFIDENCE,
     apply_self_cognition_patch_to_continuity,
@@ -4284,6 +4285,7 @@ class MVPDialogueRuntime:
         now: int,
         turn_index: int,
         triggered_by: str,
+        current_idle_tick_event: Mapping[str, Any] | None = None,
     ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         result = ConsolidationOwner.maybe_run(
             state,
@@ -4302,10 +4304,36 @@ class MVPDialogueRuntime:
                 source="background_tick",
             )
             events.extend(meta_result.events)
+        cleanup_result = detect_cleanup_intents(
+            state,
+            now=now,
+            turn_index=turn_index,
+            source=triggered_by,
+            current_idle_tick_event=current_idle_tick_event,
+        )
+        events.extend(cleanup_result.events)
+        cleanup_run = CleanupOwner.apply_intents(
+            state,
+            now=now,
+            turn_index=turn_index,
+            source=triggered_by,
+        )
+        events.extend(cleanup_run.events)
         for event in events:
             if str(event.get("type", "") or "").startswith("MemoryGate"):
                 self._record_memory_gate_event(state, event)
-            self.store.append_log({"event": "m15_consolidation_audit", **event})
+            event_type = str(event.get("type", "") or "")
+            channel = (
+                "m15_cleanup_audit"
+                if event_type.startswith("Cleanup")
+                or event_type in {
+                    "OpenItemBacklogDetectedEvent",
+                    "PendingExpectationBacklogDetectedEvent",
+                    "LowTraceabilityRecallBurdenDetectedEvent",
+                }
+                else "m15_consolidation_audit"
+            )
+            self.store.append_log({"event": channel, **event})
         return state, events
 
     def _record_episode_settlements(
@@ -5887,11 +5915,13 @@ class MVPDialogueRuntime:
             self.store.append_log({"event": "m13_proactive_audit", **event})
         self._record_episode(episode)
         state = self.store.load()
+        tick_event = next((event for event in events if str(event.get("type", "")) == "IdleCognitiveTickEvent"), None)
         state, consolidation_events = self._run_consolidation_cycle(
             state,
             now=tick_now,
             turn_index=turn_index,
             triggered_by="idle_cognitive_tick",
+            current_idle_tick_event=tick_event if isinstance(tick_event, Mapping) else None,
         )
         self.store.save(state)
         if consolidation_events:
@@ -6422,10 +6452,22 @@ class MVPDialogueRuntime:
 
     def _maybe_drain_queued_outreach_locked(self, *, turn_index: int, now: int) -> dict[str, Any]:
         entry = pop_next_pending_outreach(self.store.root, now=now)
-        if entry is None:
+        if entry is None and str(os.environ.get("SEGMENTUM_QUEUE_INCLUDE_OTHER_SESSIONS", "") or "").strip() == "1":
             entry = self._relay_due_outreach_from_sibling_session_locked(now=now)
         if entry is None:
             return {"drained": False, "reason": "empty_queue"}
+        if str(entry.get("trigger", "")) == "scheduled_outreach":
+            refs = [str(r) for r in (entry.get("evidence_refs") or entry.get("trigger_evidence_refs") or []) or [] if str(r or "").strip()]
+            anchor = str(entry.get("source_intent_id", "") or entry.get("scheduled_intent_id", "") or "").strip()
+            if not refs and not anchor:
+                update_queued_outreach_status(
+                    self.store.root,
+                    str(entry.get("proposal_id", "")),
+                    "suppressed",
+                    now=now,
+                    suppression_reason="queued_outreach_missing_traceability_anchor",
+                )
+                return {"drained": False, "reason": "queued_outreach_missing_traceability_anchor"}
         proposal = ProactiveTurnProposal(
             proposal_id=str(entry.get("proposal_id", "")),
             created_at=int(entry.get("created_at", now) or now),

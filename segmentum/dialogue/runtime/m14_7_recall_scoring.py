@@ -7,6 +7,8 @@ from typing import Any, Mapping
 import json
 import re
 
+from segmentum.dialogue.runtime.m15_3_cleanup_control import cleanup_recall_suppression_reason
+
 
 MEMORY_EFE_RECALL_FLOOR = 0.2
 RECENCY_HALF_LIFE_SECONDS = 14 * 86400
@@ -56,8 +58,11 @@ def score_recall_candidate(
     now: int,
     retrieved_context: Mapping[str, Any] | None = None,
 ) -> float:
-    del retrieved_context
+    context = retrieved_context if isinstance(retrieved_context, Mapping) else {}
+    phase = str(context.get("phase", "") or "")
     if str(candidate.get("status", "") or "") == "archived":
+        return 0.0
+    if cleanup_recall_suppression_reason(candidate, now=now, phase=phase):
         return 0.0
     lexical = _lexical_overlap_norm(candidate, query)
     salience = _bounded_float(candidate.get("salience"), default=0.5)

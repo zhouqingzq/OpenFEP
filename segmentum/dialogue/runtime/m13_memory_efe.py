@@ -20,6 +20,13 @@ from segmentum.dialogue.runtime.m13_drive import (
     normalize_m13_drive_state,
 )
 from segmentum.dialogue.runtime.m14_7_recall_scoring import MEMORY_EFE_RECALL_FLOOR, score_recall_candidate
+from segmentum.dialogue.runtime.m15_3_cleanup_control import (
+    cleanup_ineligibility_reason,
+    explicit_scheduled_anchor_refs,
+    is_strictly_traceable,
+    strict_bound_memory_ids,
+    strict_evidence_refs,
+)
 from segmentum.dialogue.runtime.m15_episode_ledger import EpisodeLedger, outreach_margin_history_adjustment
 
 ENGINEERING_PROXY_LABEL = "mvp_local_memory_efe_bridge"
@@ -134,22 +141,14 @@ def _content_summary(row: Mapping[str, Any]) -> str:
     return ""
 
 
-def _evidence_refs(row: Mapping[str, Any]) -> list[str]:
-    refs = _string_list(row.get("evidence_refs"), limit=8)
-    for key in ("evidence_ref", "source_event_id", "intent_id", "id"):
-        value = str(row.get(key, "") or "").strip()
-        if value and value not in refs:
-            refs.append(value[:120])
-    return refs[:8]
+def _evidence_refs(row: Mapping[str, Any], *, source_kind: str = "") -> list[str]:
+    if source_kind == "scheduled_outreach":
+        return explicit_scheduled_anchor_refs(row, limit=8)
+    return strict_evidence_refs(row, limit=8)
 
 
 def _bound_memory_ids(row: Mapping[str, Any]) -> list[str]:
-    ids = _string_list(row.get("bound_memory_ids"), limit=8)
-    for key in ("memory_id", "source_memory_id"):
-        value = str(row.get(key, "") or "").strip()
-        if value and value not in ids:
-            ids.append(value[:120])
-    return ids[:8]
+    return strict_bound_memory_ids(row, limit=8)
 
 
 def _relationship_precision(state: Mapping[str, Any]) -> float:
@@ -266,6 +265,8 @@ class NormalizedExpectation:
 class NormalizedExpectationSet:
     eligible_for_efe: list[NormalizedExpectation] = field(default_factory=list)
     diagnostic_only: list[NormalizedExpectation] = field(default_factory=list)
+    bound_recall_seed_ids: list[str] = field(default_factory=list)
+    bound_recall_floor_bypassed_ids: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -288,6 +289,8 @@ class M13MemoryEfeEvaluationResult:
     suppression_reasons: list[str]
     reason_codes: list[str]
     evidence_refs: list[str]
+    bound_recall_seed_ids: list[str] = field(default_factory=list)
+    bound_recall_floor_bypassed_ids: list[str] = field(default_factory=list)
     events: list[dict[str, Any]] = field(default_factory=list)
 
 
@@ -352,11 +355,18 @@ def _make_expectation(
         or row.get("intent_id")
         or ""
     ).strip()
-    evidence_refs = _evidence_refs(row)
+    evidence_refs = _evidence_refs(row, source_kind=source_kind)
     bound_ids = _bound_memory_ids(row)
     status = str(row.get("status", "pending") or "pending").strip().lower()
     if source_kind == "open_item" and status in {"", "active"}:
         status = "open"
+    cleanup_reason = cleanup_ineligibility_reason(row, now=now, phase=phase, expectation=True)
+    if cleanup_reason:
+        eligible = False
+        ineligibility_reason = cleanup_reason
+    elif source_kind in {"pending_expectation", "memory_dynamics_expectation", "open_item"} and eligible and not is_strictly_traceable(row):
+        eligible = False
+        ineligibility_reason = "not_traceable_or_testable"
     relationship_weight = _clamp(0.75 + 0.25 * _relationship_precision(state), 0.75, 1.0)
     recall_keys = _string_list(row.get("recall_keys"), limit=8)
     precision, precision_approx = _precision_components(
@@ -567,6 +577,8 @@ def normalize_expectations_for_efe(
 ) -> NormalizedExpectationSet:
     eligible: list[NormalizedExpectation] = []
     diagnostic: list[NormalizedExpectation] = []
+    bound_recall_seed_ids: list[str] = []
+    bound_recall_floor_bypassed_ids: list[str] = []
     memory_by_id: dict[str, Mapping[str, Any]] = {}
     for key in ("short_term_memory", "long_term_memory"):
         rows = state.get(key, [])
@@ -590,11 +602,19 @@ def normalize_expectations_for_efe(
                         row,
                         query=[expectation.content_summary, *expectation.recall_keys, *expectation.evidence_refs],
                         now=now,
-                        retrieved_context={},
+                        retrieved_context={"phase": "memory_efe"},
                     )
                     for row in bound_rows
                 ]
                 if scores and max(scores) < MEMORY_EFE_RECALL_FLOOR:
+                    if phase == "idle" and (expectation.evidence_refs or expectation.bound_memory_ids):
+                        for bound_id in expectation.bound_memory_ids:
+                            if bound_id in memory_by_id and bound_id not in bound_recall_seed_ids:
+                                bound_recall_seed_ids.append(bound_id)
+                            if bound_id in memory_by_id and bound_id not in bound_recall_floor_bypassed_ids:
+                                bound_recall_floor_bypassed_ids.append(bound_id)
+                        eligible.append(expectation)
+                        return
                     diagnostic.append(replace(expectation, eligible=False, ineligibility_reason="bound_memory_recall_score_below_floor"))
                     return
         if expectation.eligible:
@@ -613,7 +633,12 @@ def normalize_expectations_for_efe(
         if isinstance(row, Mapping):
             add(_normalize_scheduled_intent(row, state=state, now=now, phase=phase))
 
-    return NormalizedExpectationSet(eligible_for_efe=eligible, diagnostic_only=diagnostic)
+    return NormalizedExpectationSet(
+        eligible_for_efe=eligible,
+        diagnostic_only=diagnostic,
+        bound_recall_seed_ids=bound_recall_seed_ids[:12],
+        bound_recall_floor_bypassed_ids=bound_recall_floor_bypassed_ids[:12],
+    )
 
 
 def _due_pressure(e: NormalizedExpectation) -> float:
@@ -1088,6 +1113,22 @@ def evaluate_memory_efe(
     if reply_angle_bias != "none":
         reason_codes.append(f"reply_angle_bias:{reply_angle_bias}")
     reason_codes.extend(suppression)
+    diagnostic_reasons = list(
+        dict.fromkeys(
+            row.ineligibility_reason
+            for row in expectations.diagnostic_only
+            if row.ineligibility_reason
+        )
+    )
+    cleanup_diagnostic_reasons = {
+        "expectation_expired",
+        "expectation_merged",
+        "low_traceability_cleanup_deprioritized",
+        "self_referential_evidence_only",
+    }
+    if any(reason in cleanup_diagnostic_reasons for reason in diagnostic_reasons):
+        reason_codes.append("cleanup_filtered_low_traceability_candidates")
+    reason_codes.extend(diagnostic_reasons[:4])
     reason_codes = list(dict.fromkeys(reason_codes))[:12]
 
     event_id = _new_id("m13_memory_efe")
@@ -1108,6 +1149,8 @@ def evaluate_memory_efe(
         "selected_policy": selected_policy,
         "should_outreach": should_outreach,
         "traceable_expectation_id": traceable_id,
+        "bound_recall_seed_ids": list(expectations.bound_recall_seed_ids[:12]),
+        "bound_recall_floor_bypassed_ids": list(expectations.bound_recall_floor_bypassed_ids[:12]),
         "suppression_reasons": list(dict.fromkeys(suppression))[:12],
         "ledger_outreach_margin_requirement_delta": ledger_margin_requirement_delta,
         "engineering_proxy_label": ENGINEERING_PROXY_LABEL,
@@ -1164,6 +1207,8 @@ def evaluate_memory_efe(
         suppression_reasons=list(dict.fromkeys(suppression))[:12],
         reason_codes=reason_codes,
         evidence_refs=evidence_refs,
+        bound_recall_seed_ids=list(expectations.bound_recall_seed_ids[:12]),
+        bound_recall_floor_bypassed_ids=list(expectations.bound_recall_floor_bypassed_ids[:12]),
         events=events,
     )
 

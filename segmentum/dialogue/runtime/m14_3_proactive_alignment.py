@@ -8,11 +8,19 @@ is traceable enough to become a proactive proposal.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import time
 from typing import Any, Mapping
 
 from segmentum.dialogue.runtime.m13_boredom import boredom_band, normalize_boredom_state
 from segmentum.dialogue.runtime.m13_drive import _bounded_float, _mapping, _string_list, normalize_m13_drive_state
 from segmentum.dialogue.runtime.m13_memory_efe import normalize_memory_efe_state
+from segmentum.dialogue.runtime.m15_3_cleanup_control import (
+    cleanup_ineligibility_reason,
+    explicit_scheduled_anchor_refs,
+    is_strictly_traceable,
+    strict_bound_memory_ids,
+    strict_evidence_refs,
+)
 from segmentum.dialogue.runtime.m13_reward import normalize_affective_reward_proxy_state
 
 VAGUE_NEXT_CHECKS = frozenset({"", "later", "regular", "someday", "soon", "next", "follow_up", "check_later"})
@@ -48,21 +56,6 @@ def _content_summary(row: Mapping[str, Any]) -> str:
     return ""
 
 
-def _generic_open_item_summary(text: str) -> bool:
-    normalized = " ".join(str(text or "").strip().casefold().split())
-    if not normalized:
-        return True
-    generic_markers = (
-        "用户未明确说明来意",
-        "未明确说明来意",
-        "unclear user intent",
-        "user intent unclear",
-        "ask what the user wants",
-        "clarify what the user wants",
-    )
-    return any(marker in normalized for marker in generic_markers)
-
-
 def _open_item_external_refs(
     *,
     refs: list[str],
@@ -87,15 +80,15 @@ def _self_only_generic_open_item(
 ) -> bool:
     if source_kind != "open_item":
         return False
-    return not _open_item_external_refs(refs=refs, trace_id=trace_id, selected_row=selected_row) or _generic_open_item_summary(topic)
+    del topic
+    return not _open_item_external_refs(refs=refs, trace_id=trace_id, selected_row=selected_row)
 
 
 def _evidence_refs(row: Mapping[str, Any]) -> list[str]:
-    refs = _string_list(row.get("evidence_refs"), limit=8)
-    refs.extend(_string_list(row.get("bound_memory_ids"), limit=8))
-    row_id = _clean_id(row.get("id") or row.get("expectation_id"))
-    if row_id and (refs or str(row.get("source_kind", "")) == "scheduled_outreach"):
-        refs.append(row_id)
+    if str(row.get("source_kind", "") or "") == "scheduled_outreach":
+        return explicit_scheduled_anchor_refs(row, limit=8)
+    refs = strict_evidence_refs(row, limit=8)
+    refs.extend(strict_bound_memory_ids(row, limit=8))
     return list(dict.fromkeys(refs))[:8]
 
 
@@ -106,14 +99,16 @@ def next_check_is_vague(value: Any) -> bool:
 def is_traceable_open_item(row: Mapping[str, Any]) -> bool:
     if not _status_open(row):
         return False
+    if cleanup_ineligibility_reason(row, now=int(time.time()), phase="proactive", expectation=False):
+        return False
     next_check = str(row.get("next_check", row.get("next_step", "")) or "").strip().casefold()
     scheduled_id = _clean_id(row.get("scheduled_intent_id") or row.get("intent_id"))
     due_at = row.get("due_at_epoch") or row.get("due_at")
-    if scheduled_id and due_at:
+    if scheduled_id and due_at and is_strictly_traceable(row):
         return True
     if next_check not in TRACEABLE_NEXT_CHECKS:
         return False
-    return bool(_evidence_refs(row) and _content_summary(row))
+    return bool(is_strictly_traceable(row) and _content_summary(row))
 
 
 def build_traceable_proactive_intent(expectation: Mapping[str, Any]) -> str:
@@ -194,6 +189,8 @@ def _target_from_memory_efe(memory_efe_evaluation: Any | None, m13_state: Mappin
     else:
         topic = trace_id or refs[0]
         source_kind = "memory_efe_bound_memory"
+    if selected_row is not None and cleanup_ineligibility_reason(selected_row, now=int(time.time()), phase="proactive", expectation=True):
+        return None
     if _self_only_generic_open_item(
         source_kind=source_kind,
         topic=topic,
@@ -459,6 +456,8 @@ def classify_proactive_target_reject_reason(
     should, trace_id, refs, reason_codes, eligible = _memory_efe_fields(memory_efe_evaluation, m13_state)
     if _memory_efe_rejected_generic_open_item(memory_efe_evaluation, m13_state):
         return "generic_self_only_open_item"
+    if "cleanup_filtered_low_traceability_candidates" in reason_codes:
+        return "cleanup_filtered_low_traceability_candidates"
     if not eligible:
         return "no_eligible_expectation"
     if "recall_failure" in reason_codes:

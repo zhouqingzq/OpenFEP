@@ -326,7 +326,8 @@ def test_queued_outreach_drain_uses_delivery_path_and_counts_llm(tmp_path: Path)
     assert bg["tokens_used_today"] > 1
 
 
-def test_current_session_can_relay_due_outbox_from_sibling_session(tmp_path: Path) -> None:
+def test_current_session_can_relay_due_outbox_from_sibling_session(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("SEGMENTUM_QUEUE_INCLUDE_OTHER_SESSIONS", "1")
     persona_root = tmp_path / "persona"
     source_root = persona_root / "sessions" / "old_tab"
     current_root = persona_root / "sessions" / "current_tab"

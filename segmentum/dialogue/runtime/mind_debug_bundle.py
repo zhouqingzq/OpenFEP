@@ -232,6 +232,7 @@ def build_mind_debug_bundle_text(
     m15_trail = observability.get("m15_delta_f_trail", [])
     m15_slow = _mapping(observability.get("m15_slow_loop"))
     m15_meta = _mapping(observability.get("m15_meta_control"))
+    m15_cleanup = _mapping(observability.get("m15_cleanup"))
     counts = _mapping(log_summary.get("counts"))
 
     lines = [
@@ -347,6 +348,31 @@ def build_mind_debug_bundle_text(
                 f"- detected {item.get('type')} trigger={item.get('action_trigger')} "
                 f"reject={item.get('reject_reason')}"
             )
+
+    cleanup_ops = _mapping(m15_cleanup.get("last_ops"))
+    lines.extend(
+        [
+            "",
+            "## M15.3 cleanup",
+            f"- last_run_at: {_fmt_ts(m15_cleanup.get('last_run_at'))}",
+            f"- last_source: {_clip(m15_cleanup.get('last_source'), limit=40)}",
+            f"- ops: merged={cleanup_ops.get('merged_duplicates', 0)} "
+            f"expired_pending={cleanup_ops.get('expired_pending_expectations', 0)} "
+            f"diagnostic_open={cleanup_ops.get('diagnostic_open_items', 0)} "
+            f"recall_deprioritized={cleanup_ops.get('recall_deprioritized', 0)}",
+            f"- active_cleanup_intents: {m15_cleanup.get('cleanup_active_count', 0)}",
+        ]
+    )
+    cleanup_active = m15_meta.get("cleanup_active", [])
+    if isinstance(cleanup_active, list) and cleanup_active:
+        for row in cleanup_active[-5:]:
+            item = _mapping(row)
+            lines.append(f"- active_cleanup {item.get('intent_kind')} detector={item.get('detector')}")
+    cleanup_recent = m15_meta.get("cleanup_recent_detections", [])
+    if isinstance(cleanup_recent, list):
+        for row in cleanup_recent[-5:]:
+            item = _mapping(row)
+            lines.append(f"- cleanup_detected {item.get('type')} emitted={item.get('emitted_intent_id')}")
 
     lines.extend(
         [

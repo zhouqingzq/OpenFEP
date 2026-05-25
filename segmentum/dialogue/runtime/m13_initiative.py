@@ -234,16 +234,6 @@ class ProactiveTurnProposal:
         return payload
 
 
-GENERIC_LOCKED_OPEN_ITEM_MARKERS = (
-    "用户未明确说明来意",
-    "未明确说明来意",
-    "unclear user intent",
-    "user intent unclear",
-    "ask what the user wants",
-    "clarify what the user wants",
-)
-
-
 def _untraceable_locked_memory_efe_proposal(proposal: ProactiveTurnProposal) -> bool:
     if proposal.trigger != "memory_efe_outreach":
         return False
@@ -257,14 +247,7 @@ def _untraceable_locked_memory_efe_proposal(proposal: ProactiveTurnProposal) -> 
         str(proposal.proposal_id or "").strip(),
     }
     external_refs = [ref for ref in refs if str(ref or "").strip() and str(ref or "").strip() not in self_ids]
-    text = " ".join(
-        (
-            str(proposal.proposed_topic or ""),
-            str(proposal.ordinary_language_intent or ""),
-        )
-    ).casefold()
-    generic = any(marker in text for marker in GENERIC_LOCKED_OPEN_ITEM_MARKERS)
-    return not external_refs or generic
+    return not external_refs
 
 
 @dataclass

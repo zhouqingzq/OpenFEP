@@ -906,7 +906,7 @@ class ChatInterface:
             return {}
         return dict(self._mvp_runtime.update_background_continuity_config(**updates))
 
-    def read_queued_outreach(self) -> list[dict[str, object]]:
+    def read_queued_outreach(self, *, include_other_sessions: bool = False) -> list[dict[str, object]]:
         self._ensure_runtime_fields()
         self._maybe_enable_mvp_llm_runtime()
         if self._mvp_runtime is None:
@@ -917,7 +917,7 @@ class ChatInterface:
         seen: set[str] = set()
         roots = [self._mvp_runtime.store.root]
         shared_root = self._mvp_runtime.store.shared_root
-        if shared_root is not None:
+        if include_other_sessions and shared_root is not None:
             sessions_dir = shared_root / "sessions"
             if sessions_dir.is_dir():
                 roots.extend(path for path in sessions_dir.iterdir() if path.is_dir())
@@ -1141,6 +1141,8 @@ class ChatInterface:
         meta_control = {
             "active": [],
             "recent_detections": [],
+            "cleanup_active": [],
+            "cleanup_recent_detections": [],
         }
         if isinstance(meta_control_raw, dict):
             meta_control["active"] = [
@@ -1166,6 +1168,30 @@ class ChatInterface:
                 for row in meta_control_raw.get("recent_detections", []) or []
                 if isinstance(row, dict)
             ][-8:]
+            meta_control["cleanup_active"] = [
+                {
+                    "intent_id": str(row.get("intent_id", "") or ""),
+                    "intent_kind": str(row.get("intent_kind", "") or ""),
+                    "detector": str(row.get("detector", "") or ""),
+                    "payload": dict(row.get("payload", {})) if isinstance(row.get("payload"), dict) else {},
+                    "expires_at": int(row.get("expires_at", 0) or 0),
+                }
+                for row in meta_control_raw.get("cleanup_active", []) or []
+                if isinstance(row, dict)
+            ][-8:]
+            meta_control["cleanup_recent_detections"] = [
+                {
+                    "type": str(row.get("type", "") or ""),
+                    "low_traceability_count": row.get("low_traceability_count", ""),
+                    "candidate_count": row.get("candidate_count", ""),
+                    "emitted_intent_id": str(row.get("emitted_intent_id", "") or ""),
+                }
+                for row in meta_control_raw.get("cleanup_recent_detections", []) or []
+                if isinstance(row, dict)
+            ][-8:]
+        cleanup = m13_state.get("m15_cleanup", {}) if isinstance(m13_state, dict) else {}
+        if not isinstance(cleanup, dict):
+            cleanup = {}
 
         return {
             "daemon": daemon,
@@ -1195,6 +1221,13 @@ class ChatInterface:
             "m15_delta_f_trail": m15_delta_f_trail,
             "m15_slow_loop": slow_loop,
             "m15_meta_control": meta_control,
+            "m15_cleanup": {
+                "last_run_at": int(cleanup.get("last_run_at", 0) or 0),
+                "last_source": str(cleanup.get("last_source", "") or ""),
+                "last_ops": dict(cleanup.get("last_ops", {})) if isinstance(cleanup.get("last_ops"), dict) else {},
+                "cleanup_active_count": int(cleanup.get("cleanup_active_count", 0) or 0),
+                "cleanup_consumed_count": int(cleanup.get("cleanup_consumed_count", 0) or 0),
+            },
             "m14_3_open_item_traceability_suggestions": m14_3_traceability_suggestions,
             "m14_3_legacy_vague_open_item_proactive": legacy_vague_open_item_proactive,
         }
