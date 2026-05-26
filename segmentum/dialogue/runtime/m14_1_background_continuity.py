@@ -53,6 +53,7 @@ def default_background_continuity_state() -> dict[str, Any]:
         "day_anchor": "",
         "last_tick_at": 0,
         "last_budget_block_reason": "",
+        "last_background_skip_reason": "",
         "last_streamlit_ping_at": 0,
         "idle_ticks_lifetime": 0,
         "self_reviews_lifetime": 0,
@@ -101,6 +102,7 @@ def normalize_background_continuity_state(raw: Any) -> dict[str, Any]:
     merged["wallclock_used_today_seconds"] = max(0.0, float(merged.get("wallclock_used_today_seconds", 0) or 0))
     merged["day_anchor"] = str(merged.get("day_anchor", "") or "")[:16]
     merged["last_budget_block_reason"] = str(merged.get("last_budget_block_reason", "") or "")[:64]
+    merged["last_background_skip_reason"] = str(merged.get("last_background_skip_reason", "") or "")[:64]
     return merged
 
 

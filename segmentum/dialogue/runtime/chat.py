@@ -93,6 +93,47 @@ def _seed_mvp_session_store_if_needed(persona_root: Path, session_root: Path) ->
                 shutil.copy2(src, dst)
             except OSError:
                 continue
+    _reset_per_session_counters(session_root)
+
+
+def _reset_per_session_counters(session_root: Path) -> None:
+    m13_path = session_root / SYSTEM_FILE_NAMES["m13_drive_state"]
+    if not m13_path.is_file():
+        return
+    try:
+        payload = json.loads(m13_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return
+    if not isinstance(payload, dict):
+        return
+    initiative = payload.get("initiative")
+    if not isinstance(initiative, dict):
+        return
+    initiative["proactive_count_this_session"] = 0
+    initiative["last_proactive_turn_at"] = 0
+    initiative["last_proactive_turn_index"] = -1
+    initiative["cooldown_until_timestamp"] = 0
+    idle = initiative.get("idle_introspection")
+    if isinstance(idle, dict):
+        idle["reflection_count_this_session"] = 0
+        idle["outreach_via_introspection_count_this_session"] = 0
+        idle["last_introspection_at"] = 0
+        initiative["idle_introspection"] = idle
+    bg = initiative.get("background_continuity")
+    if isinstance(bg, dict):
+        bg["ticks_today"] = 0
+        bg["llm_calls_today"] = 0
+        bg["tokens_used_today"] = 0
+        bg["wallclock_used_today_seconds"] = 0.0
+        bg["self_reviews_today"] = 0
+        bg["last_background_skip_reason"] = ""
+        bg["last_budget_block_reason"] = ""
+        initiative["background_continuity"] = bg
+    payload["initiative"] = initiative
+    try:
+        m13_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    except OSError:
+        return
 
 
 def _latest_temporal_state_seed(persona_root: Path) -> Path:
@@ -1023,9 +1064,23 @@ class ChatInterface:
         last_health_background_ran_llm = None
         last_proactive_target: dict[str, object] = {}
         last_proactive_suppression: dict[str, object] = {}
+        latest_selector_target: dict[str, object] = {}
+        latest_attempted_target: dict[str, object] = {}
+        latest_delivered_target: dict[str, object] = {}
+        latest_suppressed_target: dict[str, object] = {}
+        latest_pipeline_suppression: dict[str, object] = {}
+        last_delivery_assessment: dict[str, object] = {}
         last_drive_band_summary: dict[str, object] = {}
         last_idle_cognitive_tick: dict[str, object] = {}
         last_idle_plan_mismatch: dict[str, object] = {}
+
+        def _row_at(row: Mapping[str, object]) -> int:
+            return int(row.get("at", 0) or 0)
+
+        def _maybe_latest(current: dict[str, object], candidate: dict[str, object], at: int) -> dict[str, object]:
+            if at >= int(current.get("at", 0) or 0):
+                return {**candidate, "at": at}
+            return current
         mvp_runtime = getattr(self, "_mvp_runtime", None)
         m15_delta_f_trail: list[dict[str, object]] = []
         if mvp_runtime is not None:
@@ -1045,11 +1100,24 @@ class ChatInterface:
                 m15_delta_f_trail = []
         for row in self.read_conversation_log(limit=300):
             if str(row.get("event", "")) != "m14_2_audit":
+                row_at = _row_at(row)
+                if str(row.get("event", "")) == "proactive_turn":
+                    latest_delivered_target = _maybe_latest(
+                        latest_delivered_target,
+                        {
+                            "trigger": str(row.get("trigger", "") or ""),
+                            "traceable_expectation_id": str(row.get("proposal_id", "") or ""),
+                            "proposal_id": str(row.get("proposal_id", "") or ""),
+                            "reply": str(row.get("reply", "") or "")[:120],
+                        },
+                        row_at,
+                    )
+                    last_proactive_target = dict(latest_delivered_target)
                 if str(row.get("type", "")) == "IdleCognitiveTickEvent":
                     target = row.get("selected_target", {})
                     bands = row.get("bands", {})
                     last_idle_cognitive_tick = {
-                        "at": int(row.get("at", 0) or 0),
+                        "at": row_at,
                         "idle_seconds": row.get("idle_seconds", 0),
                         "retrieved_ids": row.get("retrieved_ids", []),
                         "bounded_retrieve_ids": row.get("bounded_retrieve_ids", []),
@@ -1061,19 +1129,32 @@ class ChatInterface:
                         "bands": dict(bands) if isinstance(bands, dict) else {},
                     }
                     if isinstance(target, dict) and target:
-                        last_proactive_target = {
+                        selector_payload = {
                             "trigger": str(target.get("trigger", "") or ""),
                             "traceable_expectation_id": str(target.get("traceable_expectation_id", "") or ""),
                             "source_kind": str(target.get("source_kind", "") or ""),
                             "selection_reason_codes": target.get("selection_reason_codes", []),
                             "evidence_refs": target.get("evidence_refs", []),
                         }
+                        latest_selector_target = _maybe_latest(latest_selector_target, selector_payload, row_at)
+                        last_proactive_target = dict(selector_payload)
                     elif str(row.get("reject_reason", "") or ""):
-                        last_proactive_suppression = {
+                        suppression_payload = {
                             "reason": str(row.get("reject_reason", "") or ""),
                             "reason_code": str(row.get("reject_reason", "") or ""),
                             "reason_stage": "idle_cognitive_tick",
                         }
+                        latest_pipeline_suppression = _maybe_latest(
+                            latest_pipeline_suppression,
+                            suppression_payload,
+                            row_at,
+                        )
+                        latest_suppressed_target = _maybe_latest(
+                            latest_suppressed_target,
+                            {**suppression_payload, "traceable_expectation_id": ""},
+                            row_at,
+                        )
+                        last_proactive_suppression = dict(suppression_payload)
                     if isinstance(bands, dict):
                         last_drive_band_summary = {
                             "behavioral_pull_band": bands.get("behavior_band", ""),
@@ -1089,22 +1170,66 @@ class ChatInterface:
                         "selection_reason_codes": row.get("selection_reason_codes", []),
                     }
                 if str(row.get("type", "")) == "M13ProactiveProposalEvent":
-                    last_proactive_target = {
+                    attempted_payload = {
                         "trigger": str(row.get("trigger", "") or ""),
                         "traceable_expectation_id": str(row.get("traceable_expectation_id", "") or ""),
                         "ordinary_language_intent": str(row.get("ordinary_language_intent", "") or "")[:160],
                         "source_kind": str(row.get("source_kind", "") or ""),
                         "selection_reason_codes": row.get("selection_reason_codes", []),
                         "evidence_refs": row.get("trigger_evidence_refs", []),
+                        "proposal_id": str(row.get("proposal_id", "") or ""),
                     }
+                    latest_attempted_target = _maybe_latest(latest_attempted_target, attempted_payload, row_at)
+                    last_proactive_target = dict(attempted_payload)
                 if str(row.get("type", "")) == "M13ProactiveSuppressionEvent":
-                    if str(row.get("reason_stage", "") or "") == "pre_proposal":
-                        last_proactive_target = {}
-                    last_proactive_suppression = {
+                    suppression_payload = {
                         "reason": str(row.get("reason", "") or ""),
                         "reason_code": str(row.get("reason_code", row.get("reason", "")) or ""),
                         "reason_stage": str(row.get("reason_stage", "") or ""),
+                        "proposal_id": str(row.get("proposal_id", "") or ""),
                     }
+                    latest_pipeline_suppression = _maybe_latest(
+                        latest_pipeline_suppression,
+                        suppression_payload,
+                        row_at,
+                    )
+                    latest_suppressed_target = _maybe_latest(
+                        latest_suppressed_target,
+                        suppression_payload,
+                        row_at,
+                    )
+                    if str(row.get("reason_stage", "") or "") == "pre_proposal":
+                        last_proactive_target = {}
+                    last_proactive_suppression = dict(suppression_payload)
+                if str(row.get("type", "")) == "MemoryEfeSuppressionEvent":
+                    suppression_payload = {
+                        "reason": "memory_efe_suppressed",
+                        "reason_code": "memory_efe_suppressed",
+                        "reason_stage": "memory_efe",
+                        "suppression_reasons": row.get("suppression_reasons", []),
+                    }
+                    latest_suppressed_target = _maybe_latest(
+                        latest_suppressed_target,
+                        suppression_payload,
+                        row_at,
+                    )
+                if str(row.get("type", "")) == "ProactiveDeliveryAssessmentEvent":
+                    last_delivery_assessment = _maybe_latest(
+                        last_delivery_assessment,
+                        {
+                            "proposal_id": str(row.get("proposal_id", "") or ""),
+                            "assessment": dict(row.get("assessment", {})) if isinstance(row.get("assessment"), dict) else {},
+                        },
+                        row_at,
+                    )
+                if str(row.get("type", "")) == "M13ProactiveGenerationEvent":
+                    delivered_payload = {
+                        "trigger": str(row.get("trigger", "") or ""),
+                        "proposal_id": str(row.get("proposal_id", "") or ""),
+                        "reply": str(row.get("reply", "") or "")[:120],
+                    }
+                    latest_delivered_target = _maybe_latest(latest_delivered_target, delivered_payload, row_at)
+                    last_proactive_target = dict(latest_delivered_target)
                 if str(row.get("type", "")) == "IdleProactiveDriveRefreshEvent":
                     summary = row.get("drive_band_summary", {})
                     last_drive_band_summary = dict(summary) if isinstance(summary, dict) else {}
@@ -1250,8 +1375,15 @@ class ChatInterface:
             "background_tokens_today": int(bg.get("tokens_used_today", 0) or 0),
             "background_tokens_budget": int(bg.get("tokens_budget_per_day", 30000) or 30000),
             "last_budget_block_reason": str(bg.get("last_budget_block_reason", "") or ""),
+            "last_background_skip_reason": str(bg.get("last_background_skip_reason", "") or ""),
             "m14_3_last_proactive_target": last_proactive_target,
             "m14_3_last_proactive_suppression": last_proactive_suppression,
+            "latest_selector_target": latest_selector_target,
+            "latest_attempted_target": latest_attempted_target,
+            "latest_delivered_target": latest_delivered_target,
+            "latest_suppressed_target": latest_suppressed_target,
+            "latest_pipeline_suppression": latest_pipeline_suppression,
+            "last_delivery_assessment": last_delivery_assessment,
             "m14_3_last_drive_band_summary": last_drive_band_summary,
             "m13_5_last_idle_cognitive_tick": last_idle_cognitive_tick,
             "m14_6_last_plan_selector_mismatch": last_idle_plan_mismatch,

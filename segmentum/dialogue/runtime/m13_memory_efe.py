@@ -431,7 +431,15 @@ def _normalize_pending_expectation(
         created = _created_at(row)
         due_at = due_at or (created + ACTIVE_GRACE_SECONDS if created else 0)
         window = window or ACTIVE_GRACE_SECONDS
-        if phase == "in_turn":
+        temporal = _mapping(state.get("temporal_state"))
+        created_turn = row.get("created_turn_index", row.get("turn_index"))
+        last_turn_idx = temporal.get("last_turn_index")
+        last_user = _epoch(temporal.get("last_user_turn_at"))
+        newer_user_turn_arrived = bool(created and last_user and last_user > created)
+        if newer_user_turn_arrived:
+            eligible = False
+            reason = "expectation_stale_after_user_turn"
+        elif phase == "in_turn":
             eligible = bool(due_at)
         elif phase == "idle" and due_at:
             eligible = now >= due_at + window
@@ -1131,7 +1139,15 @@ def evaluate_memory_efe(
         "low_traceability_cleanup_deprioritized",
         "self_referential_evidence_only",
     }
-    if any(reason in cleanup_diagnostic_reasons for reason in diagnostic_reasons):
+    diagnostic_cleanup_hits = [reason for reason in diagnostic_reasons if reason in cleanup_diagnostic_reasons]
+    if diagnostic_cleanup_hits:
+        if not expectations.eligible_for_efe:
+            reason_codes.append("no_eligible_expectation_after_cleanup")
+        else:
+            reason_codes.append("diagnostic_expectation_pool_noisy")
+    if any(
+        row.ineligibility_reason in cleanup_diagnostic_reasons for row in expectations.eligible_for_efe
+    ):
         reason_codes.append("cleanup_filtered_low_traceability_candidates")
     reason_codes.extend(diagnostic_reasons[:4])
     reason_codes = list(dict.fromkeys(reason_codes))[:12]

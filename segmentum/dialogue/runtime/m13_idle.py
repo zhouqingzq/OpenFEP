@@ -120,6 +120,8 @@ def normalize_idle_introspection_state(raw: Any) -> dict[str, Any]:
         int(merged.get("max_per_session", DEFAULT_IDLE_INTROSPECTION_MAX_PER_SESSION) or DEFAULT_IDLE_INTROSPECTION_MAX_PER_SESSION),
     )
     merged["reflection_count_this_session"] = max(0, int(merged.get("reflection_count_this_session", 0) or 0))
+    if merged["reflection_count_this_session"] > merged["max_per_session"] * 10:
+        merged["reflection_count_this_session"] = merged["max_per_session"]
     merged["outreach_via_introspection_count_this_session"] = max(
         0, int(merged.get("outreach_via_introspection_count_this_session", 0) or 0)
     )

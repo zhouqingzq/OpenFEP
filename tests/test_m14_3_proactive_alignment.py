@@ -885,3 +885,48 @@ def test_daemon_acks_ui_environment_events_and_reports_ratio(tmp_path: Path) -> 
         )
     )
     assert result["environment_events_pending_acked_ratio"] == 1.0
+
+
+def test_assessor_reject_backoff_blocks_structural_proposal() -> None:
+    from segmentum.dialogue.runtime.m13_initiative import (
+        build_proposal_from_target,
+        record_target_assessor_reject_backoff,
+    )
+
+    m13 = _opted_m13()
+    m13 = record_target_assessor_reject_backoff(
+        m13,
+        expectation_id="exp_trace",
+        now=NOW,
+        reason_code="delivery_assessor_reject",
+    )
+    initiative = normalize_initiative_state(m13["initiative"])
+    locked = build_proposal_from_target(
+        ProactiveTarget(
+            trigger="memory_efe_outreach",
+            traceable_expectation_id="exp_trace",
+            evidence_refs=["mem_trace"],
+            proposed_topic="benchmark follow-up",
+            ordinary_language_intent="Follow up on benchmark",
+            source_kind="memory_dynamics_expectation",
+            selection_reason_codes=["memory_efe_should_outreach"],
+        ),
+        now=NOW + 30,
+        initiative=initiative,
+    )
+    state = {
+        "open_items": [],
+        "temporal_state": {"last_user_text": "", "last_user_turn_at": NOW - 5000},
+        "m13_drive_state": m13,
+    }
+    _, check = evaluate_proactive_initiative(
+        state,
+        now=NOW + 30,
+        turn_index=6,
+        idle_seconds=999,
+        implicit_idle_request=True,
+        locked_proposal=locked,
+        llm=None,
+    )
+    assert check.proposal is None
+    assert check.suppression_reason_code == "assessor_reject_backoff_active"

@@ -271,6 +271,12 @@ def build_mind_debug_bundle_text(
     mismatch = _mapping(observability.get("m14_6_last_plan_selector_mismatch"))
     target = _mapping(observability.get("m14_3_last_proactive_target"))
     suppression = _mapping(observability.get("m14_3_last_proactive_suppression"))
+    latest_selector = _mapping(observability.get("latest_selector_target"))
+    latest_attempted = _mapping(observability.get("latest_attempted_target"))
+    latest_delivered = _mapping(observability.get("latest_delivered_target"))
+    latest_suppressed = _mapping(observability.get("latest_suppressed_target"))
+    latest_pipeline = _mapping(observability.get("latest_pipeline_suppression"))
+    last_assessment = _mapping(observability.get("last_delivery_assessment"))
     bands = _mapping(observability.get("m14_3_last_drive_band_summary"))
     intro_plan = _mapping(log_summary.get("latest_intro_plan"))
     plan_body = _mapping(intro_plan.get("plan"))
@@ -320,6 +326,7 @@ def build_mind_debug_bundle_text(
         f"- background_llm_calls_today: {observability.get('background_llm_calls_today', 0)}/"
         f"{observability.get('background_llm_budget', '?')}",
         f"- last_budget_block_reason: {_clip(observability.get('last_budget_block_reason'), limit=80)}",
+        f"- last_background_skip_reason: {_clip(observability.get('last_background_skip_reason'), limit=80)}",
         f"- environment_event_status_counts: {json.dumps(_mapping(observability.get('environment_event_status_counts')), ensure_ascii=False)}",
         f"- environment_events_terminal_ratio: {observability.get('environment_events_terminal_ratio', '-')}",
         "",
@@ -333,13 +340,21 @@ def build_mind_debug_bundle_text(
         f"- selected_target: {json.dumps(_mapping(tick.get('selected_target')), ensure_ascii=False) if tick.get('selected_target') else '-'}",
         f"- bands: {json.dumps(_mapping(tick.get('bands')), ensure_ascii=False) if tick.get('bands') else '-'}",
         "",
-        "## M14.3 proactive alignment",
+        "## M14.3 proactive alignment (legacy summary)",
         f"- target_trigger: {_clip(target.get('trigger'), limit=60)}",
         f"- source_kind: {_clip(target.get('source_kind'), limit=40)}",
         f"- traceable_expectation_id: {_clip(target.get('traceable_expectation_id'), limit=80)}",
         f"- evidence_refs: [{_join(target.get('evidence_refs'))}]",
         f"- selection_reason_codes: [{_join(target.get('selection_reason_codes'))}]",
         f"- last_suppression: {_clip(suppression.get('reason_code'), limit=80)} stage={_clip(suppression.get('reason_stage'), limit=40)}",
+        "",
+        "## Proactive target timeline",
+        f"- latest_selector_target: {json.dumps(latest_selector, ensure_ascii=False) if latest_selector else '-'}",
+        f"- latest_attempted_target: {json.dumps(latest_attempted, ensure_ascii=False) if latest_attempted else '-'}",
+        f"- latest_delivered_target: {json.dumps(latest_delivered, ensure_ascii=False) if latest_delivered else '-'}",
+        f"- latest_suppressed_target: {json.dumps(latest_suppressed, ensure_ascii=False) if latest_suppressed else '-'}",
+        f"- latest_pipeline_suppression: {json.dumps(latest_pipeline, ensure_ascii=False) if latest_pipeline else '-'}",
+        f"- last_delivery_assessment: {json.dumps(last_assessment, ensure_ascii=False) if last_assessment else '-'}",
         f"- drive_bands: behavior={bands.get('behavioral_pull_band')} boredom={bands.get('boredom_band')} "
         f"reward={bands.get('affective_reward_band')} relation={bands.get('relation_path_precision_band')}",
         f"- open_item_traceability_suggestions: {observability.get('m14_3_open_item_traceability_suggestions', 0)}",

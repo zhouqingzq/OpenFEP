@@ -458,6 +458,12 @@ def classify_proactive_target_reject_reason(
         return "generic_self_only_open_item"
     if "cleanup_filtered_low_traceability_candidates" in reason_codes:
         return "cleanup_filtered_low_traceability_candidates"
+    if "no_eligible_expectation_after_cleanup" in reason_codes:
+        return "no_eligible_expectation_after_cleanup"
+    if "diagnostic_expectation_pool_noisy" in reason_codes:
+        return "diagnostic_expectation_pool_noisy"
+    if "expectation_stale_after_user_turn" in reason_codes:
+        return "expectation_stale_after_user_turn"
     if not eligible:
         return "no_eligible_expectation"
     if "recall_failure" in reason_codes:

@@ -493,3 +493,41 @@ def test_no_background_autonomy_wording_in_engineering_surfaces() -> None:
     assert "no background autonomy" not in app_text.casefold()
     init_text = (root / "segmentum/dialogue/runtime/m13_initiative.py").read_text(encoding="utf-8")
     assert "background autonomy" not in init_text.casefold() or "not a claim" in init_text
+
+
+def test_background_tick_persists_skip_reason(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "bg_skip"), llm=None)
+    runtime.set_initiative_user_opt_in(True)
+    runtime.set_background_continuity_opt_in(True)
+    runtime.set_idle_introspection_opt_in(True)
+    result = runtime.run_background_self_tick(runner_kind="cli")
+    assert result.get("skip_reason") in {"llm_unavailable", "no_structural_signal"}
+    state = runtime.store.load()
+    bg = state["m13_drive_state"]["initiative"]["background_continuity"]
+    assert bg.get("last_background_skip_reason") in {"llm_unavailable", "no_structural_signal"}
+
+
+def test_seed_mvp_session_resets_per_session_counters(tmp_path: Path) -> None:
+    from segmentum.dialogue.runtime.chat import _reset_per_session_counters
+    from segmentum.dialogue.runtime.mvp_loop import SYSTEM_FILE_NAMES
+
+    persona_root = tmp_path / "persona"
+    session_root = persona_root / "sessions" / "sess_new"
+    persona_root.mkdir(parents=True)
+    payload = {
+        "initiative": {
+            "proactive_count_this_session": 9,
+            "idle_introspection": {"reflection_count_this_session": 99, "max_per_session": 4},
+            "background_continuity": {"ticks_today": 50, "llm_calls_today": 40},
+        }
+    }
+    session_root.mkdir(parents=True)
+    (session_root / SYSTEM_FILE_NAMES["m13_drive_state"]).write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    _reset_per_session_counters(session_root)
+    reloaded = json.loads((session_root / SYSTEM_FILE_NAMES["m13_drive_state"]).read_text(encoding="utf-8"))
+    assert reloaded["initiative"]["proactive_count_this_session"] == 0
+    assert reloaded["initiative"]["idle_introspection"]["reflection_count_this_session"] == 0
+    assert reloaded["initiative"]["background_continuity"]["ticks_today"] == 0

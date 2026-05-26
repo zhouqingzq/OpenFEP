@@ -611,3 +611,42 @@ def test_idle_llm_outreach_cannot_bypass_memory_efe_without_eligible_expectation
     assert idle_result.outreach_recommendation.get("should_outreach") is False
     reloaded = store.load()
     assert reloaded["m13_drive_state"]["memory_efe"]["should_outreach"] is False  # type: ignore[index]
+
+
+def test_memory_dynamics_expectation_stale_after_user_turn_not_eligible() -> None:
+    state = _state(
+        pending_expectations=[
+            {
+                "id": "exp_turn0_weather_response",
+                "content": "user will respond to weather joke",
+                "verify_on": "memory_dynamics_idle",
+                "source": "memory_dynamics_adapter",
+                "created_at": NOW - 7200,
+                "created_turn_index": 0,
+                "evidence_refs": ["stm_turn_0"],
+                "bound_memory_ids": ["stm_turn_0"],
+                "confidence": 0.7,
+            }
+        ],
+        temporal_state={
+            "last_user_turn_at": NOW - 60,
+            "last_turn_at": NOW - 60,
+            "last_turn_index": 1,
+        },
+    )
+    bundle = normalize_expectations_for_efe(state, now=NOW, phase="idle")
+    eligible_ids = [row.expectation_id for row in bundle.eligible_for_efe]
+    assert "exp_turn0_weather_response" not in eligible_ids
+
+
+def test_diagnostic_only_pool_emits_noisy_reason_not_active_cleanup() -> None:
+    state = _state(
+        pending_expectations=[
+            _overdue_expectation(id="exp_live"),
+            {"id": "exp_old", "status": "expired", "content": "stale", "verify_on": "later"},
+        ]
+    )
+    result = evaluate_memory_efe(state, now=NOW, phase="idle", turn_index=5, user_active=False)
+    assert result.eligible_for_efe
+    assert "diagnostic_expectation_pool_noisy" in result.reason_codes
+    assert "cleanup_filtered_low_traceability_candidates" not in result.reason_codes

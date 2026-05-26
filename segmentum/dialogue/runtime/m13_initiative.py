@@ -12,6 +12,7 @@ import copy
 import json
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Mapping, Protocol
 
 from segmentum.dialogue.runtime.m13_drive import (
@@ -130,8 +131,14 @@ def default_initiative_state() -> dict[str, Any]:
         "legacy_vague_open_item_proactive": False,
         "opponent_strength_block_threshold": DEFAULT_OPPONENT_STRENGTH_BLOCK_THRESHOLD,
         "delivery_assessor_min_confidence": MIN_DELIVERY_ASSESSMENT_CONFIDENCE,
+        "rejected_target_backoff": {},
         "engineering_proxy_label": "mvp_local_m13_initiative",
     }
+
+
+MAX_REJECTED_TARGET_BACKOFF_ENTRIES = 12
+ASSESSOR_REJECT_BACKOFF_BASE_SECONDS = 90
+ASSESSOR_REJECT_BACKOFF_MAX_COUNT = 3
 
 
 def normalize_initiative_state(raw: Any) -> dict[str, Any]:
@@ -169,6 +176,21 @@ def normalize_initiative_state(raw: Any) -> dict[str, Any]:
         merged.get("delivery_assessor_min_confidence"),
         default=MIN_DELIVERY_ASSESSMENT_CONFIDENCE,
     )
+    raw_backoff = merged.get("rejected_target_backoff")
+    cleaned_backoff: dict[str, dict[str, Any]] = {}
+    if isinstance(raw_backoff, Mapping):
+        for key, value in raw_backoff.items():
+            if not isinstance(value, Mapping):
+                continue
+            target_id = str(key or "").strip()[:120]
+            if not target_id:
+                continue
+            cleaned_backoff[target_id] = {
+                "until_at": int(value.get("until_at", 0) or 0),
+                "reject_count": max(0, int(value.get("reject_count", 0) or 0)),
+                "last_reason_code": str(value.get("last_reason_code", "") or "")[:96],
+            }
+    merged["rejected_target_backoff"] = cleaned_backoff
     from segmentum.dialogue.runtime.m13_idle import normalize_idle_introspection_state
     from segmentum.dialogue.runtime.m14_1_background_continuity import merge_background_continuity_into_initiative
 
@@ -180,6 +202,136 @@ def normalize_initiative_state(raw: Any) -> dict[str, Any]:
 def merge_initiative_into_m13_state(m13_state: dict[str, Any]) -> dict[str, Any]:
     state = normalize_m13_drive_state(m13_state)
     state["initiative"] = normalize_initiative_state(state.get("initiative"))
+    return state
+
+
+def is_relaxed_proactive_profile(initiative: Mapping[str, Any]) -> bool:
+    return (
+        str(initiative.get("proactive_policy_profile", BOUNDED_DEFAULT_PROFILE)) == STREAMLIT_OPEN_CHAT_PROFILE
+        and str(os.environ.get("SEGMENTUM_STREAMLIT_OPEN_CHAT_RELAX_PROACTIVE_CAPS", "") or "").strip() == "1"
+    )
+
+
+def proactive_delivery_gate_reason(
+    initiative: Mapping[str, Any],
+    *,
+    now: int,
+    turn_index: int,
+) -> str:
+    if is_relaxed_proactive_profile(initiative):
+        return ""
+    if int(initiative.get("proactive_count_this_session", 0) or 0) >= int(
+        initiative.get("max_proactive_per_session", DEFAULT_MAX_PROACTIVE_PER_SESSION) or 1
+    ):
+        return "session_limit_reached"
+    if int(initiative.get("cooldown_until_timestamp", 0) or 0) > now:
+        return "cooldown_active"
+    last_turn = int(initiative.get("last_proactive_turn_index", -1) or -1)
+    cooldown_turns = int(initiative.get("cooldown_turns", DEFAULT_COOLDOWN_TURNS) or DEFAULT_COOLDOWN_TURNS)
+    if last_turn >= 0 and turn_index - last_turn <= cooldown_turns:
+        return "cooldown_active"
+    return ""
+
+
+def count_logged_proactive_turns(log_path: Path) -> int:
+    if not log_path.is_file():
+        return 0
+    count = 0
+    try:
+        for line in log_path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if str(row.get("event", "")) == "proactive_turn":
+                count += 1
+    except OSError:
+        return 0
+    return count
+
+
+def repair_proactive_count_from_log(
+    m13_state: dict[str, Any],
+    *,
+    log_path: Path,
+) -> tuple[dict[str, Any], bool, dict[str, Any] | None]:
+    state = merge_initiative_into_m13_state(m13_state)
+    initiative = normalize_initiative_state(state.get("initiative"))
+    logged = count_logged_proactive_turns(log_path)
+    stored = int(initiative.get("proactive_count_this_session", 0) or 0)
+    if logged <= stored:
+        return state, False, None
+    initiative["proactive_count_this_session"] = logged
+    state["initiative"] = initiative
+    audit = {
+        "event": "m13_proactive_audit",
+        "type": "ProactiveCountRepairEvent",
+        "previous_count": stored,
+        "repaired_count": logged,
+        "source": "conversation_log_audit",
+        "engineering_proxy_label": "mvp_local_m13_initiative",
+    }
+    return state, True, audit
+
+
+def is_target_assessor_backoff_active(
+    initiative: Mapping[str, Any],
+    expectation_id: str,
+    *,
+    now: int,
+) -> bool:
+    target_id = str(expectation_id or "").strip()
+    if not target_id:
+        return False
+    backoff = initiative.get("rejected_target_backoff")
+    if not isinstance(backoff, Mapping):
+        return False
+    row = backoff.get(target_id)
+    if not isinstance(row, Mapping):
+        return False
+    return int(row.get("until_at", 0) or 0) > int(now)
+
+
+def record_target_assessor_reject_backoff(
+    m13_state: dict[str, Any],
+    *,
+    expectation_id: str,
+    now: int,
+    reason_code: str,
+) -> dict[str, Any]:
+    state = merge_initiative_into_m13_state(m13_state)
+    initiative = normalize_initiative_state(state.get("initiative"))
+    target_id = str(expectation_id or "").strip()[:120]
+    if not target_id:
+        return state
+    backoff = dict(initiative.get("rejected_target_backoff") or {})
+    prior = backoff.get(target_id, {}) if isinstance(backoff.get(target_id), Mapping) else {}
+    reject_count = min(
+        ASSESSOR_REJECT_BACKOFF_MAX_COUNT,
+        int(prior.get("reject_count", 0) or 0) + 1,
+    )
+    backoff[target_id] = {
+        "until_at": int(now) + ASSESSOR_REJECT_BACKOFF_BASE_SECONDS * reject_count,
+        "reject_count": reject_count,
+        "last_reason_code": str(reason_code or "")[:96],
+    }
+    ordered = list(backoff.items())[-MAX_REJECTED_TARGET_BACKOFF_ENTRIES:]
+    initiative["rejected_target_backoff"] = dict(ordered)
+    state["initiative"] = initiative
+    return state
+
+
+def clear_target_assessor_backoff(m13_state: dict[str, Any], expectation_id: str) -> dict[str, Any]:
+    state = merge_initiative_into_m13_state(m13_state)
+    initiative = normalize_initiative_state(state.get("initiative"))
+    target_id = str(expectation_id or "").strip()
+    backoff = dict(initiative.get("rejected_target_backoff") or {})
+    if target_id and target_id in backoff:
+        backoff.pop(target_id, None)
+        initiative["rejected_target_backoff"] = backoff
+        state["initiative"] = initiative
     return state
 
 
@@ -780,25 +932,9 @@ def evaluate_proactive_initiative(
         return state, suppress("disabled", reason_code="initiative_disabled")
     if user_typing:
         return state, suppress("user_active")
-    relaxed_profile = (
-        str(initiative.get("proactive_policy_profile", BOUNDED_DEFAULT_PROFILE)) == STREAMLIT_OPEN_CHAT_PROFILE
-        and str(os.environ.get("SEGMENTUM_STREAMLIT_OPEN_CHAT_RELAX_PROACTIVE_CAPS", "") or "").strip() == "1"
-    )
-    if not relaxed_profile and int(initiative.get("proactive_count_this_session", 0) or 0) >= int(
-        initiative.get("max_proactive_per_session", DEFAULT_MAX_PROACTIVE_PER_SESSION) or 1
-    ):
-        return state, suppress("session_limit_reached")
-    cooldown_until = int(initiative.get("cooldown_until_timestamp", 0) or 0)
-    if not relaxed_profile and cooldown_until > now:
-        return state, suppress("cooldown_active")
-    last_turn = int(initiative.get("last_proactive_turn_index", -1) or -1)
-    cooldown_turns = int(initiative.get("cooldown_turns", DEFAULT_COOLDOWN_TURNS) or DEFAULT_COOLDOWN_TURNS)
-    if (
-        not relaxed_profile
-        and last_turn >= 0
-        and turn_index - last_turn <= cooldown_turns
-    ):
-        return state, suppress("cooldown_active")
+    gate_reason = proactive_delivery_gate_reason(initiative, now=now, turn_index=turn_index)
+    if gate_reason:
+        return state, suppress(gate_reason, reason_code=gate_reason)
 
     if implicit_idle_request:
         if not initiative.get("implicit_idle_delivery"):
@@ -823,6 +959,16 @@ def evaluate_proactive_initiative(
                     "trigger": locked_proposal.trigger,
                     "source_kind": locked_proposal.source_kind,
                 },
+            )
+        if is_target_assessor_backoff_active(
+            initiative,
+            locked_proposal.traceable_expectation_id,
+            now=now,
+        ):
+            return state, suppress(
+                "assessor_reject_backoff_active",
+                reason_code="assessor_reject_backoff_active",
+                extra={"traceable_expectation_id": locked_proposal.traceable_expectation_id},
             )
         state, meta_intent, meta_events = apply_trigger_suppression_intent(
             state,
@@ -929,6 +1075,17 @@ def evaluate_proactive_initiative(
         if llm is None and recent.strip():
             return state, suppress("insufficient_evidence", reason_code="no_traceable_proactive_target")
         return state, suppress("no_traceable_proactive_target", reason_code="no_traceable_proactive_target")
+
+    if is_target_assessor_backoff_active(
+        initiative,
+        target_detail.traceable_expectation_id,
+        now=now,
+    ):
+        return state, suppress(
+            "assessor_reject_backoff_active",
+            reason_code="assessor_reject_backoff_active",
+            extra={"traceable_expectation_id": target_detail.traceable_expectation_id},
+        )
 
     state, meta_intent, meta_events = apply_trigger_suppression_intent(
         state,
@@ -1075,7 +1232,9 @@ def mark_proactive_turn_consumed(
     initiative["cooldown_until_timestamp"] = now + max(30, proposal.cooldown_cost * 45)
     initiative["pending_proactive_proposal"] = {}
     initiative["last_suppression_reason"] = ""
+    initiative["last_suppression_reason_code"] = ""
     state["initiative"] = initiative
+    state = clear_target_assessor_backoff(state, proposal.traceable_expectation_id)
     return state
 
 

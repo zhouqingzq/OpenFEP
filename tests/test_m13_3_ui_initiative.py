@@ -565,3 +565,79 @@ def test_chat_interface_proactive_does_not_append_user_transcript(tmp_path: Path
     last = iface._transcript[-1]
     role = last.role if hasattr(last, "role") else last.get("role")
     assert role == "agent"
+
+
+def test_run_proactive_turn_blocks_second_delivery_when_session_cap_reached(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "sess_cap"), llm=_ShortLLM())
+    state = runtime.store.load()
+    state["open_items"] = [{"id": "oi", "status": "open", "title": "t", "next_check": "n"}]
+    state["m13_drive_state"] = set_initiative_user_opt_in(state.get("m13_drive_state", {}), enabled=True)
+    state = _enable_legacy_open_item_proactive(state)  # type: ignore[arg-type]
+    runtime.store.save(state)
+
+    first = runtime.maybe_propose_proactive_turn(turn_index=0, manual_continue=True)
+    first_result = runtime.run_proactive_turn(
+        proposal_id=str(first["proposal"]["proposal_id"]),
+        turn_index=0,
+    )
+    assert first_result.reply
+
+    reloaded = runtime.store.load()
+    initiative = normalize_initiative_state(reloaded["m13_drive_state"]["initiative"])
+    assert int(initiative.get("proactive_count_this_session", 0) or 0) == 1
+
+    _, check = evaluate_proactive_initiative(
+        reloaded,
+        now=int(initiative.get("cooldown_until_timestamp", 0) or 0) + 100,
+        turn_index=5,
+        manual_continue=True,
+        llm=_ContextUnsafeLLM(),
+    )
+    assert check.proposal is None
+    assert check.suppression_reason == "session_limit_reached"
+
+
+def test_repair_proactive_count_from_log(tmp_path: Path) -> None:
+    from segmentum.dialogue.runtime.m13_initiative import repair_proactive_count_from_log
+
+    store = MVPStateStore(tmp_path / "sess_repair")
+    state = store.load()
+    state["m13_drive_state"] = set_initiative_user_opt_in(state.get("m13_drive_state", {}), enabled=True)
+    store.save(state)
+    log_path = store.root / "conversation_log.jsonl"
+    log_path.write_text(
+        "\n".join(
+            [
+                json.dumps({"event": "proactive_turn", "at": 1, "turn_index": 0, "reply": "a"}),
+                json.dumps({"event": "proactive_turn", "at": 2, "turn_index": 2, "reply": "b"}),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    repaired, changed, audit = repair_proactive_count_from_log(
+        state["m13_drive_state"],
+        log_path=log_path,
+    )
+    assert changed is True
+    assert audit is not None
+    initiative = normalize_initiative_state(repaired["initiative"])
+    assert int(initiative.get("proactive_count_this_session", 0) or 0) == 2
+
+
+def test_assessor_reject_backoff_blocks_repeat_proposal(tmp_path: Path) -> None:
+    from segmentum.dialogue.runtime.m13_initiative import (
+        is_target_assessor_backoff_active,
+        record_target_assessor_reject_backoff,
+    )
+
+    m13 = set_initiative_user_opt_in(default_m13_drive_state(), enabled=True)
+    m13 = record_target_assessor_reject_backoff(
+        m13,
+        expectation_id="exp_test",
+        now=1_700_000_000,
+        reason_code="delivery_assessor_reject",
+    )
+    initiative = normalize_initiative_state(m13["initiative"])
+    assert is_target_assessor_backoff_active(initiative, "exp_test", now=1_700_000_030)
+    assert not is_target_assessor_backoff_active(initiative, "exp_test", now=1_700_000_400)

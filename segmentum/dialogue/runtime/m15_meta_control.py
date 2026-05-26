@@ -623,7 +623,12 @@ def apply_trigger_suppression_intent(
         intent = MetaControlInterventionIntent.from_mapping(row)
         if intent.intent_kind != "suppress_action_trigger_for_n_turns":
             continue
-        if str(intent.payload.get("action_trigger", "") or "") != str(action_trigger or ""):
+        stored_trigger = str(intent.payload.get("action_trigger", "") or "")
+        requested_trigger = str(action_trigger or "")
+        if not (
+            stored_trigger == requested_trigger
+            or (stored_trigger == "idle_cognitive_tick" and requested_trigger == "memory_efe_outreach")
+        ):
             continue
         events.append(
             {

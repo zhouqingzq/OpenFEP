@@ -126,3 +126,26 @@ def test_build_mind_debug_bundle_includes_traceability_and_verdicts(tmp_path: Pa
     assert "pending_user_message: hello" in text
     assert "## Diagnose verdicts" in text
     assert "## Recent audit tail" in text
+    assert "## Proactive target timeline" in text
+
+
+def test_debug_bundle_shows_separate_proactive_timeline_fields(tmp_path: Path) -> None:
+    text = build_mind_debug_bundle_text(
+        session_root=tmp_path / "session2",
+        persona_name="test_persona",
+        session_id="sess_2",
+        state={},
+        observability={
+            "latest_selector_target": {"at": 100, "traceable_expectation_id": "exp_sel"},
+            "latest_attempted_target": {"at": 200, "traceable_expectation_id": "exp_try"},
+            "latest_delivered_target": {"at": 300, "proposal_id": "prop_ok"},
+            "latest_suppressed_target": {"at": 250, "reason_code": "delivery_assessor_reject"},
+            "latest_pipeline_suppression": {"at": 250, "reason_code": "delivery_assessor_reject"},
+        },
+        ui_hints={},
+        turn_index=1,
+    )
+    assert "exp_sel" in text
+    assert "exp_try" in text
+    assert "prop_ok" in text
+    assert "delivery_assessor_reject" in text

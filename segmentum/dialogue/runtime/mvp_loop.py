@@ -96,7 +96,10 @@ from segmentum.dialogue.runtime.m13_initiative import (
     mark_proactive_turn_consumed,
     merge_initiative_into_m13_state,
     normalize_initiative_state,
+    proactive_delivery_gate_reason,
     proposal_from_initiative_state,
+    record_target_assessor_reject_backoff,
+    repair_proactive_count_from_log,
     set_initiative_proactive_policy_profile,
     set_initiative_user_opt_in,
 )
@@ -232,6 +235,7 @@ SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
     "temporal_state": {
         "last_turn_at": None,
         "last_user_turn_at": None,
+        "last_assistant_turn_at": None,
         "last_turn_index": None,
         "last_user_text": "",
         "last_reply": "",
@@ -3460,11 +3464,15 @@ def _update_temporal_state(
 ) -> None:
     previous = _mapping(state.get("temporal_state"))
     last_user_turn_at = previous.get("last_user_turn_at")
+    last_assistant_turn_at = previous.get("last_assistant_turn_at")
     if not proactive_turn:
         last_user_turn_at = now
+    else:
+        last_assistant_turn_at = now
     state["temporal_state"] = {
         "last_turn_at": now,
         "last_user_turn_at": last_user_turn_at,
+        "last_assistant_turn_at": last_assistant_turn_at,
         "last_turn_index": turn_index,
         "last_user_text": user_text,
         "last_reply": reply,
@@ -4208,6 +4216,20 @@ class MVPDialogueRuntime:
 
     def _episode_ledger(self) -> EpisodeLedger:
         return EpisodeLedger(self.store.root)
+
+    def _load_state_with_initiative_repair(self) -> dict[str, Any]:
+        state = self.store.load()
+        m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+        repaired_state, changed, audit = repair_proactive_count_from_log(
+            m13_state,
+            log_path=self.store.root / "conversation_log.jsonl",
+        )
+        if changed:
+            state["m13_drive_state"] = repaired_state
+            self.store.save(state)
+            if audit:
+                self.store.append_log(audit)
+        return state
 
     def _current_state_fingerprint(
         self,
@@ -5825,7 +5847,7 @@ class MVPDialogueRuntime:
         implicit_idle_request: bool = False,
         preselected_target: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
-        state = self.store.load()
+        state = self._load_state_with_initiative_repair()
         now = _utc_timestamp()
         structural_signals = self._initiative_structural_signals(state)
         memory_efe_evaluation = None
@@ -5941,7 +5963,7 @@ class MVPDialogueRuntime:
         speaker_name: str = "",
         now: int | None = None,
     ) -> MVPTurnResult:
-        state = self.store.load()
+        state = self._load_state_with_initiative_repair()
         now = int(now if now is not None else _utc_timestamp())
         m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state"))
         initiative = normalize_initiative_state(m13_state.get("initiative"))
@@ -5982,6 +6004,31 @@ class MVPDialogueRuntime:
                 reply="",
                 action="proactive_suppressed",
                 diagnostics={"suppression_reason": reason, "proactive_turn": True, "m15_episode": episode.to_dict()},
+            )
+
+        gate_reason = proactive_delivery_gate_reason(initiative, now=now, turn_index=turn_index)
+        if gate_reason:
+            initiative["last_suppression_reason"] = gate_reason
+            initiative["last_suppression_reason_code"] = gate_reason
+            initiative["pending_proactive_proposal"] = {}
+            m13_state["initiative"] = initiative
+            state["m13_drive_state"] = m13_state
+            self.store.save(state)
+            self.store.append_log(
+                {
+                    "event": "m13_proactive_audit",
+                    "type": "M13ProactiveSuppressionEvent",
+                    "reason": gate_reason,
+                    "reason_code": gate_reason,
+                    "reason_stage": "pre_generation",
+                    "proposal_id": proposal_id,
+                    "turn_index": turn_index,
+                }
+            )
+            return MVPTurnResult(
+                reply="",
+                action="proactive_suppressed",
+                diagnostics={"suppression_reason": gate_reason, "reason_code": gate_reason, "proactive_turn": True},
             )
 
         state_snapshot = copy.deepcopy(self.store.load())
@@ -6038,6 +6085,18 @@ class MVPDialogueRuntime:
             initiative["last_suppression_reason_code"] = reason_code
             initiative["pending_proactive_proposal"] = {}
             initiative["cooldown_until_timestamp"] = now + max(30, int(proposal.cooldown_cost or 0) * 45)
+            m13_state["initiative"] = initiative
+            if str(proposal.traceable_expectation_id or "").strip():
+                m13_state = record_target_assessor_reject_backoff(
+                    m13_state,
+                    expectation_id=proposal.traceable_expectation_id,
+                    now=now,
+                    reason_code=reason_code,
+                )
+            initiative = normalize_initiative_state(m13_state.get("initiative"))
+            initiative["pending_proactive_proposal"] = {}
+            initiative["last_suppression_reason"] = reason_code
+            initiative["last_suppression_reason_code"] = reason_code
             m13_state["initiative"] = initiative
             state_snapshot["m13_drive_state"] = m13_state
             self.store.save(state_snapshot)
@@ -6247,6 +6306,7 @@ class MVPDialogueRuntime:
             bg[key] = metered.get(key, bg.get(key, 0))
         if block_reason:
             bg["last_budget_block_reason"] = block_reason
+            bg["last_background_skip_reason"] = block_reason
             self.append_background_audit(
                 {
                     "type": "BackgroundBudgetReachedEvent",
@@ -6305,9 +6365,19 @@ class MVPDialogueRuntime:
             )
             bg = normalize_background_continuity_state(initiative.get("background_continuity"))
             if not bool(bg.get("user_opt_in")) or not bool(initiative.get("user_opt_in")):
+                bg["last_background_skip_reason"] = "not_opted_in"
+                initiative["background_continuity"] = bg
+                m13_state["initiative"] = initiative
+                state["m13_drive_state"] = m13_state
+                self.store.save(state)
                 return {"skip_reason": "not_opted_in", "ran_introspection": False}
             idle = normalize_idle_introspection_state(initiative.get("idle_introspection"))
             if not bool(idle.get("enabled")):
+                bg["last_background_skip_reason"] = "idle_introspection_disabled"
+                initiative["background_continuity"] = bg
+                m13_state["initiative"] = initiative
+                state["m13_drive_state"] = m13_state
+                self.store.save(state)
                 return {"skip_reason": "idle_introspection_disabled", "ran_introspection": False}
 
             bg, rollover = maybe_rollover_daily_counters(bg, now=now)
@@ -6321,6 +6391,7 @@ class MVPDialogueRuntime:
             block = check_background_budgets(bg)
             if block:
                 bg["last_budget_block_reason"] = block
+                bg["last_background_skip_reason"] = block
                 bg["last_tick_at"] = now
                 initiative["background_continuity"] = bg
                 m13_state["initiative"] = initiative
@@ -6342,6 +6413,7 @@ class MVPDialogueRuntime:
                 bg = record_background_tick(bg, wallclock_seconds=time.monotonic() - wall_start, ran_introspection=False)
                 bg["last_tick_at"] = now
                 bg["last_background_ran_llm"] = False
+                bg["last_background_skip_reason"] = "no_structural_signal"
                 initiative["background_continuity"] = bg
                 m13_state["initiative"] = initiative
                 state["m13_drive_state"] = m13_state
@@ -6361,6 +6433,7 @@ class MVPDialogueRuntime:
                 bg["last_tick_at"] = now
                 bg["last_background_ran_llm"] = False
                 bg["last_budget_block_reason"] = "llm_unavailable"
+                bg["last_background_skip_reason"] = "llm_unavailable"
                 initiative["background_continuity"] = bg
                 m13_state["initiative"] = initiative
                 state["m13_drive_state"] = m13_state
@@ -6408,6 +6481,7 @@ class MVPDialogueRuntime:
             )
             bg["last_tick_at"] = now
             bg["last_budget_block_reason"] = ""
+            bg["last_background_skip_reason"] = ""
             bg["last_background_ran_llm"] = bool(idle_result.ran_llm)
             initiative["background_continuity"] = bg
             m13_state["initiative"] = initiative
@@ -7987,11 +8061,30 @@ class MVPDialogueRuntime:
             for item in normalized_results
             if str(item.get("status", "")) in {"confirmed", "violated"}
         }
-        if resolved_ids:
-            state["pending_expectations"] = [
-                item for item in pending
-                if not isinstance(item, Mapping) or str(item.get("id")) not in resolved_ids
-            ]
+        supersede_statuses = {"superseded", "topic_shifted"}
+        superseded_ids = {
+            str(item.get("id"))
+            for item in normalized_results
+            if str(item.get("status", "")).casefold() in supersede_statuses
+        }
+        if resolved_ids or superseded_ids:
+            updated_pending: list[Any] = []
+            for item in pending:
+                if not isinstance(item, Mapping):
+                    updated_pending.append(item)
+                    continue
+                row_id = str(item.get("id", "") or "")
+                if row_id and row_id in resolved_ids:
+                    continue
+                if row_id and row_id in superseded_ids:
+                    expired_row = dict(item)
+                    expired_row["status"] = "expired"
+                    expired_row["expired_at"] = now
+                    expired_row["expired_reason_code"] = "user_topic_shift"
+                    updated_pending.append(expired_row)
+                    continue
+                updated_pending.append(item)
+            state["pending_expectations"] = updated_pending
         history = state.setdefault("short_term_memory", [])
         if isinstance(history, list):
             for payload in normalized_results:
