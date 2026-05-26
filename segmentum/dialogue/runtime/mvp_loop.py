@@ -14,6 +14,7 @@ import json
 import os
 import re
 import time
+import uuid
 from pathlib import Path
 from typing import Any, Mapping, Protocol
 
@@ -5468,7 +5469,9 @@ class MVPDialogueRuntime:
             "state_root": str(self.store.root),
             "system_files": {key: str(self.store.path_for(key)) for key in SYSTEM_FILE_DEFAULTS},
         }
-        if proactive_turn and not proactive_defer_audit_log:
+        if proactive_turn and proactive_defer_audit_log:
+            pass
+        elif proactive_turn:
             self.store.append_log(
                 {
                     "event": "proactive_turn",
@@ -6033,6 +6036,8 @@ class MVPDialogueRuntime:
                 reason_code = "delivery_assessor_reject"
             initiative["last_suppression_reason"] = reason_code
             initiative["last_suppression_reason_code"] = reason_code
+            initiative["pending_proactive_proposal"] = {}
+            initiative["cooldown_until_timestamp"] = now + max(30, int(proposal.cooldown_cost or 0) * 45)
             m13_state["initiative"] = initiative
             state_snapshot["m13_drive_state"] = m13_state
             self.store.save(state_snapshot)
@@ -6336,6 +6341,7 @@ class MVPDialogueRuntime:
             if not signals.should_run_llm():
                 bg = record_background_tick(bg, wallclock_seconds=time.monotonic() - wall_start, ran_introspection=False)
                 bg["last_tick_at"] = now
+                bg["last_background_ran_llm"] = False
                 initiative["background_continuity"] = bg
                 m13_state["initiative"] = initiative
                 state["m13_drive_state"] = m13_state
@@ -6350,6 +6356,25 @@ class MVPDialogueRuntime:
                     }
                 )
                 return {"skip_reason": "no_structural_signal", "ran_introspection": False}
+            if self.llm is None:
+                bg = record_background_tick(bg, wallclock_seconds=time.monotonic() - wall_start, ran_introspection=False)
+                bg["last_tick_at"] = now
+                bg["last_background_ran_llm"] = False
+                bg["last_budget_block_reason"] = "llm_unavailable"
+                initiative["background_continuity"] = bg
+                m13_state["initiative"] = initiative
+                state["m13_drive_state"] = m13_state
+                self.store.save(state)
+                self.append_background_audit(
+                    {
+                        "type": "BackgroundIdleTickEvent",
+                        "at": now,
+                        "skip_reason": "llm_unavailable",
+                        "runner_kind": runner_kind,
+                        "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
+                    }
+                )
+                return {"skip_reason": "llm_unavailable", "ran_introspection": False}
 
             meter = BackgroundLLMMeter(self.llm, bg)
             original_llm = self.llm
@@ -6383,6 +6408,7 @@ class MVPDialogueRuntime:
             )
             bg["last_tick_at"] = now
             bg["last_budget_block_reason"] = ""
+            bg["last_background_ran_llm"] = bool(idle_result.ran_llm)
             initiative["background_continuity"] = bg
             m13_state["initiative"] = initiative
             state["m13_drive_state"] = m13_state
@@ -6398,6 +6424,7 @@ class MVPDialogueRuntime:
                     "type": "BackgroundIdleTickEvent",
                     "at": now,
                     "ran_introspection": True,
+                    "ran_llm": bool(idle_result.ran_llm),
                     "outreach_outcome": idle_result.diagnostics.get("outreach_outcome", ""),
                     "consolidation_events": len(consolidation_events),
                     "runner_kind": runner_kind,
@@ -8029,6 +8056,7 @@ class MVPDialogueRuntime:
         memory_dynamics: Mapping[str, Any] | None = None,
     ) -> None:
         short = state.setdefault("short_term_memory", [])
+        turn_memory_committed = False
         if isinstance(short, list):
             assistant_reply = str(thinking.get("reply", "")).strip()
             turn_memory_id = f"stm_turn_{now}"
@@ -8090,6 +8118,7 @@ class MVPDialogueRuntime:
                 )
                 short.append(row)
                 state["short_term_memory"] = short[-24:]
+                turn_memory_committed = True
 
         for write in thinking.get("memory_writes", []) or []:
             if not isinstance(write, Mapping):
@@ -8172,25 +8201,78 @@ class MVPDialogueRuntime:
                     isinstance(candidate, Mapping) and str(candidate.get("content", "")).strip()
                     for candidate in write_candidates
                 )
+                active_statuses = {"", "pending", "active", "uncertain", "due"}
+
+                def _active_pending_row(row: Any) -> bool:
+                    if not isinstance(row, Mapping):
+                        return False
+                    status = str(row.get("status", "pending") or "pending").strip().lower()
+                    return status in active_statuses and not status.startswith("merged_into:")
+
+                active_ids = {
+                    str(row.get("id", "") or "").strip()
+                    for row in pending
+                    if _active_pending_row(row) and str(row.get("id", "") or "").strip()
+                }
+
+                def _short_local_expectation_id(raw: str) -> bool:
+                    if not raw.startswith("exp_") or len(raw) > 12:
+                        return False
+                    suffix = raw[4:]
+                    return bool(suffix) and suffix.replace("_", "").isdigit()
+
+                def _expectation_signature(row: Mapping[str, Any]) -> tuple[str, str, str, tuple[str, ...]]:
+                    refs = tuple(_string_list(row.get("evidence_refs"), limit=8))
+                    return (
+                        str(row.get("source", "thinking_prompt") or "thinking_prompt"),
+                        str(row.get("content", row.get("summary", "")) or "").strip(),
+                        str(row.get("verify_on", row.get("verify", "")) or "").strip(),
+                        refs,
+                    )
+
+                active_signatures = {
+                    _expectation_signature(row)
+                    for row in pending
+                    if isinstance(row, Mapping) and _active_pending_row(row)
+                }
                 for item in new_expectations:
                     if isinstance(item, Mapping) and str(item.get("content", "")).strip():
                         payload = dict(item)
-                        payload.setdefault("id", f"exp_{now}_{len(pending)}")
+                        raw_id = str(payload.get("id", "") or "").strip()
+                        if raw_id:
+                            payload.setdefault("source_expectation_id", raw_id)
+                        if not raw_id or raw_id in active_ids or _short_local_expectation_id(raw_id):
+                            raw_id = f"exp_{turn_index}_{now}_{uuid.uuid4().hex[:8]}"
+                        payload["id"] = raw_id[:120]
                         payload.setdefault("created_at", now)
-                        if _traceable_memory_dynamics_expectation_candidate(payload) and (
-                            has_memory_candidate or _structured_memory_dynamics_binding(payload)
-                        ):
-                            payload.setdefault("source", "memory_dynamics_adapter")
-                            payload["verify_on"] = "memory_dynamics_idle"
-                            refs = _string_list(payload.get("evidence_refs"), limit=8)
-                            if turn_memory_id not in refs:
-                                refs.append(turn_memory_id)
-                            payload["evidence_refs"] = list(dict.fromkeys(refs))[:8]
+                        payload.setdefault("created_turn_index", turn_index)
+                        payload.setdefault("source", "thinking_prompt")
+                        refs = _string_list(payload.get("evidence_refs"), limit=8)
+                        if turn_memory_id not in refs:
+                            refs.append(turn_memory_id)
+                        payload["evidence_refs"] = list(dict.fromkeys(refs))[:8]
+                        bind_current_turn = bool(turn_memory_committed or _structured_memory_dynamics_binding(payload))
+                        if bind_current_turn:
                             bound = _string_list(payload.get("bound_memory_ids"), limit=8)
                             if turn_memory_id not in bound:
                                 bound.append(turn_memory_id)
                             payload["bound_memory_ids"] = list(dict.fromkeys(bound))[:8]
+                        if _traceable_memory_dynamics_expectation_candidate(payload) and (
+                            has_memory_candidate or _structured_memory_dynamics_binding(payload)
+                        ):
+                            payload["source"] = "memory_dynamics_adapter"
+                            payload["verify_on"] = "memory_dynamics_idle"
+                            if bind_current_turn:
+                                bound = _string_list(payload.get("bound_memory_ids"), limit=8)
+                                if turn_memory_id not in bound:
+                                    bound.append(turn_memory_id)
+                                payload["bound_memory_ids"] = list(dict.fromkeys(bound))[:8]
+                        sig = _expectation_signature(payload)
+                        if sig in active_signatures:
+                            continue
                         pending.append(payload)
+                        active_ids.add(str(payload.get("id", "")))
+                        active_signatures.add(sig)
 
         open_items = thinking.get("open_item_writes")
         if isinstance(open_items, list):

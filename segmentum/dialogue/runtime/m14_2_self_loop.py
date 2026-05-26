@@ -193,23 +193,43 @@ class M142SelfLoopDaemon:
                 event_results.append({"event_id": event.get("event_id"), "error": type(exc).__name__})
         prepared = self.prepare_due_intents(now=now)
         all_events = self.event_store.query_events(limit=400)
-        terminal = sum(1 for row in all_events if str(row.get("status", "")) in {"acked", "expired"})
-        pending_like = sum(1 for row in all_events if str(row.get("status", "")) in {"pending", "claimed", "failed"})
-        acked_ratio = round(terminal / max(1, terminal + pending_like), 4)
+        event_status_counts = {
+            "acked_count": sum(1 for row in all_events if str(row.get("status", "")) == "acked"),
+            "pending_count": sum(1 for row in all_events if str(row.get("status", "")) == "pending"),
+            "claimed_count": sum(1 for row in all_events if str(row.get("status", "")) == "claimed"),
+            "failed_count": sum(1 for row in all_events if str(row.get("status", "")) == "failed"),
+            "expired_count": sum(1 for row in all_events if str(row.get("status", "")) == "expired"),
+        }
+        terminal = event_status_counts["acked_count"] + event_status_counts["expired_count"]
+        pending_like = event_status_counts["pending_count"] + event_status_counts["claimed_count"] + event_status_counts["failed_count"]
+        terminal_ratio = round(terminal / max(1, terminal + pending_like), 4)
+        state = self.runtime.store.load()
+        bg = _mapping(_mapping(_mapping(state.get("m13_drive_state")).get("initiative")).get("background_continuity"))
+        llm_available = self.runtime.llm is not None
         self._audit(
             {
                 "type": "SelfLoopDaemonHealthEvent",
                 "at": now,
                 "claimed_events": len(claimed),
                 "prepared_due_intents": len(prepared),
-                "environment_events_pending_acked_ratio": acked_ratio,
+                "environment_events_pending_acked_ratio": terminal_ratio,
+                "environment_events_terminal_ratio": terminal_ratio,
+                "environment_event_status_counts": dict(event_status_counts),
+                "llm_available": llm_available,
+                "llm_unavailable_reason": "" if llm_available else "llm_unavailable",
+                "background_ran_llm": bool(bg.get("last_background_ran_llm", False)),
             }
         )
         return {
             "claimed_events": len(claimed),
             "event_results": event_results,
             "prepared_intents": prepared,
-            "environment_events_pending_acked_ratio": acked_ratio,
+            "environment_events_pending_acked_ratio": terminal_ratio,
+            "environment_events_terminal_ratio": terminal_ratio,
+            "environment_event_status_counts": dict(event_status_counts),
+            "llm_available": llm_available,
+            "llm_unavailable_reason": "" if llm_available else "llm_unavailable",
+            "background_ran_llm": bool(bg.get("last_background_ran_llm", False)),
         }
 
     def prepare_due_intents(self, *, now: int | None = None) -> list[dict[str, Any]]:

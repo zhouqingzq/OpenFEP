@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from segmentum.dialogue.runtime.m14_2_event_bus import EnvironmentEventStore
@@ -21,6 +22,12 @@ def test_event_bus_append_claim_ack_roundtrip(tmp_path: Path) -> None:
     events = store.query_events(statuses={"acked"})
     assert len(events) == 1
     assert events[0]["acked_at"] == now
+    raw_events = [
+        json.loads(line)
+        for line in store.events_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert raw_events[0]["status"] == "pending"
 
 
 def test_event_bus_claim_lease_recovers_after_crash(tmp_path: Path) -> None:

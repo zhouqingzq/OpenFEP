@@ -490,6 +490,14 @@ def test_apply_memory_efe_state_with_store_lock_persists_snapshot(tmp_path: Path
     assert reloaded["m13_drive_state"]["memory_efe"]["traceable_expectation_id"] == "exp_a"
 
 
+def test_expired_traceable_expectation_is_diagnostic_only_not_eligible() -> None:
+    state = _state(pending_expectations=[_overdue_expectation(status="expired")])
+    result = evaluate_memory_efe(state, phase="idle", now=NOW, turn_index=5, user_active=False)
+    assert result.eligible_for_efe == []
+    assert result.diagnostic_only
+    assert result.diagnostic_only[0].ineligibility_reason == "expectation_expired"
+
+
 def test_build_proposal_input_is_structural_only() -> None:
     result = evaluate_memory_efe(_state(pending_expectations=[_overdue_expectation()]), phase="idle", now=NOW, turn_index=5, user_active=False)
     payload = build_memory_efe_outreach_proposal_input(result)

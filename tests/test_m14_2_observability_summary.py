@@ -60,7 +60,14 @@ def test_observability_summary_counts_active_intents_and_pending_outreach_only()
     )
     chat.read_conversation_log = MethodType(
         lambda self, limit=300: [
-            {"event": "m14_2_audit", "type": "SelfLoopDaemonHealthEvent", "at": now},
+            {
+                "event": "m14_2_audit",
+                "type": "SelfLoopDaemonHealthEvent",
+                "at": now,
+                "llm_available": False,
+                "llm_unavailable_reason": "llm_unavailable",
+                "background_ran_llm": False,
+            },
             {
                 "event": "m13_proactive_audit",
                 "type": "M13ProactiveProposalEvent",
@@ -87,5 +94,10 @@ def test_observability_summary_counts_active_intents_and_pending_outreach_only()
     assert summary["clock_wake_acked_today"] == 1
     assert summary["user_message_pending"] == 1
     assert summary["ui_audit_pending"] == 1
+    assert summary["environment_event_status_counts"]["acked_count"] == 1
+    assert summary["environment_event_status_counts"]["pending_count"] == 2
+    assert summary["environment_events_terminal_ratio"] == round(1 / 3, 4)
+    assert summary["daemon_llm_available"] is False
+    assert summary["daemon_llm_unavailable_reason"] == "llm_unavailable"
     assert summary["m14_3_last_proactive_target"]["trigger"] == "memory_efe_outreach"
     assert summary["m14_3_last_proactive_suppression"]["reason_code"] == "delivery_assessor_reject"

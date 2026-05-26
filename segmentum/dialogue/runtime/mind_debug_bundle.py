@@ -153,7 +153,15 @@ def _expectations_section(expectations: Any) -> list[str]:
     if not rows:
         lines.append("- (none)")
         return lines
-    for row in rows[:10]:
+    active_rows = [
+        row
+        for row in rows
+        if isinstance(row, Mapping)
+        and str(row.get("status", "pending") or "pending").strip().lower() in {"", "pending", "active", "uncertain", "due"}
+    ]
+    expired_like = len(rows) - len(active_rows)
+    lines.append(f"- active_rows_shown={min(len(active_rows), 10)} raw_total={len(rows)} folded_non_active={expired_like}")
+    for row in active_rows[:10]:
         if not isinstance(row, Mapping):
             continue
         lines.append(
@@ -163,6 +171,19 @@ def _expectations_section(expectations: Any) -> list[str]:
             f"bound_memory_ids=[{_join(row.get('bound_memory_ids'))}]"
         )
     return lines
+
+
+def _status_counts(rows: Any) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    items = rows if isinstance(rows, list) else []
+    for row in items:
+        if not isinstance(row, Mapping):
+            continue
+        status = str(row.get("status", "pending") or "pending").strip().lower()
+        if status.startswith("merged_into:"):
+            status = "merged"
+        counts[status or "pending"] = counts.get(status or "pending", 0) + 1
+    return counts
 
 
 def _queued_outreach_section(rows: Any, *, session_id: str = "") -> list[str]:
@@ -189,14 +210,21 @@ def _queued_outreach_section(rows: Any, *, session_id: str = "") -> list[str]:
 
 def _strict_traceability_section(state: Mapping[str, Any]) -> list[str]:
     summary = summarize_strict_traceability(state)
+    pending_rows = state.get("pending_expectations", []) if isinstance(state.get("pending_expectations"), list) else []
+    pending_counts = _status_counts(pending_rows)
+    pending_raw = len(pending_rows) if isinstance(pending_rows, list) else 0
     return [
         "## Traceability (strict)",
         f"- open_items: total={summary.get('open_items_total', 0)} "
         f"strict_trace={summary.get('open_items_strict_trace', 0)} "
         f"duplicate_ids={summary.get('open_items_duplicate_local_ids', 0)}",
-        f"- pending_expectations: total={summary.get('pending_expectations_total', 0)} "
-        f"strict_trace={summary.get('pending_expectations_strict_trace', 0)} "
+        f"- pending_expectations_raw_total={pending_raw} "
+        f"active_total={summary.get('pending_expectations_total', 0)} "
+        f"strict_trace_active={summary.get('pending_expectations_strict_trace', 0)} "
         f"duplicate_ids={summary.get('pending_expectations_duplicate_local_ids', 0)}",
+        f"- pending_status_counts: expired={pending_counts.get('expired', 0)} "
+        f"merged={pending_counts.get('merged', 0)} diagnostic={pending_counts.get('diagnostic_only', 0)} "
+        f"active={summary.get('pending_expectations_total', 0)}",
     ]
 
 
@@ -286,9 +314,14 @@ def build_mind_debug_bundle_text(
         f"- daemon_pid: {lock.pid if lock else 0} alive={lock_alive}",
         f"- health_ticks_today: {observability.get('health_ticks_today', 0)}",
         f"- background_ticks_today: {bg.get('ticks_today', 0)}",
+        f"- daemon_llm_available: {observability.get('daemon_llm_available', '-')}",
+        f"- daemon_llm_unavailable_reason: {_clip(observability.get('daemon_llm_unavailable_reason'), limit=80)}",
+        f"- daemon_background_ran_llm: {observability.get('daemon_background_ran_llm', '-')}",
         f"- background_llm_calls_today: {observability.get('background_llm_calls_today', 0)}/"
         f"{observability.get('background_llm_budget', '?')}",
         f"- last_budget_block_reason: {_clip(observability.get('last_budget_block_reason'), limit=80)}",
+        f"- environment_event_status_counts: {json.dumps(_mapping(observability.get('environment_event_status_counts')), ensure_ascii=False)}",
+        f"- environment_events_terminal_ratio: {observability.get('environment_events_terminal_ratio', '-')}",
         "",
         "## M13.5 last idle cognitive tick",
         f"- at: {_fmt_ts(tick.get('at'))}",
@@ -387,6 +420,14 @@ def build_mind_debug_bundle_text(
         for row in cleanup_active[-5:]:
             item = _mapping(row)
             lines.append(f"- active_cleanup {item.get('intent_kind')} detector={item.get('detector')}")
+    cleanup_consumed = m15_meta.get("cleanup_consumed", [])
+    if isinstance(cleanup_consumed, list) and cleanup_consumed:
+        for row in cleanup_consumed[-5:]:
+            item = _mapping(row)
+            lines.append(
+                f"- recently_applied_cleanup {item.get('intent_kind')} "
+                f"at={_fmt_ts(item.get('consumed_at'))} ops={json.dumps(_mapping(item.get('ops_delta')), ensure_ascii=False)}"
+            )
     cleanup_recent = m15_meta.get("cleanup_recent_detections", [])
     if isinstance(cleanup_recent, list):
         for row in cleanup_recent[-5:]:

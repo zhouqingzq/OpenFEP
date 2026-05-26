@@ -287,6 +287,49 @@ def test_run_forever_background_self_tick_safely_swallows_exceptions(tmp_path: P
     assert "simulated background tick failure" in log_text
 
 
+def test_background_self_tick_reports_llm_unavailable_when_signal_requires_llm(tmp_path: Path) -> None:
+    store = MVPStateStore(tmp_path / "bg_no_llm")
+    state = _full_opted_state()
+    state["open_items"] = [
+        {
+            "id": "oi_trace",
+            "status": "open",
+            "title": "traceable follow-up",
+            "next_check": "next_user_turn",
+            "evidence_refs": ["stm_turn_a"],
+            "bound_memory_ids": ["stm_turn_a"],
+        }
+    ]
+    store.save(state)
+    runtime = MVPDialogueRuntime(store=store, llm=None)
+
+    result = runtime.run_background_self_tick(runner_kind="standalone_daemon")
+
+    assert result["skip_reason"] == "llm_unavailable"
+    bg = store.load()["m13_drive_state"]["initiative"]["background_continuity"]
+    assert bg["last_budget_block_reason"] == "llm_unavailable"
+    assert bg["last_background_ran_llm"] is False
+    log_text = (store.root / "conversation_log.jsonl").read_text(encoding="utf-8")
+    assert '"skip_reason": "llm_unavailable"' in log_text
+
+
+def test_daemon_health_reports_llm_unavailable_and_materialized_event_counts(tmp_path: Path) -> None:
+    store = MVPStateStore(tmp_path / "daemon_no_llm")
+    store.save(_full_opted_state())
+    runtime = MVPDialogueRuntime(store=store, llm=None)
+    daemon = M142SelfLoopDaemon(runtime, persona_id="p", session_id="s", clock=lambda: 1_800_000_000)
+    event_store = EnvironmentEventStore(store.root, persona_id="p", session_id="s", clock=lambda: 1_800_000_000)
+    event_store.append_event("UIPingEvent", {"render": True}, source="test", correlation_id="ui")
+
+    result = daemon.tick_once(record_clock_wake=False)
+
+    assert result["llm_available"] is False
+    assert result["llm_unavailable_reason"] == "llm_unavailable"
+    assert result["environment_event_status_counts"]["acked_count"] == 1
+    assert result["environment_events_terminal_ratio"] == 1.0
+    assert result["environment_events_pending_acked_ratio"] == 1.0
+
+
 def test_self_loop_daemon_cli_accepts_persona_session_contract() -> None:
     result = subprocess.run(
         [sys.executable, "-m", "segmentum.dialogue.runtime.m14_2_self_loop", "--help"],

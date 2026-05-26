@@ -416,6 +416,76 @@ def test_user_text_tension_words_alone_do_not_create_memory_dynamics_trace(tmp_p
     assert row["verify_on"] == "next_user_turn"
 
 
+def test_short_duplicate_expectation_id_is_rewritten_and_trace_anchored(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "trace_rewrite"), llm=None)
+    state = runtime.store.load()
+    state["pending_expectations"] = [
+        {
+            "id": "exp_001",
+            "status": "pending",
+            "content": "older topic",
+            "verify_on": "next_user_turn",
+            "evidence_refs": ["stm_turn_old"],
+        }
+    ]
+    runtime._apply_thinking_writes(
+        state,
+        {
+            "reply": "short",
+            "new_expectations": [
+                {
+                    "id": "exp_001",
+                    "content": "new topic should not reuse local id",
+                    "confidence": 0.7,
+                    "verify_on": "next_user_turn",
+                }
+            ],
+        },
+        user_text="new user text",
+        now=5001,
+        turn_index=7,
+        memory_dynamics={"write_candidates": []},
+    )
+
+    row = state["pending_expectations"][-1]
+    assert row["id"].startswith("exp_7_5001_")
+    assert row["source_expectation_id"] == "exp_001"
+    assert row["created_turn_index"] == 7
+    assert row["evidence_refs"] == ["stm_turn_5001"]
+
+
+def test_duplicate_active_pending_expectation_signature_is_not_appended(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "trace_dedupe"), llm=None)
+    state = runtime.store.load()
+    existing = {
+        "id": "exp_existing",
+        "status": "pending",
+        "source": "thinking_prompt",
+        "content": "same structural expectation",
+        "verify_on": "next_user_turn",
+        "evidence_refs": ["stm_turn_6001"],
+    }
+    state["pending_expectations"] = [existing]
+    runtime._apply_thinking_writes(
+        state,
+        {
+            "new_expectations": [
+                {
+                    "content": "same structural expectation",
+                    "confidence": 0.7,
+                    "verify_on": "next_user_turn",
+                }
+            ],
+        },
+        user_text="same turn",
+        now=6001,
+        turn_index=3,
+        memory_dynamics={"write_candidates": []},
+    )
+
+    assert state["pending_expectations"] == [existing]
+
+
 def test_generic_unclear_intent_expectation_does_not_get_memory_dynamics_trace(tmp_path: Path) -> None:
     runtime = MVPDialogueRuntime(store=MVPStateStore(tmp_path / "trace_generic"), llm=None)
     state = runtime.store.load()
@@ -742,15 +812,21 @@ def test_delivery_assessor_reject_emits_post_generation_reason_code(tmp_path: Pa
     m13["initiative"] = initiative
     state["m13_drive_state"] = m13
     runtime.store.save(state)
-    result = runtime.run_proactive_turn(proposal_id=proposal.proposal_id, turn_index=1)
+    result = runtime.run_proactive_turn(proposal_id=proposal.proposal_id, turn_index=1, now=NOW)
     assert result.reply == ""
     assert result.diagnostics.get("reason_code") == "delivery_assessor_reject"
     assert result.diagnostics.get("suppression_reason") == "delivery_assessor_reject"
+    initiative_after = normalize_initiative_state(
+        normalize_m13_drive_state(runtime.store.load()["m13_drive_state"])["initiative"]
+    )
+    assert initiative_after["pending_proactive_proposal"] == {}
+    assert initiative_after["cooldown_until_timestamp"] > NOW
     rows = [
         json.loads(line)
         for line in (runtime.store.root / "conversation_log.jsonl").read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
+    assert not any(row.get("event") in {"turn", "proactive_turn"} for row in rows)
     suppression = [row for row in rows if row.get("type") == "M13ProactiveSuppressionEvent"][-1]
     assert suppression["reason_code"] == "delivery_assessor_reject"
     assert suppression["reason_stage"] == "post_generation"

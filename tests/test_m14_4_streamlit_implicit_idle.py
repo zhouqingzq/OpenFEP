@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
+from segmentum.dialogue.runtime.chat import ChatInterface
 from segmentum.dialogue.runtime.m13_drive import default_m13_drive_state, normalize_m13_drive_state
 from segmentum.dialogue.runtime.m13_initiative import (
     BOUNDED_DEFAULT_PROFILE,
@@ -64,7 +66,32 @@ def test_fresh_session_uses_m14_5_conservative_defaults(monkeypatch: pytest.Monk
     assert initiative["max_proactive_per_session"] == 1
 
 
-def test_streamlit_open_chat_profile_skips_session_limit_for_explicit_profile() -> None:
+def test_streamlit_open_chat_profile_respects_session_limit_by_default() -> None:
+    state = {
+        "open_items": [],
+        "temporal_state": {"last_user_text": ""},
+        "m13_drive_state": _m13_enabled(profile=STREAMLIT_OPEN_CHAT_PROFILE),
+    }
+    m13 = normalize_m13_drive_state(state["m13_drive_state"])
+    initiative = normalize_initiative_state(m13["initiative"])
+    initiative["proactive_count_this_session"] = 1
+    m13["initiative"] = initiative
+    state["m13_drive_state"] = m13
+    _, check = evaluate_proactive_initiative(
+        state,
+        now=NOW,
+        turn_index=3,
+        implicit_idle_request=True,
+        idle_seconds=999,
+        locked_proposal=_locked_proposal(),
+        llm=None,
+    )
+    assert check.proposal is None
+    assert check.suppression_reason_code == "session_limit_reached"
+
+
+def test_streamlit_open_chat_profile_skips_session_limit_only_with_env_opt_in(monkeypatch) -> None:
+    monkeypatch.setenv("SEGMENTUM_STREAMLIT_OPEN_CHAT_RELAX_PROACTIVE_CAPS", "1")
     state = {
         "open_items": [],
         "temporal_state": {"last_user_text": ""},
@@ -136,7 +163,34 @@ def test_locked_generic_open_item_memory_efe_rejected_as_untraceable() -> None:
     assert check.suppression_reason_code == "no_traceable_proactive_target"
 
 
-def test_streamlit_open_chat_profile_skips_cooldown_turns_and_timestamp() -> None:
+def test_streamlit_open_chat_profile_respects_cooldown_by_default() -> None:
+    state = {
+        "open_items": [],
+        "temporal_state": {"last_user_text": ""},
+        "m13_drive_state": _m13_enabled(profile=STREAMLIT_OPEN_CHAT_PROFILE),
+    }
+    m13 = normalize_m13_drive_state(state["m13_drive_state"])
+    initiative = normalize_initiative_state(m13["initiative"])
+    initiative["last_proactive_turn_index"] = 2
+    initiative["cooldown_turns"] = 2
+    initiative["cooldown_until_timestamp"] = NOW + 120
+    m13["initiative"] = initiative
+    state["m13_drive_state"] = m13
+    _, check = evaluate_proactive_initiative(
+        state,
+        now=NOW,
+        turn_index=3,
+        implicit_idle_request=True,
+        idle_seconds=999,
+        locked_proposal=_locked_proposal(),
+        llm=None,
+    )
+    assert check.proposal is None
+    assert check.suppression_reason_code == "cooldown_active"
+
+
+def test_streamlit_open_chat_profile_skips_cooldown_only_with_env_opt_in(monkeypatch) -> None:
+    monkeypatch.setenv("SEGMENTUM_STREAMLIT_OPEN_CHAT_RELAX_PROACTIVE_CAPS", "1")
     state = {
         "open_items": [],
         "temporal_state": {"last_user_text": ""},
@@ -327,6 +381,52 @@ def test_throttle_prevents_back_to_back_implicit_idle_proposals() -> None:
     assert second.attempted is False
     assert second.suppression_reason_code == "implicit_idle_attempt_throttled"
     assert chat.propose_calls == 1
+
+
+def test_chat_interface_suppressed_proactive_does_not_advance_turn_index() -> None:
+    class _Runtime:
+        def run_proactive_turn(self, *, proposal_id: str, turn_index: int, speaker_name: str = "") -> SimpleNamespace:
+            assert proposal_id == "prop_1"
+            assert turn_index == 4
+            return SimpleNamespace(
+                reply="",
+                action="proactive_suppressed",
+                diagnostics={"suppression_reason": "delivery_assessor_reject"},
+                followup_replies=[],
+            )
+
+    class _Safety:
+        def enforce(self, text: str, obs_channels: dict[str, object]) -> tuple[str, list[object]]:
+            return text, []
+
+    traits = SimpleNamespace(to_dict=lambda: {"openness": 0.0})
+    profile = SimpleNamespace(
+        openness=0.0,
+        conscientiousness=0.0,
+        extraversion=0.0,
+        agreeableness=0.0,
+        neuroticism=0.0,
+    )
+    chat = ChatInterface.__new__(ChatInterface)
+    chat._use_mvp_runtime = True
+    chat._mvp_runtime = _Runtime()
+    chat._agent = SimpleNamespace(
+        slow_variable_learner=SimpleNamespace(state=SimpleNamespace(traits=traits)),
+        self_model=SimpleNamespace(personality_profile=profile),
+    )
+    chat._safety = _Safety()
+    chat._last_obs_channels = {}
+    chat._last_action = "answer"
+    chat._turn_index = 4
+    chat._transcript = []
+    chat._session_id = "s"
+
+    response = chat.run_proactive_turn("prop_1")
+
+    assert response.reply == ""
+    assert response.diagnostics["suppression_reason"] == "delivery_assessor_reject"
+    assert chat._turn_index == 4
+    assert chat._transcript == []
 
 
 def test_policy_profile_persists_in_m13_drive_state(tmp_path: Path) -> None:

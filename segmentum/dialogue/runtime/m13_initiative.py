@@ -780,9 +780,11 @@ def evaluate_proactive_initiative(
         return state, suppress("disabled", reason_code="initiative_disabled")
     if user_typing:
         return state, suppress("user_active")
-    queued_delivery = locked_proposal is not None and str(locked_proposal.source) == "queued_outreach"
-    relaxed_profile = str(initiative.get("proactive_policy_profile", BOUNDED_DEFAULT_PROFILE)) == STREAMLIT_OPEN_CHAT_PROFILE
-    if not queued_delivery and not relaxed_profile and int(initiative.get("proactive_count_this_session", 0) or 0) >= int(
+    relaxed_profile = (
+        str(initiative.get("proactive_policy_profile", BOUNDED_DEFAULT_PROFILE)) == STREAMLIT_OPEN_CHAT_PROFILE
+        and str(os.environ.get("SEGMENTUM_STREAMLIT_OPEN_CHAT_RELAX_PROACTIVE_CAPS", "") or "").strip() == "1"
+    )
+    if not relaxed_profile and int(initiative.get("proactive_count_this_session", 0) or 0) >= int(
         initiative.get("max_proactive_per_session", DEFAULT_MAX_PROACTIVE_PER_SESSION) or 1
     ):
         return state, suppress("session_limit_reached")
@@ -792,8 +794,7 @@ def evaluate_proactive_initiative(
     last_turn = int(initiative.get("last_proactive_turn_index", -1) or -1)
     cooldown_turns = int(initiative.get("cooldown_turns", DEFAULT_COOLDOWN_TURNS) or DEFAULT_COOLDOWN_TURNS)
     if (
-        not queued_delivery
-        and not relaxed_profile
+        not relaxed_profile
         and last_turn >= 0
         and turn_index - last_turn <= cooldown_turns
     ):
@@ -809,6 +810,11 @@ def evaluate_proactive_initiative(
     if locked_proposal is not None:
         if locked_proposal.trigger not in _ALLOWED_TRIGGERS:
             return state, suppress("no_high_value_target", reason_code="no_traceable_proactive_target")
+        if locked_proposal.trigger in TRACEABLE_DELIVERY_TRIGGERS and not (
+            _string_list(locked_proposal.trigger_evidence_refs, limit=MAX_EVIDENCE_REFS)
+            or str(locked_proposal.traceable_expectation_id or "").strip()
+        ):
+            return state, suppress("no_traceable_proactive_target", reason_code="no_traceable_proactive_target")
         if _untraceable_locked_memory_efe_proposal(locked_proposal):
             return state, suppress(
                 "no_traceable_proactive_target",

@@ -35,6 +35,11 @@ def test_build_mind_debug_bundle_includes_traceability_and_verdicts(tmp_path: Pa
                     "content": "user will ask about boundary",
                     "evidence_refs": ["mem_2"],
                     "bound_memory_ids": ["mem_2"],
+                },
+                {
+                    "id": "exp_old",
+                    "status": "expired",
+                    "content": "stale expectation",
                 }
             ],
             "m13_drive_state": {
@@ -93,6 +98,17 @@ def test_build_mind_debug_bundle_includes_traceability_and_verdicts(tmp_path: Pa
             },
             "m14_3_open_item_traceability_suggestions": 1,
             "health_ticks_today": 0,
+            "environment_event_status_counts": {"acked_count": 1, "pending_count": 0},
+            "environment_events_terminal_ratio": 1.0,
+            "m15_meta_control": {
+                "cleanup_consumed": [
+                    {
+                        "intent_kind": "cleanup_pending_expectation_backlog",
+                        "consumed_at": 1_700_000_210,
+                        "ops_delta": {"expired_pending_expectations": 1},
+                    }
+                ]
+            },
         },
         ui_hints={"pending_user_message": "hello"},
         turn_index=2,
@@ -101,6 +117,10 @@ def test_build_mind_debug_bundle_includes_traceability_and_verdicts(tmp_path: Pa
     assert "Path B Mind Debug Bundle" in text
     assert "item_001" in text
     assert "exp_001" in text
+    assert "pending_expectations_raw_total=2 active_total=1 strict_trace_active=1" in text
+    assert "folded_non_active=1" in text
+    assert "recently_applied_cleanup cleanup_pending_expectation_backlog" in text
+    assert "environment_events_terminal_ratio: 1.0" in text
     assert "generic_self_only_open_item" in text
     assert "intro_should_outreach: True" in text
     assert "pending_user_message: hello" in text

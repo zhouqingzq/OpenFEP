@@ -978,9 +978,19 @@ class ChatInterface:
         last_clock_wake_at = 0
         user_message_pending = 0
         ui_audit_pending = 0
+        env_status_counts = {
+            "acked_count": 0,
+            "pending_count": 0,
+            "claimed_count": 0,
+            "failed_count": 0,
+            "expired_count": 0,
+        }
         for row in self.read_m14_2_environment_events(limit=400):
             event_type = str(row.get("event_type", "") or "")
             status = str(row.get("status", "") or "")
+            key = f"{status}_count"
+            if key in env_status_counts:
+                env_status_counts[key] += 1
             at = int(row.get("at", 0) or 0)
             event_day = datetime.fromtimestamp(at).date().isoformat() if at > 0 else ""
             if event_type == "ClockWakeEvent" and status == "acked" and event_day == today:
@@ -990,6 +1000,9 @@ class ChatInterface:
                 user_message_pending += 1
             if event_type in {"UIPingEvent", "OutboxDeliverySurfaceAvailableEvent"} and status == "pending":
                 ui_audit_pending += 1
+        env_terminal = env_status_counts["acked_count"] + env_status_counts["expired_count"]
+        env_pending_like = env_status_counts["pending_count"] + env_status_counts["claimed_count"] + env_status_counts["failed_count"]
+        env_terminal_ratio = round(env_terminal / max(1, env_terminal + env_pending_like), 4)
 
         active_intent_statuses = {"pending", "preparing", "prepared", "awaiting_delivery"}
         scheduled_intents_active = 0
@@ -1005,6 +1018,9 @@ class ChatInterface:
 
         health_ticks_today = 0
         last_health_at = 0
+        last_health_llm_available = None
+        last_health_llm_unavailable_reason = ""
+        last_health_background_ran_llm = None
         last_proactive_target: dict[str, object] = {}
         last_proactive_suppression: dict[str, object] = {}
         last_drive_band_summary: dict[str, object] = {}
@@ -1099,6 +1115,9 @@ class ChatInterface:
             if at > 0 and datetime.fromtimestamp(at).date().isoformat() == today:
                 health_ticks_today += 1
                 last_health_at = max(last_health_at, at)
+                last_health_llm_available = bool(row.get("llm_available")) if "llm_available" in row else last_health_llm_available
+                last_health_llm_unavailable_reason = str(row.get("llm_unavailable_reason", "") or last_health_llm_unavailable_reason)
+                last_health_background_ran_llm = bool(row.get("background_ran_llm")) if "background_ran_llm" in row else last_health_background_ran_llm
 
         reflection_count = int(idle.get("reflection_count_this_session", 0) or 0)
         reflection_max = int(idle.get("max_per_session", 4) or 4)
@@ -1179,6 +1198,18 @@ class ChatInterface:
                 for row in meta_control_raw.get("cleanup_active", []) or []
                 if isinstance(row, dict)
             ][-8:]
+            meta_control["cleanup_consumed"] = [
+                {
+                    "intent_id": str(row.get("intent_id", "") or ""),
+                    "intent_kind": str(row.get("intent_kind", "") or ""),
+                    "detector": str(row.get("detector", "") or ""),
+                    "source": str(row.get("source", "") or ""),
+                    "consumed_at": int(row.get("consumed_at", 0) or 0),
+                    "ops_delta": dict(row.get("ops_delta", {})) if isinstance(row.get("ops_delta"), dict) else {},
+                }
+                for row in meta_control_raw.get("cleanup_consumed", []) or []
+                if isinstance(row, dict)
+            ][-8:]
             meta_control["cleanup_recent_detections"] = [
                 {
                     "type": str(row.get("type", "") or ""),
@@ -1199,8 +1230,14 @@ class ChatInterface:
             "last_clock_wake_at": last_clock_wake_at,
             "health_ticks_today": health_ticks_today,
             "last_health_at": last_health_at,
+            "daemon_llm_available": last_health_llm_available,
+            "daemon_llm_unavailable_reason": last_health_llm_unavailable_reason,
+            "daemon_background_ran_llm": last_health_background_ran_llm,
             "user_message_pending": user_message_pending,
             "ui_audit_pending": ui_audit_pending,
+            "environment_event_status_counts": dict(env_status_counts),
+            "environment_events_terminal_ratio": env_terminal_ratio,
+            "environment_events_pending_acked_ratio": env_terminal_ratio,
             "scheduled_intents_active": scheduled_intents_active,
             "queued_outreach": queued_outreach,
             "reflection_count": reflection_count,
@@ -1439,12 +1476,14 @@ class ChatInterface:
         diagnostics["safe_followup_replies"] = safe_followups
         diagnostics["proactive_turn"] = True
         diagnostics["not_user_requested_current_turn"] = True
-        if safe_text.strip():
+        delivered = bool(safe_text.strip() or safe_followups)
+        if delivered and safe_text.strip():
             self._transcript.append(TranscriptUtterance(role="agent", text=safe_text))
+        if delivered:
             for followup in safe_followups:
                 self._transcript.append(TranscriptUtterance(role="agent", text=followup))
-        self._last_action = action
-        self._turn_index += 1
+            self._last_action = action
+            self._turn_index += 1
         post_traits = self._agent.slow_variable_learner.state.traits.to_dict()
         post_big_five = {
             "openness": pp.openness,
