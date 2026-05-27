@@ -42,7 +42,7 @@ from segmentum.dialogue.runtime.m14_2_scheduled_intents import (
     ScheduledIntentStore,
     ensure_scheduled_open_item,
 )
-from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore
+from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore, llm_configuration_status
 from segmentum.dialogue.runtime.m13_drive import _mapping, normalize_m13_drive_state
 from segmentum.dialogue.runtime.m13_initiative import normalize_initiative_state
 
@@ -205,7 +205,9 @@ class M142SelfLoopDaemon:
         terminal_ratio = round(terminal / max(1, terminal + pending_like), 4)
         state = self.runtime.store.load()
         bg = _mapping(_mapping(_mapping(state.get("m13_drive_state")).get("initiative")).get("background_continuity"))
-        llm_available = self.runtime.llm is not None
+        llm_status = llm_configuration_status(self.runtime.llm)
+        llm_available = bool(llm_status.get("available"))
+        llm_unavailable_reason = str(llm_status.get("reason", "") or "")
         self._audit(
             {
                 "type": "SelfLoopDaemonHealthEvent",
@@ -216,7 +218,7 @@ class M142SelfLoopDaemon:
                 "environment_events_terminal_ratio": terminal_ratio,
                 "environment_event_status_counts": dict(event_status_counts),
                 "llm_available": llm_available,
-                "llm_unavailable_reason": "" if llm_available else "llm_unavailable",
+                "llm_unavailable_reason": "" if llm_available else llm_unavailable_reason,
                 "background_ran_llm": bool(bg.get("last_background_ran_llm", False)),
             }
         )
@@ -228,7 +230,7 @@ class M142SelfLoopDaemon:
             "environment_events_terminal_ratio": terminal_ratio,
             "environment_event_status_counts": dict(event_status_counts),
             "llm_available": llm_available,
-            "llm_unavailable_reason": "" if llm_available else "llm_unavailable",
+            "llm_unavailable_reason": "" if llm_available else llm_unavailable_reason,
             "background_ran_llm": bool(bg.get("last_background_ran_llm", False)),
         }
 

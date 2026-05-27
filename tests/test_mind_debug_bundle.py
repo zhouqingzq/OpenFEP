@@ -100,6 +100,8 @@ def test_build_mind_debug_bundle_includes_traceability_and_verdicts(tmp_path: Pa
             "health_ticks_today": 0,
             "environment_event_status_counts": {"acked_count": 1, "pending_count": 0},
             "environment_events_terminal_ratio": 1.0,
+            "environment_event_backlog_count": 0,
+            "stale_environment_event_backlog_count": 0,
             "m15_meta_control": {
                 "cleanup_consumed": [
                     {
@@ -121,6 +123,7 @@ def test_build_mind_debug_bundle_includes_traceability_and_verdicts(tmp_path: Pa
     assert "folded_non_active=1" in text
     assert "recently_applied_cleanup cleanup_pending_expectation_backlog" in text
     assert "environment_events_terminal_ratio: 1.0" in text
+    assert "stale_environment_event_backlog_count: 0" in text
     assert "generic_self_only_open_item" in text
     assert "intro_should_outreach: True" in text
     assert "pending_user_message: hello" in text

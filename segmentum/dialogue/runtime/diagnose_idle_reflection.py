@@ -93,7 +93,7 @@ def summarize_log(path: Path) -> dict[str, Any]:
             latest_intro_plan = dict(row)
         if typ == "SelfLoopDaemonHealthEvent":
             latest_health = dict(row)
-        if typ in {"M13ProactiveProposalEvent", "ProactiveDeliveryAssessmentEvent"} or event == "proactive_turn":
+        if event == "proactive_turn" or typ == "M13ProactiveGenerationEvent":
             latest_delivery = dict(row)
         if "skip_reason" in row or "reason_code" in row or "suppression_reason_code" in row:
             latest_skip = dict(row)

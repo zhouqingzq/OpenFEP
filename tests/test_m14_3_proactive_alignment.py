@@ -930,3 +930,65 @@ def test_assessor_reject_backoff_blocks_structural_proposal() -> None:
     )
     assert check.proposal is None
     assert check.suppression_reason_code == "assessor_reject_backoff_active"
+
+
+def test_assessor_reject_backoff_blocks_memory_efe_selector() -> None:
+    from segmentum.dialogue.runtime.m13_initiative import record_target_assessor_reject_backoff
+
+    now = int(time.time())
+    m13 = _opted_m13()
+    m13 = record_target_assessor_reject_backoff(
+        m13,
+        expectation_id="exp_trace",
+        now=now,
+        reason_code="delivery_assessor_reject",
+    )
+    m13["memory_efe"] = {
+        "should_outreach": True,
+        "traceable_expectation_id": "exp_trace",
+        "evidence_refs": ["stm_trace"],
+        "reason_codes": ["memory_backed_social_prediction_error"],
+        "eligible_for_efe": [
+            {
+                "expectation_id": "exp_trace",
+                "source_kind": "memory_dynamics_expectation",
+                "content_summary": "follow up benchmark",
+                "evidence_refs": ["stm_trace"],
+            }
+        ],
+    }
+    state = {"m13_drive_state": m13, "temporal_state": {"last_user_turn_at": NOW - 999}}
+
+    assert select_proactive_target(state, m13) is None
+
+
+def test_meta_control_blocks_memory_efe_selector() -> None:
+    now = int(time.time())
+    m13 = _opted_m13()
+    m13["memory_efe"] = {
+        "should_outreach": True,
+        "traceable_expectation_id": "exp_trace",
+        "evidence_refs": ["stm_trace"],
+        "reason_codes": ["memory_backed_social_prediction_error"],
+        "eligible_for_efe": [
+            {
+                "expectation_id": "exp_trace",
+                "source_kind": "memory_dynamics_expectation",
+                "content_summary": "follow up benchmark",
+                "evidence_refs": ["stm_trace"],
+            }
+        ],
+    }
+    m13["meta_control_intents"] = {
+        "active": [
+            {
+                "intent_id": "meta_1",
+                "intent_kind": "suppress_action_trigger_for_n_turns",
+                "payload": {"action_trigger": "idle_cognitive_tick"},
+                "expires_at": now + 300,
+            }
+        ]
+    }
+    state = {"m13_drive_state": m13, "temporal_state": {"last_user_turn_at": NOW - 999}}
+
+    assert select_proactive_target(state, m13) is None

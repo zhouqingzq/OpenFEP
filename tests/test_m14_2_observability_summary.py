@@ -34,7 +34,7 @@ def test_observability_summary_counts_active_intents_and_pending_outreach_only()
     chat.read_m14_2_environment_events = MethodType(
         lambda self, limit=20: [
             {"event_type": "ClockWakeEvent", "status": "acked", "at": now},
-            {"event_type": "UserMessageCommittedEvent", "status": "pending", "at": now},
+            {"event_type": "UserMessageCommittedEvent", "status": "pending", "at": now - 600},
             {"event_type": "UIPingEvent", "status": "pending", "at": now},
         ],
         chat,
@@ -97,7 +97,29 @@ def test_observability_summary_counts_active_intents_and_pending_outreach_only()
     assert summary["environment_event_status_counts"]["acked_count"] == 1
     assert summary["environment_event_status_counts"]["pending_count"] == 2
     assert summary["environment_events_terminal_ratio"] == round(1 / 3, 4)
+    assert summary["environment_event_backlog_count"] == 2
+    assert summary["stale_environment_event_backlog_count"] == 1
     assert summary["daemon_llm_available"] is False
     assert summary["daemon_llm_unavailable_reason"] == "llm_unavailable"
     assert summary["m14_3_last_proactive_target"]["trigger"] == "memory_efe_outreach"
     assert summary["m14_3_last_proactive_suppression"]["reason_code"] == "delivery_assessor_reject"
+
+
+def test_observability_summary_clamps_idle_reflection_count() -> None:
+    chat = ChatInterface.__new__(ChatInterface)
+
+    chat.read_self_loop_daemon_status = MethodType(lambda self: {"status": "running"}, chat)
+    chat.read_idle_introspection_status = MethodType(
+        lambda self: {"reflection_count_this_session": 10, "max_per_session": 4},
+        chat,
+    )
+    chat.read_background_continuity_status = MethodType(lambda self: {}, chat)
+    chat.read_m14_2_environment_events = MethodType(lambda self, limit=20: [], chat)
+    chat.read_m14_2_scheduled_intents = MethodType(lambda self: [], chat)
+    chat.read_queued_outreach = MethodType(lambda self: [], chat)
+    chat.read_conversation_log = MethodType(lambda self, limit=300: [], chat)
+
+    summary = chat.read_m14_2_observability_summary()
+
+    assert summary["reflection_count"] == 4
+    assert summary["reflection_max"] == 4

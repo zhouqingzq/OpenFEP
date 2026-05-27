@@ -159,6 +159,55 @@ def _relationship_precision(state: Mapping[str, Any]) -> float:
     return max(_bounded_float(value) for value in rel.values())
 
 
+def _is_generic_low_resolution_expectation(row: Mapping[str, Any]) -> bool:
+    text = _content_summary(row).casefold()
+    if not text:
+        return False
+    generic_markers = (
+        "转其他",
+        "其他话题",
+        "闲聊",
+        "继续聊天",
+        "继续闲聊",
+        "other topic",
+        "small talk",
+        "continue chatting",
+        "keep chatting",
+    )
+    if not any(marker in text for marker in generic_markers):
+        return False
+    alternation_count = text.count("或") + text.count("或者") + text.count(" or ")
+    return alternation_count >= 1
+
+
+def _target_assessor_backoff_active(state: Mapping[str, Any], traceable_expectation_id: str, *, now: int) -> bool:
+    target_id = str(traceable_expectation_id or "").strip()
+    if not target_id:
+        return False
+    initiative = _mapping(normalize_m13_drive_state(state.get("m13_drive_state")).get("initiative"))
+    backoff = _mapping(initiative.get("rejected_target_backoff"))
+    row = _mapping(backoff.get(target_id))
+    return int(row.get("until_at", 0) or 0) > int(now)
+
+
+def _meta_trigger_suppression_active(state: Mapping[str, Any], action_trigger: str, *, now: int) -> bool:
+    requested = str(action_trigger or "")
+    meta = _mapping(normalize_m13_drive_state(state.get("m13_drive_state")).get("meta_control_intents"))
+    for row in meta.get("active", []) or []:
+        if not isinstance(row, Mapping):
+            continue
+        if str(row.get("intent_kind", "") or "") != "suppress_action_trigger_for_n_turns":
+            continue
+        expires_at = int(row.get("expires_at", 0) or 0)
+        if expires_at > 0 and expires_at <= int(now):
+            continue
+        payload = _mapping(row.get("payload"))
+        stored = str(payload.get("action_trigger", "") or "")
+        if stored == requested or (stored == "idle_cognitive_tick" and requested == "memory_efe_outreach"):
+            return True
+    return False
+
+
 def default_memory_efe_state() -> dict[str, Any]:
     return {
         "phase": "",
@@ -364,6 +413,9 @@ def _make_expectation(
     if cleanup_reason:
         eligible = False
         ineligibility_reason = cleanup_reason
+    elif source_kind == "memory_dynamics_expectation" and eligible and _is_generic_low_resolution_expectation(row):
+        eligible = False
+        ineligibility_reason = "generic_low_resolution_expectation"
     elif source_kind in {"pending_expectation", "memory_dynamics_expectation", "open_item"} and eligible and not is_strictly_traceable(row):
         eligible = False
         ineligibility_reason = "not_traceable_or_testable"
@@ -1112,6 +1164,10 @@ def evaluate_memory_efe(
         last_at = int(memory_efe_state.get("last_memory_efe_outreach_at", 0) or 0)
         if last_at > 0 and now - last_at < M13_6_OUTREACH_RESETTLE_WINDOW_SECONDS:
             suppression.append("recently_outreached")
+        if _target_assessor_backoff_active(state, traceable_id, now=now):
+            suppression.append("target_assessor_reject_backoff")
+        if _meta_trigger_suppression_active(state, "memory_efe_outreach", now=now):
+            suppression.append("meta_control_trigger_suppressed")
         suppression.extend(_duplicate_outreach_reasons(state, traceable_expectation_id=traceable_id, structural_signals=structural_signals))
         suppression.extend(_initiative_suppression_reasons(state, now=now, turn_index=turn_index))
         should_outreach = selected_policy == "outreach" and not suppression
@@ -1138,6 +1194,7 @@ def evaluate_memory_efe(
         "expectation_merged",
         "low_traceability_cleanup_deprioritized",
         "self_referential_evidence_only",
+        "generic_low_resolution_expectation",
     }
     diagnostic_cleanup_hits = [reason for reason in diagnostic_reasons if reason in cleanup_diagnostic_reasons]
     if diagnostic_cleanup_hits:

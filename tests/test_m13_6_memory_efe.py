@@ -8,6 +8,7 @@ from segmentum.dialogue.runtime.m13_initiative import (
     _pick_structural_target,
     evaluate_proactive_initiative,
     normalize_initiative_state,
+    record_target_assessor_reject_backoff,
     set_initiative_user_opt_in,
 )
 from segmentum.dialogue.runtime.m13_memory_efe import (
@@ -93,6 +94,63 @@ def test_vague_verify_later_is_diagnostic_only() -> None:
     assert normalized.diagnostic_only[0].ineligibility_reason == "verify_later_without_concrete_due"
     result = evaluate_memory_efe(state, phase="idle", now=NOW, turn_index=5, user_active=False)
     assert result.should_outreach is False
+
+
+def test_generic_memory_dynamics_expectation_is_diagnostic_only() -> None:
+    state = _state(
+        pending_expectations=[
+            {
+                "id": "exp_generic",
+                "source": "memory_dynamics_adapter",
+                "verify_on": "memory_dynamics_idle",
+                "status": "pending",
+                "content": "用户会继续抱怨天气或询问消暑方法，或者转其他闲聊话题",
+                "confidence": 0.8,
+                "created_at": NOW - 120,
+                "evidence_refs": ["stm_turn_weather"],
+                "bound_memory_ids": ["stm_turn_weather"],
+            }
+        ]
+    )
+
+    normalized = normalize_expectations_for_efe(state, now=NOW, phase="idle")
+    assert normalized.eligible_for_efe == []
+    assert normalized.diagnostic_only[0].ineligibility_reason == "generic_low_resolution_expectation"
+    result = evaluate_memory_efe(state, phase="idle", now=NOW, turn_index=5, user_active=False)
+    assert result.should_outreach is False
+    assert "generic_low_resolution_expectation" in result.reason_codes
+
+
+def test_assessor_reject_backoff_suppresses_same_memory_efe_target() -> None:
+    m13 = record_target_assessor_reject_backoff(
+        _opted_in_m13(),  # type: ignore[arg-type]
+        expectation_id="exp_specific",
+        now=NOW,
+        reason_code="delivery_assessor_reject",
+    )
+    state = _state(
+        m13_drive_state=m13,
+        pending_expectations=[
+            {
+                "id": "exp_specific",
+                "source": "memory_dynamics_adapter",
+                "verify_on": "memory_dynamics_idle",
+                "status": "pending",
+                "content": "用户会回复是否已经按刚才约定提交 benchmark 结果",
+                "confidence": 0.95,
+                "created_at": NOW - 120,
+                "evidence_refs": ["stm_turn_benchmark"],
+                "bound_memory_ids": ["stm_turn_benchmark"],
+            }
+        ],
+    )
+
+    result = evaluate_memory_efe(state, phase="idle", now=NOW + 30, turn_index=5, user_active=False)
+
+    assert result.traceable_expectation_id == "exp_specific"
+    assert result.selected_policy == "outreach"
+    assert result.should_outreach is False
+    assert "target_assessor_reject_backoff" in result.suppression_reasons
 
 
 def test_overdue_scheduled_open_item_can_make_outreach_lowest_policy() -> None:

@@ -329,6 +329,8 @@ def build_mind_debug_bundle_text(
         f"- last_background_skip_reason: {_clip(observability.get('last_background_skip_reason'), limit=80)}",
         f"- environment_event_status_counts: {json.dumps(_mapping(observability.get('environment_event_status_counts')), ensure_ascii=False)}",
         f"- environment_events_terminal_ratio: {observability.get('environment_events_terminal_ratio', '-')}",
+        f"- environment_event_backlog_count: {observability.get('environment_event_backlog_count', 0)}",
+        f"- stale_environment_event_backlog_count: {observability.get('stale_environment_event_backlog_count', 0)}",
         "",
         "## M13.5 last idle cognitive tick",
         f"- at: {_fmt_ts(tick.get('at'))}",

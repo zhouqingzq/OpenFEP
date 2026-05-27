@@ -153,3 +153,34 @@ def test_diagnose_verdicts_are_closed_enum_codes() -> None:
     assert set(verdicts) <= VERDICT_CODES
     assert "DAEMON_PROCESS_ALIVE_NO_BACKGROUND_TICKS" in verdicts
     assert "IDLE_INTRO_PLAN_SELECTOR_MISMATCH" in verdicts
+
+
+def test_rejected_delivery_assessment_is_not_counted_as_delivered(tmp_path: Path) -> None:
+    log = tmp_path / "conversation_log.jsonl"
+    log.write_text(
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "event": "m13_proactive_audit",
+                        "type": "ProactiveDeliveryAssessmentEvent",
+                        "at": NOW,
+                        "assessment": {"allow_delivery": False, "confidence": 0.9},
+                    }
+                ),
+                json.dumps(
+                    {
+                        "event": "m13_proactive_audit",
+                        "type": "M13ProactiveSuppressionEvent",
+                        "at": NOW + 1,
+                        "reason_code": "delivery_assessor_reject",
+                    }
+                ),
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    summary = summarize_log(log)
+
+    assert summary["latest_delivery"] == {}

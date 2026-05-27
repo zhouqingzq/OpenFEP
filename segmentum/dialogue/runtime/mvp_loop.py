@@ -692,6 +692,19 @@ class JSONLLMClient(Protocol):
         ...
 
 
+def llm_configuration_status(llm: Any) -> dict[str, Any]:
+    """Return local LLM availability without making a network request."""
+    if llm is None:
+        return {"available": False, "reason": "llm_unavailable"}
+    api_key = getattr(llm, "api_key", None)
+    if api_key is not None and not str(api_key or "").strip():
+        return {"available": False, "reason": "llm_not_configured"}
+    wrapped = getattr(llm, "_llm", None)
+    if wrapped is not None and wrapped is not llm:
+        return llm_configuration_status(wrapped)
+    return {"available": True, "reason": ""}
+
+
 def analyze_materials_into_personas(
     llm: JSONLLMClient,
     materials: list[str],
@@ -745,7 +758,7 @@ class OpenRouterJSONClient:
 
     @classmethod
     def available(cls) -> bool:
-        return bool(cls.from_config().api_key)
+        return bool(llm_configuration_status(cls.from_config()).get("available"))
 
     def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, Any]:
         if not self.api_key:
@@ -6428,12 +6441,14 @@ class MVPDialogueRuntime:
                     }
                 )
                 return {"skip_reason": "no_structural_signal", "ran_introspection": False}
-            if self.llm is None:
+            llm_status = llm_configuration_status(self.llm)
+            if not bool(llm_status.get("available")):
+                llm_reason = str(llm_status.get("reason", "") or "llm_unavailable")
                 bg = record_background_tick(bg, wallclock_seconds=time.monotonic() - wall_start, ran_introspection=False)
                 bg["last_tick_at"] = now
                 bg["last_background_ran_llm"] = False
-                bg["last_budget_block_reason"] = "llm_unavailable"
-                bg["last_background_skip_reason"] = "llm_unavailable"
+                bg["last_budget_block_reason"] = llm_reason
+                bg["last_background_skip_reason"] = llm_reason
                 initiative["background_continuity"] = bg
                 m13_state["initiative"] = initiative
                 state["m13_drive_state"] = m13_state
@@ -6442,12 +6457,12 @@ class MVPDialogueRuntime:
                     {
                         "type": "BackgroundIdleTickEvent",
                         "at": now,
-                        "skip_reason": "llm_unavailable",
+                        "skip_reason": llm_reason,
                         "runner_kind": runner_kind,
                         "engineering_proxy_label": M14_1_ENGINEERING_PROXY_LABEL,
                     }
                 )
-                return {"skip_reason": "llm_unavailable", "ran_introspection": False}
+                return {"skip_reason": llm_reason, "ran_introspection": False}
 
             meter = BackgroundLLMMeter(self.llm, bg)
             original_llm = self.llm
@@ -7157,29 +7172,43 @@ class MVPDialogueRuntime:
         raw_plan: dict[str, Any] = {}
         llm_system = ""
         llm_user = ""
-        try:
-            llm_system, llm_user = build_conscious_idle_prompt(
-                idle_context=idle_context,
-                retrieved_memories=retrieved,
-                turn_index=turn_index,
-                self_continuity_snapshot=snapshot,
-            )
-            raw_plan = self.llm.complete_json(system_prompt=llm_system, user_prompt=llm_user)
-            ran_llm = True
-        except BackgroundBudgetExhausted:
-            raise
-        except Exception as exc:
-            llm_error = str(exc)[:240]
+        llm_status = llm_configuration_status(self.llm)
+        if not bool(llm_status.get("available")):
+            llm_error = str(llm_status.get("reason", "") or "llm_unavailable")[:240]
             audit_events.append(
                 {
                     "type": "IdleIntrospectionAbortEvent",
                     "turn_index": turn_index,
                     "at": now,
-                    "reason": "llm_unavailable",
+                    "reason": llm_error,
                     "detail": llm_error,
                     "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
                 }
             )
+        else:
+            try:
+                llm_system, llm_user = build_conscious_idle_prompt(
+                    idle_context=idle_context,
+                    retrieved_memories=retrieved,
+                    turn_index=turn_index,
+                    self_continuity_snapshot=snapshot,
+                )
+                raw_plan = self.llm.complete_json(system_prompt=llm_system, user_prompt=llm_user)
+                ran_llm = True
+            except BackgroundBudgetExhausted:
+                raise
+            except Exception as exc:
+                llm_error = "llm_unavailable"
+                audit_events.append(
+                    {
+                        "type": "IdleIntrospectionAbortEvent",
+                        "turn_index": turn_index,
+                        "at": now,
+                        "reason": llm_error,
+                        "detail": str(exc)[:240],
+                        "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
+                    }
+                )
 
         if not raw_plan or not isinstance(raw_plan, Mapping):
             raw_plan = build_structural_idle_plan(idle_context, retrieved_ids=retrieved_ids)

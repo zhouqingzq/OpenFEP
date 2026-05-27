@@ -176,10 +176,41 @@ def _memory_efe_rejected_generic_open_item(memory_efe_evaluation: Any | None, m1
     )
 
 
+def _target_assessor_backoff_active(m13_state: Mapping[str, Any], trace_id: str, *, now: int) -> bool:
+    if not trace_id:
+        return False
+    initiative = _mapping(normalize_m13_drive_state(m13_state).get("initiative"))
+    backoff = _mapping(initiative.get("rejected_target_backoff"))
+    row = _mapping(backoff.get(trace_id))
+    return int(row.get("until_at", 0) or 0) > int(now)
+
+
+def _meta_trigger_suppression_active(m13_state: Mapping[str, Any], trigger: str, *, now: int) -> bool:
+    meta = _mapping(normalize_m13_drive_state(m13_state).get("meta_control_intents"))
+    for row in meta.get("active", []) or []:
+        if not isinstance(row, Mapping):
+            continue
+        if str(row.get("intent_kind", "") or "") != "suppress_action_trigger_for_n_turns":
+            continue
+        expires_at = int(row.get("expires_at", 0) or 0)
+        if expires_at > 0 and expires_at <= int(now):
+            continue
+        payload = _mapping(row.get("payload"))
+        stored = str(payload.get("action_trigger", "") or "")
+        if stored == trigger or (stored == "idle_cognitive_tick" and trigger == "memory_efe_outreach"):
+            return True
+    return False
+
+
 def _target_from_memory_efe(memory_efe_evaluation: Any | None, m13_state: Mapping[str, Any]) -> ProactiveTarget | None:
     should, trace_id, refs, reason_codes, eligible = _memory_efe_fields(memory_efe_evaluation, m13_state)
     intent = ""
     if not should or not refs:
+        return None
+    now = int(time.time())
+    if _target_assessor_backoff_active(m13_state, trace_id, now=now):
+        return None
+    if _meta_trigger_suppression_active(m13_state, "memory_efe_outreach", now=now):
         return None
     trace_id, selected_row = _memory_efe_selected_row(eligible, trace_id)
     if selected_row is not None:

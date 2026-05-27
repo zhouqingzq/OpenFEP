@@ -16,7 +16,7 @@ from segmentum.dialogue.runtime.m14_1_background_continuity import (
 from segmentum.dialogue.runtime.m14_2_event_bus import EnvironmentEventStore
 from segmentum.dialogue.runtime.m14_2_scheduled_intents import ScheduledIntentStore
 from segmentum.dialogue.runtime.m14_2_self_loop import M142SelfLoopDaemon
-from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore
+from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore, OpenRouterJSONClient
 
 
 def _structured_payload(text: str = "sleep on it and tell me tomorrow morning") -> dict[str, object]:
@@ -311,6 +311,31 @@ def test_background_self_tick_reports_llm_unavailable_when_signal_requires_llm(t
     assert bg["last_background_ran_llm"] is False
     log_text = (store.root / "conversation_log.jsonl").read_text(encoding="utf-8")
     assert '"skip_reason": "llm_unavailable"' in log_text
+
+
+def test_configured_runtime_without_api_key_reports_not_configured(tmp_path: Path) -> None:
+    store = MVPStateStore(tmp_path / "bg_missing_key")
+    state = _full_opted_state()
+    state["open_items"] = [
+        {
+            "id": "oi_trace",
+            "status": "open",
+            "title": "traceable follow-up",
+            "next_check": "next_user_turn",
+            "evidence_refs": ["stm_turn_a"],
+            "bound_memory_ids": ["stm_turn_a"],
+        }
+    ]
+    store.save(state)
+    runtime = MVPDialogueRuntime(store=store, llm=OpenRouterJSONClient(api_key=""))
+    daemon = M142SelfLoopDaemon(runtime, persona_id="p", session_id="s", clock=lambda: 1_800_000_000)
+
+    result = runtime.run_background_self_tick(runner_kind="standalone_daemon")
+    health = daemon.tick_once(record_clock_wake=False)
+
+    assert result["skip_reason"] == "llm_not_configured"
+    assert health["llm_available"] is False
+    assert health["llm_unavailable_reason"] == "llm_not_configured"
 
 
 def test_daemon_health_reports_llm_unavailable_and_materialized_event_counts(tmp_path: Path) -> None:

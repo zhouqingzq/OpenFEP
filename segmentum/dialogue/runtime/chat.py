@@ -1026,6 +1026,8 @@ class ChatInterface:
             "failed_count": 0,
             "expired_count": 0,
         }
+        environment_event_backlog_count = 0
+        stale_environment_event_backlog_count = 0
         for row in self.read_m14_2_environment_events(limit=400):
             event_type = str(row.get("event_type", "") or "")
             status = str(row.get("status", "") or "")
@@ -1033,6 +1035,10 @@ class ChatInterface:
             if key in env_status_counts:
                 env_status_counts[key] += 1
             at = int(row.get("at", 0) or 0)
+            if status in {"pending", "claimed", "failed"}:
+                environment_event_backlog_count += 1
+                if at > 0 and now - at > 300:
+                    stale_environment_event_backlog_count += 1
             event_day = datetime.fromtimestamp(at).date().isoformat() if at > 0 else ""
             if event_type == "ClockWakeEvent" and status == "acked" and event_day == today:
                 clock_wake_acked_today += 1
@@ -1244,8 +1250,8 @@ class ChatInterface:
                 last_health_llm_unavailable_reason = str(row.get("llm_unavailable_reason", "") or last_health_llm_unavailable_reason)
                 last_health_background_ran_llm = bool(row.get("background_ran_llm")) if "background_ran_llm" in row else last_health_background_ran_llm
 
-        reflection_count = int(idle.get("reflection_count_this_session", 0) or 0)
         reflection_max = int(idle.get("max_per_session", 4) or 4)
+        reflection_count = min(reflection_max, int(idle.get("reflection_count_this_session", 0) or 0))
         m14_3_traceability_suggestions = 0
         legacy_vague_open_item_proactive = False
         try:
@@ -1363,6 +1369,8 @@ class ChatInterface:
             "environment_event_status_counts": dict(env_status_counts),
             "environment_events_terminal_ratio": env_terminal_ratio,
             "environment_events_pending_acked_ratio": env_terminal_ratio,
+            "environment_event_backlog_count": environment_event_backlog_count,
+            "stale_environment_event_backlog_count": stale_environment_event_backlog_count,
             "scheduled_intents_active": scheduled_intents_active,
             "queued_outreach": queued_outreach,
             "reflection_count": reflection_count,
