@@ -19,6 +19,7 @@ import { formatStatusBar } from "./render/status_bar.js";
 import { ThinkingIndicator } from "./render/thinking_indicator.js";
 import {
   formatTranscriptLine,
+  resolveTranscriptLabelWidth,
   transcriptRoleFromEvent,
   type TranscriptLabels,
   type TranscriptLine,
@@ -466,7 +467,14 @@ export class ConsciousnessRepl {
   }
 
   private emitTranscript(line: TranscriptLine): void {
-    this.emitLine(formatTranscriptLine(line, { color: this.color, labels: this.transcriptLabels() }));
+    const labels = this.transcriptLabels();
+    this.emitLine(
+      formatTranscriptLine(line, {
+        color: this.color,
+        labels,
+        labelWidth: resolveTranscriptLabelWidth(labels),
+      }),
+    );
   }
 
   private emitStatusLine(): void {

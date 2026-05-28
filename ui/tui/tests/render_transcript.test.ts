@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   ansiColorForRole,
+  displayWidth,
   formatTranscriptBlock,
   formatTranscriptLine,
+  resolveTranscriptLabelWidth,
   roleLabel,
   transcriptRoleFromEvent,
 } from "../src/render/transcript.js";
@@ -25,6 +27,24 @@ describe("transcript rendering", () => {
     expect(named).toContain("胡桃");
     expect(named).toContain("| 你好");
     expect(roleLabel("suppression")).toBe("suppression");
+  });
+
+  it("aligns pipe column for mixed-width speaker labels", () => {
+    const labels = { user: "zq", assistant: "胡桃" };
+    const labelWidth = resolveTranscriptLabelWidth(labels);
+    expect(displayWidth("zq")).toBe(2);
+    expect(displayWidth("胡桃")).toBe(4);
+    const block = formatTranscriptBlock(
+      [
+        { role: "user", text: "汪汪" },
+        { role: "assistant", text: "乖狗狗" },
+      ],
+      { color: false, labels, labelWidth },
+    );
+    const lines = block.split("\n");
+    const pipeColumn = (line: string) => displayWidth(line.slice(0, line.indexOf("|")));
+    expect(pipeColumn(lines[0]!)).toBe(labelWidth);
+    expect(pipeColumn(lines[0]!)).toBe(pipeColumn(lines[1]!));
   });
 
   it("applies ansi colors when enabled", () => {
