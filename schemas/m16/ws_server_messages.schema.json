@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://segments.local/schemas/m16/ws_server_messages.schema.json",
+  "title": "M16WebSocketServerMessage",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "message_id",
+    "session_id",
+    "persona_id",
+    "at",
+    "kind",
+    "payload"
+  ],
+  "properties": {
+    "schema_version": { "const": "m16.0" },
+    "message_id": { "type": "string", "maxLength": 120 },
+    "session_id": { "type": "string", "maxLength": 120 },
+    "persona_id": { "type": "string", "maxLength": 120 },
+    "at": { "type": "integer", "minimum": 0 },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "Subscribed",
+        "SessionSnapshot",
+        "UserMessageAccepted",
+        "AssistantMessageCommitted",
+        "ProactiveMessageCommitted",
+        "AuditEvent",
+        "RunnerHealth",
+        "RunnerSuppression",
+        "Error"
+      ]
+    },
+    "payload": { "type": "object" }
+  }
+}

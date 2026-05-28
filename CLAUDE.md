@@ -134,6 +134,11 @@ M15.0: Episode Ledger And Free-Energy Proxy Trajectory
 M15.1: Consolidation And Forgetting Loop
 M15.2: Meta-Control Intervention Layer (engineering scheduler)
 M15.3: Open-Item And Pending-Expectation Cleanup Meta-Control
+M16.0: Consciousness Runner Architecture And Wire Protocol
+M16.1: Python Consciousness Runner Service And Gateway
+M16.2: TypeScript Consciousness Client SDK
+M16.3: TypeScript Web Thin Frontend
+M16.4: TypeScript TUI Client And Streamlit Deprecation
 ```
 
 Deferred or non-active for new implementation unless explicitly revived:
@@ -149,8 +154,11 @@ M12 is split into M12.0 (identity continuity) and M12.1 (mechanistic personality
 The M9 series ends at M9.0. Path B memory gate, decay, and precision-weighted
 recall completion lives in M14.7. The three-timescale memory-dynamics loop
 (fast idle refresh, slow consolidation, meta-control intervention) spans
-M13.5, M14.6–M14.7, and M15.0–M15.3. M15.2 applies intervention intents on
-the local Streamlit demo path (`streamlit_open_chat`); production
+M13.5, M14.6–M14.7, and M15.0–M15.3. M16 moves Path B orchestration into a
+Python consciousness runner with FastAPI/WebSocket I/O; TypeScript Web/TUI are
+thin clients. After M16.4, Streamlit must not schedule idle or proactive ticks
+by default. M15.2 applies intervention intents on the local Streamlit demo path
+(`streamlit_open_chat`) until M16 retires that scheduler; production
 (`bounded_default`) remains detection-audit-only unless explicitly enabled.
 
 ---
@@ -197,7 +205,8 @@ self-thought producers) for new Hu Tao / MVP chat behavior.
   `run_proactive_turn` path only. Fresh initiative state remains conservative
   (`bounded_default`, implicit idle off); local Streamlit may auto-enable hidden
   MVP chat toggles, and `streamlit_open_chat` cap/cooldown relaxation requires
-  an explicit env flag or setter.
+  an explicit env flag or setter. After M16.4, the acceptance path is the M16
+  runner + gateway; Streamlit is legacy I/O only.
 
 ---
 

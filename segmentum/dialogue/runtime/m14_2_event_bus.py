@@ -18,7 +18,7 @@ from typing import Any, Iterator, Mapping
 
 M14_2_ENGINEERING_PROXY_LABEL = "mvp_local_decoupled_self_loop"
 
-ENVIRONMENT_EVENT_TYPES = frozenset(
+_BASE_ENVIRONMENT_EVENT_TYPES = frozenset(
     {
         "UserMessageCommittedEvent",
         "UIPingEvent",
@@ -30,6 +30,13 @@ ENVIRONMENT_EVENT_TYPES = frozenset(
         "OutboxDeliverySurfaceAvailableEvent",
     }
 )
+
+try:
+    from segmentum.dialogue.runtime.m16_protocol import M16_PERCEPTION_EVENT_TYPES
+except ImportError:  # pragma: no cover - pre-M16.0 checkout
+    M16_PERCEPTION_EVENT_TYPES = frozenset()
+
+ENVIRONMENT_EVENT_TYPES = _BASE_ENVIRONMENT_EVENT_TYPES | M16_PERCEPTION_EVENT_TYPES
 
 TERMINAL_EVENT_STATUSES = frozenset({"acked", "expired"})
 DEFAULT_IDEMPOTENCY_WINDOW_SECONDS = 24 * 3600

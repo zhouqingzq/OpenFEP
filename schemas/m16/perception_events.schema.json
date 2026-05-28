@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://segments.local/schemas/m16/perception_events.schema.json",
+  "title": "M16PerceptionEvent",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "event_id",
+    "event_type",
+    "source",
+    "at",
+    "persona_id",
+    "session_id",
+    "payload",
+    "status"
+  ],
+  "properties": {
+    "event_id": { "type": "string", "maxLength": 120 },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "ClientInputCommittedEvent",
+        "DeliverySurfaceConnectedEvent",
+        "DeliverySurfaceReadyEvent",
+        "DeliverySurfaceDisconnectedEvent",
+        "RunnerControlCommandEvent"
+      ]
+    },
+    "source": { "type": "string", "maxLength": 64 },
+    "at": { "type": "integer", "minimum": 0 },
+    "persona_id": { "type": "string", "maxLength": 120 },
+    "session_id": { "type": "string", "maxLength": 120 },
+    "correlation_id": { "type": "string", "maxLength": 120 },
+    "payload": { "type": "object" },
+    "status": { "type": "string", "enum": ["pending", "claimed", "acked", "failed", "expired"] }
+  }
+}

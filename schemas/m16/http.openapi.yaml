@@ -1,0 +1,161 @@
+openapi: 3.1.0
+info:
+  title: Segmentum Consciousness Gateway
+  version: m16.0
+  description: >
+    Path B perception and actuation gateway. Mutating routes append durable
+    perception events only; they do not execute cognition inline.
+servers:
+  - url: http://127.0.0.1:8765
+paths:
+  /health:
+    get:
+      summary: Gateway health
+      responses:
+        "200":
+          description: OK
+  /v1/personas/{persona_id}/sessions:
+    post:
+      summary: Create session
+      parameters:
+        - $ref: "#/components/parameters/PersonaId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionRequest"
+      responses:
+        "201":
+          description: Created
+  /v1/personas/{persona_id}/sessions/{session_id}:
+    get:
+      summary: Session metadata
+      parameters:
+        - $ref: "#/components/parameters/PersonaId"
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: OK
+  /v1/personas/{persona_id}/sessions/{session_id}/input:
+    post:
+      summary: Append client input perception event
+      description: Returns 202 Accepted with event_id. Does not call run_turn inline.
+      parameters:
+        - $ref: "#/components/parameters/PersonaId"
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientInputRequest"
+      responses:
+        "202":
+          description: Accepted
+  /v1/personas/{persona_id}/sessions/{session_id}/snapshot:
+    get:
+      summary: Bounded session snapshot for client resync
+      parameters:
+        - $ref: "#/components/parameters/PersonaId"
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: OK
+  /v1/personas/{persona_id}/sessions/{session_id}/runner/start:
+    post:
+      summary: Start consciousness runner lock/process
+      parameters:
+        - $ref: "#/components/parameters/PersonaId"
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RunnerControlRequest"
+      responses:
+        "202":
+          description: Accepted
+  /v1/personas/{persona_id}/sessions/{session_id}/runner/stop:
+    post:
+      summary: Stop consciousness runner
+      parameters:
+        - $ref: "#/components/parameters/PersonaId"
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RunnerControlRequest"
+      responses:
+        "202":
+          description: Accepted
+  /v1/personas/{persona_id}/sessions/{session_id}/runner/status:
+    get:
+      summary: Runner status
+      parameters:
+        - $ref: "#/components/parameters/PersonaId"
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: OK
+  /v1/personas/{persona_id}/sessions/{session_id}/stream:
+    get:
+      summary: WebSocket stream (Upgrade)
+      description: WS endpoint for actuation fan-out and client perception messages.
+      parameters:
+        - $ref: "#/components/parameters/PersonaId"
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "101":
+          description: Switching Protocols
+components:
+  parameters:
+    PersonaId:
+      name: persona_id
+      in: path
+      required: true
+      schema:
+        type: string
+    SessionId:
+      name: session_id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    CreateSessionRequest:
+      type: object
+      required: [correlation_id]
+      properties:
+        correlation_id:
+          type: string
+          maxLength: 120
+        session_id:
+          type: string
+          maxLength: 120
+    ClientInputRequest:
+      type: object
+      required: [text, correlation_id]
+      properties:
+        text:
+          type: string
+          maxLength: 8000
+        correlation_id:
+          type: string
+          maxLength: 120
+    RunnerControlRequest:
+      type: object
+      required: [correlation_id, command]
+      properties:
+        correlation_id:
+          type: string
+          maxLength: 120
+        command:
+          type: string
+          enum: [start, stop, status]
+        reason:
+          type: string
+          maxLength: 160
