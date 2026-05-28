@@ -137,12 +137,19 @@ export class ConsciousnessHttpClient {
     return expectJson<SnapshotResponse>(this.config, response, [200]);
   }
 
-  async postInput(text: string, metadata?: Partial<Pick<PostInputRequest, "correlation_id">>): Promise<PostInputResponse> {
+  async postInput(
+    text: string,
+    metadata?: Partial<Pick<PostInputRequest, "correlation_id" | "speaker_name">>,
+  ): Promise<PostInputResponse> {
     const url = `${sessionBase(this.config)}/input`;
     const payload: PostInputRequest = {
       text: text.slice(0, 8000),
       correlation_id: metadata?.correlation_id ?? newCorrelationId("in"),
     };
+    const speakerName = String(metadata?.speaker_name ?? "").trim();
+    if (speakerName) {
+      payload.speaker_name = speakerName.slice(0, 64);
+    }
     const response = await this.fetch(url, {
       method: "POST",
       headers: headers(this.config, { "Content-Type": "application/json" }),

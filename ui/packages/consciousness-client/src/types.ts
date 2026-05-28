@@ -81,6 +81,7 @@ export interface DeliveryAckPayload {
 
 export interface ClientInputPayload {
   text: string;
+  speaker_name?: string;
 }
 
 export interface SubscribePayload {
@@ -107,6 +108,7 @@ export interface CreateSessionResponse {
 export interface PostInputRequest {
   text: string;
   correlation_id: string;
+  speaker_name?: string;
 }
 
 export interface PostInputResponse {

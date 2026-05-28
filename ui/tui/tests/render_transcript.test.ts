@@ -18,6 +18,12 @@ describe("transcript rendering", () => {
   it("formats labeled transcript lines", () => {
     const plain = formatTranscriptLine({ role: "assistant", text: "你好" }, { color: false });
     expect(plain).toBe("assistant  | 你好");
+    const named = formatTranscriptLine(
+      { role: "assistant", text: "你好" },
+      { color: false, labels: { assistant: "胡桃", user: "周青" } },
+    );
+    expect(named).toContain("胡桃");
+    expect(named).toContain("| 你好");
     expect(roleLabel("suppression")).toBe("suppression");
   });
 

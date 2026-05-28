@@ -1,26 +1,54 @@
 import type { WsServerMessage } from "@segments/consciousness-client";
 
-import { type TranscriptLine, formatTranscriptLine } from "./transcript.js";
+import { type TranscriptLine } from "./transcript.js";
 
 const MAX_AUDIT_TAIL = 40;
+const DELIVERY_SURFACE_REFRESH_SECONDS = 30;
+
+export interface AuditTailOptions {
+  verbose?: boolean;
+}
 
 export class AuditTail {
   private lines: TranscriptLine[] = [];
+  private lastSuppressionText = "";
+  private lastSuppressionAt = 0;
+  private readonly verbose: boolean;
+
+  constructor(options?: AuditTailOptions) {
+    this.verbose = options?.verbose === true;
+  }
 
   push(message: WsServerMessage): TranscriptLine | null {
     const kind = String(message.kind ?? "");
     if (kind === "RunnerSuppression") {
       const reason = String(message.payload?.reason_code ?? "unknown");
+      const now = message.at ?? Math.floor(Date.now() / 1000);
+      if (reason === this.lastSuppressionText && now - this.lastSuppressionAt < 8) {
+        return null;
+      }
+      this.lastSuppressionText = reason;
+      this.lastSuppressionAt = now;
       const line: TranscriptLine = {
         role: "suppression",
         text: reason,
         at: message.at,
-        meta: kind,
       };
       this.append(line);
       return line;
     }
-    if (kind === "AuditEvent" || kind === "RunnerHealth") {
+    if (kind === "RunnerHealth") {
+      if (!this.verbose) {
+        return null;
+      }
+      const ready = message.payload?.delivery_surface_ready;
+      const reason = String(message.payload?.delivery_surface_reason ?? "").trim();
+      const summary = reason ? `RunnerHealth: ${reason}` : `RunnerHealth: ready=${String(ready)}`;
+      const line: TranscriptLine = { role: "audit", text: summary, at: message.at, meta: kind };
+      this.append(line);
+      return line;
+    }
+    if (kind === "AuditEvent") {
       const summary = summarizeAuditPayload(message.payload ?? {});
       const line: TranscriptLine = {
         role: "audit",
@@ -36,13 +64,6 @@ export class AuditTail {
 
   list(): readonly TranscriptLine[] {
     return this.lines;
-  }
-
-  recentText(limit = 12): string {
-    return this.lines
-      .slice(-limit)
-      .map((line) => formatTranscriptLine(line, { color: false }))
-      .join("\n");
   }
 
   private append(line: TranscriptLine): void {
@@ -65,3 +86,5 @@ function summarizeAuditPayload(payload: Record<string, unknown>): string {
   }
   return eventType;
 }
+
+export { DELIVERY_SURFACE_REFRESH_SECONDS };

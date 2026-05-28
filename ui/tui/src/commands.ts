@@ -1,4 +1,4 @@
-export type CommandName = "status" | "snapshot" | "debug" | "quit" | "help";
+export type CommandName = "status" | "snapshot" | "debug" | "start-runner" | "quit" | "help";
 
 export interface ParsedInput {
   kind: "command" | "message" | "empty";
@@ -6,7 +6,14 @@ export interface ParsedInput {
   text?: string;
 }
 
-const COMMAND_NAMES: ReadonlySet<string> = new Set(["status", "snapshot", "debug", "quit", "help"]);
+const COMMAND_NAMES: ReadonlySet<string> = new Set([
+  "status",
+  "snapshot",
+  "debug",
+  "start-runner",
+  "quit",
+  "help",
+]);
 
 export function parseReplLine(line: string): ParsedInput {
   const trimmed = line.trim();
@@ -26,10 +33,11 @@ export function parseReplLine(line: string): ParsedInput {
 export function commandHelpText(): string {
   return [
     "Commands:",
-    "  /status    runner health + connection summary",
-    "  /snapshot  print latest gateway snapshot JSON",
-    "  /debug     copy-friendly mind debug block",
-    "  /quit      exit",
-    "  /help      show this help",
+    "  /status        runner health + connection summary",
+    "  /start-runner  start consciousness runner via gateway",
+    "  /snapshot      print latest gateway snapshot JSON",
+    "  /debug         TUI debug JSON + paths to full mind debug logs",
+    "  /quit          exit",
+    "  /help          show this help",
   ].join("\n");
 }

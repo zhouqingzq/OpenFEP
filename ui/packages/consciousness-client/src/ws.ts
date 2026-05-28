@@ -232,6 +232,13 @@ export class ConsciousnessStream {
     await this.sendClientMessage("ClientInput", { text: text.slice(0, 8000) });
   }
 
+  async signalDeliverySurfaceReady(): Promise<void> {
+    if (!this.subscribed) {
+      throw new Error("websocket stream is not subscribed");
+    }
+    await this.sendClientMessage("DeliverySurfaceReady", {});
+  }
+
   async disconnect(): Promise<void> {
     this.closedByUser = true;
     this.options.autoReconnect = false;

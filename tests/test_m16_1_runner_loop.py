@@ -121,3 +121,28 @@ def test_streamlit_not_required_for_runner_acceptance_path(tmp_path: Path) -> No
     assert step.claimed_events >= 1
     assert bridge.is_event_processed(event_id)
     assert not any("streamlit" in str(msg).casefold() for msg in step.actuation_messages)
+
+
+def test_runner_acks_slow_turn_after_default_claim_lease(tmp_path: Path) -> None:
+    bridge, hub, runner, clk = build_stack(tmp_path)
+    event_id = bridge.append_client_input(text="slow turn", correlation_id="corr_slow")
+
+    def _slow(_text: str, *, turn_index: int, now: int) -> object:
+        clk.advance(120)
+        return type("TurnResult", (), {"reply": "done"})()
+
+    runner._inline_run_turn = _slow  # type: ignore[method-assign]
+    step = runner.run_once_for_tests(now=clk())
+    assert bridge.is_event_processed(event_id)
+    assert any(msg.get("kind") == "AssistantMessageCommitted" for msg in step.actuation_messages)
+    assert runner.status().last_error == ""
+
+
+def test_runner_status_hides_stale_error_when_healthy(tmp_path: Path) -> None:
+    bridge, hub, runner, clk = build_stack(tmp_path)
+    runner.start()
+    runner._status.last_error = "ValueError"
+    runner._status.last_health_at = clk()
+    row = runner.status().to_dict()
+    assert row["running"] is True
+    assert row["last_error"] == ""

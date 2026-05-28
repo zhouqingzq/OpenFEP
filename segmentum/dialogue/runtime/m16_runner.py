@@ -21,6 +21,7 @@ from segmentum.dialogue.runtime.mvp_loop import _mapping
 
 DEFAULT_TICK_INTERVAL_SECONDS = 2
 DEFAULT_SILENCE_TICK_SECONDS = 5
+DEFAULT_CLAIM_LEASE_SECONDS = 900
 CLAIM_EVENT_TYPES = frozenset(
     {
         "ClientInputCommittedEvent",
@@ -41,7 +42,7 @@ class RunnerStatus:
     last_error: str = ""
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        row = {
             "running": self.running,
             "pid": self.pid,
             "runner_kind": self.runner_kind,
@@ -50,6 +51,9 @@ class RunnerStatus:
             "steps_total": self.steps_total,
             "last_error": self.last_error,
         }
+        if row["running"] and int(row.get("last_health_at", 0) or 0) > 0:
+            row["last_error"] = ""
+        return row
 
 
 @dataclass
@@ -76,6 +80,7 @@ class ConsciousnessRunner:
     hub: M16WsHub
     tick_interval_seconds: int = DEFAULT_TICK_INTERVAL_SECONDS
     silence_tick_seconds: int = DEFAULT_SILENCE_TICK_SECONDS
+    claim_lease_seconds: int = DEFAULT_CLAIM_LEASE_SECONDS
     clock: Callable[[], int] | None = None
     _thread: threading.Thread | None = field(default=None, init=False, repr=False)
     _stop: threading.Event = field(default_factory=threading.Event, init=False, repr=False)
@@ -108,6 +113,7 @@ class ConsciousnessRunner:
         self._thread = threading.Thread(target=self._loop, name="m16-consciousness-runner", daemon=True)
         self._thread.start()
         self._status = RunnerStatus(running=True, pid=info.pid if info else 0, runner_kind=RUNNER_KIND)
+        self._status.last_error = ""
         return self.status()
 
     def stop(self, *, graceful_seconds: int = 15) -> RunnerStatus:
@@ -128,11 +134,13 @@ class ConsciousnessRunner:
     def status(self) -> RunnerStatus:
         lock = read_runner_lock(self.bridge.session_root)
         alive = runner_lock_is_alive(lock) if lock is not None else False
-        if self._status.running and not alive and lock is not None:
-            self._status.running = False
         if lock is not None and alive:
             self._status.pid = lock.pid
             self._status.runner_kind = lock.runner_kind
+            if self._thread is not None and self._thread.is_alive():
+                self._status.running = True
+        elif self._status.running and not alive and lock is not None:
+            self._status.running = False
         return self._status
 
     def nudge(self) -> None:
@@ -157,15 +165,31 @@ class ConsciousnessRunner:
     def _run_cycle(self, ts: int, *, max_event_steps: int) -> RunnerStepResult:
         processed: list[dict[str, Any]] = []
         actuation_messages: list[dict[str, Any]] = []
-        claimed = self.bridge.claim_events(limit=max_event_steps, event_types=CLAIM_EVENT_TYPES)
+        claimed = self.bridge.claim_events(
+            limit=max_event_steps,
+            event_types=CLAIM_EVENT_TYPES,
+            lease_seconds=self.claim_lease_seconds,
+        )
         for event in claimed:
             try:
                 row = self._handle_event(event, now=ts)
                 processed.append(row)
-                self.bridge.ack_event(str(event.get("event_id", "")), result=row)
+                self.bridge.ack_event(
+                    str(event.get("event_id", "")),
+                    result=row,
+                    lease_seconds=self.claim_lease_seconds,
+                )
                 actuation_messages.extend(list(row.get("actuation_messages", []) or []))
             except Exception as exc:
-                self.bridge.fail_event(str(event.get("event_id", "")), type(exc).__name__, retryable=True)
+                try:
+                    self.bridge.fail_event(
+                        str(event.get("event_id", "")),
+                        type(exc).__name__,
+                        retryable=True,
+                        lease_seconds=self.claim_lease_seconds,
+                    )
+                except Exception:
+                    pass
                 processed.append({"event_id": event.get("event_id"), "error": type(exc).__name__})
 
         if self._silence_tick_due(ts):
@@ -196,6 +220,7 @@ class ConsciousnessRunner:
         )
         self._status.steps_total += 1
         self._status.last_health_at = ts
+        self._status.last_error = ""
         return RunnerStepResult(
             claimed_events=len(claimed),
             processed=processed,
@@ -233,18 +258,67 @@ class ConsciousnessRunner:
             return {"skipped": "already_processed", "event_id": event_id, "actuation_messages": []}
         payload = _mapping(event.get("payload"))
         text = str(payload.get("text", "") or "")
+        speaker_name = str(payload.get("speaker_name", "") or "").strip()
         turn_index = self.bridge.next_user_turn_index()
-        if self._inline_run_turn is not None:
-            result = self._inline_run_turn(text, turn_index=turn_index, now=now)
-        else:
-            result = self.bridge.run_user_turn(text, turn_index=turn_index)
+        actuation_messages: list[dict[str, Any]] = []
+        try:
+            if self._inline_run_turn is not None:
+                result = self._inline_run_turn(text, turn_index=turn_index, now=now)
+            else:
+                result = self.bridge.run_user_turn(text, turn_index=turn_index, speaker_name=speaker_name)
+        except Exception as exc:
+            detail = str(exc)[:240]
+            error_msg = self.hub.build_and_publish(
+                kind="Error",
+                payload={
+                    "code": "turn_failed",
+                    "message": type(exc).__name__,
+                    "detail": detail,
+                },
+                now=now,
+            )
+            self.bridge.append_runner_audit(
+                typ="ConsciousnessRunnerTurnFailedEvent",
+                correlation_id=correlation_id,
+                now=now,
+                event_id=event_id,
+                error=type(exc).__name__,
+                detail=detail,
+            )
+            return {
+                "event_id": event_id,
+                "error": type(exc).__name__,
+                "actuation_messages": [error_msg],
+            }
         self.bridge.mark_event_processed(event_id, now=now)
         delivery_id = f"assistant:{event_id}"
-        actuation_messages: list[dict[str, Any]] = []
+        reply = str(getattr(result, "reply", "") or "").strip()
+        if not reply:
+            error_msg = self.hub.build_and_publish(
+                kind="Error",
+                payload={
+                    "code": "empty_reply",
+                    "message": "empty_reply",
+                    "detail": "run_turn returned no visible reply",
+                },
+                now=now,
+            )
+            self.bridge.append_runner_audit(
+                typ="ConsciousnessRunnerTurnFailedEvent",
+                correlation_id=correlation_id,
+                now=now,
+                event_id=event_id,
+                error="empty_reply",
+            )
+            return {
+                "event_id": event_id,
+                "error": "empty_reply",
+                "actuation_messages": [error_msg],
+            }
         if self.bridge.record_actuation(
             delivery_id=delivery_id,
             actuation_type="AssistantMessageDeliveredEvent",
-            payload={"text": str(getattr(result, "reply", "") or ""), "turn_index": turn_index},
+            payload={"text": reply, "turn_index": turn_index},
             correlation_id=correlation_id,
             now=now,
         ):
@@ -256,7 +330,7 @@ class ConsciousnessRunner:
             committed = self.hub.build_and_publish(
                 kind="AssistantMessageCommitted",
                 payload={
-                    "text": str(getattr(result, "reply", "") or ""),
+                    "text": reply,
                     "turn_index": turn_index,
                     "delivery_id": delivery_id,
                 },
@@ -272,7 +346,7 @@ class ConsciousnessRunner:
         return {
             "event_id": event_id,
             "turn_index": turn_index,
-            "reply": str(getattr(result, "reply", "") or ""),
+            "reply": reply,
             "actuation_messages": actuation_messages,
         }
 

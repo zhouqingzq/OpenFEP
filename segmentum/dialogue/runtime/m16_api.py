@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import logging
 import uuid
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
@@ -30,7 +31,19 @@ from segmentum.dialogue.runtime.m16_protocol import (
 from segmentum.dialogue.runtime.m16_runner import ConsciousnessRunner
 from segmentum.dialogue.runtime.m16_runtime_bridge import M16SessionBridge, RUNNER_KIND
 from segmentum.dialogue.runtime.m16_ws_hub import M16WsHub
-from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore
+from segmentum.dialogue.runtime.mvp_loop import (
+    MVPDialogueRuntime,
+    MVPStateStore,
+    default_openrouter_client,
+    llm_configuration_status_with_source,
+    openrouter_secrets_path,
+)
+
+
+def _resolve_session_llm(gateway: "M16Gateway") -> Any | None:
+    if gateway.llm_factory is not None:
+        return gateway.llm_factory()
+    return default_openrouter_client()
 
 
 class CreateSessionBody(BaseModel):
@@ -41,6 +54,7 @@ class CreateSessionBody(BaseModel):
 class ClientInputBody(BaseModel):
     text: str = Field(max_length=MAX_INPUT_TEXT_CHARS)
     correlation_id: str = Field(max_length=MAX_CORRELATION_ID_CHARS)
+    speaker_name: str = Field(default="", max_length=64)
 
 
 class RunnerControlBody(BaseModel):
@@ -86,7 +100,7 @@ class M16Gateway:
             return existing
         root = self.resolve_session_root(persona_id, session_id)
         store = MVPStateStore(root)
-        llm = self.llm_factory() if self.llm_factory is not None else None
+        llm = _resolve_session_llm(self)
         runtime = MVPDialogueRuntime(store=store, llm=llm)
         bridge = M16SessionBridge(
             persona_id=persona_id,
@@ -182,6 +196,7 @@ def create_app(gateway: M16Gateway | None = None) -> FastAPI:
             "session_id": session_id,
             "schema_version": SCHEMA_VERSION,
             "runner": status.to_dict() if status is not None else {"running": False},
+            "llm": llm_configuration_status_with_source(handle.bridge.runtime.llm),
             "delivery_surface": {
                 "ws_subscribed": handle.hub.delivery_state().ws_subscribed,
                 "delivery_surface_ready_at": handle.hub.delivery_state().delivery_surface_ready_at,
@@ -195,6 +210,7 @@ def create_app(gateway: M16Gateway | None = None) -> FastAPI:
         event_id = handle.bridge.append_client_input(
             text=body.text,
             correlation_id=body.correlation_id,
+            speaker_name=body.speaker_name,
         )
         _append_gateway_audit(
             handle.bridge,
@@ -203,6 +219,8 @@ def create_app(gateway: M16Gateway | None = None) -> FastAPI:
             event_id=event_id,
         )
         runner = gw.ensure_runner(handle)
+        if not runner.status().running:
+            runner.start()
         runner.nudge()
         return JSONResponse(
             status_code=202,
@@ -405,6 +423,19 @@ def _serve_main(argv: list[str] | None = None) -> int:
     parser.add_argument("--session", default="")
     parser.add_argument("--dev-token", default="")
     args = parser.parse_args(argv)
+
+    llm_status = llm_configuration_status_with_source(_resolve_session_llm(M16Gateway()))
+    if not bool(llm_status.get("available")):
+        logging.getLogger(__name__).warning(
+            "M16 gateway LLM unavailable (%s). Configure %s or set OPENROUTER_API_KEY.",
+            llm_status.get("reason", "llm_unavailable"),
+            openrouter_secrets_path(),
+        )
+    else:
+        logging.getLogger(__name__).info(
+            "M16 gateway LLM ready (%s)",
+            llm_status.get("config_source") or "configured",
+        )
 
     import uvicorn
 

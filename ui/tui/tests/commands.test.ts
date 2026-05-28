@@ -7,6 +7,7 @@ describe("parseReplLine", () => {
     expect(parseReplLine("/status")).toEqual({ kind: "command", command: "status" });
     expect(parseReplLine("/snapshot")).toEqual({ kind: "command", command: "snapshot" });
     expect(parseReplLine("/debug")).toEqual({ kind: "command", command: "debug" });
+    expect(parseReplLine("/start-runner")).toEqual({ kind: "command", command: "start-runner" });
     expect(parseReplLine("/quit")).toEqual({ kind: "command", command: "quit" });
   });
 
@@ -27,6 +28,7 @@ describe("commandHelpText", () => {
   it("documents required operator commands", () => {
     const help = commandHelpText();
     expect(help).toContain("/status");
+    expect(help).toContain("/start-runner");
     expect(help).toContain("/snapshot");
     expect(help).toContain("/debug");
     expect(help).toContain("/quit");

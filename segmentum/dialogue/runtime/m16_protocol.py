@@ -326,8 +326,16 @@ def build_client_input_committed_event(
     source: str = "m16_gateway",
     now: int | None = None,
     event_id: str | None = None,
+    speaker_name: str = "",
 ) -> dict[str, Any]:
     bounded_text = str(text or "")[:MAX_INPUT_TEXT_CHARS]
+    payload: dict[str, Any] = {
+        "text": bounded_text,
+        "char_count": len(bounded_text),
+    }
+    bounded_speaker = str(speaker_name or "").strip()[:64]
+    if bounded_speaker:
+        payload["speaker_name"] = bounded_speaker
     event = {
         "event_id": event_id or _new_id("m16evt"),
         "event_type": "ClientInputCommittedEvent",
@@ -336,10 +344,7 @@ def build_client_input_committed_event(
         "persona_id": persona_id,
         "session_id": session_id,
         "correlation_id": str(correlation_id or _new_id("corr"))[:MAX_CORRELATION_ID_CHARS],
-        "payload": {
-            "text": bounded_text,
-            "char_count": len(bounded_text),
-        },
+        "payload": payload,
         "status": "pending",
     }
     errors = validate_perception_event(event)

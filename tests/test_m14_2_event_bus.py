@@ -60,3 +60,24 @@ def test_event_bus_idempotent_correlation_id(tmp_path: Path) -> None:
     second = store.append_event("UIPingEvent", {"rerun": True}, source="test", correlation_id="same")
     assert second == first
     assert len(store.query_events()) == 1
+
+
+def test_event_bus_recovers_stale_lock(tmp_path: Path) -> None:
+    stale = tmp_path / "environment_event_store.lock"
+    stale.write_text("99999999", encoding="utf-8")
+    store = EnvironmentEventStore(tmp_path, persona_id="p", session_id="s", clock=lambda: 100)
+    event_id = store.append_event("UIPingEvent", {}, source="test", correlation_id="stale-lock")
+    assert event_id
+    assert not stale.is_file()
+
+
+def test_event_bus_ack_after_long_inflight_processing(tmp_path: Path) -> None:
+    clock = {"now": 100}
+    store = EnvironmentEventStore(tmp_path, persona_id="p", session_id="s", clock=lambda: clock["now"])
+    event_id = store.append_event("UserMessageCommittedEvent", {"user_text": "slow"}, source="test", correlation_id="slow")
+    claimed = store.claim_events("worker-a", limit=1, lease_seconds=60)
+    assert claimed and claimed[0]["event_id"] == event_id
+    clock["now"] = 161
+    store.ack_event(event_id, "worker-a", {"ok": True}, lease_seconds=60)
+    acked = store.query_events(statuses={"acked"})
+    assert len(acked) == 1

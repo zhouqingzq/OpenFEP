@@ -705,6 +705,30 @@ def llm_configuration_status(llm: Any) -> dict[str, Any]:
     return {"available": True, "reason": ""}
 
 
+def openrouter_secrets_path() -> Path:
+    return Path(__file__).resolve().parents[3] / "secrets" / "openrouter.json"
+
+
+def llm_configuration_status_with_source(llm: Any) -> dict[str, Any]:
+    status = dict(llm_configuration_status(llm))
+    secrets_path = openrouter_secrets_path()
+    if secrets_path.is_file():
+        status["config_source"] = str(secrets_path)
+    elif os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY"):
+        status["config_source"] = "environment"
+    else:
+        status["config_source"] = ""
+    return status
+
+
+def default_openrouter_client() -> OpenRouterJSONClient | None:
+    """Load MVP LLM from secrets/openrouter.json with env fallback."""
+    client = OpenRouterJSONClient.from_config()
+    if llm_configuration_status(client).get("available"):
+        return client
+    return None
+
+
 def analyze_materials_into_personas(
     llm: JSONLLMClient,
     materials: list[str],
@@ -731,7 +755,7 @@ class OpenRouterJSONClient:
 
     @classmethod
     def from_config(cls) -> "OpenRouterJSONClient":
-        config_path = Path(__file__).resolve().parents[3] / "secrets" / "openrouter.json"
+        config_path = openrouter_secrets_path()
         config: dict[str, Any] = {}
         if config_path.exists():
             try:

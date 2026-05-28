@@ -7,7 +7,15 @@ export interface TranscriptLine {
   meta?: string;
 }
 
-const ROLE_LABELS: Record<TranscriptRole, string> = {
+export interface TranscriptLabels {
+  user?: string;
+  assistant?: string;
+  proactive?: string;
+  audit?: string;
+  suppression?: string;
+}
+
+const DEFAULT_ROLE_LABELS: Record<TranscriptRole, string> = {
   user: "user",
   assistant: "assistant",
   proactive: "proactive",
@@ -25,16 +33,23 @@ const ANSI: Record<TranscriptRole, string> = {
 
 const RESET = "\x1b[0m";
 
-export function roleLabel(role: TranscriptRole): string {
-  return ROLE_LABELS[role];
+export function roleLabel(role: TranscriptRole, labels?: TranscriptLabels): string {
+  const custom = labels?.[role];
+  if (custom && custom.trim()) {
+    return custom.trim();
+  }
+  return DEFAULT_ROLE_LABELS[role];
 }
 
 export function ansiColorForRole(role: TranscriptRole): string {
   return ANSI[role];
 }
 
-export function formatTranscriptLine(line: TranscriptLine, options?: { color?: boolean }): string {
-  const label = roleLabel(line.role).padEnd(11, " ");
+export function formatTranscriptLine(
+  line: TranscriptLine,
+  options?: { color?: boolean; labels?: TranscriptLabels },
+): string {
+  const label = roleLabel(line.role, options?.labels).padEnd(11, " ");
   const meta = line.meta ? ` (${line.meta})` : "";
   const body = `${label}| ${line.text}${meta}`;
   if (options?.color === false) {
@@ -43,7 +58,10 @@ export function formatTranscriptLine(line: TranscriptLine, options?: { color?: b
   return `${ansiColorForRole(line.role)}${body}${RESET}`;
 }
 
-export function formatTranscriptBlock(lines: TranscriptLine[], options?: { color?: boolean }): string {
+export function formatTranscriptBlock(
+  lines: TranscriptLine[],
+  options?: { color?: boolean; labels?: TranscriptLabels },
+): string {
   return lines.map((line) => formatTranscriptLine(line, options)).join("\n");
 }
 

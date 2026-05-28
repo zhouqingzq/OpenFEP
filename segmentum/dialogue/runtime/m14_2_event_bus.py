@@ -49,6 +49,25 @@ def _now_int(clock: Any | None = None) -> int:
     return int(value)
 
 
+def _read_event_bus_lock_pid(lock_path: Path) -> int:
+    try:
+        return int(lock_path.read_text(encoding="utf-8").strip())
+    except (OSError, ValueError):
+        return 0
+
+
+def _clear_stale_event_bus_lock(lock_path: Path) -> bool:
+    if not lock_path.is_file():
+        return False
+    from segmentum.dialogue.runtime.m14_1_background_continuity import _pid_alive
+
+    pid = _read_event_bus_lock_pid(lock_path)
+    if pid > 0 and _pid_alive(pid):
+        return False
+    lock_path.unlink(missing_ok=True)
+    return True
+
+
 @contextmanager
 def event_bus_file_lock(root: Path, *, timeout: float = 5.0) -> Iterator[None]:
     root.mkdir(parents=True, exist_ok=True)
@@ -63,6 +82,8 @@ def event_bus_file_lock(root: Path, *, timeout: float = 5.0) -> Iterator[None]:
             acquired = True
             break
         except FileExistsError:
+            if _clear_stale_event_bus_lock(lock_path):
+                continue
             time.sleep(0.01)
     if not acquired:
         raise TimeoutError(f"could not acquire event bus lock: {lock_path}")
@@ -221,10 +242,22 @@ class EnvironmentEventStore:
                 claimed.append(merged)
         return claimed
 
-    def ack_event(self, event_id: str, consumer_id: str, result: Mapping[str, Any] | None = None) -> None:
+    def ack_event(
+        self,
+        event_id: str,
+        consumer_id: str,
+        result: Mapping[str, Any] | None = None,
+        *,
+        lease_seconds: int = 60,
+    ) -> None:
         now = _now_int(self.clock)
         with event_bus_file_lock(self.root):
-            event = self._event_by_id_unlocked(event_id, now=now)
+            event = self._event_by_id_unlocked(
+                event_id,
+                now=now,
+                lease_seconds=lease_seconds,
+                apply_lease_recovery=False,
+            )
             if not event or str(event.get("claimed_by", "")) != str(consumer_id):
                 raise ValueError("event is not claimed by this consumer")
             _append_jsonl(
@@ -243,10 +276,23 @@ class EnvironmentEventStore:
                 },
             )
 
-    def fail_event(self, event_id: str, consumer_id: str, reason: str, *, retryable: bool = True) -> None:
+    def fail_event(
+        self,
+        event_id: str,
+        consumer_id: str,
+        reason: str,
+        *,
+        retryable: bool = True,
+        lease_seconds: int = 60,
+    ) -> None:
         now = _now_int(self.clock)
         with event_bus_file_lock(self.root):
-            event = self._event_by_id_unlocked(event_id, now=now)
+            event = self._event_by_id_unlocked(
+                event_id,
+                now=now,
+                lease_seconds=lease_seconds,
+                apply_lease_recovery=False,
+            )
             if not event or str(event.get("claimed_by", "")) != str(consumer_id):
                 raise ValueError("event is not claimed by this consumer")
             _append_jsonl(
@@ -288,13 +334,30 @@ class EnvironmentEventStore:
             return out[-max(1, int(limit)) :]
         return out
 
-    def _event_by_id_unlocked(self, event_id: str, *, now: int) -> dict[str, Any] | None:
-        for event in self._current_events_unlocked(now=now):
+    def _event_by_id_unlocked(
+        self,
+        event_id: str,
+        *,
+        now: int,
+        lease_seconds: int = 60,
+        apply_lease_recovery: bool = True,
+    ) -> dict[str, Any] | None:
+        for event in self._current_events_unlocked(
+            now=now,
+            lease_seconds=lease_seconds,
+            apply_lease_recovery=apply_lease_recovery,
+        ):
             if str(event.get("event_id")) == str(event_id):
                 return event
         return None
 
-    def _current_events_unlocked(self, *, now: int, lease_seconds: int = 60) -> list[dict[str, Any]]:
+    def _current_events_unlocked(
+        self,
+        *,
+        now: int,
+        lease_seconds: int = 60,
+        apply_lease_recovery: bool = True,
+    ) -> list[dict[str, Any]]:
         events = [dict(row) for row in _read_jsonl(self.events_path)]
         by_id = {str(row.get("event_id")): row for row in events if row.get("event_id")}
         for row in _read_jsonl(self.claims_path):
@@ -318,6 +381,8 @@ class EnvironmentEventStore:
                 else:
                     event["retryable"] = False
         for event in events:
+            if not apply_lease_recovery:
+                continue
             if str(event.get("status")) == "claimed":
                 claimed_at = int(event.get("claimed_at", 0) or 0)
                 if now - claimed_at > max(1, int(lease_seconds)):

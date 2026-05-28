@@ -14,7 +14,7 @@ from segmentum.dialogue.runtime.m16_protocol import (
     ENGINEERING_PROXY_LABEL,
     build_client_input_committed_event,
 )
-from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore, _mapping
+from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore, llm_configuration_status_with_source, _mapping
 
 
 RUNNER_KIND = "m16_gateway_runner"
@@ -74,7 +74,14 @@ class M16SessionBridge:
         self._processed_path = self.session_root / M16_PROCESSED_EVENTS
         self._actuation_path = self.session_root / M16_ACTUATION_LOG
 
-    def append_client_input(self, *, text: str, correlation_id: str, source: str = "m16_gateway") -> str:
+    def append_client_input(
+        self,
+        *,
+        text: str,
+        correlation_id: str,
+        source: str = "m16_gateway",
+        speaker_name: str = "",
+    ) -> str:
         row = build_client_input_committed_event(
             persona_id=self.persona_id,
             session_id=self.session_id,
@@ -82,6 +89,7 @@ class M16SessionBridge:
             correlation_id=correlation_id,
             source=source,
             now=_now(self.clock),
+            speaker_name=speaker_name,
         )
         return self.event_store.append_event(
             "ClientInputCommittedEvent",
@@ -119,11 +127,24 @@ class M16SessionBridge:
             lease_seconds=lease_seconds,
         )
 
-    def ack_event(self, event_id: str, *, result: Mapping[str, Any] | None = None) -> None:
-        self.event_store.ack_event(event_id, self.consumer_id, result=result)
+    def ack_event(
+        self,
+        event_id: str,
+        *,
+        result: Mapping[str, Any] | None = None,
+        lease_seconds: int = 60,
+    ) -> None:
+        self.event_store.ack_event(event_id, self.consumer_id, result=result, lease_seconds=lease_seconds)
 
-    def fail_event(self, event_id: str, reason: str, *, retryable: bool = True) -> None:
-        self.event_store.fail_event(event_id, self.consumer_id, reason, retryable=retryable)
+    def fail_event(
+        self,
+        event_id: str,
+        reason: str,
+        *,
+        retryable: bool = True,
+        lease_seconds: int = 60,
+    ) -> None:
+        self.event_store.fail_event(event_id, self.consumer_id, reason, retryable=retryable, lease_seconds=lease_seconds)
 
     def turn_index(self) -> int:
         state = self.store.load()
@@ -244,6 +265,10 @@ class M16SessionBridge:
         temporal = _mapping(state.get("temporal_state"))
         m13 = _mapping(state.get("m13_drive_state"))
         initiative = _mapping(m13.get("initiative"))
+        share = _mapping(temporal.get("last_share_trace"))
+        user_display = str(share.get("speaker_name") or "").strip()
+        if user_display in {"", "default_user"}:
+            user_display = ""
         chat_tail: list[dict[str, Any]] = []
         log_path = self.session_root / "conversation_log.jsonl"
         if log_path.is_file():
@@ -272,5 +297,8 @@ class M16SessionBridge:
                 "last_user_turn_at": int(temporal.get("last_user_turn_at", 0) or 0),
                 "initiative_enabled": bool(initiative.get("enabled")),
                 "runner_kind": RUNNER_KIND,
+                "llm": llm_configuration_status_with_source(self.runtime.llm),
+                "user_display_name": user_display,
+                "user_known": bool(user_display),
             },
         }
