@@ -102,6 +102,21 @@ def test_build_mind_debug_bundle_includes_traceability_and_verdicts(tmp_path: Pa
             "environment_events_terminal_ratio": 1.0,
             "environment_event_backlog_count": 0,
             "stale_environment_event_backlog_count": 0,
+            "latest_turn_latency": {
+                "latency_mode": "normal",
+                "latency_mode_reasons": ["task_or_technical_marker"],
+                "blocking_llm_calls": 5,
+                "turn_total_duration_ms": 1200.0,
+                "slowest_stage": {"stage": "conscious_loop"},
+                "skipped_llm_stage_count": 3,
+                "turn_latency_trace": [
+                    {"stage": "conscious_loop", "duration_ms": 900.0},
+                    {"stage": "thinking_reply", "duration_ms": 300.0},
+                ],
+            },
+            "scheduler_skip_reason": "idle_time_too_short",
+            "cognitive_selector_skip_reason": "generic_self_only_open_item",
+            "delivery_skip_reason": "",
             "m15_meta_control": {
                 "cleanup_consumed": [
                     {
@@ -124,6 +139,10 @@ def test_build_mind_debug_bundle_includes_traceability_and_verdicts(tmp_path: Pa
     assert "recently_applied_cleanup cleanup_pending_expectation_backlog" in text
     assert "environment_events_terminal_ratio: 1.0" in text
     assert "stale_environment_event_backlog_count: 0" in text
+    assert "latest_turn_latency_reasons: task_or_technical_marker" in text
+    assert "latest_turn_latency_trace: conscious_loop:900.0ms; thinking_reply:300.0ms" in text
+    assert "scheduler_skip_reason: idle_time_too_short" in text
+    assert "cognitive_selector_skip_reason: generic_self_only_open_item" in text
     assert "generic_self_only_open_item" in text
     assert "intro_should_outreach: True" in text
     assert "pending_user_message: hello" in text

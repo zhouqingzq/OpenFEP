@@ -1020,9 +1020,48 @@ def test_low_risk_casual_turn_skips_post_reply_observer(tmp_path: Path) -> None:
 
     result = runtime.run_turn("睡觉了吗？", turn_index=0, now=6360)
 
-    assert len(llm.calls) == 3
+    assert len(llm.calls) == 2
+    assert result.diagnostics["latency_mode"] == "fast_chat"
+    assert result.diagnostics["turn_latency_summary"]["blocking_llm_calls"] == 2
+    skipped = {row["stage"]: row["reason"] for row in result.diagnostics["skipped_llm_stages"]}
+    assert skipped["query_planner"] == "latency_fast_path"
+    assert skipped["evidence_judge"] == "latency_fast_path"
+    assert skipped["m11_user_model"] == "latency_fast_path"
+    assert skipped["post_reply_observer"] == "latency_fast_path"
     assert result.diagnostics["conversation_mode"] == "casual_fast"
     assert result.diagnostics["post_reply_observer_skipped_reason"] == "low_risk_short_reply"
+
+
+def test_fast_chat_skips_m12_identity_even_when_enabled(tmp_path: Path) -> None:
+    llm = FakeJSONLLM()
+    store = MVPStateStore(tmp_path / "persona")
+    state = store.load()
+    state["m12_identity_continuity_enabled"] = True
+    store.save(state)
+    runtime = MVPDialogueRuntime(store=store, llm=llm, persona_name="test persona")
+
+    result = runtime.run_turn("hello", turn_index=0, now=6370)
+
+    assert len(llm.calls) == 2
+    assert result.diagnostics["latency_mode"] == "fast_chat"
+    systems = [call["system"] for call in llm.calls]
+    assert not any("identity-continuity extractor" in system for system in systems)
+    skipped = {row["stage"]: row["reason"] for row in result.diagnostics["skipped_llm_stages"]}
+    assert skipped["m12_identity_pre"] == "latency_fast_path"
+
+
+def test_preference_feedback_uses_normal_latency_path(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=FakeJSONLLM(),
+        persona_name="test persona",
+    )
+
+    result = runtime.run_turn("I prefer short replies.", turn_index=0, now=6380)
+
+    assert result.diagnostics["latency_mode"] == "normal"
+    assert "memory_or_preference_marker" in result.diagnostics["latency_mode_reasons"]
+    assert result.diagnostics["turn_latency_summary"]["blocking_llm_calls"] > 2
 
 
 def test_visible_reply_validation_strips_debug_json_and_compresses_casual() -> None:
@@ -2718,7 +2757,7 @@ def test_mvp_m12_identity_extractor_runs_before_conscious_when_enabled(tmp_path:
     )
     runtime.initialize_from_materials(["喜欢快速原型，讨厌凭空编造经历。"])
     llm.calls.clear()
-    runtime.run_turn("你好。", turn_index=0)
+    runtime.run_turn("请检查这个项目计划是否合理。", turn_index=0)
     systems = [c["system"] for c in llm.calls]
     m12_idx = next(i for i, s in enumerate(systems) if "identity-continuity extractor" in s)
     con_idx = next(i for i, s in enumerate(systems) if "意识主循环" in s)

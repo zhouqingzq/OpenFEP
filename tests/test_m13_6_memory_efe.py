@@ -121,6 +121,64 @@ def test_generic_memory_dynamics_expectation_is_diagnostic_only() -> None:
     assert "generic_low_resolution_expectation" in result.reason_codes
 
 
+def test_generic_social_continuation_with_strict_trace_is_diagnostic_only() -> None:
+    state = _state(
+        pending_expectations=[
+            {
+                "id": "exp_generic_social",
+                "source": "memory_dynamics_adapter",
+                "verify_on": "memory_dynamics_idle",
+                "status": "pending",
+                "content": "用户会继续闲聊或表示惊讶/认可，或者道晚安",
+                "confidence": 0.86,
+                "created_at": NOW - 120,
+                "evidence_refs": ["stm_turn_chat"],
+                "bound_memory_ids": ["stm_turn_chat"],
+            }
+        ]
+    )
+
+    normalized = normalize_expectations_for_efe(state, now=NOW, phase="idle")
+
+    assert normalized.eligible_for_efe == []
+    diagnostic = normalized.diagnostic_only[0]
+    assert diagnostic.ineligibility_reason == "generic_low_resolution_expectation"
+    assert diagnostic.resolution_class == "generic_social_continuation"
+    assert diagnostic.specificity_score == 0.0
+    result = evaluate_memory_efe(state, phase="idle", now=NOW, turn_index=5, user_active=False)
+    assert result.should_outreach is False
+    assert "generic_low_resolution_expectation" in result.reason_codes
+
+
+def test_mixed_specific_and_generic_memory_expectation_remains_eligible_with_discounted_resolution() -> None:
+    state = _state(
+        pending_expectations=[
+            {
+                "id": "exp_mixed_moon",
+                "source": "memory_dynamics_adapter",
+                "verify_on": "memory_dynamics_idle",
+                "status": "pending",
+                "content": "用户会追问满月夜具体忙什么（往生堂业务/仪式/守夜），或继续开月亮玩笑",
+                "confidence": 0.86,
+                "created_at": NOW - 120,
+                "evidence_refs": ["stm_turn_moon"],
+                "bound_memory_ids": ["stm_turn_moon"],
+            }
+        ]
+    )
+
+    normalized = normalize_expectations_for_efe(state, now=NOW, phase="idle")
+
+    assert len(normalized.eligible_for_efe) == 1
+    eligible = normalized.eligible_for_efe[0]
+    assert eligible.resolution_class == "mixed_specific_and_generic"
+    assert eligible.testable_branch_count == 1
+    assert eligible.generic_branch_count == 1
+    result = evaluate_memory_efe(state, phase="idle", now=NOW, turn_index=5, user_active=False)
+    assert result.policy_costs["resolution_class"] == "mixed_specific_and_generic"
+    assert result.policy_costs["specificity_score"] < 1.0
+
+
 def test_assessor_reject_backoff_suppresses_same_memory_efe_target() -> None:
     m13 = record_target_assessor_reject_backoff(
         _opted_in_m13(),  # type: ignore[arg-type]

@@ -10,6 +10,7 @@ from __future__ import annotations
 import copy
 from dataclasses import dataclass, field, replace
 from datetime import datetime
+import re
 import uuid
 from typing import Any, Mapping
 
@@ -180,6 +181,134 @@ def _is_generic_low_resolution_expectation(row: Mapping[str, Any]) -> bool:
     return alternation_count >= 1
 
 
+@dataclass(frozen=True)
+class ExpectationResolutionProfile:
+    resolution_class: str
+    specificity_score: float
+    generic_branch_count: int
+    testable_branch_count: int
+    branch_count: int
+    reason_codes: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "resolution_class": self.resolution_class,
+            "specificity_score": _round(self.specificity_score),
+            "generic_branch_count": self.generic_branch_count,
+            "testable_branch_count": self.testable_branch_count,
+            "branch_count": self.branch_count,
+            "reason_codes": list(self.reason_codes[:8]),
+        }
+
+
+_GENERIC_SOCIAL_PATTERNS = (
+    r"继续.{0,8}(闲聊|聊天|聊下去|开玩笑|玩笑|抱怨|吐槽)",
+    r"转.{0,8}(其他|别的).{0,8}(话题|闲聊|聊天)",
+    r"(表示)?(惊讶|认可|接受|同意|附和)",
+    r"(道|说)?晚安",
+    r"(small talk|continue chatting|keep chatting|other topic|change topic)",
+)
+
+_TESTABLE_ACTION_PATTERNS = (
+    r"(追问|询问|问).{0,16}(具体|细节|什么|为什么|怎么|如何|哪)",
+    r"(说明|解释|补充|确认|澄清|选择|决定|提供|给出|回应是否|回复是否)",
+    r"(ask|explain|confirm|clarify|choose|provide|specify|follow up)",
+)
+
+_LOW_RESOLUTION_OBJECT_PATTERNS = (
+    r"(天气|消暑|闲聊|聊天|话题|玩笑|反应|认可|惊讶|晚安|心情|日常)",
+    r"(weather|small talk|chat|joke|reaction|good night)",
+)
+
+
+def _expectation_branches(text: str) -> list[str]:
+    normalized = " ".join(str(text or "").strip().split())
+    if not normalized:
+        return []
+    parts = re.split(r"(?:，|,|；|;|。|\.|\s+or\s+|或者|或是|还是|或)", normalized, flags=re.IGNORECASE)
+    branches = [part.strip(" （）()[]【】") for part in parts if part.strip(" （）()[]【】")]
+    return branches or [normalized]
+
+
+def _has_testable_action(branch: str) -> bool:
+    return any(re.search(pattern, branch, flags=re.IGNORECASE) for pattern in _TESTABLE_ACTION_PATTERNS)
+
+
+def _has_low_resolution_object(branch: str) -> bool:
+    return any(re.search(pattern, branch, flags=re.IGNORECASE) for pattern in _LOW_RESOLUTION_OBJECT_PATTERNS)
+
+
+def _has_concrete_object(branch: str, row: Mapping[str, Any]) -> bool:
+    if row.get("open_item_id") or row.get("scheduled_intent_id") or row.get("intent_id"):
+        return True
+    text = str(branch or "").strip()
+    if re.search(r"[A-Za-z0-9_:-]{3,}", text):
+        return True
+    if "（" in text or "(" in text or "：" in text or ":" in text:
+        return True
+    terms = re.findall(r"[\u4e00-\u9fff]{2,}", text)
+    concrete_terms = [term for term in terms if not _has_low_resolution_object(term)]
+    return any(len(term) >= 3 for term in concrete_terms)
+
+
+def _branch_is_generic_social(branch: str, row: Mapping[str, Any]) -> bool:
+    text = str(branch or "").strip()
+    if not text:
+        return True
+    if any(re.search(pattern, text, flags=re.IGNORECASE) for pattern in _GENERIC_SOCIAL_PATTERNS):
+        return not (_has_testable_action(text) and _has_concrete_object(text, row))
+    return not _has_testable_action(text) and not _has_concrete_object(text, row)
+
+
+def _branch_is_testable(branch: str, row: Mapping[str, Any]) -> bool:
+    text = str(branch or "").strip()
+    if not text:
+        return False
+    if _has_testable_action(text) and _has_concrete_object(text, row):
+        return True
+    if _has_testable_action(text) and not _has_low_resolution_object(text):
+        return True
+    if _has_concrete_object(text, row) and not _has_low_resolution_object(text) and not any(
+        re.search(pattern, text, flags=re.IGNORECASE) for pattern in _GENERIC_SOCIAL_PATTERNS
+    ):
+        return True
+    return False
+
+
+def expectation_resolution_profile(row: Mapping[str, Any]) -> ExpectationResolutionProfile:
+    branches = _expectation_branches(_content_summary(row))
+    if not branches:
+        return ExpectationResolutionProfile(
+            resolution_class="generic_social_continuation",
+            specificity_score=0.0,
+            generic_branch_count=1,
+            testable_branch_count=0,
+            branch_count=1,
+            reason_codes=("generic_low_resolution_expectation",),
+        )
+    generic_count = sum(1 for branch in branches if _branch_is_generic_social(branch, row))
+    testable_count = sum(1 for branch in branches if _branch_is_testable(branch, row))
+    branch_count = max(1, len(branches))
+    specificity = _clamp(testable_count / float(branch_count))
+    if testable_count == 0:
+        resolution_class = "generic_social_continuation"
+        reason_codes = ("generic_low_resolution_expectation",)
+    elif generic_count > 0:
+        resolution_class = "mixed_specific_and_generic"
+        reason_codes = ("mixed_specific_and_generic",)
+    else:
+        resolution_class = "concrete_testable"
+        reason_codes = ("concrete_testable_expectation",)
+    return ExpectationResolutionProfile(
+        resolution_class=resolution_class,
+        specificity_score=specificity,
+        generic_branch_count=generic_count,
+        testable_branch_count=testable_count,
+        branch_count=branch_count,
+        reason_codes=reason_codes,
+    )
+
+
 def _target_assessor_backoff_active(state: Mapping[str, Any], traceable_expectation_id: str, *, now: int) -> bool:
     target_id = str(traceable_expectation_id or "").strip()
     if not target_id:
@@ -285,6 +414,11 @@ class NormalizedExpectation:
     ineligibility_reason: str = ""
     precision_approx: dict[str, float] = field(default_factory=dict)
     recall_keys: list[str] = field(default_factory=list)
+    resolution_class: str = "concrete_testable"
+    specificity_score: float = 1.0
+    generic_branch_count: int = 0
+    testable_branch_count: int = 1
+    branch_count: int = 1
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -307,6 +441,11 @@ class NormalizedExpectation:
             "ineligibility_reason": self.ineligibility_reason,
             "precision_approx": dict(self.precision_approx),
             "recall_keys": list(self.recall_keys[:8]),
+            "resolution_class": self.resolution_class,
+            "specificity_score": _round(self.specificity_score),
+            "generic_branch_count": self.generic_branch_count,
+            "testable_branch_count": self.testable_branch_count,
+            "branch_count": self.branch_count,
         }
 
 
@@ -329,7 +468,7 @@ class M13MemoryEfeEvaluationResult:
     repetition_tension: float
     f_memory: float
     efe_by_policy: dict[str, float]
-    policy_costs: dict[str, float]
+    policy_costs: dict[str, Any]
     selected_policy: str
     reply_angle_bias: str
     should_outreach: bool
@@ -409,11 +548,27 @@ def _make_expectation(
     status = str(row.get("status", "pending") or "pending").strip().lower()
     if source_kind == "open_item" and status in {"", "active"}:
         status = "open"
+    resolution = (
+        expectation_resolution_profile(row)
+        if source_kind == "memory_dynamics_expectation"
+        else ExpectationResolutionProfile(
+            resolution_class="concrete_testable",
+            specificity_score=1.0,
+            generic_branch_count=0,
+            testable_branch_count=1,
+            branch_count=1,
+            reason_codes=("concrete_testable_expectation",),
+        )
+    )
     cleanup_reason = cleanup_ineligibility_reason(row, now=now, phase=phase, expectation=True)
     if cleanup_reason:
         eligible = False
         ineligibility_reason = cleanup_reason
-    elif source_kind == "memory_dynamics_expectation" and eligible and _is_generic_low_resolution_expectation(row):
+    elif (
+        source_kind == "memory_dynamics_expectation"
+        and eligible
+        and resolution.resolution_class == "generic_social_continuation"
+    ):
         eligible = False
         ineligibility_reason = "generic_low_resolution_expectation"
     elif source_kind in {"pending_expectation", "memory_dynamics_expectation", "open_item"} and eligible and not is_strictly_traceable(row):
@@ -456,6 +611,11 @@ def _make_expectation(
         ineligibility_reason=ineligibility_reason,
         precision_approx=precision_approx,
         recall_keys=recall_keys,
+        resolution_class=resolution.resolution_class,
+        specificity_score=resolution.specificity_score,
+        generic_branch_count=resolution.generic_branch_count,
+        testable_branch_count=resolution.testable_branch_count,
+        branch_count=resolution.branch_count,
     )
 
 
@@ -952,7 +1112,7 @@ def _policy_costs(
     *,
     expectation: NormalizedExpectation | None,
     state: Mapping[str, Any],
-) -> dict[str, float]:
+) -> dict[str, Any]:
     boundary = _boundary_cost(expectation, state)
     regret_bias = _bounded_float(_mapping(state.get("social_sharing_policy")).get("regret_bias"), default=0.0)
     relationship_cost = 0.10 + regret_bias
@@ -975,7 +1135,7 @@ def _compute_idle_efe(
     eligible_count: int,
     expectation: NormalizedExpectation | None,
     state: Mapping[str, Any],
-) -> tuple[dict[str, float], dict[str, float], float]:
+) -> tuple[dict[str, float], dict[str, Any], float]:
     costs = _policy_costs(expectation=expectation, state=state)
     expected_internal_resolution = min(0.15, 0.04 * eligible_count)
     expected_epistemic_gain = min(0.25, 0.08 * eligible_count)
@@ -986,6 +1146,8 @@ def _compute_idle_efe(
         MAX_OUTREACH_RESOLUTION_PRIOR,
         0.38 * traceable * evidence_strength * boundary_allowance,
     )
+    if expectation is not None:
+        expected_outreach_resolution *= _clamp(expectation.specificity_score)
     expected_information_gain = min(0.25, f_memory * 0.16)
     if expectation and expectation.source_kind in {"open_item", "scheduled_outreach", "memory_dynamics_expectation"}:
         expected_information_gain = max(expected_information_gain, 0.25)
@@ -1006,6 +1168,11 @@ def _compute_idle_efe(
     costs["expected_epistemic_gain"] = _round(expected_epistemic_gain)
     costs["expected_information_gain"] = _round(expected_information_gain)
     costs["expected_outreach_resolution"] = _round(expected_outreach_resolution)
+    if expectation is not None:
+        costs["resolution_class"] = expectation.resolution_class
+        costs["specificity_score"] = _round(expectation.specificity_score)
+        costs["generic_branch_count"] = expectation.generic_branch_count
+        costs["testable_branch_count"] = expectation.testable_branch_count
     return efe, costs, expected_outreach_resolution
 
 
@@ -1181,6 +1348,8 @@ def evaluate_memory_efe(
         reason_codes.append("repetition_tension_read_only")
     if reply_angle_bias != "none":
         reason_codes.append(f"reply_angle_bias:{reply_angle_bias}")
+    if traceable and traceable.resolution_class == "mixed_specific_and_generic":
+        reason_codes.append("mixed_specific_and_generic")
     reason_codes.extend(suppression)
     diagnostic_reasons = list(
         dict.fromkeys(
@@ -1235,6 +1404,14 @@ def evaluate_memory_efe(
     }
     if traceable and traceable.precision_approx:
         event["precision_approx"] = dict(traceable.precision_approx)
+    if traceable:
+        event["resolution_profile"] = {
+            "resolution_class": traceable.resolution_class,
+            "specificity_score": _round(traceable.specificity_score),
+            "generic_branch_count": traceable.generic_branch_count,
+            "testable_branch_count": traceable.testable_branch_count,
+            "branch_count": traceable.branch_count,
+        }
     events = [event]
     if suppression:
         events.append(

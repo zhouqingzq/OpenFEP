@@ -748,10 +748,12 @@ class OpenRouterJSONClient:
     model: str = "deepseek/deepseek-v4-flash"
     temperature: float = 0.35
     timeout_seconds: float = 35.0
+    auxiliary_timeout_seconds: float = 12.0
     api_key: str | None = None
     base_url: str = "https://openrouter.ai/api/v1"
     fallback_models: tuple[str, ...] = ("deepseek/deepseek-v4-flash",)
     request_retries: int = 1
+    auxiliary_request_retries: int = 0
 
     @classmethod
     def from_config(cls) -> "OpenRouterJSONClient":
@@ -778,6 +780,8 @@ class OpenRouterJSONClient:
                 if str(item).strip()
             ),
             request_retries=int(config.get("request_retries", 1) or 0),
+            auxiliary_timeout_seconds=float(config.get("auxiliary_timeout_seconds", 12.0) or 12.0),
+            auxiliary_request_retries=int(config.get("auxiliary_request_retries", 0) or 0),
         )
 
     @classmethod
@@ -3752,6 +3756,212 @@ def _should_run_post_reply_observer(
     return False, "low_risk_short_reply"
 
 
+_AUXILIARY_LLM_STAGES = {
+    "m12_identity_pre",
+    "m13_settlement",
+    "query_planner",
+    "evidence_judge",
+    "m11_user_model",
+    "m12_2_first_order",
+    "m12_2_second_order",
+    "post_reply_observer",
+}
+
+
+def _is_m12_1_stage(stage: str) -> bool:
+    return str(stage or "").startswith("m12_1_step_")
+
+
+def _call_llm_with_stage_profile(
+    llm: JSONLLMClient,
+    *,
+    stage: str,
+    system_prompt: str,
+    user_prompt: str,
+) -> dict[str, Any]:
+    """Apply shorter local client settings to non-reply helper calls."""
+    should_profile = stage in _AUXILIARY_LLM_STAGES or _is_m12_1_stage(stage)
+    timeout_attr = "timeout_seconds"
+    retries_attr = "request_retries"
+    aux_timeout_attr = "auxiliary_timeout_seconds"
+    aux_retries_attr = "auxiliary_request_retries"
+    can_profile = (
+        should_profile
+        and hasattr(llm, timeout_attr)
+        and hasattr(llm, retries_attr)
+    )
+    if not can_profile:
+        return llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+    old_timeout = getattr(llm, timeout_attr)
+    old_retries = getattr(llm, retries_attr)
+    try:
+        aux_timeout = getattr(llm, aux_timeout_attr, None)
+        aux_retries = getattr(llm, aux_retries_attr, None)
+        if aux_timeout is not None:
+            setattr(llm, timeout_attr, float(aux_timeout))
+        if aux_retries is not None:
+            setattr(llm, retries_attr, int(aux_retries))
+        return llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+    finally:
+        setattr(llm, timeout_attr, old_timeout)
+        setattr(llm, retries_attr, old_retries)
+
+
+_LATENCY_TASK_MARKERS = (
+    "implement",
+    "fix",
+    "debug",
+    "diagnose",
+    "review",
+    "refactor",
+    "test",
+    "pytest",
+    "python",
+    "typescript",
+    "javascript",
+    "api",
+    "json",
+    "sql",
+    "error",
+    "stack trace",
+    "plan",
+    "code",
+    "bug",
+    "optimize",
+    "performance",
+    "latency",
+    "帮我实现",
+    "修复",
+    "调试",
+    "诊断",
+    "代码",
+    "测试",
+    "计划",
+    "优化",
+    "报错",
+    "架构",
+    "检查",
+    "里程碑",
+    "是否真的",
+    "完成",
+)
+
+_LATENCY_MEMORY_MARKERS = (
+    "remember",
+    "forget",
+    "memory",
+    "preference",
+    "i prefer",
+    "记住",
+    "忘掉",
+    "别记",
+    "偏好",
+    "我喜欢",
+    "我讨厌",
+)
+
+_LATENCY_RELATIONSHIP_MARKERS = (
+    "you hurt",
+    "you ignored",
+    "not comfortable",
+    "boundary",
+    "trust",
+    "你刚才",
+    "你是不是",
+    "别这样",
+    "不舒服",
+    "边界",
+    "信任",
+    "关系",
+    "喜欢你",
+    "讨厌你",
+)
+
+
+def _has_latency_marker(text: str, markers: tuple[str, ...]) -> bool:
+    lowered = str(text or "").casefold()
+    return any(marker.casefold() in lowered for marker in markers)
+
+
+def _classify_turn_latency_mode(
+    state: Mapping[str, Any],
+    *,
+    user_text: str,
+    user_id: str,
+    proactive_turn: bool,
+    identity_anchored_action: bool,
+    assessable_pending_rows: list[Mapping[str, Any]],
+) -> dict[str, Any]:
+    text = str(user_text or "").strip()
+    reasons: list[str] = []
+    mode = "fast_chat"
+    if proactive_turn:
+        return {"mode": "full", "reason_codes": ["proactive_turn"]}
+    if identity_anchored_action:
+        return {"mode": "full", "reason_codes": ["identity_anchored_action"]}
+    explicit_secret, _secret_phrase = _detect_explicit_secrecy(text)
+    if explicit_secret:
+        return {"mode": "full", "reason_codes": ["explicit_secrecy"]}
+    if assessable_pending_rows:
+        reasons.append("pending_reward_settlement")
+        mode = "normal"
+    if len(text) > 90:
+        reasons.append("long_user_text")
+        mode = "normal"
+    if _has_latency_marker(text, _LATENCY_TASK_MARKERS):
+        reasons.append("task_or_technical_marker")
+        mode = "normal"
+    if _has_latency_marker(text, _LATENCY_MEMORY_MARKERS):
+        reasons.append("memory_or_preference_marker")
+        mode = "normal"
+    if _has_latency_marker(text, _LATENCY_RELATIONSHIP_MARKERS):
+        reasons.append("relationship_feedback_marker")
+        mode = "normal"
+    if _is_follow_up_probe(text) or _has_any_marker(text, _QUERY_PLANNER_CUE_MARKERS):
+        reasons.append("recall_or_query_marker")
+        mode = "normal"
+    if state.get("short_term_memory") and re.search(r"[\?？]|多少钱|是谁|什么|哪", text):
+        reasons.append("memory_backed_question")
+        mode = "normal"
+    if _relationship_value_rows(state, user_id):
+        reasons.append("active_relationship_value_memory")
+        mode = "normal"
+    if mode == "fast_chat":
+        reasons.append("low_risk_short_chat")
+    return {"mode": mode, "reason_codes": reasons}
+
+
+def _m12_2_latency_triggered(
+    *,
+    latency_mode: str,
+    user_text: str,
+    relationship_value_context: Mapping[str, Any],
+) -> tuple[bool, str]:
+    if latency_mode == "fast_chat":
+        return False, "latency_fast_path"
+    if relationship_value_context.get("active_relationship_value_memories"):
+        return True, "relationship_value_memory"
+    if _has_latency_marker(user_text, _LATENCY_RELATIONSHIP_MARKERS):
+        return True, "relationship_feedback_marker"
+    if re.search(r"(what do you think of me|how do you see me|do you know me)", str(user_text or ""), re.I):
+        return True, "explicit_reciprocal_role_query"
+    if re.search(r"(你.*怎么看我|你.*了解我|我在你.*眼里|你觉得我)", str(user_text or "")):
+        return True, "explicit_reciprocal_role_query"
+    return False, "cadence_not_due"
+
+
+def _latency_trace_summary(trace: list[Mapping[str, Any]]) -> dict[str, Any]:
+    calls = [dict(item) for item in trace]
+    total = round(sum(float(item.get("duration_ms", 0.0) or 0.0) for item in calls), 3)
+    slowest = max(calls, key=lambda item: float(item.get("duration_ms", 0.0) or 0.0), default={})
+    return {
+        "total_llm_duration_ms": total,
+        "blocking_llm_calls": len(calls),
+        "slowest_stage": dict(slowest) if slowest else {},
+    }
+
+
 def _load_m11_state(state: Mapping[str, Any], *, user_id: str, display_name: str) -> M11RuntimeState:
     models = _mapping(state.get("m11_user_models"))
     payload = _mapping(models.get(user_id))
@@ -4630,8 +4840,66 @@ class MVPDialogueRuntime:
         identity_anchored_action = _identity_anchored_action_sensitive(user_text)
         m12_pre_result: dict[str, Any] | None = None
         turn_key = f"turn_{turn_index + 1:04d}"
+        turn_latency_trace: list[dict[str, Any]] = []
+        skipped_llm_stages: list[dict[str, str]] = []
+        turn_latency_started = time.monotonic()
+
+        def _mark_llm_skipped(stage: str, reason: str) -> None:
+            skipped_llm_stages.append({"stage": stage, "reason": reason})
+
+        def _complete_json_stage(stage: str, system_prompt: str, user_prompt: str) -> dict[str, Any]:
+            started = time.monotonic()
+            try:
+                result = _call_llm_with_stage_profile(
+                    self.llm,
+                    stage=stage,
+                    system_prompt=system_prompt,
+                    user_prompt=user_prompt,
+                )
+            except Exception as exc:
+                turn_latency_trace.append(
+                    {
+                        "stage": stage,
+                        "duration_ms": round((time.monotonic() - started) * 1000.0, 3),
+                        "success": False,
+                        "error_type": type(exc).__name__,
+                        "prompt_chars": len(system_prompt) + len(user_prompt),
+                        "completion_present": False,
+                    }
+                )
+                raise
+            turn_latency_trace.append(
+                {
+                    "stage": stage,
+                    "duration_ms": round((time.monotonic() - started) * 1000.0, 3),
+                    "success": True,
+                    "error_type": "",
+                    "prompt_chars": len(system_prompt) + len(user_prompt),
+                    "completion_present": bool(result),
+                }
+            )
+            return result
+
+        m13_state = normalize_m13_drive_state(state.get("m13_drive_state"))
+        reward_for_settlement = normalize_affective_reward_proxy_state(
+            m13_state.get("affective_reward_proxy")
+        )
+        user_reaction_assessments: dict[str, dict[str, Any]] = {}
+        assessable_pending_rows = list_assessable_pending_rows(
+            reward_for_settlement,
+            turn_index=turn_index,
+        )
+        latency_mode_info = _classify_turn_latency_mode(
+            state,
+            user_text=user_text,
+            user_id=user_id,
+            proactive_turn=proactive_turn,
+            identity_anchored_action=identity_anchored_action,
+            assessable_pending_rows=assessable_pending_rows,
+        )
+        latency_mode = str(latency_mode_info.get("mode", "normal") or "normal")
         m12_cognitive_bus = CognitiveEventBus()
-        if _m12_enabled_for_state(state) and not proactive_turn:
+        if _m12_enabled_for_state(state) and not proactive_turn and latency_mode != "fast_chat":
             m12_state = _load_m12_state(state)
             m11_readonly_pre: dict[str, object] = {}
 
@@ -4641,7 +4909,7 @@ class MVPDialogueRuntime:
                     speaker_name=display_name,
                 )
                 try:
-                    return self.llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+                    return _complete_json_stage("m12_identity_pre", system_prompt, user_prompt)
                 except Exception:
                     return {
                         "identity_claims": [],
@@ -4684,6 +4952,8 @@ class MVPDialogueRuntime:
                     "sequence": seq_idx,
                     "cognitive_event": ev.to_dict(),
                 })
+        elif _m12_enabled_for_state(state) and not proactive_turn:
+            _mark_llm_skipped("m12_identity_pre", "latency_fast_path")
         _report_progress("m12_identity_pre")
         entity_binding = build_entity_binding_context(
             state=state,
@@ -4718,15 +4988,6 @@ class MVPDialogueRuntime:
             "binding": entity_binding,
         })
 
-        m13_state = normalize_m13_drive_state(state.get("m13_drive_state"))
-        reward_for_settlement = normalize_affective_reward_proxy_state(
-            m13_state.get("affective_reward_proxy")
-        )
-        user_reaction_assessments: dict[str, dict[str, Any]] = {}
-        assessable_pending_rows = list_assessable_pending_rows(
-            reward_for_settlement,
-            turn_index=turn_index,
-        )
         if assessable_pending_rows and str(user_text or "").strip() and not proactive_turn:
             observation_channels = observation_channels_from_bus(bus)
             for assessable_pending in assessable_pending_rows:
@@ -4741,10 +5002,7 @@ class MVPDialogueRuntime:
                         observation_channels=observation_channels,
                         turn_index=turn_index,
                     )
-                    assessor_raw = self.llm.complete_json(
-                        system_prompt=assessor_system,
-                        user_prompt=assessor_user,
-                    )
+                    assessor_raw = _complete_json_stage("m13_settlement", assessor_system, assessor_user)
                     user_reaction_assessments[pending_id] = normalize_user_reaction_assessment(assessor_raw)
                     assessment = user_reaction_assessments[pending_id]
                     bus.append(
@@ -4805,7 +5063,7 @@ class MVPDialogueRuntime:
             temporal_input=temporal_input,
             entity_binding=entity_binding,
         )
-        conscious = self.llm.complete_json(system_prompt=conscious_system, user_prompt=conscious_user)
+        conscious = _complete_json_stage("conscious_loop", conscious_system, conscious_user)
         _report_progress("conscious_loop")
         m13_state, m13_memory_efe_settlement_events = settle_memory_efe_outreach(
             m13_state,
@@ -4844,12 +5102,18 @@ class MVPDialogueRuntime:
             recall_query["entity_binding"] = entity_binding
             memory_dynamics["recall_query"] = recall_query
         query_plan: dict[str, Any] = {}
-        if _should_run_query_planner(
+        should_run_query_planner = _should_run_query_planner(
             state,
             user_text=user_text,
             recall_query=recall_query,
             entity_binding=entity_binding,
-        ):
+        )
+        if latency_mode == "fast_chat":
+            _mark_llm_skipped("query_planner", "latency_fast_path")
+            should_run_query_planner = False
+        elif not should_run_query_planner:
+            _mark_llm_skipped("query_planner", "cadence_not_due")
+        if should_run_query_planner:
             try:
                 planner_system, planner_user = build_query_planner_prompt(
                     user_text=user_text,
@@ -4859,7 +5123,7 @@ class MVPDialogueRuntime:
                     entity_binding=entity_binding,
                 )
                 query_plan = _normalize_query_plan(
-                    self.llm.complete_json(system_prompt=planner_system, user_prompt=planner_user)
+                    _complete_json_stage("query_planner", planner_system, planner_user)
                 )
                 recall_query = _merge_query_plan_into_recall_query(recall_query, query_plan)
                 memory_dynamics["recall_query"] = recall_query
@@ -4874,7 +5138,11 @@ class MVPDialogueRuntime:
             entity_binding=entity_binding,
         )
         evidence_judgment: dict[str, Any] = {}
-        if lexical_candidates:
+        if latency_mode == "fast_chat":
+            _mark_llm_skipped("evidence_judge", "latency_fast_path")
+        elif not lexical_candidates:
+            _mark_llm_skipped("evidence_judge", "no_lexical_candidates")
+        if lexical_candidates and latency_mode != "fast_chat":
             try:
                 judge_system, judge_user = build_evidence_judge_prompt(
                     user_text=user_text,
@@ -4885,7 +5153,7 @@ class MVPDialogueRuntime:
                     entity_binding=entity_binding,
                 )
                 evidence_judgment = _normalize_evidence_judgment(
-                    self.llm.complete_json(system_prompt=judge_system, user_prompt=judge_user),
+                    _complete_json_stage("evidence_judge", judge_system, judge_user),
                     lexical_candidates=lexical_candidates,
                     current_user_id=user_id,
                 )
@@ -4925,14 +5193,17 @@ class MVPDialogueRuntime:
         _report_progress("memory_recall")
         response_style_prior = _response_style_prior(state, retrieved)
         m11_result_dict: dict[str, Any] = {}
-        if _m11_enabled_for_state(state) and not proactive_turn:
+        should_run_m11 = _m11_enabled_for_state(state) and not proactive_turn and latency_mode != "fast_chat"
+        if not should_run_m11 and _m11_enabled_for_state(state) and not proactive_turn:
+            _mark_llm_skipped("m11_user_model", "latency_fast_path" if latency_mode == "fast_chat" else "cadence_not_due")
+        if should_run_m11:
             def _extract_m11(snapshot: Mapping[str, object]) -> Mapping[str, object]:
                 system_prompt, user_prompt = build_m11_extractor_prompt(
                     snapshot=snapshot,
                     speaker_name=display_name,
                 )
                 try:
-                    return self.llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+                    return _complete_json_stage("m11_user_model", system_prompt, user_prompt)
                 except Exception:
                     return noop_extraction()
 
@@ -4972,7 +5243,7 @@ class MVPDialogueRuntime:
                 m12_result=m12_pre_result,
             )
         m12_1_result_dict: dict[str, Any] = {}
-        if _m12_1_enabled_for_state(state):
+        if _m12_1_enabled_for_state(state) and latency_mode != "fast_chat":
             m12_1_state = _load_m12_1_state(state)
             m12_summary_for_personality: dict[str, object] = {}
             if m12_pre_result:
@@ -4985,7 +5256,7 @@ class MVPDialogueRuntime:
                 def _extract(snapshot: Mapping[str, object]) -> Mapping[str, object]:
                     system_prompt, user_prompt = build_step_extractor_prompt(step, snapshot)
                     try:
-                        return self.llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+                        return _complete_json_stage(f"m12_1_step_{step}", system_prompt, user_prompt)
                     except Exception:
                         return {"status": "insufficient_evidence", "reason": f"step_{step}_llm_error"}
 
@@ -5017,6 +5288,9 @@ class MVPDialogueRuntime:
                 memory_dynamics,
                 m12_1_result=m12_1_result_dict,
             )
+        elif _m12_1_enabled_for_state(state):
+            for step in range(1, 9):
+                _mark_llm_skipped(f"m12_1_step_{step}", "latency_fast_path")
 
         relationship_value_context = resolve_relationship_value_context(
             state,
@@ -5025,14 +5299,23 @@ class MVPDialogueRuntime:
         )
         m12_2_result_dict: dict[str, Any] = {}
         m12_2_enabled = _m12_2_enabled_for_state(state) and not proactive_turn
-        if m12_2_enabled:
+        m12_2_should_run, m12_2_skip_reason = _m12_2_latency_triggered(
+            latency_mode=latency_mode,
+            user_text=user_text,
+            relationship_value_context=relationship_value_context,
+        )
+        m12_2_run_this_turn = m12_2_enabled and m12_2_should_run
+        if m12_2_enabled and not m12_2_run_this_turn:
+            _mark_llm_skipped("m12_2_first_order", m12_2_skip_reason)
+            _mark_llm_skipped("m12_2_second_order", m12_2_skip_reason)
+        if m12_2_run_this_turn:
             m12_2_state = _load_m12_2_state(state)
 
             def _extract_m12_2(name: str):
                 def _extract(snapshot: Mapping[str, object]) -> Mapping[str, object]:
                     system_prompt, user_prompt = build_m12_2_extractor_prompt(name, snapshot)
                     try:
-                        return self.llm.complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+                        return _complete_json_stage(f"m12_2_{name}", system_prompt, user_prompt)
                     except Exception:
                         if name == "first_order":
                             return {
@@ -5090,7 +5373,7 @@ class MVPDialogueRuntime:
                 m12_2_result=m12_2_result_dict,
             )
 
-        if not m12_2_enabled:
+        if not m12_2_run_this_turn:
             _apply_relationship_value_context_to_memory_dynamics(
                 memory_dynamics,
                 relationship_value_context,
@@ -5121,6 +5404,8 @@ class MVPDialogueRuntime:
         m13_boredom_evaluator = M13BoredomEvaluator()
         boredom_assessor_llm = self.llm
         reply_contract = _mapping(_mapping(memory_dynamics.get("control_guidance")).get("reply_contract"))
+        if latency_mode == "fast_chat":
+            boredom_assessor_llm = None
         if (
             str(reply_contract.get("conversation_mode", "")) == "casual_fast"
             and not retrieved
@@ -5140,7 +5425,7 @@ class MVPDialogueRuntime:
             evidence_judgment=evidence_judgment,
             m11_result=m11_result_dict or None,
             m12_payload=m12_pre_result,
-            m12_2_result=m12_2_result_dict if m12_2_enabled else None,
+            m12_2_result=m12_2_result_dict if m12_2_run_this_turn else None,
             llm=boredom_assessor_llm,
         )
         for m13_boredom_event in m13_boredom_evaluation.events:
@@ -5210,7 +5495,7 @@ class MVPDialogueRuntime:
                 "entity_binding": entity_binding,
             },
         )
-        thinking = self.llm.complete_json(system_prompt=thinking_system, user_prompt=thinking_user)
+        thinking = _complete_json_stage("thinking_reply", thinking_system, thinking_user)
         _report_progress("thinking_reply")
 
         self._apply_expectation_results(
@@ -5281,6 +5566,12 @@ class MVPDialogueRuntime:
             memory_dynamics=memory_dynamics,
             reply_validation=reply_validation,
         )
+        if latency_mode == "fast_chat" and should_observe:
+            _mark_llm_skipped("post_reply_observer", "latency_fast_path")
+            should_observe = False
+            observer_reason = "latency_fast_path"
+        elif latency_mode == "fast_chat":
+            _mark_llm_skipped("post_reply_observer", "latency_fast_path")
         if should_observe:
             try:
                 observer_system, observer_user = build_post_reply_observer_prompt(
@@ -5292,10 +5583,7 @@ class MVPDialogueRuntime:
                     temporal_assessment=temporal_assessment,
                     turn_index=turn_index,
                 )
-                observer_result = self.llm.complete_json(
-                    system_prompt=observer_system,
-                    user_prompt=observer_user,
-                )
+                observer_result = _complete_json_stage("post_reply_observer", observer_system, observer_user)
                 post_reply_observer = dict(observer_result)
                 post_reply_observer["trigger_reason"] = observer_reason
                 followup_text = _validated_followup_text(post_reply_observer)
@@ -5496,6 +5784,11 @@ class MVPDialogueRuntime:
             llm_thinking_result = {
                 "debug_summary": legacy_inner_thought,
             } if legacy_inner_thought else {}
+        latency_summary = _latency_trace_summary(turn_latency_trace)
+        latency_summary["turn_total_duration_ms"] = round((time.monotonic() - turn_latency_started) * 1000.0, 3)
+        latency_summary["latency_mode"] = latency_mode
+        latency_summary["latency_mode_reasons"] = _string_list(latency_mode_info.get("reason_codes"), limit=12)
+        latency_summary["skipped_stage_count"] = len(skipped_llm_stages)
         diagnostics = {
             "mvp_runtime": True,
             "proactive_turn": proactive_turn,
@@ -5526,6 +5819,11 @@ class MVPDialogueRuntime:
             "sharing_regret_feedback": sharing_regret_feedback,
             "followup_replies": followup_replies,
             "conversation_mode": control_guidance.get("conversation_mode"),
+            "latency_mode": latency_mode,
+            "latency_mode_reasons": _string_list(latency_mode_info.get("reason_codes"), limit=12),
+            "turn_latency_trace": [dict(item) for item in turn_latency_trace],
+            "turn_latency_summary": latency_summary,
+            "skipped_llm_stages": [dict(item) for item in skipped_llm_stages],
             "reply_contract": reply_contract,
             "reply_validation": reply_validation,
             "raw_reply": raw_reply,
@@ -5545,6 +5843,24 @@ class MVPDialogueRuntime:
             "state_root": str(self.store.root),
             "system_files": {key: str(self.store.path_for(key)) for key in SYSTEM_FILE_DEFAULTS},
         }
+        latency_log_event = {
+            "event": "turn_latency",
+            "type": "MVPDialogTurnLatencyEvent",
+            "at": now,
+            "turn_index": turn_index,
+            "latency_mode": latency_mode,
+            "latency_mode_reasons": _string_list(latency_mode_info.get("reason_codes"), limit=12),
+            "blocking_llm_calls": latency_summary.get("blocking_llm_calls", 0),
+            "total_llm_duration_ms": latency_summary.get("total_llm_duration_ms", 0.0),
+            "turn_total_duration_ms": latency_summary.get("turn_total_duration_ms", 0.0),
+            "slowest_stage": dict(latency_summary.get("slowest_stage", {}))
+            if isinstance(latency_summary.get("slowest_stage"), Mapping)
+            else {},
+            "turn_latency_trace": [dict(item) for item in turn_latency_trace[:12]],
+            "skipped_llm_stages": [dict(item) for item in skipped_llm_stages],
+        }
+        if not proactive_defer_audit_log:
+            self.store.append_log(latency_log_event)
         if proactive_turn and proactive_defer_audit_log:
             pass
         elif proactive_turn:
@@ -5822,6 +6138,15 @@ class MVPDialogueRuntime:
                 memory_efe_evaluation=memory_efe_evaluation,
                 structural_signals=sig_dict,
             )
+            if reject_reason:
+                m13_state = merge_initiative_into_m13_state(state.get("m13_drive_state", {}))
+                initiative = merge_idle_introspection_into_initiative(m13_state.get("initiative"))
+                idle = normalize_idle_introspection_state(initiative.get("idle_introspection"))
+                idle["last_cognitive_skip_reason"] = reject_reason
+                idle["last_cognitive_skip_at"] = now
+                initiative["idle_introspection"] = idle
+                m13_state["initiative"] = initiative
+                state["m13_drive_state"] = m13_state
         selected_target_payload = None
         if selected_target is not None:
             selected_target_payload = {

@@ -1079,6 +1079,9 @@ class ChatInterface:
         last_drive_band_summary: dict[str, object] = {}
         last_idle_cognitive_tick: dict[str, object] = {}
         last_idle_plan_mismatch: dict[str, object] = {}
+        latest_turn_latency: dict[str, object] = {}
+        latest_cognitive_skip: dict[str, object] = {}
+        latest_delivery_skip: dict[str, object] = {}
 
         def _row_at(row: Mapping[str, object]) -> int:
             return int(row.get("at", 0) or 0)
@@ -1160,7 +1163,7 @@ class ChatInterface:
                             {**suppression_payload, "traceable_expectation_id": ""},
                             row_at,
                         )
-                        last_proactive_suppression = dict(suppression_payload)
+                        latest_cognitive_skip = _maybe_latest(latest_cognitive_skip, suppression_payload, row_at)
                     if isinstance(bands, dict):
                         last_drive_band_summary = {
                             "behavioral_pull_band": bands.get("behavior_band", ""),
@@ -1204,6 +1207,7 @@ class ChatInterface:
                         suppression_payload,
                         row_at,
                     )
+                    latest_delivery_skip = _maybe_latest(latest_delivery_skip, suppression_payload, row_at)
                     if str(row.get("reason_stage", "") or "") == "pre_proposal":
                         last_proactive_target = {}
                     last_proactive_suppression = dict(suppression_payload)
@@ -1239,6 +1243,25 @@ class ChatInterface:
                 if str(row.get("type", "")) == "IdleProactiveDriveRefreshEvent":
                     summary = row.get("drive_band_summary", {})
                     last_drive_band_summary = dict(summary) if isinstance(summary, dict) else {}
+                if str(row.get("type", "")) == "MVPDialogTurnLatencyEvent":
+                    latest_turn_latency = _maybe_latest(
+                        latest_turn_latency,
+                        {
+                            "latency_mode": str(row.get("latency_mode", "") or ""),
+                            "blocking_llm_calls": int(row.get("blocking_llm_calls", 0) or 0),
+                            "total_llm_duration_ms": float(row.get("total_llm_duration_ms", 0.0) or 0.0),
+                            "turn_total_duration_ms": float(row.get("turn_total_duration_ms", 0.0) or 0.0),
+                            "slowest_stage": dict(row.get("slowest_stage", {}))
+                            if isinstance(row.get("slowest_stage"), dict)
+                            else {},
+                            "latency_mode_reasons": row.get("latency_mode_reasons", []),
+                            "turn_latency_trace": row.get("turn_latency_trace", []),
+                            "skipped_llm_stage_count": len(row.get("skipped_llm_stages", []))
+                            if isinstance(row.get("skipped_llm_stages"), list)
+                            else 0,
+                        },
+                        row_at,
+                    )
                 continue
             if str(row.get("type", "")) != "SelfLoopDaemonHealthEvent":
                 continue
@@ -1377,6 +1400,18 @@ class ChatInterface:
             "reflection_max": reflection_max,
             "last_introspection_at": int(idle.get("last_introspection_at", 0) or 0),
             "last_idle_skip_reason": str(idle.get("last_skip_reason", "") or ""),
+            "scheduler_skip_reason": str(idle.get("last_skip_reason", "") or ""),
+            "cognitive_selector_skip_reason": str(
+                idle.get("last_cognitive_skip_reason")
+                or latest_cognitive_skip.get("reason_code")
+                or latest_cognitive_skip.get("reason")
+                or ""
+            ),
+            "delivery_skip_reason": str(
+                latest_delivery_skip.get("reason_code")
+                or latest_delivery_skip.get("reason")
+                or ""
+            ),
             "last_outreach_outcome": str(idle.get("last_outreach_outcome", "") or ""),
             "background_llm_calls_today": int(bg.get("llm_calls_today", 0) or 0),
             "background_llm_budget": int(bg.get("llm_calls_budget_per_day", 80) or 80),
@@ -1393,6 +1428,7 @@ class ChatInterface:
             "latest_pipeline_suppression": latest_pipeline_suppression,
             "last_delivery_assessment": last_delivery_assessment,
             "m14_3_last_drive_band_summary": last_drive_band_summary,
+            "latest_turn_latency": latest_turn_latency,
             "m13_5_last_idle_cognitive_tick": last_idle_cognitive_tick,
             "m14_6_last_plan_selector_mismatch": last_idle_plan_mismatch,
             "m15_delta_f_trail": m15_delta_f_trail,

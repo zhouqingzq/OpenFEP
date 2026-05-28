@@ -278,6 +278,15 @@ def build_mind_debug_bundle_text(
     latest_pipeline = _mapping(observability.get("latest_pipeline_suppression"))
     last_assessment = _mapping(observability.get("last_delivery_assessment"))
     bands = _mapping(observability.get("m14_3_last_drive_band_summary"))
+    latest_turn_latency = _mapping(observability.get("latest_turn_latency"))
+    latency_trace = latest_turn_latency.get("turn_latency_trace", [])
+    if not isinstance(latency_trace, list):
+        latency_trace = []
+    latency_trace_text = "; ".join(
+        f"{_clip(_mapping(row).get('stage'), limit=28)}:{_mapping(row).get('duration_ms', 0)}ms"
+        for row in latency_trace[:6]
+        if isinstance(row, Mapping)
+    )
     intro_plan = _mapping(log_summary.get("latest_intro_plan"))
     plan_body = _mapping(intro_plan.get("plan"))
     outreach_plan = _mapping(plan_body.get("outreach_recommendation"))
@@ -331,6 +340,13 @@ def build_mind_debug_bundle_text(
         f"- environment_events_terminal_ratio: {observability.get('environment_events_terminal_ratio', '-')}",
         f"- environment_event_backlog_count: {observability.get('environment_event_backlog_count', 0)}",
         f"- stale_environment_event_backlog_count: {observability.get('stale_environment_event_backlog_count', 0)}",
+        f"- latest_turn_latency: mode={_clip(latest_turn_latency.get('latency_mode'), limit=40)} "
+        f"calls={latest_turn_latency.get('blocking_llm_calls', 0)} "
+        f"total_ms={latest_turn_latency.get('turn_total_duration_ms', 0)} "
+        f"slowest={_clip(_mapping(latest_turn_latency.get('slowest_stage')).get('stage'), limit=40)} "
+        f"skipped={latest_turn_latency.get('skipped_llm_stage_count', 0)}",
+        f"- latest_turn_latency_reasons: {_join(latest_turn_latency.get('latency_mode_reasons'), limit=8)}",
+        f"- latest_turn_latency_trace: {latency_trace_text or '-'}",
         "",
         "## M13.5 last idle cognitive tick",
         f"- at: {_fmt_ts(tick.get('at'))}",
@@ -479,6 +495,9 @@ def build_mind_debug_bundle_text(
         [
             "",
             "## Latest skip reasons (log vs state)",
+            f"- scheduler_skip_reason: {_clip(observability.get('scheduler_skip_reason'), limit=80)}",
+            f"- cognitive_selector_skip_reason: {_clip(observability.get('cognitive_selector_skip_reason'), limit=80)}",
+            f"- delivery_skip_reason: {_clip(observability.get('delivery_skip_reason'), limit=80)}",
             f"- log_latest_skip: {_clip(latest_skip.get('skip_reason') or latest_skip.get('reason_code') or latest_skip.get('suppression_reason_code'), limit=80)} "
             f"at={_fmt_ts(latest_skip.get('at'))}",
             f"- log_latest_stateful_skip: {_clip(latest_stateful.get('skip_reason') or latest_stateful.get('reason_code'), limit=80)} "
