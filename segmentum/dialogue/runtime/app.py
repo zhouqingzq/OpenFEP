@@ -52,6 +52,10 @@ from segmentum.dialogue.runtime.m14_1_background_continuity import (
     MIN_TICK_SECONDS,
 )
 from segmentum.dialogue.runtime.m14_4_implicit_idle import run_streamlit_implicit_idle_proactive
+from segmentum.dialogue.runtime.m16_streamlit_legacy import (
+    streamlit_legacy_banner_markdown,
+    streamlit_scheduling_allowed,
+)
 
 _DIALOGUE_PREF_FIELDS: tuple[str, ...] = (
     "current_speaker_name",
@@ -1135,6 +1139,8 @@ def _install_m14_delivery_autorefresh(chat_iface: ChatInterface) -> None:
 
 def _run_streamlit_implicit_idle_delivery_check(chat_iface: ChatInterface) -> None:
     """Run the M14.4 implicit idle delivery check without a browser reload."""
+    if not streamlit_scheduling_allowed():
+        return
     pending_text = st.session_state.get("pending_user_message")
     pending_proactive = bool(st.session_state.get("pending_proactive_continue", False))
     if (
@@ -1751,67 +1757,69 @@ def render_chat() -> None:
         st.session_state.pending_speaker_name = speaker
         st.rerun()
 
-    if chat_iface.has_agent() and getattr(chat_iface, "mvp_runtime_active", False):
-        try:
-            chat_iface.record_background_streamlit_ping()
-        except Exception:  # pragma: no cover
-            pass
+    if streamlit_scheduling_allowed():
+        if chat_iface.has_agent() and getattr(chat_iface, "mvp_runtime_active", False):
+            try:
+                chat_iface.record_background_streamlit_ping()
+            except Exception:  # pragma: no cover
+                pass
     _install_m14_delivery_autorefresh(chat_iface)
-    if (
-        chat_iface.has_agent()
-        and getattr(chat_iface, "mvp_runtime_active", False)
-        and bool(st.session_state.get("m13_initiative_opt_in", False))
-        and not pending_text
-        and not pending_proactive
-        and not bool(st.session_state.get("m13_ui_turn_in_progress", False))
-    ):
-        try:
-            drain = chat_iface.maybe_drain_queued_outreach()
-            if drain.get("drained") and str(drain.get("reply", "")).strip():
-                resp = ChatResponse(
-                    reply=str(drain["reply"]),
-                    action="proactive_queued",
-                    observation={},
-                    delta_traits={},
-                    delta_big_five={},
-                    diagnostics={"queued_outreach_drain": drain},
-                    safety_checks=[],
-                    turn_index=int(getattr(chat_iface, "_turn_index", 0)),
+    if streamlit_scheduling_allowed():
+        if (
+            chat_iface.has_agent()
+            and getattr(chat_iface, "mvp_runtime_active", False)
+            and bool(st.session_state.get("m13_initiative_opt_in", False))
+            and not pending_text
+            and not pending_proactive
+            and not bool(st.session_state.get("m13_ui_turn_in_progress", False))
+        ):
+            try:
+                drain = chat_iface.maybe_drain_queued_outreach()
+                if drain.get("drained") and str(drain.get("reply", "")).strip():
+                    resp = ChatResponse(
+                        reply=str(drain["reply"]),
+                        action="proactive_queued",
+                        observation={},
+                        delta_traits={},
+                        delta_big_five={},
+                        diagnostics={"queued_outreach_drain": drain},
+                        safety_checks=[],
+                        turn_index=int(getattr(chat_iface, "_turn_index", 0)),
+                    )
+                    append_assistant_response_messages(st.session_state.messages, resp)
+                    st.rerun()
+            except Exception as exc:  # pragma: no cover
+                _logger.exception("queued outreach drain failed: %s", exc)
+        _maybe_run_streamlit_idle_introspection(
+            chat_iface,
+            pending_text=pending_text,
+            pending_proactive=pending_proactive,
+        )
+        if (
+            not hasattr(st, "fragment")
+            and chat_iface.has_agent()
+            and getattr(chat_iface, "mvp_runtime_active", False)
+            and bool(st.session_state.get("m13_initiative_opt_in", False))
+            and bool(st.session_state.get("m13_implicit_idle_delivery", False))
+            and not pending_text
+            and not pending_proactive
+            and not bool(st.session_state.get("m13_ui_turn_in_progress", False))
+        ):
+            try:
+                result = run_streamlit_implicit_idle_proactive(
+                    chat_iface,
+                    session_state=st.session_state,
+                    pending_user_message=pending_text,
+                    pending_proactive=pending_proactive,
+                    user_typing=False,
+                    speaker_name=str(st.session_state.current_speaker_name or "").strip() or "测试用户",
                 )
-                append_assistant_response_messages(st.session_state.messages, resp)
-                st.rerun()
-        except Exception as exc:  # pragma: no cover
-            _logger.exception("queued outreach drain failed: %s", exc)
-    _maybe_run_streamlit_idle_introspection(
-        chat_iface,
-        pending_text=pending_text,
-        pending_proactive=pending_proactive,
-    )
-    if (
-        not hasattr(st, "fragment")
-        and chat_iface.has_agent()
-        and getattr(chat_iface, "mvp_runtime_active", False)
-        and bool(st.session_state.get("m13_initiative_opt_in", False))
-        and bool(st.session_state.get("m13_implicit_idle_delivery", False))
-        and not pending_text
-        and not pending_proactive
-        and not bool(st.session_state.get("m13_ui_turn_in_progress", False))
-    ):
-        try:
-            result = run_streamlit_implicit_idle_proactive(
-                chat_iface,
-                session_state=st.session_state,
-                pending_user_message=pending_text,
-                pending_proactive=pending_proactive,
-                user_typing=False,
-                speaker_name=str(st.session_state.current_speaker_name or "").strip() or "测试用户",
-            )
-            if result.delivered and result.response is not None:
-                append_assistant_response_messages(st.session_state.messages, result.response)
-                st.rerun()
-        except Exception as exc:  # pragma: no cover
-            _logger.exception("implicit idle proactive delivery failed: %s", exc)
-    _run_streamlit_implicit_idle_delivery_tick()
+                if result.delivered and result.response is not None:
+                    append_assistant_response_messages(st.session_state.messages, result.response)
+                    st.rerun()
+            except Exception as exc:  # pragma: no cover
+                _logger.exception("implicit idle proactive delivery failed: %s", exc)
+        _run_streamlit_implicit_idle_delivery_tick()
 
 
 _MIND_BUS_EVENT_PREFIXES = (
@@ -1832,6 +1840,8 @@ def _maybe_run_streamlit_idle_introspection(
     pending_proactive: bool,
 ) -> None:
     """M13.4: cheap gate on reruns; LLM only when idle + structural signals pass."""
+    if not streamlit_scheduling_allowed():
+        return
     if not bool(st.session_state.get("m13_idle_introspection_opt_in", False)):
         return
     if not (
@@ -3046,6 +3056,7 @@ def main() -> None:
     inject_app_style()
 
     st.title("Segmentum Persona Runtime")
+    st.warning(streamlit_legacy_banner_markdown(), icon="⚠️")
     _did_hdr = str(st.session_state.get("dialogue_client_id") or "")
     st.markdown(
         (

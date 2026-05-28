@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from segmentum.dialogue.runtime.m13_drive import normalize_m13_drive_state
 from segmentum.dialogue.runtime.m13_initiative import set_initiative_user_opt_in
 from segmentum.dialogue.runtime.m14_4_implicit_idle import run_streamlit_implicit_idle_proactive
@@ -9,6 +11,12 @@ from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStor
 
 
 NOW = 1_700_000_000
+
+
+@pytest.fixture(autouse=True)
+def _enable_legacy_streamlit_scheduler(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("SEGMENTS_LEGACY_STREAMLIT_SCHEDULER", "1")
+    monkeypatch.delenv("M16_RUNNER", raising=False)
 
 
 def _m13_enabled() -> dict[str, object]:

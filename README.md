@@ -81,6 +81,35 @@ python main.py --cycles 20 --precision-profile hair_trigger --reset-state
 
 State persists to `data/segment_v0_1_state.json`; structured JSONL trace beside it.
 
+## Path B Consciousness Chat (M16)
+
+Quick start with the M16 runner and web thin client:
+
+```bash
+# Terminal A — gateway + runner bridge
+python -m segmentum.dialogue.runtime.m16_api --host 127.0.0.1 --port 8765
+
+# Terminal B — web UI
+cd ui/web && npm install && npm run dev
+# open http://127.0.0.1:5173/?persona=胡桃&session=<session_id>
+```
+
+Quick start with the TUI operator client:
+
+```bash
+cd ui/tui && npm install && npm run build
+npx consciousness-tui --persona 胡桃 --session <session_id> --gateway http://127.0.0.1:8765
+```
+
+Legacy Streamlit adapter (I/O only; scheduling off by default):
+
+```bash
+streamlit run segmentum/dialogue/runtime/app.py
+```
+
+Set `SEGMENTS_LEGACY_STREAMLIT_SCHEDULER=1` only for compatibility testing.
+See `reports/m16_4_streamlit_migration.md`.
+
 ## Personality Analysis
 
 The `PersonalityAnalyzer` performs **inverse inference**: given text or behavioral materials, it builds a full personality generative model by running the FEP infrastructure in reverse - a 10-step pipeline from raw text to a structured personality report.

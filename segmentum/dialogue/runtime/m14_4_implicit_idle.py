@@ -3,6 +3,9 @@
 This module only wires the existing M13.3 proposal/delivery path for an open
 Streamlit chat page. It does not choose a new target and does not generate text
 outside ``run_proactive_turn``.
+
+After M16.4, callers must respect ``m16_streamlit_legacy.streamlit_scheduling_allowed()``.
+The entrypoint below returns a suppressed result when the legacy scheduler is off.
 """
 
 from __future__ import annotations
@@ -12,6 +15,7 @@ import time
 from typing import Any, Mapping
 
 from segmentum.dialogue.runtime.m13_initiative import DEFAULT_IDLE_THRESHOLD_SECONDS
+from segmentum.dialogue.runtime.m16_streamlit_legacy import streamlit_scheduling_allowed
 
 ENGINEERING_PROXY_LABEL = "mvp_local_streamlit_implicit_idle"
 DEFAULT_IMPLICIT_IDLE_ATTEMPT_INTERVAL_SECONDS = 45.0
@@ -169,6 +173,21 @@ def run_streamlit_implicit_idle_proactive(
     speaker_name: str = "",
     min_attempt_interval_seconds: float = DEFAULT_IMPLICIT_IDLE_ATTEMPT_INTERVAL_SECONDS,
 ) -> ImplicitIdleProactiveResult:
+    if not streamlit_scheduling_allowed():
+        result = ImplicitIdleProactiveResult(
+            suppression_reason_code="m16_legacy_scheduler_off",
+            proactive_policy_profile="bounded_default",
+        )
+        _record_event(
+            chat_iface,
+            _event(
+                idle_seconds=0.0,
+                idle_threshold_seconds=float(DEFAULT_IDLE_THRESHOLD_SECONDS),
+                proactive_policy_profile=result.proactive_policy_profile,
+                suppression_reason_code=result.suppression_reason_code,
+            ),
+        )
+        return result
     now = float(time.time() if now is None else now)
     now_mono = float(time.monotonic() if now_mono is None else now_mono)
     state = chat_iface.read_mvp_state_dict() if hasattr(chat_iface, "read_mvp_state_dict") else {}

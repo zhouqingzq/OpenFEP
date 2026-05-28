@@ -2,14 +2,24 @@
 
 ## Active Product Path: Path B Only
 
-All new dialogue cognition work targets **Path B** — the MVP UI chat stack:
+All new dialogue cognition work targets **Path B** — the MVP chat stack
+orchestrated by the **M16 Consciousness Runner** (not Streamlit reruns):
 
 ```text
-segmentum/dialogue/runtime/app.py
--> ChatInterface
+ui/web or ui/tui (@segments/consciousness-client)
+-> m16_api gateway + WebSocket actuation
+-> ConsciousnessRunner (m16_runner.py)
 -> MVPDialogueRuntime (mvp_loop.py)
 -> MVPStateStore + persona/session JSON
 ```
+
+**Streamlit (`app.py`) is legacy I/O only after M16.4.** It must not schedule
+idle ticks, implicit proactive delivery, or queued outreach drain unless
+`SEGMENTS_LEGACY_STREAMLIT_SCHEDULER=1` and `M16_RUNNER` is not active. Runner
+mode always wins over the legacy scheduler flag.
+
+For daily debugging use `ui/tui`; for demos use `ui/web`. See
+`reports/m16_4_streamlit_migration.md`.
 
 **Path B is the only path to extend.** Do not plan features around Path A, do not
 unify the two stacks, and do not carry forward historical experiments as
@@ -201,11 +211,14 @@ self-thought producers) for new Hu Tao / MVP chat behavior.
   evidence refs. Vague open-item `next_check` tokens alone must not trigger
   M13.3 proposals. Blocked proactive delivery must emit structured
   `reason_code` audit events, not only a generic `safety_risk` label.
-- Streamlit implicit idle delivery uses the existing M13.3 proposal and
-  `run_proactive_turn` path only. Fresh initiative state remains conservative
-  (`bounded_default`, implicit idle off); local Streamlit may auto-enable hidden
-  MVP chat toggles, and `streamlit_open_chat` cap/cooldown relaxation requires
-  an explicit env flag or setter. After M16.4, the acceptance path is the M16
+- Legacy Streamlit implicit idle delivery (M14.4) uses the existing M13.3
+  proposal and `run_proactive_turn` path only when
+  `SEGMENTS_LEGACY_STREAMLIT_SCHEDULER=1` and runner mode is off. After M16.4,
+  acceptance uses M16 runner + web/TUI delivery surface, not Streamlit reruns.
+  Fresh initiative state remains conservative (`bounded_default`, implicit idle
+  off); local Streamlit may auto-enable hidden MVP chat toggles, and
+  `streamlit_open_chat` cap/cooldown relaxation requires an explicit env flag or
+  setter. After M16.4, the acceptance path is the M16
   runner + gateway; Streamlit is legacy I/O only.
 
 ---

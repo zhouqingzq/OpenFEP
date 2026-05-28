@@ -55,7 +55,7 @@ M16.0: Consciousness Runner Architecture And Wire Protocol — **landed** (`repo
 M16.1: Python Consciousness Runner Service And Gateway — **landed** (`m16_runner.py`, `m16_api.py`, `m16_cli.py`, bridge/ws hub, acceptance tests). Streamlit remains legacy/non-acceptance for proactive scheduling.
 M16.2: TypeScript Consciousness Client SDK — **landed** (`ui/packages/consciousness-client`, HTTP + WS + ajv validation, vitest).
 M16.3: TypeScript Web Thin Frontend — **landed** (`ui/web`, Vite + consciousness-client, delivery ack + resync tests).
-M16.4: TypeScript TUI Client And Streamlit Deprecation
+M16.4: TypeScript TUI Client And Streamlit Deprecation — **landed** (`ui/tui`, `m16_streamlit_legacy.py`, migration guide, Streamlit scheduler gated off by default).
 ```
 
 M8.9 is a bridge milestone. It does not replace the original roadmap; it locks state ownership, memory write intent, and generation evidence boundaries before M9-M12 expand the system.

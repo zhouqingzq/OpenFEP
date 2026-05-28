@@ -30,6 +30,12 @@ from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStor
 NOW = 1_900_000_000
 
 
+@pytest.fixture(autouse=True)
+def _enable_legacy_streamlit_scheduler(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("SEGMENTS_LEGACY_STREAMLIT_SCHEDULER", "1")
+    monkeypatch.delenv("M16_RUNNER", raising=False)
+
+
 def _m13_enabled(*, profile: str = BOUNDED_DEFAULT_PROFILE, implicit_idle: bool = True) -> dict[str, object]:
     m13 = set_initiative_user_opt_in(default_m13_drive_state(), enabled=True)
     m13 = set_initiative_implicit_idle_delivery(m13, enabled=implicit_idle)
