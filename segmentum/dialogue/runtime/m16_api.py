@@ -388,6 +388,12 @@ def create_app(gateway: M16Gateway | None = None) -> FastAPI:
                 client_id=client_id,
             )
 
+    web_dist = Path(__file__).resolve().parents[3] / "ui" / "web" / "dist"
+    if web_dist.is_dir():
+        from fastapi.staticfiles import StaticFiles
+
+        app.mount("/", StaticFiles(directory=str(web_dist), html=True), name="m16_web_static")
+
     return app
 
 

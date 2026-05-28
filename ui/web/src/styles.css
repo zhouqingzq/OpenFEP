@@ -1,0 +1,177 @@
+:root {
+  color-scheme: dark;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: #0f1419;
+  color: #e7ecf1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  padding: 1rem;
+  border-right: 1px solid #243041;
+  background: #121820;
+  overflow: auto;
+}
+
+.sidebar h1 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+
+.session-fields label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.session-fields input {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #314158;
+  background: #0f1419;
+  color: inherit;
+}
+
+.session-fields button,
+.runner-controls button {
+  margin-top: 0.5rem;
+  margin-right: 0.35rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #3d5168;
+  background: #1a2430;
+  color: inherit;
+  cursor: pointer;
+}
+
+.connection-badge {
+  display: inline-block;
+  margin: 0.75rem 0;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: #243041;
+}
+
+.connection-badge[data-state="live"] {
+  background: #1f4d37;
+}
+
+.connection-badge[data-state="resyncing"],
+.connection-badge[data-state="connecting"] {
+  background: #4d3a1f;
+}
+
+.connection-badge[data-state="offline"] {
+  background: #4d1f1f;
+}
+
+.runner-status,
+.snapshot-json {
+  font-size: 0.72rem;
+  white-space: pre-wrap;
+  background: #0f1419;
+  border: 1px solid #243041;
+  border-radius: 8px;
+  padding: 0.5rem;
+  max-height: 180px;
+  overflow: auto;
+}
+
+.chat-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.chat-list {
+  flex: 1;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.message {
+  max-width: 720px;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  background: #1a2430;
+}
+
+.message-user {
+  margin-left: auto;
+  background: #24364d;
+}
+
+.message-proactive {
+  border: 1px solid #5a4d1f;
+}
+
+.message header {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  margin-bottom: 0.35rem;
+}
+
+.composer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-top: 1px solid #243041;
+}
+
+.composer textarea {
+  resize: vertical;
+  min-height: 56px;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #314158;
+  background: #121820;
+  color: inherit;
+}
+
+.toast-suppression {
+  opacity: 0.85;
+  font-size: 0.85rem;
+  background: #402820;
+}
+
+.diagnostics-panel h2,
+.diagnostics-panel h3 {
+  font-size: 0.9rem;
+  margin: 0.75rem 0 0.35rem;
+}
+
+.runtime-hints {
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+}
+
+.audit-list {
+  padding-left: 1rem;
+  font-size: 0.72rem;
+  max-height: 120px;
+  overflow: auto;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}

@@ -54,7 +54,7 @@ M15.3: Open-Item And Pending-Expectation Cleanup Meta-Control
 M16.0: Consciousness Runner Architecture And Wire Protocol — **landed** (`reports/m16_0_consciousness_runner_contract.md`, `m16_protocol.py`, OpenAPI/JSON schemas).
 M16.1: Python Consciousness Runner Service And Gateway — **landed** (`m16_runner.py`, `m16_api.py`, `m16_cli.py`, bridge/ws hub, acceptance tests). Streamlit remains legacy/non-acceptance for proactive scheduling.
 M16.2: TypeScript Consciousness Client SDK — **landed** (`ui/packages/consciousness-client`, HTTP + WS + ajv validation, vitest).
-M16.3: TypeScript Web Thin Frontend
+M16.3: TypeScript Web Thin Frontend — **landed** (`ui/web`, Vite + consciousness-client, delivery ack + resync tests).
 M16.4: TypeScript TUI Client And Streamlit Deprecation
 ```
 

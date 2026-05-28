@@ -111,11 +111,9 @@ export {
 };
 export * from "./types.js";
 export * from "./errors.js";
+export { ReconnectBackoff, sleep } from "./reconnect.js";
 export {
   validateOutboundClientMessage,
   validateInboundServerMessage,
-  compileSchemasForCi,
   FORBIDDEN_ACTUATION_PAYLOAD_KEYS,
-  schemasDirectory,
-} from "./validate.js";
-export { ReconnectBackoff, sleep } from "./reconnect.js";
+} from "./validate-lite.js";

@@ -16,7 +16,7 @@ import {
   type WsClientMessage,
   type WsServerMessage,
 } from "./types.js";
-import { validateInboundServerMessage, validateOutboundClientMessage } from "./validate.js";
+import { validateInboundServerMessage, validateOutboundClientMessage } from "./validate-lite.js";
 
 type StreamListener<K extends StreamEventName> = (...args: StreamEventMap[K]) => void;
 
