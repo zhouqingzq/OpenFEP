@@ -1,11 +1,35 @@
 {
   "name": "@segments/consciousness-client",
-  "version": "0.0.0-m16.0-scaffold",
+  "version": "0.1.0-m16.2",
   "private": true,
-  "description": "M16.2 will implement the shared TypeScript client for the consciousness gateway.",
+  "description": "TypeScript client for the M16 consciousness gateway (HTTP + WebSocket).",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "node -e \"console.log('M16.2: implement build')\"",
-    "test": "node -e \"console.log('M16.2: implement tests')\""
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "cross-env M16_INTEGRATION=1 vitest run tests/integration.test.ts",
+    "validate-schemas": "tsx scripts/validate-schemas.ts",
+    "example": "tsx examples/minimal-node.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "cross-env": "^7.0.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   }
 }
