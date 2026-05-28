@@ -48,12 +48,13 @@ def test_ws_client_input_appends_event_without_inline_turn(tmp_path: Path) -> No
                     "at": clk(),
                     "kind": "ClientInput",
                     "correlation_id": "corr_ws_in",
-                    "payload": {"text": "via ws"},
+                    "payload": {"text": "via ws", "speaker_name": "zq"},
                 }
             )
     assert calls == []
     events = bridge.event_store.query_events(event_types={"ClientInputCommittedEvent"})
     assert any(ev["payload"]["text"] == "via ws" for ev in events)
+    assert any(ev["payload"].get("speaker_name") == "zq" for ev in events)
 
 
 def test_ws_delivery_surface_ready_via_stream(tmp_path: Path) -> None:

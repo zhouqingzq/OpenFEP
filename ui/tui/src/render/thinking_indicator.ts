@@ -87,4 +87,11 @@ export class ThinkingIndicator {
   isActive(): boolean {
     return this.active;
   }
+
+  touch(): void {
+    if (!this.active) {
+      return;
+    }
+    this.hooks.render(this.formatLine(Date.now() - this.startedAt, this.frameIndex));
+  }
 }

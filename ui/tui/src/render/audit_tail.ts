@@ -49,6 +49,9 @@ export class AuditTail {
       return line;
     }
     if (kind === "AuditEvent") {
+      if (String(message.payload?.audit_type ?? "") === "turn_progress") {
+        return null;
+      }
       const summary = summarizeAuditPayload(message.payload ?? {});
       const line: TranscriptLine = {
         role: "audit",

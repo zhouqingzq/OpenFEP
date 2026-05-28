@@ -154,7 +154,14 @@ class M16SessionBridge:
     def next_user_turn_index(self) -> int:
         return self.turn_index() + 1
 
-    def run_user_turn(self, text: str, *, turn_index: int | None = None, speaker_name: str = "") -> Any:
+    def run_user_turn(
+        self,
+        text: str,
+        *,
+        turn_index: int | None = None,
+        speaker_name: str = "",
+        turn_progress: Any | None = None,
+    ) -> Any:
         idx = int(turn_index if turn_index is not None else self.next_user_turn_index())
         return self.runtime.run_turn(
             text,
@@ -162,6 +169,7 @@ class M16SessionBridge:
             speaker_name=speaker_name or "default_user",
             bus_messages=[{"type": "M16UserInputEvent", "source": "m16_runner", "turn_index": idx}],
             now=_now(self.clock),
+            turn_progress=turn_progress,
         )
 
     def run_idle_cognitive_tick(self, *, idle_seconds: float = 0.0, now: int | None = None) -> dict[str, Any]:

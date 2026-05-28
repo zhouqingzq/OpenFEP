@@ -347,10 +347,12 @@ def create_app(gateway: M16Gateway | None = None) -> FastAPI:
                     handle.hub.build_and_publish(kind="RunnerHealth", payload={"pong": True})
                 elif kind == "ClientInput":
                     text = str(payload.get("text", "") or "")[:MAX_INPUT_TEXT_CHARS]
+                    speaker_name = str(payload.get("speaker_name", "") or "")[:64]
                     event_id = handle.bridge.append_client_input(
                         text=text,
                         correlation_id=msg_correlation,
                         source="m16_ws",
+                        speaker_name=speaker_name,
                     )
                     _append_gateway_audit(
                         handle.bridge,

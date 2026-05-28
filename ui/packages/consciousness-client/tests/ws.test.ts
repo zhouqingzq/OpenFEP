@@ -82,6 +82,23 @@ describe("websocket stream", () => {
     validateOutboundClientMessage(ack);
     await stream.disconnect();
   });
+
+  it("test_ws_client_input_serializes_speaker_name", async () => {
+    const client = createTestClient(mockFetch({}));
+    const stream = client.connectStream({ autoReconnect: false });
+    await stream.connect();
+    const ws = MockWebSocket.instances[0];
+    ws.simulateMessage(baseMessage("Subscribed"));
+    await stream.sendClientInput("hello", { speaker_name: "zq" });
+    const input = JSON.parse(ws.sent.at(-1) ?? "{}") as {
+      kind: string;
+      payload: { text: string; speaker_name?: string };
+    };
+    expect(input.kind).toBe("ClientInput");
+    expect(input.payload).toMatchObject({ text: "hello", speaker_name: "zq" });
+    validateOutboundClientMessage(input);
+    await stream.disconnect();
+  });
 });
 
 describe("validation", () => {

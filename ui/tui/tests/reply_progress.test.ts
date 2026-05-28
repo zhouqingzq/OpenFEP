@@ -9,9 +9,14 @@ describe("reply progress", () => {
     expect(formatProgressBar(1, 8)).toBe("[========]");
   });
 
-  it("formats persona reply line with percent", () => {
-    const line = formatReplyProgressLine("胡桃", 60_000, 120_000);
+  it("formats persona reply line with stage percent", () => {
+    const line = formatReplyProgressLine("胡桃", 42);
     expect(line).toContain("胡桃正在回复...");
-    expect(line).toContain("50%");
+    expect(line).toContain("42%");
+  });
+
+  it("clamps percent to 0-100", () => {
+    expect(formatReplyProgressLine("胡桃", 150)).toContain("100%");
+    expect(formatReplyProgressLine("胡桃", -5)).toContain("0%");
   });
 });

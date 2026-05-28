@@ -14,7 +14,7 @@ import type { Interface } from "node:readline";
 
 import { commandHelpText, parseReplLine } from "./commands.js";
 import { AuditTail, DELIVERY_SURFACE_REFRESH_SECONDS } from "./render/audit_tail.js";
-import { formatReplyProgressLine, DEFAULT_REPLY_EXPECTED_MS } from "./render/reply_progress.js";
+import { formatReplyProgressLine } from "./render/reply_progress.js";
 import { formatStatusBar } from "./render/status_bar.js";
 import { ThinkingIndicator } from "./render/thinking_indicator.js";
 import {
@@ -23,7 +23,7 @@ import {
   type TranscriptLabels,
   type TranscriptLine,
 } from "./render/transcript.js";
-import { createReplOutput, clearReplInlineStatus, emitReplInlineStatus, emitReplMessage, withTimeout, waitForAbortSignal, type ReplOutput } from "./repl_io.js";
+import { createReplOutput, clearReadlineSubmittedEcho, clearReplInlineStatus, emitReplInlineStatus, emitReplMessage, withTimeout, waitForAbortSignal, type ReplOutput } from "./repl_io.js";
 import { createStdinLineSource, REPL_PROMPT, type StdinLineSource } from "./stdin_lines.js";
 
 const INPUT_TIMEOUT_MS = 15_000;
@@ -68,6 +68,7 @@ export class ConsciousnessRepl {
   private subscribeAbort: AbortController | null = null;
   private readonly thinking: ThinkingIndicator;
   private awaitingAssistantReply = false;
+  private replyProgressPercent = 0;
 
   constructor(private readonly options: ReplOptions) {
     this.color = options.color !== false;
@@ -197,6 +198,9 @@ export class ConsciousnessRepl {
       }
     });
     stream.on("auditEvent", (msg) => {
+      if (this.handleTurnProgress(msg)) {
+        return;
+      }
       const line = this.auditTail.push(msg);
       if (line) {
         this.emitTranscript(line);
@@ -292,6 +296,8 @@ export class ConsciousnessRepl {
   }
 
   private queueUserMessage(text: string): void {
+    clearReadlineSubmittedEcho(this.rl, this.prompt);
+    this.replyProgressPercent = 0;
     const key = `local:user:${text}:${Math.floor(Date.now() / 1000)}`;
     this.renderedMessageKeys.add(key);
     this.emitTranscript({ role: "user", text, at: Math.floor(Date.now() / 1000) });
@@ -487,10 +493,27 @@ export class ConsciousnessRepl {
 
   private startThinkingIndicator(): void {
     this.awaitingAssistantReply = true;
+    this.replyProgressPercent = 0;
     const personaName = this.options.personaId;
     this.thinking.start({
-      formatLine: (elapsedMs) => formatReplyProgressLine(personaName, elapsedMs, DEFAULT_REPLY_EXPECTED_MS),
+      formatLine: () => formatReplyProgressLine(personaName, this.replyProgressPercent),
     });
+  }
+
+  private handleTurnProgress(message: WsServerMessage): boolean {
+    const payload = message.payload ?? {};
+    if (String(payload.audit_type ?? "") !== "turn_progress") {
+      return false;
+    }
+    const percent = Number(payload.percent ?? 0);
+    if (!Number.isFinite(percent)) {
+      return true;
+    }
+    this.replyProgressPercent = Math.max(this.replyProgressPercent, Math.min(100, Math.round(percent)));
+    if (this.awaitingAssistantReply) {
+      this.thinking.touch();
+    }
+    return true;
   }
 
   private stopThinkingIndicator(): void {

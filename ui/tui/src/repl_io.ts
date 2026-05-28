@@ -31,6 +31,17 @@ export function restoreReplPrompt(rl: Interface | null, prompt = "> "): void {
   process.stdout.write(`${prompt}${typed}`);
 }
 
+/** Remove the line readline echoed after Enter; transcript renders the user turn separately. */
+export function clearReadlineSubmittedEcho(rl: Interface | null, prompt = "> "): void {
+  if (!rl || !process.stdout.isTTY) {
+    return;
+  }
+  // Delete the submitted echo row entirely (ELM) so scrollback does not keep a blank line.
+  readline.moveCursor(process.stdout, 0, -1);
+  process.stdout.write("\x1b[2K\x1b[M");
+  restoreReplPrompt(rl, prompt);
+}
+
 export function emitReplMessage(
   rl: Interface | null,
   write: () => void,

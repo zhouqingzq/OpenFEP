@@ -228,8 +228,13 @@ export class ConsciousnessStream {
     await this.sendClientMessage("DeliveryAck", { delivery_id: deliveryId.slice(0, 120) });
   }
 
-  async sendClientInput(text: string): Promise<void> {
-    await this.sendClientMessage("ClientInput", { text: text.slice(0, 8000) });
+  async sendClientInput(text: string, metadata?: { speaker_name?: string }): Promise<void> {
+    const payload: Record<string, unknown> = { text: text.slice(0, 8000) };
+    const speakerName = String(metadata?.speaker_name ?? "").trim();
+    if (speakerName) {
+      payload.speaker_name = speakerName.slice(0, 64);
+    }
+    await this.sendClientMessage("ClientInput", payload);
   }
 
   async signalDeliverySurfaceReady(): Promise<void> {

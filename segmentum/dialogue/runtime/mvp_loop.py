@@ -4549,6 +4549,7 @@ class MVPDialogueRuntime:
         bus_messages: list[Mapping[str, Any]] | None = None,
         now: int | None = None,
         proactive_context: Mapping[str, Any] | None = None,
+        turn_progress: Any | None = None,
     ) -> MVPTurnResult:
         now = _utc_timestamp() if now is None else int(now)
         state = self.store.load()
@@ -4620,6 +4621,12 @@ class MVPDialogueRuntime:
                 "text": user_text,
                 "at": now,
             })
+        def _report_progress(step: str) -> None:
+            reporter = turn_progress
+            if reporter is not None and hasattr(reporter, "advance"):
+                reporter.advance(step)
+
+        _report_progress("init")
         identity_anchored_action = _identity_anchored_action_sensitive(user_text)
         m12_pre_result: dict[str, Any] | None = None
         turn_key = f"turn_{turn_index + 1:04d}"
@@ -4677,6 +4684,7 @@ class MVPDialogueRuntime:
                     "sequence": seq_idx,
                     "cognitive_event": ev.to_dict(),
                 })
+        _report_progress("m12_identity_pre")
         entity_binding = build_entity_binding_context(
             state=state,
             user_text=user_text,
@@ -4787,6 +4795,7 @@ class MVPDialogueRuntime:
         ):
             bus.append(addendum)
 
+        _report_progress("m13_settlement")
         conscious_system, conscious_user = build_conscious_loop_prompt(
             state=state,
             user_text=user_text,
@@ -4797,6 +4806,7 @@ class MVPDialogueRuntime:
             entity_binding=entity_binding,
         )
         conscious = self.llm.complete_json(system_prompt=conscious_system, user_prompt=conscious_user)
+        _report_progress("conscious_loop")
         m13_state, m13_memory_efe_settlement_events = settle_memory_efe_outreach(
             m13_state,
             conscious_plan=conscious,
@@ -4855,6 +4865,7 @@ class MVPDialogueRuntime:
                 memory_dynamics["recall_query"] = recall_query
             except Exception as exc:
                 query_plan = {"planner_error": type(exc).__name__}
+        _report_progress("query_planner")
         lexical_candidates = lexical_recall_short_term_candidates(
             state,
             user_text=user_text,
@@ -4891,6 +4902,7 @@ class MVPDialogueRuntime:
                     "judge_summary": "evidence judge failed; candidates are passed as uncertain recall",
                 }
         _apply_evidence_judgment_contract(memory_dynamics, evidence_judgment)
+        _report_progress("evidence_judge")
         retrieved = retrieve_memories_for_guidance(
             state,
             recall_query,
@@ -4910,6 +4922,7 @@ class MVPDialogueRuntime:
             "query_plan": query_plan,
         }
         self._mark_recalled(state, retrieved, now)
+        _report_progress("memory_recall")
         response_style_prior = _response_style_prior(state, retrieved)
         m11_result_dict: dict[str, Any] = {}
         if _m11_enabled_for_state(state) and not proactive_turn:
@@ -5083,6 +5096,7 @@ class MVPDialogueRuntime:
                 relationship_value_context,
             )
 
+        _report_progress("user_modeling")
         m13_evaluator = M13DriveEvaluator()
         m15_state_fingerprint_pre = self._current_state_fingerprint(state)
         m13_evaluation = m13_evaluator.evaluate(
@@ -5172,6 +5186,7 @@ class MVPDialogueRuntime:
         for m13_memory_efe_event in m13_memory_efe_evaluation.events:
             bus.append(m13_memory_efe_event)
         merge_memory_efe_guidance_into_control(memory_dynamics, m13_memory_efe_evaluation)
+        _report_progress("m13_eval")
 
         thinking_system, thinking_user = build_thinking_prompt(
             state=_prompt_safe_state(state, user_id=user_id),
@@ -5196,6 +5211,7 @@ class MVPDialogueRuntime:
             },
         )
         thinking = self.llm.complete_json(system_prompt=thinking_system, user_prompt=thinking_user)
+        _report_progress("thinking_reply")
 
         self._apply_expectation_results(
             state,
@@ -5295,6 +5311,7 @@ class MVPDialogueRuntime:
                 }
         else:
             post_reply_observer_skipped_reason = observer_reason
+        _report_progress("post_reply_observer")
         post_reply_memory_updates_applied = self._apply_post_reply_memory_updates(
             state,
             post_reply_observer.get("memory_updates"),
@@ -5559,6 +5576,7 @@ class MVPDialogueRuntime:
                     "diagnostics": diagnostics,
                 }
             )
+        _report_progress("finalize")
         return MVPTurnResult(
             reply=reply,
             action=action,

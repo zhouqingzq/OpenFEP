@@ -261,11 +261,30 @@ class ConsciousnessRunner:
         speaker_name = str(payload.get("speaker_name", "") or "").strip()
         turn_index = self.bridge.next_user_turn_index()
         actuation_messages: list[dict[str, Any]] = []
+        from segmentum.dialogue.runtime.m16_turn_progress import TurnProgressReporter, build_turn_progress_payload
+
+        def _publish_turn_progress(turn_idx: int, stage: str, percent: int) -> None:
+            self.hub.build_and_publish(
+                kind="AuditEvent",
+                payload=build_turn_progress_payload(
+                    turn_index=turn_idx,
+                    stage=stage,
+                    percent=percent,
+                ),
+                now=now,
+            )
+
+        progress = TurnProgressReporter(turn_index=turn_index, publish=_publish_turn_progress)
         try:
             if self._inline_run_turn is not None:
                 result = self._inline_run_turn(text, turn_index=turn_index, now=now)
             else:
-                result = self.bridge.run_user_turn(text, turn_index=turn_index, speaker_name=speaker_name)
+                result = self.bridge.run_user_turn(
+                    text,
+                    turn_index=turn_index,
+                    speaker_name=speaker_name,
+                    turn_progress=progress,
+                )
         except Exception as exc:
             detail = str(exc)[:240]
             error_msg = self.hub.build_and_publish(
