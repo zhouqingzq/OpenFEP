@@ -9,6 +9,11 @@ describe("reply progress", () => {
     expect(formatProgressBar(1, 8)).toBe("[========]");
   });
 
+  it("shows waiting label before first stage percent", () => {
+    expect(formatReplyProgressLine("胡桃", 0)).toContain("等待中");
+    expect(formatReplyProgressLine("胡桃", 0)).not.toContain("0%");
+  });
+
   it("formats persona reply line with stage percent", () => {
     const line = formatReplyProgressLine("胡桃", 42);
     expect(line).toContain("胡桃正在回复...");
@@ -17,6 +22,6 @@ describe("reply progress", () => {
 
   it("clamps percent to 0-100", () => {
     expect(formatReplyProgressLine("胡桃", 150)).toContain("100%");
-    expect(formatReplyProgressLine("胡桃", -5)).toContain("0%");
+    expect(formatReplyProgressLine("胡桃", -5)).toContain("等待中");
   });
 });

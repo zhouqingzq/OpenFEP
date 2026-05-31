@@ -8,6 +8,9 @@ export function formatProgressBar(ratio: number, width = 20): string {
 }
 
 export function formatReplyProgressLine(personaName: string, percent: number): string {
+  if (percent <= 0) {
+    return `${personaName}正在回复... [>                   ] 等待中`;
+  }
   const clamped = Math.max(0, Math.min(100, Math.round(percent)));
   const bar = formatProgressBar(clamped / 100);
   return `${personaName}正在回复... ${bar} ${clamped}%`;

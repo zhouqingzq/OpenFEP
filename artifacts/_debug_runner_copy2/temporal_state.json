@@ -1,0 +1,36 @@
+{
+  "last_turn_at": 1779970206,
+  "last_user_turn_at": 1779970206,
+  "last_assistant_turn_at": null,
+  "last_turn_index": 5,
+  "last_user_text": "你还记得我们昨天聊了什么么？",
+  "last_reply": "嗯？",
+  "last_elapsed_seconds": 122,
+  "last_time_gap_label": "short_gap",
+  "last_share_trace": {
+    "user_id": "default_user",
+    "speaker_name": "default_user",
+    "allow_direct_disclosure": true,
+    "allow_abstract_sharing": true,
+    "net_free_energy_reduction": 0.2668,
+    "had_cross_user_memory": false,
+    "lexical_recall_terms": [
+      "昨天",
+      "昨天聊天",
+      "昨日对话",
+      "聊天记录",
+      "历史对话",
+      "上一个session",
+      "连续性",
+      "你还记得我们昨天聊了什么么",
+      "处理用户关于昨日聊天内容的回溯询问——当前记忆库中没有任何昨天（或更早）的对话记录，需要检测这是一个时间语境纠正、用户虚构、还是连续性测试",
+      "判断是否有必要检索长期记忆或调整自我认知；若无法找到昨日记录，需在回复中自然表达无此记忆，同时避免承认不存在的时间戳"
+    ],
+    "target_person": "",
+    "pronoun_bindings": {},
+    "evidence_topics": [],
+    "evidence_source_names": [
+      "default_user"
+    ]
+  }
+}

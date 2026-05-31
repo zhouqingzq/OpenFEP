@@ -1,0 +1,70 @@
+[
+  {
+    "id": "exp_user_introduce",
+    "content": "用户可能会自我介绍或开启新话题",
+    "verify_on": "memory_dynamics_idle",
+    "confidence": 0.5,
+    "memory_dynamics_binding": {
+      "should_bind_idle": false,
+      "reason_codes": [],
+      "evidence_refs": []
+    },
+    "source_expectation_id": "exp_user_introduce",
+    "created_at": 1779969905,
+    "created_turn_index": 2,
+    "source": "memory_dynamics_adapter",
+    "evidence_refs": [
+      "stm_turn_1779969905"
+    ],
+    "bound_memory_ids": [
+      "stm_turn_1779969905"
+    ]
+  },
+  {
+    "id": "exp_user_introduce_or_topic",
+    "content": "用户可能会自我介绍或主动提出想聊的话题",
+    "verify_on": "memory_dynamics_idle",
+    "confidence": 0.5,
+    "memory_dynamics_binding": {
+      "should_bind_idle": false,
+      "reason_codes": [],
+      "evidence_refs": []
+    },
+    "source_expectation_id": "exp_user_introduce_or_topic",
+    "created_at": 1779969991,
+    "created_turn_index": 3,
+    "source": "memory_dynamics_adapter",
+    "evidence_refs": [
+      "stm_turn_1779969991"
+    ],
+    "bound_memory_ids": [
+      "stm_turn_1779969991"
+    ]
+  },
+  {
+    "id": "exp_user_topic_or_intro_after_4th",
+    "content": "用户可能会提出话题或自我介绍",
+    "verify_on": "memory_dynamics_idle",
+    "confidence": 0.55,
+    "memory_dynamics_binding": {
+      "should_bind_idle": false,
+      "reason_codes": [
+        "expectation_uncertain_cycle"
+      ],
+      "evidence_refs": [
+        "stm_turn_1779969991",
+        "stm_turn_1779969905"
+      ]
+    },
+    "source_expectation_id": "exp_user_topic_or_intro_after_4th",
+    "created_at": 1779970084,
+    "created_turn_index": 4,
+    "source": "memory_dynamics_adapter",
+    "evidence_refs": [
+      "stm_turn_1779970084"
+    ],
+    "bound_memory_ids": [
+      "stm_turn_1779970084"
+    ]
+  }
+]

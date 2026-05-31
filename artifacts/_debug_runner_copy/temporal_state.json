@@ -1,0 +1,36 @@
+{
+  "last_turn_at": 1779970084,
+  "last_user_turn_at": 1779970084,
+  "last_assistant_turn_at": null,
+  "last_turn_index": 4,
+  "last_user_text": "胡桃晚上好啊",
+  "last_reply": "晚上好呀～今晚有什么想聊聊的吗？",
+  "last_elapsed_seconds": 93,
+  "last_time_gap_label": "immediate",
+  "last_share_trace": {
+    "user_id": "default_user",
+    "speaker_name": "default_user",
+    "allow_direct_disclosure": true,
+    "allow_abstract_sharing": true,
+    "net_free_energy_reduction": 0.2668,
+    "had_cross_user_memory": false,
+    "lexical_recall_terms": [
+      "胡桃",
+      "晚上问候",
+      "名称确认",
+      "greeting循环",
+      "话题推进",
+      "胡桃晚上好啊",
+      "处理用户第4轮问候'胡桃晚上好啊'：名称已确立，需回礼并自然推进——可接话'晚上好'，重复用户称名表明识别，不再重复自我介绍引导话语，转入轻闲聊。",
+      "等待用户是否推进到自我介绍或话题，若再一轮纯问候则标记循环模式。"
+    ],
+    "target_person": "",
+    "pronoun_bindings": {},
+    "evidence_topics": [],
+    "evidence_source_names": [
+      "default_user",
+      "default_user",
+      "default_user"
+    ]
+  }
+}

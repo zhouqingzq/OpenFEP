@@ -1287,6 +1287,11 @@ def build_conscious_loop_prompt(
 你必须基于系统文件和消息总线做判断，不能用关键词表替代判断。
 你的输出只给机器读，用 JSON 表示：现在要处理什么、要检索什么记忆、哪些预期需要验证、是否可能要修改自我认知。
 你还要专门判断当前时间语境：工程层只提供当前时间、上一轮时间和上一轮摘要这些事实；是否发生时间跳变、用户是否在纠正时间语境、连续性风险如何，必须由你在 temporal_assessment 中判断。
+reply_pacing_hint 必须基于对用户本轮意图的语义理解，而不是句长或关键词表：
+- 反思、困惑、身份/关系、情感深度、要求认真交流 → balanced 或 serious_thinking
+- 只有轻量闲聊、用户明显留白、且当前不是 normal_dialogue 框架时，才用 casual_fast
+- 若用户要求停止角色扮演、回归正常、说正事，interaction_framework_hint 设为 normal_dialogue，且 reply_pacing_hint 不得为 casual_fast
+prefers_compact_reply 仅在 reply_pacing_hint=casual_fast 且快照显示用户偏好更短回复时为 true。
 不要生成最终回复。
 工程层会提供 entity_binding。它约束当前说话人、别名、被谈论对象和代词绑定：current_interlocutor 永远是当前 session 用户；若 aliases 包含“周青”，说明当前用户可以叫周青，不能把周青当成第三方目标，除非用户明确说“我自己/本人”。旧 expectation 不能覆盖 entity_binding；若冲突，标成 uncertain。
 """
@@ -1338,10 +1343,145 @@ current_interlocutor:
     "reply_guidance": "给回复模块的时间语境建议，例如承认时间已经推进，不要强行沿用上一轮宵夜语境"
   }},
   "thought_intensity_hint": "none|short|long",
+  "reply_pacing_hint": "casual_fast|balanced|serious_thinking",
+  "interaction_framework_hint": "normal_dialogue|roleplay|mixed|uncertain",
+  "prefers_compact_reply": false,
+  "reply_pacing_reason": "为何选择该回复节奏（给系统审计，不要写进用户可见回复）",
   "reasoning_notes": "给系统看的简短判断"
 }}
 """
     return system_prompt, user_prompt
+
+
+ALLOWED_REPLY_PACING_HINTS = frozenset({"casual_fast", "balanced", "serious_thinking"})
+ALLOWED_INTERACTION_FRAMEWORK_HINTS = frozenset(
+    {"normal_dialogue", "roleplay", "mixed", "uncertain"}
+)
+ALLOWED_THOUGHT_INTENSITY_HINTS = frozenset({"none", "short", "long"})
+
+
+def normalize_conscious_turn_plan(raw: Any) -> dict[str, Any]:
+    """Validate bounded conscious-loop fields from LLM output."""
+    if not isinstance(raw, Mapping):
+        raw = {}
+
+    reply_pacing_hint = str(raw.get("reply_pacing_hint", "") or "").strip().lower()
+    if reply_pacing_hint not in ALLOWED_REPLY_PACING_HINTS:
+        reply_pacing_hint = ""
+
+    interaction_framework_hint = str(raw.get("interaction_framework_hint", "") or "").strip().lower()
+    if interaction_framework_hint not in ALLOWED_INTERACTION_FRAMEWORK_HINTS:
+        interaction_framework_hint = "uncertain"
+
+    thought_intensity_hint = str(raw.get("thought_intensity_hint", "") or "short").strip().lower()
+    if thought_intensity_hint not in ALLOWED_THOUGHT_INTENSITY_HINTS:
+        thought_intensity_hint = "short"
+
+    reply_pacing_reason = str(raw.get("reply_pacing_reason", "") or "").strip()[:240]
+
+    return {
+        "pending_expectations_to_verify": _string_list(raw.get("pending_expectations_to_verify"), limit=12),
+        "expectation_results": [
+            dict(item)
+            for item in (raw.get("expectation_results") or [])
+            if isinstance(item, Mapping)
+        ],
+        "current_task": str(raw.get("current_task", "") or "").strip()[:240],
+        "next_task": str(raw.get("next_task", "") or "").strip()[:240],
+        "bus_messages_to_handle": _string_list(raw.get("bus_messages_to_handle"), limit=12),
+        "memory_search_keywords": _string_list(raw.get("memory_search_keywords"), limit=16),
+        "sharing_candidate_ids": _string_list(raw.get("sharing_candidate_ids"), limit=12),
+        "sharing_intent": str(raw.get("sharing_intent", "") or "none").strip() or "none",
+        "secrecy_constraints_detected": [
+            dict(item)
+            for item in (raw.get("secrecy_constraints_detected") or [])
+            if isinstance(item, Mapping)
+        ],
+        "sharing_reaction_expectation": str(raw.get("sharing_reaction_expectation", "") or "").strip()[:240],
+        "sharing_expectation_status": str(raw.get("sharing_expectation_status", "") or "unverified").strip()
+        or "unverified",
+        "needs_self_cognition_update": bool(raw.get("needs_self_cognition_update", False)),
+        "self_cognition_update_reason": str(raw.get("self_cognition_update_reason", "") or "").strip()[:240],
+        "temporal_assessment": dict(_mapping(raw.get("temporal_assessment"))),
+        "thought_intensity_hint": thought_intensity_hint,
+        "reply_pacing_hint": reply_pacing_hint,
+        "interaction_framework_hint": interaction_framework_hint,
+        "prefers_compact_reply": bool(raw.get("prefers_compact_reply", False)),
+        "reply_pacing_reason": reply_pacing_reason,
+        "reasoning_notes": str(raw.get("reasoning_notes", "") or "").strip()[:240],
+    }
+
+
+def _default_conscious_turn_plan() -> dict[str, Any]:
+    return normalize_conscious_turn_plan({})
+
+
+def _reply_pacing_hint_from_conscious_plan(conscious_plan: Mapping[str, Any]) -> str:
+    plan = _mapping(conscious_plan)
+    hint = str(plan.get("reply_pacing_hint", "") or "").strip().lower()
+    if hint in ALLOWED_REPLY_PACING_HINTS:
+        resolved = hint
+    else:
+        intensity = str(plan.get("thought_intensity_hint", "short") or "short").strip().lower()
+        if intensity == "long":
+            resolved = "serious_thinking"
+        else:
+            resolved = "balanced"
+    framework = str(plan.get("interaction_framework_hint", "uncertain") or "uncertain").strip().lower()
+    if framework == "normal_dialogue" and resolved == "casual_fast":
+        return "balanced"
+    return resolved
+
+
+def _pacing_guidance_from_conscious_plan(conscious_plan: Mapping[str, Any]) -> dict[str, Any]:
+    plan = _mapping(conscious_plan)
+    mode = _reply_pacing_hint_from_conscious_plan(plan)
+    prefers_compact = bool(plan.get("prefers_compact_reply", False))
+    contract = _reply_contract(mode, prefers_short=prefers_compact)
+    if mode == "serious_thinking":
+        return {
+            "conversation_mode": "serious_thinking",
+            "reply_pacing": "serious_thinking",
+            "max_response_moves": contract["max_response_moves"],
+            "question_policy": "only_if_needed",
+            "roleplay_density": "light",
+            "leave_space_for_user": False,
+            "followup_policy": "only_for_error_or_missed_emotion",
+            "reply_contract": contract,
+            "pacing_source": "conscious_loop",
+            "reply_pacing_hint": str(plan.get("reply_pacing_hint", "") or mode),
+            "interaction_framework_hint": str(plan.get("interaction_framework_hint", "uncertain") or "uncertain"),
+            "reply_pacing_reason": str(plan.get("reply_pacing_reason", "") or "").strip()[:240],
+        }
+    if mode == "casual_fast":
+        return {
+            "conversation_mode": "casual_fast",
+            "reply_pacing": "casual_fast",
+            "max_response_moves": contract["max_response_moves"],
+            "question_policy": contract["question_policy"],
+            "roleplay_density": "light",
+            "leave_space_for_user": True,
+            "followup_policy": "allowed_once_if_high_confidence",
+            "reply_contract": contract,
+            "pacing_source": "conscious_loop",
+            "reply_pacing_hint": str(plan.get("reply_pacing_hint", "") or mode),
+            "interaction_framework_hint": str(plan.get("interaction_framework_hint", "uncertain") or "uncertain"),
+            "reply_pacing_reason": str(plan.get("reply_pacing_reason", "") or "").strip()[:240],
+        }
+    return {
+        "conversation_mode": "balanced",
+        "reply_pacing": "balanced",
+        "max_response_moves": contract["max_response_moves"],
+        "question_policy": "optional_one",
+        "roleplay_density": "light",
+        "leave_space_for_user": True,
+        "followup_policy": "allowed_once_if_high_confidence",
+        "reply_contract": contract,
+        "pacing_source": "conscious_loop",
+        "reply_pacing_hint": str(plan.get("reply_pacing_hint", "") or mode),
+        "interaction_framework_hint": str(plan.get("interaction_framework_hint", "uncertain") or "uncertain"),
+        "reply_pacing_reason": str(plan.get("reply_pacing_reason", "") or "").strip()[:240],
+    }
 
 
 def build_m11_extractor_prompt(
@@ -2512,55 +2652,6 @@ _BREVITY_FEEDBACK_MARKERS = (
     "一句话",
 )
 
-_SERIOUS_MARKERS = (
-    "代码",
-    "实现",
-    "计划",
-    "架构",
-    "技术",
-    "工程",
-    "评估",
-    "复盘",
-    "测试",
-    "接口",
-    "schema",
-    "api",
-    "pytest",
-    "debug",
-    "bug",
-    "修复",
-    "原因",
-    "分析",
-    "设计",
-    "方案",
-    "修改",
-    "提交",
-)
-
-_CASUAL_MARKERS = (
-    "晚上好",
-    "早上好",
-    "吃",
-    "撑",
-    "陪",
-    "陪伴",
-    "聊天",
-    "母亲节",
-    "家里",
-    "孩子",
-    "开心",
-    "难过",
-    "想你",
-    "睡觉",
-    "晚安",
-    "聊会",
-    "聊一会",
-    "唉",
-    "单挑",
-    "看你",
-    "好了",
-)
-
 
 def _structured_memory_dynamics_binding(row: Mapping[str, Any]) -> bool:
     binding = _mapping(row.get("memory_dynamics_binding"))
@@ -2587,21 +2678,6 @@ def _traceable_memory_dynamics_expectation_candidate(row: Mapping[str, Any]) -> 
 def _has_any_marker(text: str, markers: tuple[str, ...]) -> bool:
     lowered = str(text or "").casefold()
     return any(marker.casefold() in lowered for marker in markers)
-
-
-def _learned_prefers_short_turns(state: Mapping[str, Any]) -> bool:
-    habits = _mapping(state.get("habit_traits"))
-    learned = habits.get("learned_conversation_habits", []) or []
-    combined = " ".join(_habit_text(item) for item in learned)
-    return _has_any_marker(combined, _BREVITY_FEEDBACK_MARKERS)
-
-
-def _compact_text_len(text: str) -> int:
-    return len(re.sub(r"\s+", "", str(text or "")))
-
-
-def _punctuation_count(text: str) -> int:
-    return len(re.findall(r"[。！？!?；;，,、.]", str(text or "")))
 
 
 def _reply_contract(mode: str, *, prefers_short: bool) -> dict[str, Any]:
@@ -2648,59 +2724,6 @@ def _reply_contract(mode: str, *, prefers_short: bool) -> dict[str, Any]:
             "avoid packing empathy, roleplay, advice, and a question into one reply",
             "never include diagnostics, JSON, conscious_plan, llm_thinking_result, or memory_dynamics in reply",
         ],
-    }
-
-
-def _pacing_guidance(
-    state: Mapping[str, Any],
-    user_text: str,
-    temporal_input: Mapping[str, Any] | None = None,
-) -> dict[str, Any]:
-    text = str(user_text or "")
-    serious = _has_any_marker(text, _SERIOUS_MARKERS)
-    casual = _has_any_marker(text, _CASUAL_MARKERS)
-    brevity_feedback = _has_any_marker(text, _BREVITY_FEEDBACK_MARKERS)
-    prefers_short = _learned_prefers_short_turns(state) or brevity_feedback
-    compact_len = _compact_text_len(text)
-    punctuation = _punctuation_count(text)
-    temporal = _mapping(temporal_input)
-    short_gap = str(temporal.get("time_gap_label", "")) in {"immediate", "short_gap"}
-    short_casual_shape = compact_len <= 18 and punctuation <= 3
-    medium_casual_shape = compact_len <= 34 and punctuation <= 4 and short_gap
-    if serious and not brevity_feedback:
-        contract = _reply_contract("serious_thinking", prefers_short=prefers_short)
-        return {
-            "conversation_mode": "serious_thinking",
-            "reply_pacing": "serious_thinking",
-            "max_response_moves": contract["max_response_moves"],
-            "question_policy": "only_if_needed",
-            "roleplay_density": "light",
-            "leave_space_for_user": False,
-            "followup_policy": "only_for_error_or_missed_emotion",
-            "reply_contract": contract,
-        }
-    if casual or prefers_short or short_casual_shape or medium_casual_shape:
-        contract = _reply_contract("casual_fast", prefers_short=prefers_short)
-        return {
-            "conversation_mode": "casual_fast",
-            "reply_pacing": "casual_fast",
-            "max_response_moves": contract["max_response_moves"],
-            "question_policy": contract["question_policy"],
-            "roleplay_density": "light",
-            "leave_space_for_user": True,
-            "followup_policy": "allowed_once_if_high_confidence",
-            "reply_contract": contract,
-        }
-    contract = _reply_contract("balanced", prefers_short=prefers_short)
-    return {
-        "conversation_mode": "balanced",
-        "reply_pacing": "balanced",
-        "max_response_moves": contract["max_response_moves"],
-        "question_policy": "optional_one",
-        "roleplay_density": "light",
-        "leave_space_for_user": True,
-        "followup_policy": "allowed_once_if_high_confidence",
-        "reply_contract": contract,
     }
 
 
@@ -2967,7 +2990,7 @@ def build_memory_dynamics_guidance(
     )
     temporal_gap = str(temporal_input.get("time_gap_label", "first_turn"))
     long_gap = temporal_gap in {"medium_gap", "long_gap"}
-    pacing = _pacing_guidance(state, user_text, temporal_input)
+    pacing = _pacing_guidance_from_conscious_plan(conscious_plan)
 
     assertion_strength = 0.72
     clarification_bias = 0.25
@@ -5063,7 +5086,9 @@ class MVPDialogueRuntime:
             temporal_input=temporal_input,
             entity_binding=entity_binding,
         )
-        conscious = _complete_json_stage("conscious_loop", conscious_system, conscious_user)
+        conscious = normalize_conscious_turn_plan(
+            _complete_json_stage("conscious_loop", conscious_system, conscious_user)
+        )
         _report_progress("conscious_loop")
         m13_state, m13_memory_efe_settlement_events = settle_memory_efe_outreach(
             m13_state,
@@ -5819,6 +5844,9 @@ class MVPDialogueRuntime:
             "sharing_regret_feedback": sharing_regret_feedback,
             "followup_replies": followup_replies,
             "conversation_mode": control_guidance.get("conversation_mode"),
+            "reply_pacing_hint": conscious.get("reply_pacing_hint"),
+            "interaction_framework_hint": conscious.get("interaction_framework_hint"),
+            "pacing_source": control_guidance.get("pacing_source"),
             "latency_mode": latency_mode,
             "latency_mode_reasons": _string_list(latency_mode_info.get("reason_codes"), limit=12),
             "turn_latency_trace": [dict(item) for item in turn_latency_trace],

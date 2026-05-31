@@ -1,0 +1,38 @@
+{
+  "last_turn_at": 1779970183,
+  "last_user_turn_at": 1779970183,
+  "last_assistant_turn_at": null,
+  "last_turn_index": 5,
+  "last_user_text": "你吃饭了么",
+  "last_reply": "还没呢，刚忙完～",
+  "last_elapsed_seconds": 99,
+  "last_time_gap_label": "immediate",
+  "last_share_trace": {
+    "user_id": "default_user",
+    "speaker_name": "default_user",
+    "allow_direct_disclosure": true,
+    "allow_abstract_sharing": true,
+    "net_free_energy_reduction": 0.2668,
+    "had_cross_user_memory": false,
+    "lexical_recall_terms": [
+      "胡桃",
+      "吃饭",
+      "日常问候",
+      "话题转换",
+      "晚餐",
+      "生活闲聊",
+      "你吃饭了么",
+      "回应用户'你吃饭了么'，自然过渡到生活闲聊，不再等待自我介绍",
+      "根据用户新方向的引导，继续日常话题；如果再次纯问候则放弃自我介绍预期"
+    ],
+    "target_person": "",
+    "pronoun_bindings": {},
+    "evidence_topics": [],
+    "evidence_source_names": [
+      "default_user",
+      "default_user",
+      "default_user",
+      "default_user"
+    ]
+  }
+}

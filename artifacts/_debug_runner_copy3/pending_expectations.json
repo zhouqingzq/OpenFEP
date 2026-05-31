@@ -1,0 +1,23 @@
+[
+  {
+    "id": "exp_clarify_yesterday",
+    "content": "用户可能会澄清昨天是否真的有对话或是在其它平台",
+    "verify_on": "memory_dynamics_idle",
+    "confidence": 0.7,
+    "memory_dynamics_binding": {
+      "should_bind_idle": false,
+      "reason_codes": [],
+      "evidence_refs": []
+    },
+    "source_expectation_id": "exp_clarify_yesterday",
+    "created_at": 1779970301,
+    "created_turn_index": 6,
+    "source": "memory_dynamics_adapter",
+    "evidence_refs": [
+      "stm_turn_1779970301"
+    ],
+    "bound_memory_ids": [
+      "stm_turn_1779970301"
+    ]
+  }
+]

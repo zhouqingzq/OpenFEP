@@ -1,0 +1,38 @@
+{
+  "last_turn_at": 1779970301,
+  "last_user_turn_at": 1779970301,
+  "last_assistant_turn_at": null,
+  "last_turn_index": 6,
+  "last_user_text": "你还记得我们昨天聊了什么么？",
+  "last_reply": "我们昨天聊过吗？\n还是说我们是在别的地方聊过？",
+  "last_elapsed_seconds": 118,
+  "last_time_gap_label": "immediate",
+  "last_share_trace": {
+    "user_id": "default_user",
+    "speaker_name": "default_user",
+    "allow_direct_disclosure": true,
+    "allow_abstract_sharing": true,
+    "net_free_energy_reduction": 0.2668,
+    "had_cross_user_memory": false,
+    "lexical_recall_terms": [
+      "昨天",
+      "历史对话",
+      "前一天",
+      "连续对话",
+      "时间跳变",
+      "memory_gap",
+      "用户纠正",
+      "对话连续性",
+      "你还记得我们昨天聊了什么么",
+      "处理用户对'昨天聊了什么'的询问，识别出这是一个时间语境纠正信号——用户在暗示本轮/当前对话有连续的历史（'昨天'），而我没有任何关于昨天的记忆，说明用户认为我们之前有过更早的交互。我需要检索所有记忆看看是否存在昨晚或之前的任何记录。关注 temporal_shift 和连续性风险。",
+      "根据检索结果判断是要承认不记得/没有昨天对话记录，还是构建一个恰当的承认未知的回应；同时自行纠正对时间连续性缺失的认知，并在回复中说明我没有昨天对话的记忆，或请求用户澄清是否指其他平台/另一段对话。"
+    ],
+    "target_person": "",
+    "pronoun_bindings": {},
+    "evidence_topics": [],
+    "evidence_source_names": [
+      "default_user",
+      "default_user"
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "id": "item_user_id",
+    "content": "用户未介绍自己是谁，需要后续对话确认称呼与身份",
+    "status": "open",
+    "next_check": "next_user_turn",
+    "created_at": 1779969877
+  },
+  {
+    "id": "item_user_id",
+    "content": "用户未介绍自己是谁，需要后续对话确认称呼与身份",
+    "status": "open",
+    "next_check": "next_user_turn",
+    "created_at": 1779969905
+  },
+  {
+    "id": "item_user_id",
+    "content": "用户未介绍自己，期待下一轮对话确认称呼与身份",
+    "status": "open",
+    "next_check": "next_user_turn",
+    "created_at": 1779969991
+  },
+  {
+    "id": "item_yesterday_context",
+    "content": "用户提及'昨天'但无对应记忆，需确认是否测试或真实跨session预期",
+    "status": "open",
+    "next_check": "next_user_turn",
+    "created_at": 1779970206
+  }
+]

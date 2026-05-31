@@ -1,0 +1,1028 @@
+{
+  "version": 1,
+  "path_patterns_by_action": [
+    {
+      "action": "answer",
+      "user_id": "default_user",
+      "topic_fingerprint": "胡桃|自我介绍|首次打招呼|称呼确定|名字|胡桃你好啊|识别用户打招呼胡桃你好啊用户称呼我为胡桃这是首次对话需要确定为自我认知中的名称或临时接受的称呼属于身份设定初始化信号|检查entity_binding中current_interlocutor的aliases是否包含胡桃不包含但用户明确用胡桃称呼我应在回复中确立或承认此名字同时",
+      "support_count": 1,
+      "success_proxy_count": 0,
+      "failure_proxy_count": 2,
+      "habit_precision": 0.0,
+      "mean_control_cost_discount": 0.0,
+      "last_seen_turn": 1,
+      "source_evidence_ids": [],
+      "status": "active"
+    },
+    {
+      "action": "answer",
+      "user_id": "default_user",
+      "topic_fingerprint": "胡桃|名称确认|再次问候|用户身份|胡桃你好啊|回应问候确认用户使用胡桃称呼已接受继续互动|等待用户进一步话语可能自我介绍或开启话题",
+      "support_count": 1,
+      "success_proxy_count": 1,
+      "failure_proxy_count": 0,
+      "habit_precision": 0.066,
+      "mean_control_cost_discount": 0.038,
+      "last_seen_turn": 2,
+      "source_evidence_ids": [
+        "exp_name_confirm"
+      ],
+      "status": "active"
+    },
+    {
+      "action": "answer",
+      "user_id": "default_user",
+      "topic_fingerprint": "胡桃|名称确认|问候|自我介绍|用户身份|胡桃你好啊|用户再次问候名称已确认需要回应问候并自然引导用户进入自我介绍或新话题|根据用户后续回应决定是否继续引导或转入闲聊",
+      "support_count": 1,
+      "success_proxy_count": 0,
+      "failure_proxy_count": 1,
+      "habit_precision": 0.0,
+      "mean_control_cost_discount": 0.0,
+      "last_seen_turn": 3,
+      "source_evidence_ids": [
+        "exp_user_introduce"
+      ],
+      "status": "active"
+    },
+    {
+      "action": "ask_question",
+      "user_id": "default_user",
+      "topic_fingerprint": "胡桃|晚上问候|名称确认|greeting循环|话题推进|胡桃晚上好啊|处理用户第4轮问候胡桃晚上好啊名称已确立需回礼并自然推进可接话晚上好重复用户称名表明识别不再重复自我介绍引导话语转入轻闲聊|等待用户是否推进到自我介绍或话题若再一轮纯问候则标记循环模式",
+      "support_count": 1,
+      "success_proxy_count": 0,
+      "failure_proxy_count": 0,
+      "habit_precision": 0.0,
+      "mean_control_cost_discount": 0.0,
+      "last_seen_turn": 4,
+      "source_evidence_ids": [
+        "stm_turn_1779969877"
+      ],
+      "status": "active"
+    }
+  ],
+  "recent_action_trace": [
+    {
+      "turn_id": "turn_0002",
+      "turn_index": 1,
+      "user_id": "default_user",
+      "action": "answer",
+      "topic_fingerprint": "胡桃|自我介绍|首次打招呼|称呼确定|名字|胡桃你好啊|识别用户打招呼胡桃你好啊用户称呼我为胡桃这是首次对话需要确定为自我认知中的名称或临时接受的称呼属于身份设定初始化信号|检查entity_binding中current_interlocutor的aliases是否包含胡桃不包含但用户明确用胡桃称呼我应在回复中确立或承认此名字同时",
+      "outcome_band": "negative"
+    },
+    {
+      "turn_id": "turn_0003",
+      "turn_index": 2,
+      "user_id": "default_user",
+      "action": "answer",
+      "topic_fingerprint": "胡桃|名称确认|再次问候|用户身份|胡桃你好啊|回应问候确认用户使用胡桃称呼已接受继续互动|等待用户进一步话语可能自我介绍或开启话题",
+      "outcome_band": "positive"
+    },
+    {
+      "turn_id": "turn_0004",
+      "turn_index": 3,
+      "user_id": "default_user",
+      "action": "answer",
+      "topic_fingerprint": "胡桃|名称确认|问候|自我介绍|用户身份|胡桃你好啊|用户再次问候名称已确认需要回应问候并自然引导用户进入自我介绍或新话题|根据用户后续回应决定是否继续引导或转入闲聊",
+      "outcome_band": "uncertain"
+    },
+    {
+      "turn_id": "turn_0005",
+      "turn_index": 4,
+      "user_id": "default_user",
+      "action": "ask_question",
+      "topic_fingerprint": "胡桃|晚上问候|名称确认|greeting循环|话题推进|胡桃晚上好啊|处理用户第4轮问候胡桃晚上好啊名称已确立需回礼并自然推进可接话晚上好重复用户称名表明识别不再重复自我介绍引导话语转入轻闲聊|等待用户是否推进到自我介绍或话题若再一轮纯问候则标记循环模式",
+      "outcome_band": "uncertain"
+    }
+  ],
+  "traction_by_action": {
+    "answer|default_user": 0.0,
+    "ask_question|default_user": 0.0
+  },
+  "cue_precision_by_topic": {
+    "胡桃|自我介绍|首次打招呼|称呼确定|名字|胡桃你好啊|识别用户打招呼胡桃你好啊用户称呼我为胡桃这是首次对话需要确定为自我认知中的名称或临时接受的称呼属于身份设定初始化信号|检查entity_binding中current_interlocutor的aliases是否包含胡桃不包含但用户明确用胡桃称呼我应在回复中确立或承认此名字同时": 0.0,
+    "胡桃|名称确认|再次问候|用户身份|胡桃你好啊|回应问候确认用户使用胡桃称呼已接受继续互动|等待用户进一步话语可能自我介绍或开启话题": 0.025,
+    "胡桃|名称确认|问候|自我介绍|用户身份|胡桃你好啊|用户再次问候名称已确认需要回应问候并自然引导用户进入自我介绍或新话题|根据用户后续回应决定是否继续引导或转入闲聊": 0.0,
+    "胡桃|晚上问候|名称确认|greeting循环|话题推进|胡桃晚上好啊|处理用户第4轮问候胡桃晚上好啊名称已确立需回礼并自然推进可接话晚上好重复用户称名表明识别不再重复自我介绍引导话语转入轻闲聊|等待用户是否推进到自我介绍或话题若再一轮纯问候则标记循环模式": 0.0
+  },
+  "relation_path_precision": {
+    "default_user": 0.02
+  },
+  "recent_topic_fingerprints": [
+    {
+      "topic": "胡桃|自我介绍|首次打招呼|称呼确定|名字|胡桃你好啊|识别用户打招呼胡桃你好啊用户称呼我为胡桃这是首次对话需要确定为自我认知中的名称或临时接受的称呼属于身份设定初始化信号|检查entity_binding中current_interlocutor的aliases是否包含胡桃不包含但用户明确用胡桃称呼我应在回复中确立或承认此名字同时",
+      "turn_index": 1
+    },
+    {
+      "topic": "胡桃|名称确认|再次问候|用户身份|胡桃你好啊|回应问候确认用户使用胡桃称呼已接受继续互动|等待用户进一步话语可能自我介绍或开启话题",
+      "turn_index": 2
+    },
+    {
+      "topic": "胡桃|名称确认|问候|自我介绍|用户身份|胡桃你好啊|用户再次问候名称已确认需要回应问候并自然引导用户进入自我介绍或新话题|根据用户后续回应决定是否继续引导或转入闲聊",
+      "turn_index": 3
+    },
+    {
+      "topic": "胡桃|晚上问候|名称确认|greeting循环|话题推进|胡桃晚上好啊|处理用户第4轮问候胡桃晚上好啊名称已确立需回礼并自然推进可接话晚上好重复用户称名表明识别不再重复自我介绍引导话语转入轻闲聊|等待用户是否推进到自我介绍或话题若再一轮纯问候则标记循环模式",
+      "turn_index": 4
+    }
+  ],
+  "pending_settlements": [],
+  "tolerance_by_path": [],
+  "last_patch_id": "m13_patch_a22e0802033e",
+  "rollback_window": [
+    {
+      "patch_id": "m13_patch_4e99ba43853e",
+      "action": "answer",
+      "user_id": "default_user",
+      "topic_fingerprint": "胡桃|名称确认|再次问候|用户身份|胡桃你好啊|回应问候确认用户使用胡桃称呼已接受继续互动|等待用户进一步话语可能自我介绍或开启话题",
+      "previous_habit_precision": 0.0,
+      "previous_control_discount": 0.0,
+      "confidence": 0.9
+    }
+  ],
+  "boredom": {
+    "boredom_level": 0.4,
+    "novelty_baseline": 0.847141,
+    "last_exploration_target": "",
+    "exploration_cooldown": 0,
+    "stale_turn_count": 0,
+    "last_progress_signal": 0.0,
+    "recent_retrieval_ids": [
+      "item_user_id",
+      "item_user_id",
+      "item_user_id",
+      "stm_turn_1779970084"
+    ],
+    "recent_plan_terms": [],
+    "engineering_proxy_label": "mvp_local_boredom_proxy"
+  },
+  "affective_reward_proxy": {
+    "reward_baseline": 0.35,
+    "opponent_strength": 0.016,
+    "tolerance_by_path": [
+      {
+        "path_id": "answer|default_user|胡桃|自我介绍|首次打招呼|称呼确定|名字|胡桃你好啊|识别用户打招呼胡桃你好啊用户称呼我为胡桃这是首次对话需要确定为自我认知中的名称或临时接受的称呼属于身份设定初始化信号|检查entity_binding中current_interlocutor的aliases是否包含胡桃不包含但用户明确用胡桃称呼我应在回复中确立或承认此名字同时",
+        "action": "answer",
+        "topic_fingerprint": "胡桃|自我介绍|首次打招呼|称呼确定|名字|胡桃你好啊|识别用户打招呼胡桃你好啊用户称呼我为胡桃这是首次对话需要确定为自我认知中的名称或临时接受的称呼属于身份设定初始化信号|检查entity_binding中current_interlocutor的aliases是否包含胡桃不包含但用户明确用胡桃称呼我应在回复中确立或承认此名字同时",
+        "support_count": 2,
+        "predicted_reward": 0.05,
+        "tolerance": 0.0,
+        "opponent_strength": 0.03,
+        "last_net_reward_proxy": 0.19,
+        "last_updated_turn": 2
+      },
+      {
+        "path_id": "answer|default_user|胡桃|名称确认|再次问候|用户身份|胡桃你好啊|回应问候确认用户使用胡桃称呼已接受继续互动|等待用户进一步话语可能自我介绍或开启话题",
+        "action": "answer",
+        "topic_fingerprint": "胡桃|名称确认|再次问候|用户身份|胡桃你好啊|回应问候确认用户使用胡桃称呼已接受继续互动|等待用户进一步话语可能自我介绍或开启话题",
+        "support_count": 2,
+        "predicted_reward": 0.1,
+        "tolerance": 0.03,
+        "opponent_strength": 0.0,
+        "last_net_reward_proxy": 0.612,
+        "last_updated_turn": 3
+      },
+      {
+        "path_id": "answer|default_user|胡桃|名称确认|问候|自我介绍|用户身份|胡桃你好啊|用户再次问候名称已确认需要回应问候并自然引导用户进入自我介绍或新话题|根据用户后续回应决定是否继续引导或转入闲聊",
+        "action": "answer",
+        "topic_fingerprint": "胡桃|名称确认|问候|自我介绍|用户身份|胡桃你好啊|用户再次问候名称已确认需要回应问候并自然引导用户进入自我介绍或新话题|根据用户后续回应决定是否继续引导或转入闲聊",
+        "support_count": 2,
+        "predicted_reward": 0.0,
+        "tolerance": 0.0,
+        "opponent_strength": 0.0,
+        "last_net_reward_proxy": 0.294,
+        "last_updated_turn": 4
+      },
+      {
+        "path_id": "ask_question|default_user|胡桃|晚上问候|名称确认|greeting循环|话题推进|胡桃晚上好啊|处理用户第4轮问候胡桃晚上好啊名称已确立需回礼并自然推进可接话晚上好重复用户称名表明识别不再重复自我介绍引导话语转入轻闲聊|等待用户是否推进到自我介绍或话题若再一轮纯问候则标记循环模式",
+        "action": "ask_question",
+        "topic_fingerprint": "胡桃|晚上问候|名称确认|greeting循环|话题推进|胡桃晚上好啊|处理用户第4轮问候胡桃晚上好啊名称已确立需回礼并自然推进可接话晚上好重复用户称名表明识别不再重复自我介绍引导话语转入轻闲聊|等待用户是否推进到自我介绍或话题若再一轮纯问候则标记循环模式",
+        "support_count": 1,
+        "predicted_reward": 0.0,
+        "tolerance": 0.0,
+        "opponent_strength": 0.0,
+        "last_net_reward_proxy": 0.394,
+        "last_updated_turn": 4
+      }
+    ],
+    "predicted_reward_by_path": {
+      "answer|default_user|胡桃|自我介绍|首次打招呼|称呼确定|名字|胡桃你好啊|识别用户打招呼胡桃你好啊用户称呼我为胡桃这是首次对话需要确定为自我认知中的名称或临时接受的称呼属于身份设定初始化信号|检查entity_binding中current_interlocutor的aliases是否包含胡桃不包含但用户明确用胡桃称呼我应在回复中确立或承认此名字同时": 0.05,
+      "answer|default_user|胡桃|名称确认|再次问候|用户身份|胡桃你好啊|回应问候确认用户使用胡桃称呼已接受继续互动|等待用户进一步话语可能自我介绍或开启话题": 0.1,
+      "answer|default_user|胡桃|名称确认|问候|自我介绍|用户身份|胡桃你好啊|用户再次问候名称已确认需要回应问候并自然引导用户进入自我介绍或新话题|根据用户后续回应决定是否继续引导或转入闲聊": 0.0,
+      "ask_question|default_user|胡桃|晚上问候|名称确认|greeting循环|话题推进|胡桃晚上好啊|处理用户第4轮问候胡桃晚上好啊名称已确立需回礼并自然推进可接话晚上好重复用户称名表明识别不再重复自我介绍引导话语转入轻闲聊|等待用户是否推进到自我介绍或话题若再一轮纯问候则标记循环模式": 0.0
+    },
+    "last_net_reward_proxy": 0.394,
+    "last_relief_proxy": 0.26,
+    "last_information_gain_proxy": 0.24,
+    "pending_settlements": [
+      {
+        "pending_id": "m13_pending_dd91ee631d95",
+        "settlement_generation": 0,
+        "prior_turn_index": 4,
+        "prior_action": "ask_question",
+        "prior_topic_fingerprint": "胡桃|晚上问候|名称确认|greeting循环|话题推进|胡桃晚上好啊|处理用户第4轮问候胡桃晚上好啊名称已确立需回礼并自然推进可接话晚上好重复用户称名表明识别不再重复自我介绍引导话语转入轻闲聊|等待用户是否推进到自我介绍或话题若再一轮纯问候则标记循环模式",
+        "prior_reply_summary": "晚上好呀～今晚有什么想聊聊的吗？",
+        "predicted_reward": 0.0,
+        "predicted_relief": 0.26,
+        "prior_information_gain": 0.24,
+        "evidence_refs": [
+          "stm_turn_1779969877",
+          "stm_turn_1779969905",
+          "stm_turn_1779969991",
+          "exp_user_introduce_or_topic",
+          "exp_user_introduce",
+          "stm_interaction_experience_default_user",
+          "stm_1779969905_73641",
+          "stm_candidate_1779969905_0"
+        ],
+        "expires_after_turns": 5,
+        "prior_reply_validation": {
+          "original_length": 16,
+          "final_length": 16,
+          "conversation_mode": "casual_fast",
+          "max_chars": 60,
+          "max_sentences": 1,
+          "changed": false,
+          "actions": [],
+          "allow_direct_disclosure": true,
+          "explicit_secrecy_detected": false,
+          "selected_disclosure_action": "none",
+          "redaction_targets": [],
+          "identity_anchored_action": false
+        },
+        "prior_post_reply_observer": {
+          "needs_followup": false,
+          "followup_type": "none"
+        },
+        "prior_expectation_results": [
+          {
+            "id": "exp_user_introduce",
+            "status": "uncertain",
+            "evidence": "用户本轮输入'胡桃晚上好啊'仍是问候轮次，没有自我介绍或开启新话题，预期既未被确认也不构成明确违背，而是持续未满足。",
+            "self_update_pressure": 0.0
+          },
+          {
+            "id": "exp_user_introduce_or_topic",
+            "status": "uncertain",
+            "evidence": "用户输入仍为问候'晚上好'，没有自我介绍或提出话题，预期未满足但未违反。",
+            "self_update_pressure": 0.0
+          }
+        ],
+        "prior_memory_candidates_applied": false,
+        "prior_evidence_judgment": {
+          "epistemic_stance": "known_from_recall",
+          "relevant_evidence_ids": [
+            "stm_candidate_1779969905_0",
+            "stm_1779969905_73641",
+            "stm_1779969877_54281",
+            "stm_turn_1779969877",
+            "stm_turn_1779969905",
+            "stm_1779969991_80875",
+            "stm_turn_1779969991"
+          ],
+          "topics": [],
+          "sensitivity_class": "public",
+          "redaction_targets": [],
+          "allowed_reply_actions": [
+            "direct_share",
+            "abstract_share",
+            "truthful_refusal",
+            "deflect",
+            "deny_knowledge"
+          ],
+          "audience_user_id": "default_user",
+          "audience_risk": "无风险，当前用户是名称确认的对话方，且所有证据均为公开互动记录。",
+          "expected_social_gain": "直接回应用户问候，维持友好关系，避免循环问候模式。",
+          "judge_summary": "短期记忆中有多条证据表明用户已多次使用'胡桃你好啊'问候，且我已接受该名称并回礼。当前问题'胡桃晚上好啊'是同一模式的延续，证据充分支持我知道用户称呼我为胡桃。"
+        },
+        "prior_safety_repair": false,
+        "prior_repetition_pressure": 0.0,
+        "prior_conflict_level": 0.0,
+        "m15_episode_id": "m15_ep_6377889aabc540d7"
+      }
+    ],
+    "reward_history": [
+      {
+        "turn_index": 1,
+        "path_id": "answer|default_user|胡桃|自我介绍|首次打招呼|称呼确定|名字|胡桃你好啊|识别用户打招呼胡桃你好啊用户称呼我为胡桃这是首次对话需要确定为自我认知中的名称或临时接受的称呼属于身份设定初始化信号|检查entity_binding中current_interlocutor的aliases是否包含胡桃不包含但用户明确用胡桃称呼我应在回复中确立或承认此名字同时",
+        "net_affective_reward_proxy": 0.0,
+        "behavioral_pull_reference": 0.144
+      },
+      {
+        "turn_index": 2,
+        "path_id": "answer|default_user|胡桃|自我介绍|首次打招呼|称呼确定|名字|胡桃你好啊|识别用户打招呼胡桃你好啊用户称呼我为胡桃这是首次对话需要确定为自我认知中的名称或临时接受的称呼属于身份设定初始化信号|检查entity_binding中current_interlocutor的aliases是否包含胡桃不包含但用户明确用胡桃称呼我应在回复中确立或承认此名字同时",
+        "net_affective_reward_proxy": 0.19,
+        "outcome_band": "negative"
+      },
+      {
+        "turn_index": 2,
+        "path_id": "answer|default_user|胡桃|名称确认|再次问候|用户身份|胡桃你好啊|回应问候确认用户使用胡桃称呼已接受继续互动|等待用户进一步话语可能自我介绍或开启话题",
+        "net_affective_reward_proxy": 1.0,
+        "behavioral_pull_reference": 0.281667
+      },
+      {
+        "turn_index": 3,
+        "path_id": "answer|default_user|胡桃|名称确认|再次问候|用户身份|胡桃你好啊|回应问候确认用户使用胡桃称呼已接受继续互动|等待用户进一步话语可能自我介绍或开启话题",
+        "net_affective_reward_proxy": 0.612,
+        "outcome_band": "positive"
+      },
+      {
+        "turn_index": 3,
+        "path_id": "answer|default_user|胡桃|名称确认|问候|自我介绍|用户身份|胡桃你好啊|用户再次问候名称已确认需要回应问候并自然引导用户进入自我介绍或新话题|根据用户后续回应决定是否继续引导或转入闲聊",
+        "net_affective_reward_proxy": 0.302,
+        "behavioral_pull_reference": 0.2692
+      },
+      {
+        "turn_index": 4,
+        "path_id": "answer|default_user|胡桃|名称确认|问候|自我介绍|用户身份|胡桃你好啊|用户再次问候名称已确认需要回应问候并自然引导用户进入自我介绍或新话题|根据用户后续回应决定是否继续引导或转入闲聊",
+        "net_affective_reward_proxy": 0.294,
+        "outcome_band": "uncertain"
+      },
+      {
+        "turn_index": 4,
+        "path_id": "ask_question|default_user|胡桃|晚上问候|名称确认|greeting循环|话题推进|胡桃晚上好啊|处理用户第4轮问候胡桃晚上好啊名称已确立需回礼并自然推进可接话晚上好重复用户称名表明识别不再重复自我介绍引导话语转入轻闲聊|等待用户是否推进到自我介绍或话题若再一轮纯问候则标记循环模式",
+        "net_affective_reward_proxy": 0.394,
+        "behavioral_pull_reference": 0.2872
+      }
+    ],
+    "settlement_generation": 0,
+    "last_seen_turn_index": 4,
+    "path_feels_stale_proxy": false,
+    "engineering_proxy_label": "mvp_local_affective_reward_proxy"
+  },
+  "initiative": {
+    "enabled": false,
+    "user_opt_in": false,
+    "implicit_idle_delivery": false,
+    "proactive_policy_profile": "bounded_default",
+    "manual_continue_button": true,
+    "idle_threshold_seconds": 120,
+    "cooldown_turns": 2,
+    "cooldown_until_timestamp": 0,
+    "max_proactive_per_session": 1,
+    "proactive_count_this_session": 0,
+    "last_proactive_turn_at": 0,
+    "last_proactive_turn_index": -1,
+    "pending_proactive_proposal": {},
+    "last_suppression_reason": "",
+    "last_suppression_reason_code": "",
+    "legacy_vague_open_item_proactive": false,
+    "opponent_strength_block_threshold": 0.5,
+    "delivery_assessor_min_confidence": 0.5,
+    "rejected_target_backoff": {},
+    "engineering_proxy_label": "mvp_local_m13_initiative",
+    "idle_introspection": {
+      "enabled": false,
+      "user_opt_in": false,
+      "idle_threshold_seconds": 90,
+      "min_interval_seconds": 180,
+      "max_per_session": 4,
+      "reflection_count_this_session": 0,
+      "outreach_via_introspection_count_this_session": 0,
+      "last_introspection_at": 0,
+      "last_skip_reason": "",
+      "last_audit_logged_at": 0,
+      "last_audit_logged_skip_reason": "",
+      "last_conscious_idle_plan": {},
+      "last_outreach_outcome": "",
+      "engineering_proxy_label": "mvp_local_idle_introspection",
+      "last_cognitive_skip_reason": "expectation_stale_after_user_turn",
+      "last_cognitive_skip_at": 1779970196
+    },
+    "background_continuity": {
+      "enabled": false,
+      "user_opt_in": false,
+      "runner_kind": "none",
+      "tick_interval_seconds": 90,
+      "queued_outreach_ttl_seconds": 86400,
+      "tokens_used_today": 0,
+      "tokens_budget_per_day": 30000,
+      "wallclock_used_today_seconds": 0.0,
+      "wallclock_budget_per_day_seconds": 600.0,
+      "ticks_today": 0,
+      "max_ticks_per_day": 400,
+      "llm_calls_today": 0,
+      "llm_calls_budget_per_day": 80,
+      "self_reviews_today": 0,
+      "day_anchor": "",
+      "last_tick_at": 0,
+      "last_budget_block_reason": "",
+      "last_background_skip_reason": "not_opted_in",
+      "last_streamlit_ping_at": 0,
+      "idle_ticks_lifetime": 0,
+      "self_reviews_lifetime": 0,
+      "llm_calls_lifetime": 0,
+      "tokens_used_lifetime": 0,
+      "engineering_proxy_label": "mvp_local_background_self_continuity"
+    }
+  },
+  "memory_efe": {
+    "phase": "idle",
+    "eligible_for_efe": [
+      {
+        "expectation_id": "exp_user_topic_or_intro_after_4th",
+        "source_kind": "memory_dynamics_expectation",
+        "content_summary": "用户可能会提出话题或自我介绍",
+        "status": "pending",
+        "confidence": 0.55,
+        "precision": 0.406,
+        "due_at": 1779970099,
+        "expected_window_seconds": 15,
+        "elapsed_since_due_seconds": 97,
+        "required_for_action": 1.0,
+        "bound_memory_ids": [
+          "stm_turn_1779970084"
+        ],
+        "evidence_refs": [
+          "stm_turn_1779970084"
+        ],
+        "relationship_weight": 0.755,
+        "boundary_cost_hint": "",
+        "scheduled_intent_id": "",
+        "eligible": true,
+        "ineligibility_reason": "",
+        "precision_approx": {
+          "confidence": 0.55,
+          "recall_salience_approx": 0.55,
+          "future_prediction_value_approx": 0.45,
+          "stale_memory_penalty_approx": 0.0
+        },
+        "recall_keys": [],
+        "resolution_class": "mixed_specific_and_generic",
+        "specificity_score": 0.5,
+        "generic_branch_count": 1,
+        "testable_branch_count": 1,
+        "branch_count": 2
+      }
+    ],
+    "diagnostic_only": [
+      {
+        "expectation_id": "exp_user_introduce",
+        "source_kind": "memory_dynamics_expectation",
+        "content_summary": "用户可能会自我介绍或开启新话题",
+        "status": "pending",
+        "confidence": 0.5,
+        "precision": 0.385,
+        "due_at": 1779969920,
+        "expected_window_seconds": 15,
+        "elapsed_since_due_seconds": 276,
+        "required_for_action": 1.0,
+        "bound_memory_ids": [
+          "stm_turn_1779969905"
+        ],
+        "evidence_refs": [
+          "stm_turn_1779969905"
+        ],
+        "relationship_weight": 0.755,
+        "boundary_cost_hint": "",
+        "scheduled_intent_id": "",
+        "eligible": false,
+        "ineligibility_reason": "expectation_stale_after_user_turn",
+        "precision_approx": {
+          "confidence": 0.5,
+          "recall_salience_approx": 0.55,
+          "future_prediction_value_approx": 0.45,
+          "stale_memory_penalty_approx": 0.0
+        },
+        "recall_keys": [],
+        "resolution_class": "mixed_specific_and_generic",
+        "specificity_score": 0.5,
+        "generic_branch_count": 1,
+        "testable_branch_count": 1,
+        "branch_count": 2
+      },
+      {
+        "expectation_id": "exp_user_introduce_or_topic",
+        "source_kind": "memory_dynamics_expectation",
+        "content_summary": "用户可能会自我介绍或主动提出想聊的话题",
+        "status": "pending",
+        "confidence": 0.5,
+        "precision": 0.385,
+        "due_at": 1779970006,
+        "expected_window_seconds": 15,
+        "elapsed_since_due_seconds": 190,
+        "required_for_action": 1.0,
+        "bound_memory_ids": [
+          "stm_turn_1779969991"
+        ],
+        "evidence_refs": [
+          "stm_turn_1779969991"
+        ],
+        "relationship_weight": 0.755,
+        "boundary_cost_hint": "",
+        "scheduled_intent_id": "",
+        "eligible": false,
+        "ineligibility_reason": "expectation_stale_after_user_turn",
+        "precision_approx": {
+          "confidence": 0.5,
+          "recall_salience_approx": 0.55,
+          "future_prediction_value_approx": 0.45,
+          "stale_memory_penalty_approx": 0.0
+        },
+        "recall_keys": [],
+        "resolution_class": "mixed_specific_and_generic",
+        "specificity_score": 0.5,
+        "generic_branch_count": 1,
+        "testable_branch_count": 1,
+        "branch_count": 2
+      },
+      {
+        "expectation_id": "item_user_id",
+        "source_kind": "open_item",
+        "content_summary": "用户未介绍自己是谁，需要后续对话确认称呼与身份",
+        "status": "open",
+        "confidence": 0.45,
+        "precision": 0.243,
+        "due_at": 1779970099,
+        "expected_window_seconds": 900,
+        "elapsed_since_due_seconds": 97,
+        "required_for_action": 0.0,
+        "bound_memory_ids": [],
+        "evidence_refs": [],
+        "relationship_weight": 0.755,
+        "boundary_cost_hint": "",
+        "scheduled_intent_id": "",
+        "eligible": false,
+        "ineligibility_reason": "not_traceable_or_testable",
+        "precision_approx": {
+          "confidence": 0.45,
+          "recall_salience_approx": 0.0,
+          "future_prediction_value_approx": 0.45,
+          "stale_memory_penalty_approx": 0.0
+        },
+        "recall_keys": [],
+        "resolution_class": "concrete_testable",
+        "specificity_score": 1.0,
+        "generic_branch_count": 0,
+        "testable_branch_count": 1,
+        "branch_count": 1
+      },
+      {
+        "expectation_id": "item_user_id",
+        "source_kind": "open_item",
+        "content_summary": "用户未介绍自己是谁，需要后续对话确认称呼与身份",
+        "status": "open",
+        "confidence": 0.45,
+        "precision": 0.243,
+        "due_at": 1779970099,
+        "expected_window_seconds": 900,
+        "elapsed_since_due_seconds": 97,
+        "required_for_action": 0.0,
+        "bound_memory_ids": [],
+        "evidence_refs": [],
+        "relationship_weight": 0.755,
+        "boundary_cost_hint": "",
+        "scheduled_intent_id": "",
+        "eligible": false,
+        "ineligibility_reason": "not_traceable_or_testable",
+        "precision_approx": {
+          "confidence": 0.45,
+          "recall_salience_approx": 0.0,
+          "future_prediction_value_approx": 0.45,
+          "stale_memory_penalty_approx": 0.0
+        },
+        "recall_keys": [],
+        "resolution_class": "concrete_testable",
+        "specificity_score": 1.0,
+        "generic_branch_count": 0,
+        "testable_branch_count": 1,
+        "branch_count": 1
+      },
+      {
+        "expectation_id": "item_user_id",
+        "source_kind": "open_item",
+        "content_summary": "用户未介绍自己，期待下一轮对话确认称呼与身份",
+        "status": "open",
+        "confidence": 0.45,
+        "precision": 0.243,
+        "due_at": 1779970099,
+        "expected_window_seconds": 900,
+        "elapsed_since_due_seconds": 97,
+        "required_for_action": 0.0,
+        "bound_memory_ids": [],
+        "evidence_refs": [],
+        "relationship_weight": 0.755,
+        "boundary_cost_hint": "",
+        "scheduled_intent_id": "",
+        "eligible": false,
+        "ineligibility_reason": "not_traceable_or_testable",
+        "precision_approx": {
+          "confidence": 0.45,
+          "recall_salience_approx": 0.0,
+          "future_prediction_value_approx": 0.45,
+          "stale_memory_penalty_approx": 0.0
+        },
+        "recall_keys": [],
+        "resolution_class": "concrete_testable",
+        "specificity_score": 1.0,
+        "generic_branch_count": 0,
+        "testable_branch_count": 1,
+        "branch_count": 1
+      }
+    ],
+    "social_prediction_error": 0.199245,
+    "epistemic_prediction_error": 0.0,
+    "repetition_tension": 0.0,
+    "f_memory": 0.199245,
+    "efe_by_policy": {
+      "wait": 0.269245,
+      "reflect": 0.191275,
+      "outreach": 0.161388
+    },
+    "policy_costs": {
+      "wait_decay_risk": 0.05,
+      "low_control_cost": 0.02,
+      "recall_cost": 0.08,
+      "control_cost": 0.1,
+      "boundary_cost": 0.05,
+      "relationship_cost": 0.1,
+      "risk_penalty": 0.0,
+      "boundary_cost_high": false,
+      "relationship_cost_high": false,
+      "expected_internal_resolution": 0.04,
+      "expected_epistemic_gain": 0.08,
+      "expected_information_gain": 0.25,
+      "expected_outreach_resolution": 0.19,
+      "resolution_class": "mixed_specific_and_generic",
+      "specificity_score": 0.5,
+      "generic_branch_count": 1,
+      "testable_branch_count": 1
+    },
+    "selected_policy": "outreach",
+    "reply_angle_bias": "none",
+    "should_outreach": false,
+    "outreach_margin": 0.107857,
+    "traceable_expectation_id": "exp_user_topic_or_intro_after_4th",
+    "suppression_reasons": [
+      "not_opted_in",
+      "initiative_disabled",
+      "delivery_channel_unavailable"
+    ],
+    "evidence_refs": [
+      "stm_turn_1779970084"
+    ],
+    "reason_codes": [
+      "memory_backed_social_prediction_error",
+      "mixed_specific_and_generic",
+      "not_opted_in",
+      "initiative_disabled",
+      "delivery_channel_unavailable",
+      "expectation_stale_after_user_turn",
+      "not_traceable_or_testable"
+    ],
+    "last_memory_efe_outreach_at": 0,
+    "pending_settlements": [],
+    "engineering_proxy_label": "mvp_local_memory_efe_bridge"
+  },
+  "meta_control_intents": {
+    "active": [],
+    "consumed": [],
+    "idle_tick_history": [
+      {
+        "at": 1779968053,
+        "turn_index": 0,
+        "reject_reason": "no_eligible_expectation",
+        "bands": {
+          "boredom_band": "low",
+          "reward_band": "low",
+          "behavior_band": "low",
+          "relation_band": "low"
+        }
+      },
+      {
+        "at": 1779968058,
+        "turn_index": 0,
+        "reject_reason": "no_eligible_expectation",
+        "bands": {
+          "boredom_band": "low",
+          "reward_band": "low",
+          "behavior_band": "low",
+          "relation_band": "low"
+        }
+      },
+      {
+        "at": 1779968065,
+        "turn_index": 0,
+        "reject_reason": "no_eligible_expectation",
+        "bands": {
+          "boredom_band": "low",
+          "reward_band": "low",
+          "behavior_band": "low",
+          "relation_band": "low"
+        }
+      },
+      {
+        "at": 1779968072,
+        "turn_index": 0,
+        "reject_reason": "no_eligible_expectation",
+        "bands": {
+          "boredom_band": "low",
+          "reward_band": "low",
+          "behavior_band": "low",
+          "relation_band": "low"
+        }
+      },
+      {
+        "at": 1779968077,
+        "turn_index": 0,
+        "reject_reason": "no_eligible_expectation",
+        "bands": {
+          "boredom_band": "low",
+          "reward_band": "low",
+          "behavior_band": "low",
+          "relation_band": "low"
+        }
+      },
+      {
+        "at": 1779970196,
+        "turn_index": 4,
+        "reject_reason": "expectation_stale_after_user_turn",
+        "bands": {
+          "boredom_band": "medium",
+          "reward_band": "low",
+          "behavior_band": "low",
+          "relation_band": "low"
+        }
+      }
+    ],
+    "tension_observation_counts": {},
+    "recent_detections": [
+      {
+        "at": 1779968034,
+        "turn_index": 0,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "MetaControlStallDetectedEvent",
+        "reject_reason": "no_eligible_expectation",
+        "window_size": 6,
+        "ratio": 1.0,
+        "emitted_intent_id": ""
+      },
+      {
+        "at": 1779968041,
+        "turn_index": 0,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "RepeatedFailurePathDetectedEvent",
+        "action_trigger": "idle_cognitive_tick",
+        "lookback_window": 16,
+        "failure_count": 16,
+        "mean_delta_fe": 0.0,
+        "emitted_intent_id": ""
+      },
+      {
+        "at": 1779968041,
+        "turn_index": 0,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "MetaControlStallDetectedEvent",
+        "reject_reason": "no_eligible_expectation",
+        "window_size": 6,
+        "ratio": 1.0,
+        "emitted_intent_id": ""
+      },
+      {
+        "at": 1779968047,
+        "turn_index": 0,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "RepeatedFailurePathDetectedEvent",
+        "action_trigger": "idle_cognitive_tick",
+        "lookback_window": 16,
+        "failure_count": 16,
+        "mean_delta_fe": 0.0,
+        "emitted_intent_id": ""
+      },
+      {
+        "at": 1779968047,
+        "turn_index": 0,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "MetaControlStallDetectedEvent",
+        "reject_reason": "no_eligible_expectation",
+        "window_size": 6,
+        "ratio": 1.0,
+        "emitted_intent_id": ""
+      },
+      {
+        "at": 1779968053,
+        "turn_index": 0,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "RepeatedFailurePathDetectedEvent",
+        "action_trigger": "idle_cognitive_tick",
+        "lookback_window": 16,
+        "failure_count": 16,
+        "mean_delta_fe": 0.0,
+        "emitted_intent_id": ""
+      },
+      {
+        "at": 1779968053,
+        "turn_index": 0,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "MetaControlStallDetectedEvent",
+        "reject_reason": "no_eligible_expectation",
+        "window_size": 6,
+        "ratio": 1.0,
+        "emitted_intent_id": ""
+      },
+      {
+        "at": 1779968058,
+        "turn_index": 0,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "RepeatedFailurePathDetectedEvent",
+        "action_trigger": "idle_cognitive_tick",
+        "lookback_window": 16,
+        "failure_count": 16,
+        "mean_delta_fe": 0.0,
+        "emitted_intent_id": ""
+      },
+      {
+        "at": 1779968058,
+        "turn_index": 0,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "MetaControlStallDetectedEvent",
+        "reject_reason": "no_eligible_expectation",
+        "window_size": 6,
+        "ratio": 1.0,
+        "emitted_intent_id": ""
+      },
+      {
+        "at": 1779968065,
+        "turn_index": 0,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "RepeatedFailurePathDetectedEvent",
+        "action_trigger": "idle_cognitive_tick",
+        "lookback_window": 16,
+        "failure_count": 16,
+        "mean_delta_fe": 0.0,
+        "emitted_intent_id": ""
+      },
+      {
+        "at": 1779968065,
+        "turn_index": 0,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "MetaControlStallDetectedEvent",
+        "reject_reason": "no_eligible_expectation",
+        "window_size": 6,
+        "ratio": 1.0,
+        "emitted_intent_id": ""
+      },
+      {
+        "at": 1779968072,
+        "turn_index": 0,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "RepeatedFailurePathDetectedEvent",
+        "action_trigger": "idle_cognitive_tick",
+        "lookback_window": 16,
+        "failure_count": 16,
+        "mean_delta_fe": 0.0,
+        "emitted_intent_id": ""
+      },
+      {
+        "at": 1779968072,
+        "turn_index": 0,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "MetaControlStallDetectedEvent",
+        "reject_reason": "no_eligible_expectation",
+        "window_size": 6,
+        "ratio": 1.0,
+        "emitted_intent_id": ""
+      },
+      {
+        "at": 1779968077,
+        "turn_index": 0,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "RepeatedFailurePathDetectedEvent",
+        "action_trigger": "idle_cognitive_tick",
+        "lookback_window": 16,
+        "failure_count": 16,
+        "mean_delta_fe": 0.0,
+        "emitted_intent_id": ""
+      },
+      {
+        "at": 1779968077,
+        "turn_index": 0,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "MetaControlStallDetectedEvent",
+        "reject_reason": "no_eligible_expectation",
+        "window_size": 6,
+        "ratio": 1.0,
+        "emitted_intent_id": ""
+      },
+      {
+        "at": 1779970196,
+        "turn_index": 4,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_meta_control",
+        "type": "RepeatedFailurePathDetectedEvent",
+        "action_trigger": "idle_cognitive_tick",
+        "lookback_window": 16,
+        "failure_count": 12,
+        "mean_delta_fe": 0.003936,
+        "emitted_intent_id": ""
+      }
+    ],
+    "cleanup_active": [],
+    "cleanup_consumed": [
+      {
+        "intent_id": "m15_cleanup_intent_ecbce955a8a0",
+        "at": 1779970196,
+        "turn_index": 4,
+        "detector": "OpenItemBacklogDetector",
+        "intent_kind": "cleanup_open_item_backlog",
+        "payload": {
+          "candidate_ids": [
+            "item_user_id"
+          ],
+          "low_traceability_count": 0,
+          "duplicate_local_ids": [
+            "item_user_id"
+          ],
+          "stale_count": 0
+        },
+        "evidence_refs": [],
+        "expires_at": 1780056596,
+        "engineering_proxy_label": "mvp_local_cleanup_meta_control",
+        "consumed_at": 1779970196,
+        "source": "idle_cognitive_tick",
+        "ops_delta": {
+          "merged_duplicates": 0,
+          "expired_pending_expectations": 0,
+          "diagnostic_open_items": 0,
+          "recall_deprioritized": 0
+        }
+      }
+    ],
+    "cleanup_recent_detections": [
+      {
+        "at": 1779970196,
+        "turn_index": 4,
+        "source": "idle_cognitive_tick",
+        "engineering_proxy_label": "mvp_local_cleanup_meta_control",
+        "type": "OpenItemBacklogDetectedEvent",
+        "open_item_count": 3,
+        "low_traceability_count": 0,
+        "duplicate_local_id_count": 1,
+        "stale_count": 0,
+        "candidate_ids": [
+          "item_user_id"
+        ],
+        "emitted_intent_id": "m15_cleanup_intent_ecbce955a8a0"
+      }
+    ],
+    "recent_idle_cognitive_ticks": [
+      {
+        "at": 1779970196,
+        "reject_reason": "expectation_stale_after_user_turn",
+        "retrieved_ids": [
+          "item_user_id",
+          "stm_turn_1779970084"
+        ]
+      }
+    ]
+  },
+  "m15_consolidation": {
+    "runs_by_day": {
+      "20601": 6
+    },
+    "last_run_at": 1779965150,
+    "last_run_id": "m15_consolidation_baf23f54d01c",
+    "last_ops": {
+      "merges": 0,
+      "promote": 0,
+      "abstract": 0,
+      "decay_touched": 0,
+      "archived": 0
+    }
+  },
+  "m15_cleanup": {
+    "last_run_id": "m15_cleanup_run_536f59696186",
+    "last_run_at": 1779970196,
+    "last_source": "idle_cognitive_tick",
+    "last_ops": {
+      "merged_duplicates": 0,
+      "expired_pending_expectations": 0,
+      "diagnostic_open_items": 0,
+      "recall_deprioritized": 0
+    },
+    "cleanup_active_count": 0,
+    "cleanup_consumed_count": 1,
+    "strict_traceability": {
+      "open_items_total": 3,
+      "open_items_strict_trace": 0,
+      "open_items_duplicate_local_ids": 1,
+      "pending_expectations_total": 3,
+      "pending_expectations_strict_trace": 3,
+      "pending_expectations_duplicate_local_ids": 0
+    }
+  }
+}

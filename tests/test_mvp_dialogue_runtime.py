@@ -15,10 +15,12 @@ from segmentum.dialogue.runtime.mvp_loop import (
     build_free_energy_personality_analysis_prompt,
     build_entity_binding_context,
     lexical_recall_short_term_candidates,
+    normalize_conscious_turn_plan,
     retrieve_memories,
     retrieve_memories_for_guidance,
     resolve_relationship_value_context,
     validate_visible_reply,
+    _pacing_guidance_from_conscious_plan,
 )
 from segmentum.user_model import SocialSharingCandidate, decide_social_sharing
 from segmentum.user_continuity import M12RuntimeConfig, M12RuntimeState, run_m12_turn
@@ -103,6 +105,9 @@ def _maybe_m12_1_step_response(system_prompt: str, user_prompt: str) -> dict[str
 class FakeJSONLLM:
     def __init__(self) -> None:
         self.calls: list[dict[str, str]] = []
+        self.conscious_reply_pacing_hint = "balanced"
+        self.conscious_interaction_framework_hint = "uncertain"
+        self.conscious_prefers_compact_reply = False
 
     def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
         self.calls.append({"system": system_prompt, "user": user_prompt})
@@ -241,6 +246,10 @@ class FakeJSONLLM:
                     "reply_guidance": "保持普通连续性，不需要主动强调时间。",
                 },
                 "thought_intensity_hint": "short",
+                "reply_pacing_hint": self.conscious_reply_pacing_hint,
+                "interaction_framework_hint": self.conscious_interaction_framework_hint,
+                "prefers_compact_reply": self.conscious_prefers_compact_reply,
+                "reply_pacing_reason": "test fake conscious pacing",
                 "reasoning_notes": "需要检索相关偏好。",
             }
         if "回复后发观察模块" in system_prompt:
@@ -887,6 +896,7 @@ def test_anti_keyword_feedback_does_not_create_reward_punishment_memory() -> Non
 
 def test_casual_input_gets_fast_pacing_in_thinking_prompt(tmp_path: Path) -> None:
     llm = FakeJSONLLM()
+    llm.conscious_reply_pacing_hint = "casual_fast"
     runtime = MVPDialogueRuntime(
         store=MVPStateStore(tmp_path / "persona"),
         llm=llm,
@@ -901,14 +911,17 @@ def test_casual_input_gets_fast_pacing_in_thinking_prompt(tmp_path: Path) -> Non
     assert '"reply_contract"' in thinking_prompt
     assert '"max_response_moves": 1' in thinking_prompt
     assert '"roleplay_density": "light"' in thinking_prompt
+    llm.conscious_reply_pacing_hint = "casual_fast"
     result = runtime.run_turn("睡觉了吗？", turn_index=1, now=6060)
     assert result.diagnostics["conversation_mode"] == "casual_fast"
 
 
 def test_short_playful_cue_gets_fast_pacing_without_keyword_dump(tmp_path: Path) -> None:
+    llm = FakeJSONLLM()
+    llm.conscious_reply_pacing_hint = "casual_fast"
     runtime = MVPDialogueRuntime(
         store=MVPStateStore(tmp_path / "persona"),
-        llm=FakeJSONLLM(),
+        llm=llm,
         persona_name="测试人格",
     )
 
@@ -923,7 +936,12 @@ def test_serious_technical_input_keeps_serious_thinking_pacing() -> None:
     guidance = build_memory_dynamics_guidance(
         {"short_term_memory": [], "long_term_memory": []},
         "请帮我设计这个 Python 项目的架构和测试计划。",
-        {"expectation_results": [], "memory_search_keywords": ["架构", "测试"]},
+        {
+            "expectation_results": [],
+            "memory_search_keywords": ["架构", "测试"],
+            "reply_pacing_hint": "serious_thinking",
+            "interaction_framework_hint": "normal_dialogue",
+        },
         [],
         {"time_gap_label": "immediate"},
         6100,
@@ -934,6 +952,41 @@ def test_serious_technical_input_keeps_serious_thinking_pacing() -> None:
     assert control["reply_pacing"] == "serious_thinking"
     assert control["max_response_moves"] == 4
     assert control["reply_contract"]["conversation_mode"] == "serious_thinking"
+    assert control["pacing_source"] == "conscious_loop"
+
+
+def test_reflective_question_uses_conscious_pacing_not_text_heuristics() -> None:
+    conscious = normalize_conscious_turn_plan(
+        {
+            "reply_pacing_hint": "balanced",
+            "interaction_framework_hint": "normal_dialogue",
+            "thought_intensity_hint": "long",
+            "memory_search_keywords": ["困惑", "身份", "期待"],
+        }
+    )
+    guidance = build_memory_dynamics_guidance(
+        {"short_term_memory": [], "long_term_memory": []},
+        "你说说，你最近感到有啥困惑的地方么？",
+        conscious,
+        [],
+        {"time_gap_label": "short_gap"},
+        7000,
+    )
+    control = guidance["control_guidance"]
+    assert control["conversation_mode"] == "balanced"
+    assert control["reply_contract"]["max_chars"] >= 140
+
+
+def test_normal_dialogue_framework_blocks_casual_fast_pacing() -> None:
+    pacing = _pacing_guidance_from_conscious_plan(
+        normalize_conscious_turn_plan(
+            {
+                "reply_pacing_hint": "casual_fast",
+                "interaction_framework_hint": "normal_dialogue",
+            }
+        )
+    )
+    assert pacing["conversation_mode"] == "balanced"
 
 
 class FollowupFakeLLM(FakeJSONLLM):
@@ -1012,6 +1065,7 @@ def test_post_reply_observer_rejects_low_confidence_long_or_roleplay_followup(tm
 
 def test_low_risk_casual_turn_skips_post_reply_observer(tmp_path: Path) -> None:
     llm = FakeJSONLLM()
+    llm.conscious_reply_pacing_hint = "casual_fast"
     runtime = MVPDialogueRuntime(
         store=MVPStateStore(tmp_path / "persona"),
         llm=llm,
@@ -1109,6 +1163,8 @@ def test_brevity_feedback_becomes_learned_habit_and_affects_next_pacing(tmp_path
     learned = saved["habit_traits"]["learned_conversation_habits"]
     assert any("更短" in item["content"] for item in learned)
 
+    llm.conscious_reply_pacing_hint = "casual_fast"
+    llm.conscious_prefers_compact_reply = True
     runtime.run_turn("今天吃撑了，想随便聊聊。", turn_index=1, now=6500)
     thinking_prompt = _latest_prompt_for(llm, "思考与回复模块")
     assert '"reply_pacing": "casual_fast"' in thinking_prompt

@@ -33,6 +33,7 @@ class M16WsHub:
     _subscribers: list[asyncio.Queue[dict[str, Any]]] = field(default_factory=list)
     _delivery: DeliverySurfaceState = field(default_factory=DeliverySurfaceState)
     _lock: threading.Lock = field(default_factory=threading.Lock)
+    _loop: asyncio.AbstractEventLoop | None = field(default=None, init=False, repr=False)
 
     def _now(self) -> int:
         if self.clock is None:
@@ -41,6 +42,10 @@ class M16WsHub:
 
     def register_subscriber(self) -> asyncio.Queue[dict[str, Any]]:
         queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue(maxsize=256)
+        try:
+            self._loop = asyncio.get_running_loop()
+        except RuntimeError:
+            pass
         with self._lock:
             self._subscribers.append(queue)
             self._delivery.ws_subscribed = True
@@ -80,17 +85,31 @@ class M16WsHub:
             now=now if now is not None else self._now(),
         )
 
+    def _put_to_subscribers(self, message: dict[str, Any], subscribers: list[asyncio.Queue[dict[str, Any]]]) -> None:
+        payload = dict(message)
+        for queue in subscribers:
+            try:
+                queue.put_nowait(payload)
+            except asyncio.QueueFull:
+                continue
+
     def publish(self, message: dict[str, Any]) -> None:
         errors = validate_ws_server_message(message)
         if errors:
             raise ValueError(f"invalid ws server message: {errors}")
         with self._lock:
             subscribers = list(self._subscribers)
-        for queue in subscribers:
+        loop = self._loop
+        if loop is not None and loop.is_running():
             try:
-                queue.put_nowait(dict(message))
-            except asyncio.QueueFull:
-                continue
+                if asyncio.get_running_loop() is loop:
+                    self._put_to_subscribers(message, subscribers)
+                    return
+            except RuntimeError:
+                pass
+            loop.call_soon_threadsafe(lambda: self._put_to_subscribers(message, subscribers))
+            return
+        self._put_to_subscribers(message, subscribers)
 
     def build_and_publish(
         self,

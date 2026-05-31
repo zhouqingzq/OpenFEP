@@ -1,0 +1,262 @@
+[
+  {
+    "id": "stm_1779969877_54281",
+    "kind": "episode",
+    "content": "用户对我说'胡桃你好啊'，我接受了名字胡桃并回礼。",
+    "salience": 0.55,
+    "keywords": [
+      "胡桃",
+      "名前",
+      "初対面",
+      "挨拶"
+    ],
+    "reason": "第一轮对话，命名事件",
+    "source": "thinking_prompt",
+    "created_at": 1779969877,
+    "last_recalled_at": 1779969991,
+    "recall_count": 2,
+    "evidence_refs": [
+      "stm_turn_1779969877"
+    ],
+    "source_user_id": "default_user",
+    "source_display_name": "default_user",
+    "shareability": "default_social",
+    "restriction_confidence": 0.75
+  },
+  {
+    "id": "stm_turn_1779969877",
+    "kind": "dialogue_turn",
+    "content": "胡桃你好啊",
+    "user_text": "胡桃你好啊",
+    "assistant_reply": "你好呀！我是胡桃，很高兴认识你～",
+    "assistant_reply_use_as_fact": false,
+    "salience": 0.49999999999999994,
+    "keywords": [
+      "第一轮对话，无已有记忆，仅注册命名事件。"
+    ],
+    "evidence_refs": [
+      "stm_turn_1779969877"
+    ],
+    "source": "dialogue",
+    "created_at": 1779969877,
+    "recall_count": 3,
+    "source_user_id": "default_user",
+    "source_display_name": "default_user",
+    "shareability": "default_social",
+    "restriction_confidence": 0.85,
+    "last_recalled_at": 1779970084
+  },
+  {
+    "id": "stm_1779969905_73641",
+    "kind": "episode",
+    "content": "用户再次说'胡桃你好啊'，我回应'又见面啦，胡桃在这儿呢～'，名称确认完成。",
+    "salience": 0.39999999999999997,
+    "keywords": [
+      "胡桃",
+      "名称确认",
+      "再次问候"
+    ],
+    "reason": "记录名称确认后的第二次互动",
+    "source": "thinking_prompt",
+    "created_at": 1779969905,
+    "last_recalled_at": 1779970084,
+    "recall_count": 2,
+    "evidence_refs": [
+      "stm_turn_1779969905"
+    ],
+    "source_user_id": "default_user",
+    "source_display_name": "default_user",
+    "shareability": "default_social",
+    "restriction_confidence": 0.75
+  },
+  {
+    "id": "stm_candidate_1779969905_0",
+    "kind": "episode",
+    "content": "胡桃你好啊。",
+    "salience": 0.53,
+    "confidence": 0.75,
+    "keywords": [
+      "胡桃",
+      "名称确认",
+      "再次问候",
+      "用户身份",
+      "胡桃你好啊",
+      "回应问候，确认用户使用'胡桃'称呼已接受，继续互动"
+    ],
+    "reason": "expectation_confirmed",
+    "evidence": "user_text",
+    "evidence_refs": [
+      "evidence:54139"
+    ],
+    "source": "memory_dynamics_adapter",
+    "created_at": 1779969905,
+    "last_recalled_at": 1779970084,
+    "recall_count": 2,
+    "source_user_id": "default_user",
+    "source_display_name": "default_user",
+    "shareability": "default_social",
+    "restriction_confidence": 0.75
+  },
+  {
+    "id": "stm_turn_1779969905",
+    "kind": "dialogue_turn",
+    "content": "胡桃你好啊。",
+    "user_text": "胡桃你好啊。",
+    "assistant_reply": "又见面啦，胡桃在这儿呢～",
+    "assistant_reply_use_as_fact": false,
+    "salience": 0.44999999999999996,
+    "keywords": [
+      "exp_name_confirm被确认，相关记忆（stm_turn_1779969877、stm_1779969877_54281）被唤起并强化，写入新的互动记录。"
+    ],
+    "evidence_refs": [
+      "stm_turn_1779969905"
+    ],
+    "source": "dialogue",
+    "created_at": 1779969905,
+    "recall_count": 2,
+    "source_user_id": "default_user",
+    "source_display_name": "default_user",
+    "shareability": "default_social",
+    "restriction_confidence": 0.85,
+    "last_recalled_at": 1779970084
+  },
+  {
+    "id": "stm_1779969991_80875",
+    "kind": "episode",
+    "content": "用户第三次问候，我回应并留出话题开口",
+    "salience": 0.35,
+    "keywords": [
+      "胡桃",
+      "问候",
+      "第三回",
+      "话题邀请"
+    ],
+    "reason": "记录当前对话推进状态",
+    "source": "thinking_prompt",
+    "created_at": 1779969991,
+    "last_recalled_at": null,
+    "recall_count": 0,
+    "evidence_refs": [
+      "stm_turn_1779969991"
+    ],
+    "source_user_id": "default_user",
+    "source_display_name": "default_user",
+    "shareability": "default_social",
+    "restriction_confidence": 0.75
+  },
+  {
+    "id": "stm_turn_1779969991",
+    "kind": "dialogue_turn",
+    "content": "胡桃你好啊",
+    "user_text": "胡桃你好啊",
+    "assistant_reply": "嘿，第三回啦～叫我胡桃就行，今天聊点什么好呢？",
+    "assistant_reply_use_as_fact": false,
+    "salience": 0.39999999999999997,
+    "keywords": [
+      "多段短期记忆被唤起，确认名称和问候循环，写入本轮推进事件。"
+    ],
+    "evidence_refs": [
+      "stm_turn_1779969991"
+    ],
+    "source": "dialogue",
+    "created_at": 1779969991,
+    "recall_count": 1,
+    "source_user_id": "default_user",
+    "source_display_name": "default_user",
+    "shareability": "default_social",
+    "restriction_confidence": 0.85,
+    "last_recalled_at": 1779970084
+  },
+  {
+    "id": "stm_1779970084_88737",
+    "kind": "episode",
+    "content": "用户第四轮问晚上好，我回礼并轻推话题",
+    "salience": 0.35,
+    "keywords": [
+      "胡桃",
+      "晚上问候",
+      "话题推进",
+      "第4轮"
+    ],
+    "reason": "记录问候循环计数和推进尝试",
+    "source": "thinking_prompt",
+    "created_at": 1779970084,
+    "last_recalled_at": null,
+    "recall_count": 0,
+    "evidence_refs": [
+      "stm_turn_1779970084"
+    ],
+    "source_user_id": "default_user",
+    "source_display_name": "default_user",
+    "shareability": "default_social",
+    "restriction_confidence": 0.75
+  },
+  {
+    "id": "stm_turn_1779970084",
+    "kind": "dialogue_turn",
+    "content": "胡桃晚上好啊",
+    "user_text": "胡桃晚上好啊",
+    "assistant_reply": "晚上好呀～今晚有什么想聊聊的吗？",
+    "assistant_reply_use_as_fact": false,
+    "salience": 0.39999999999999997,
+    "keywords": [
+      "唤起4条问候记忆，exp_user_introduce仍uncertain，未达到 violated，不触发认知更新"
+    ],
+    "evidence_refs": [
+      "stm_turn_1779970084"
+    ],
+    "source": "dialogue",
+    "created_at": 1779970084,
+    "recall_count": 1,
+    "source_user_id": "default_user",
+    "source_display_name": "default_user",
+    "shareability": "default_social",
+    "restriction_confidence": 0.85,
+    "last_recalled_at": 1779970206
+  },
+  {
+    "id": "stm_1779970206_31468",
+    "kind": "episode",
+    "content": "用户问'你还记得我们昨天聊了什么么？'，我回复无昨日记录",
+    "salience": 0.41,
+    "keywords": [
+      "昨天",
+      "记忆测试",
+      "时间语境纠正"
+    ],
+    "reason": "用户引入跨session时间参照，需记录以追踪连续性",
+    "source": "thinking_prompt",
+    "created_at": 1779970206,
+    "last_recalled_at": null,
+    "recall_count": 0,
+    "evidence_refs": [
+      "stm_turn_1779970206"
+    ],
+    "source_user_id": "default_user",
+    "source_display_name": "default_user",
+    "shareability": "default_social",
+    "restriction_confidence": 0.75
+  },
+  {
+    "id": "stm_turn_1779970206",
+    "kind": "dialogue_turn",
+    "content": "你还记得我们昨天聊了什么么？",
+    "user_text": "你还记得我们昨天聊了什么么？",
+    "assistant_reply": "嗯？昨天我们还没聊过呢，你记错了吧～",
+    "assistant_reply_use_as_fact": false,
+    "salience": 0.35,
+    "keywords": [
+      "用户引入'昨天'时间参照，与当前session记忆冲突，唤起temporal_assessment和reply_contract；新expectation用于验证用户意图。"
+    ],
+    "evidence_refs": [
+      "stm_turn_1779970206"
+    ],
+    "source": "dialogue",
+    "created_at": 1779970206,
+    "recall_count": 0,
+    "source_user_id": "default_user",
+    "source_display_name": "default_user",
+    "shareability": "default_social",
+    "restriction_confidence": 0.85
+  }
+]

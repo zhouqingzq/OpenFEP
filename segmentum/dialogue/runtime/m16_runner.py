@@ -275,6 +275,7 @@ class ConsciousnessRunner:
             )
 
         progress = TurnProgressReporter(turn_index=turn_index, publish=_publish_turn_progress)
+        _publish_turn_progress(turn_index, "claimed", 1)
         try:
             if self._inline_run_turn is not None:
                 result = self._inline_run_turn(text, turn_index=turn_index, now=now)
