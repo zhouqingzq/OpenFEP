@@ -16,6 +16,57 @@ def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
     return max(low, min(high, float(value)))
 
 
+def _string_list(value: object) -> list[str]:
+    if isinstance(value, (list, tuple)):
+        return [str(item) for item in value if str(item)]
+    return []
+
+
+def _memory_semantic_provenance(memory_context: Mapping[str, object] | None) -> dict[str, object]:
+    if not memory_context:
+        return {}
+    retrieved_memory_ids = _string_list(memory_context.get("retrieved_episode_ids"))
+    recall_hypothesis = (
+        dict(memory_context.get("recall_hypothesis", {}))
+        if isinstance(memory_context.get("recall_hypothesis"), Mapping)
+        else {}
+    )
+    weights = {
+        str(key): float(value)
+        for key, value in dict(
+            memory_context.get(
+                "winner_take_most_weights",
+                recall_hypothesis.get("winner_take_most_weights", {}),
+            )
+        ).items()
+        if isinstance(value, (int, float))
+    }
+    primary_entry_id = str(recall_hypothesis.get("primary_entry_id", ""))
+    committed_memory_ids: list[str] = []
+    if primary_entry_id:
+        committed_memory_ids.append(primary_entry_id)
+    committed_memory_ids.extend(
+        entry_id
+        for entry_id, weight in sorted(weights.items(), key=lambda item: (-item[1], item[0]))
+        if weight >= 0.16 and entry_id not in committed_memory_ids
+    )
+    if not committed_memory_ids and retrieved_memory_ids:
+        committed_memory_ids.append(retrieved_memory_ids[0])
+    auxiliary_memory_ids = [
+        entry_id for entry_id in retrieved_memory_ids if entry_id not in committed_memory_ids
+    ]
+    return {
+        "linked_memory_ids": list(retrieved_memory_ids),
+        "committed_memory_ids": list(committed_memory_ids),
+        "auxiliary_memory_ids": list(auxiliary_memory_ids),
+        "linked_path_ids": _string_list(memory_context.get("active_path_ids")),
+        "recall_primary_entry_id": primary_entry_id,
+        "representation_mode": str(memory_context.get("representation_mode", "")),
+        "acceptance_path": str(memory_context.get("acceptance_path", "")),
+        "decision_changed_by_recall": bool(memory_context.get("decision_changed_by_recall", False)),
+    }
+
+
 class VerificationStatus(StrEnum):
     CREATED = "created"
     ACTIVE = "active"
@@ -618,10 +669,12 @@ class PredictionLedger:
         diagnostics,
         prediction: Mapping[str, float],
         subject_state,
+        memory_context: Mapping[str, object] | None = None,
         narrative_uncertainty=None,
         experiment_design=None,
     ) -> PredictionLedgerUpdate:
         created: list[str] = []
+        semantic_provenance = _memory_semantic_provenance(memory_context)
         priorities = sorted(
             prediction.items(),
             key=lambda item: (-abs(float(item[1])), item[0]),
@@ -643,6 +696,7 @@ class PredictionLedger:
                     linked_commitments=tuple(diagnostics.commitment_focus[:2]),
                     linked_identity_anchors=tuple(subject_state.continuity_anchors[:2]),
                     linked_goal=diagnostics.active_goal,
+                    semantic_provenance=dict(semantic_provenance),
                 )
             )
             created.append(created_id)
@@ -674,6 +728,7 @@ class PredictionLedger:
                     linked_commitments=tuple(diagnostics.commitment_focus[:2]),
                     linked_identity_anchors=tuple(subject_state.continuity_anchors[:2]),
                     linked_goal=diagnostics.active_goal,
+                    semantic_provenance=dict(semantic_provenance),
                 )
             )
             created.append(prediction_id)
@@ -692,6 +747,7 @@ class PredictionLedger:
                     expected_horizon=2,
                     supporting_evidence=tuple(diagnostics.social_alerts[:2] or diagnostics.social_focus[:2]),
                     linked_goal=diagnostics.active_goal,
+                    semantic_provenance=dict(semantic_provenance),
                 )
             )
             created.append(social_prediction_id)
@@ -750,6 +806,7 @@ class PredictionLedger:
                     ),
                     linked_goal=diagnostics.active_goal,
                     decision_relevance=float(unknown.decision_relevance.total_score),
+                    semantic_provenance=dict(semantic_provenance),
                 )
             )
             created.append(prediction_id)
@@ -789,6 +846,7 @@ class PredictionLedger:
                         linked_goal=diagnostics.active_goal,
                         maintenance_context=str(plan.selected_action),
                         decision_relevance=float(getattr(plan, "informative_value", 0.0)),
+                        semantic_provenance=dict(semantic_provenance),
                     )
                 )
                 created.append(prediction_id)

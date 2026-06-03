@@ -417,3 +417,218 @@ class MemoryEntry:
             salience_delta=_coerce_optional_float(payload.get("salience_delta")),
             retention_adjustment=_coerce_optional_float(payload.get("retention_adjustment")),
         )
+
+
+@dataclass
+class PathCueSignature:
+    semantic_tags: list[str] = field(default_factory=list)
+    context_tags: list[str] = field(default_factory=list)
+    sensitive_channels: list[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        self.semantic_tags = _coerce_str_list(self.semantic_tags)
+        self.context_tags = _coerce_str_list(self.context_tags)
+        self.sensitive_channels = _coerce_str_list(self.sensitive_channels)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "semantic_tags": list(self.semantic_tags),
+            "context_tags": list(self.context_tags),
+            "sensitive_channels": list(self.sensitive_channels),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, object] | None) -> "PathCueSignature":
+        if not isinstance(payload, dict):
+            return cls()
+        return cls(
+            semantic_tags=_coerce_str_list(payload.get("semantic_tags", [])),
+            context_tags=_coerce_str_list(payload.get("context_tags", [])),
+            sensitive_channels=_coerce_str_list(payload.get("sensitive_channels", [])),
+        )
+
+
+@dataclass
+class PathOutcomeProfile:
+    outcome_distribution: dict[str, float] = field(default_factory=dict)
+    predicted_effects: dict[str, float] = field(default_factory=dict)
+    preferred_probability: float = 0.0
+    future_path_utility: float = 0.0
+
+    def __post_init__(self) -> None:
+        self.outcome_distribution = {
+            str(key): _coerce_float(value)
+            for key, value in dict(self.outcome_distribution or {}).items()
+            if str(key)
+        }
+        self.predicted_effects = {
+            str(key): _coerce_float(value)
+            for key, value in dict(self.predicted_effects or {}).items()
+            if str(key)
+        }
+        self.preferred_probability = _coerce_float(self.preferred_probability)
+        self.future_path_utility = _coerce_float(self.future_path_utility)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "outcome_distribution": dict(self.outcome_distribution),
+            "predicted_effects": dict(self.predicted_effects),
+            "preferred_probability": self.preferred_probability,
+            "future_path_utility": self.future_path_utility,
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, object] | None) -> "PathOutcomeProfile":
+        if not isinstance(payload, dict):
+            return cls()
+        return cls(
+            outcome_distribution=(
+                dict(payload.get("outcome_distribution", {}))
+                if isinstance(payload.get("outcome_distribution"), dict)
+                else {}
+            ),
+            predicted_effects=(
+                dict(payload.get("predicted_effects", {}))
+                if isinstance(payload.get("predicted_effects"), dict)
+                else {}
+            ),
+            preferred_probability=_coerce_float(payload.get("preferred_probability", 0.0)),
+            future_path_utility=_coerce_float(payload.get("future_path_utility", 0.0)),
+        )
+
+
+@dataclass
+class PathRiskProfile:
+    mean_risk: float = 0.0
+    max_risk: float = 0.0
+    contradiction_burden: float = 0.0
+    maintenance_cost: float = 0.0
+    caution_score: float = 0.0
+
+    def __post_init__(self) -> None:
+        self.mean_risk = _coerce_float(self.mean_risk)
+        self.max_risk = _coerce_float(self.max_risk)
+        self.contradiction_burden = _coerce_float(self.contradiction_burden)
+        self.maintenance_cost = _coerce_float(self.maintenance_cost)
+        self.caution_score = _coerce_float(self.caution_score)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "mean_risk": self.mean_risk,
+            "max_risk": self.max_risk,
+            "contradiction_burden": self.contradiction_burden,
+            "maintenance_cost": self.maintenance_cost,
+            "caution_score": self.caution_score,
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, object] | None) -> "PathRiskProfile":
+        if not isinstance(payload, dict):
+            return cls()
+        return cls(
+            mean_risk=_coerce_float(payload.get("mean_risk", 0.0)),
+            max_risk=_coerce_float(payload.get("max_risk", 0.0)),
+            contradiction_burden=_coerce_float(payload.get("contradiction_burden", 0.0)),
+            maintenance_cost=_coerce_float(payload.get("maintenance_cost", 0.0)),
+            caution_score=_coerce_float(payload.get("caution_score", 0.0)),
+        )
+
+
+@dataclass
+class MemoryPath:
+    path_id: str
+    source_episode_ids: list[str] = field(default_factory=list)
+    source_memory_ids: list[str] = field(default_factory=list)
+    dominant_action: str = ""
+    cue_signature: PathCueSignature = field(default_factory=PathCueSignature)
+    outcome_profile: PathOutcomeProfile = field(default_factory=PathOutcomeProfile)
+    risk_profile: PathRiskProfile = field(default_factory=PathRiskProfile)
+    expected_surprise_profile: dict[str, float] = field(default_factory=dict)
+    support_count: int = 0
+    confirmation_count: int = 0
+    violation_count: int = 0
+    path_quality: float = 0.0
+    path_polarity: str = "positive"
+    last_updated_cycle: int = 0
+
+    def __post_init__(self) -> None:
+        self.path_id = str(self.path_id or "")
+        self.source_episode_ids = _coerce_str_list(self.source_episode_ids)
+        self.source_memory_ids = _coerce_str_list(self.source_memory_ids)
+        self.dominant_action = str(self.dominant_action or "")
+        if not isinstance(self.cue_signature, PathCueSignature):
+            self.cue_signature = PathCueSignature.from_dict(
+                dict(self.cue_signature) if isinstance(self.cue_signature, dict) else {}
+            )
+        if not isinstance(self.outcome_profile, PathOutcomeProfile):
+            self.outcome_profile = PathOutcomeProfile.from_dict(
+                dict(self.outcome_profile) if isinstance(self.outcome_profile, dict) else {}
+            )
+        if not isinstance(self.risk_profile, PathRiskProfile):
+            self.risk_profile = PathRiskProfile.from_dict(
+                dict(self.risk_profile) if isinstance(self.risk_profile, dict) else {}
+            )
+        self.expected_surprise_profile = {
+            str(key): _coerce_float(value)
+            for key, value in dict(self.expected_surprise_profile or {}).items()
+            if str(key)
+        }
+        self.support_count = max(0, _coerce_int(self.support_count))
+        self.confirmation_count = max(0, _coerce_int(self.confirmation_count))
+        self.violation_count = max(0, _coerce_int(self.violation_count))
+        self.path_quality = _coerce_float(self.path_quality)
+        self.path_polarity = str(self.path_polarity or "positive")
+        self.last_updated_cycle = max(0, _coerce_int(self.last_updated_cycle))
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "path_id": self.path_id,
+            "source_episode_ids": list(self.source_episode_ids),
+            "source_memory_ids": list(self.source_memory_ids),
+            "dominant_action": self.dominant_action,
+            "cue_signature": self.cue_signature.to_dict(),
+            "outcome_profile": self.outcome_profile.to_dict(),
+            "risk_profile": self.risk_profile.to_dict(),
+            "expected_surprise_profile": dict(self.expected_surprise_profile),
+            "support_count": self.support_count,
+            "confirmation_count": self.confirmation_count,
+            "violation_count": self.violation_count,
+            "path_quality": self.path_quality,
+            "path_polarity": self.path_polarity,
+            "last_updated_cycle": self.last_updated_cycle,
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, object]) -> "MemoryPath":
+        return cls(
+            path_id=str(payload.get("path_id", "")),
+            source_episode_ids=_coerce_str_list(payload.get("source_episode_ids", [])),
+            source_memory_ids=_coerce_str_list(payload.get("source_memory_ids", [])),
+            dominant_action=str(payload.get("dominant_action", "")),
+            cue_signature=PathCueSignature.from_dict(
+                dict(payload.get("cue_signature", {}))
+                if isinstance(payload.get("cue_signature"), dict)
+                else {}
+            ),
+            outcome_profile=PathOutcomeProfile.from_dict(
+                dict(payload.get("outcome_profile", {}))
+                if isinstance(payload.get("outcome_profile"), dict)
+                else {}
+            ),
+            risk_profile=PathRiskProfile.from_dict(
+                dict(payload.get("risk_profile", {}))
+                if isinstance(payload.get("risk_profile"), dict)
+                else {}
+            ),
+            expected_surprise_profile=(
+                dict(payload.get("expected_surprise_profile", {}))
+                if isinstance(payload.get("expected_surprise_profile"), dict)
+                else {}
+            ),
+            support_count=_coerce_int(payload.get("support_count", 0)),
+            confirmation_count=_coerce_int(payload.get("confirmation_count", 0)),
+            violation_count=_coerce_int(payload.get("violation_count", 0)),
+            path_quality=_coerce_float(payload.get("path_quality", 0.0)),
+            path_polarity=str(payload.get("path_polarity", "positive")),
+            last_updated_cycle=_coerce_int(payload.get("last_updated_cycle", 0)),
+        )

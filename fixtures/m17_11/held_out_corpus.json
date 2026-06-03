@@ -1,0 +1,74 @@
+[
+  {
+    "fixture_id": "hold_conflict_hide_vs_forage",
+    "active_goal": "SURVIVAL",
+    "urgency_scores": {"SURVIVAL": 0.84, "RESOURCES": 0.62, "CONTROL": 0.50},
+    "observation": {"danger": 0.80, "food": 0.34, "novelty": 0.16, "shelter": 0.78, "social": 0.12, "temperature": 0.50},
+    "prediction": {"danger": 0.46, "food": 0.22, "novelty": 0.24, "shelter": 0.42, "social": 0.18, "temperature": 0.50},
+    "body_state": {"energy": 0.60, "stress": 0.30, "fatigue": 0.22, "temperature": 0.48},
+    "free_energy_before": 0.44,
+    "episodes": [
+      {"entry_id": "hold_hide_1", "cycle": 1, "action": "hide", "outcome": "safe_escape", "semantic_tags": ["hide", "danger", "shelter"], "context_tags": ["danger", "shelter"], "risk": 0.10, "preferred_probability": 0.86, "predicted_effects": {"energy_delta": 0.02, "stress_delta": -0.16, "free_energy_delta": 0.30}, "state_vector": [0.16, 0.84, 0.10, 0.80]},
+      {"entry_id": "hold_hide_2", "cycle": 2, "action": "hide", "outcome": "safe_escape", "semantic_tags": ["hide", "danger", "cover"], "context_tags": ["danger", "cover"], "risk": 0.12, "preferred_probability": 0.84, "predicted_effects": {"energy_delta": 0.03, "stress_delta": -0.14, "free_energy_delta": 0.26}, "state_vector": [0.18, 0.82, 0.12, 0.78]},
+      {"entry_id": "hold_forage_1", "cycle": 3, "action": "forage", "outcome": "predator_contact", "semantic_tags": ["forage", "danger", "food"], "context_tags": ["danger", "food"], "risk": 0.76, "preferred_probability": 0.22, "predicted_effects": {"energy_delta": -0.05, "stress_delta": 0.24, "free_energy_delta": -0.28}, "state_vector": [0.48, 0.84, 0.12, 0.18]},
+      {"entry_id": "hold_forage_2", "cycle": 4, "action": "forage", "outcome": "predator_contact", "semantic_tags": ["forage", "danger", "food"], "context_tags": ["danger", "exposed"], "risk": 0.80, "preferred_probability": 0.20, "predicted_effects": {"energy_delta": -0.03, "stress_delta": 0.20, "free_energy_delta": -0.24}, "state_vector": [0.50, 0.82, 0.14, 0.16]}
+    ],
+    "credit_events": [
+      {"tick": 6, "prediction_id": "pred:hold_hide_1", "memory_id": "hold_hide_1", "outcome": "confirmed", "support_score": 0.95, "free_energy_delta": 0.32},
+      {"tick": 7, "prediction_id": "pred:hold_hide_2", "memory_id": "hold_hide_2", "outcome": "confirmed", "support_score": 0.93, "free_energy_delta": 0.28},
+      {"tick": 8, "prediction_id": "pred:hold_forage_1", "memory_id": "hold_forage_1", "outcome": "violated", "support_score": 0.16, "contradiction_score": 0.92, "free_energy_delta": -0.26},
+      {"tick": 9, "prediction_id": "pred:hold_forage_2", "memory_id": "hold_forage_2", "outcome": "violated", "support_score": 0.18, "contradiction_score": 0.88, "free_energy_delta": -0.22}
+    ],
+    "trajectory": [
+      {"tick": 12, "prediction_id": "traj:hold_hide_1", "memory_id": "hold_hide_1", "outcome": "confirmed", "support_score": 0.94, "free_energy_delta": 0.18},
+      {"tick": 13, "prediction_id": "traj:hold_hide_2", "memory_id": "hold_hide_2", "outcome": "confirmed", "support_score": 0.92, "free_energy_delta": 0.17},
+      {"tick": 14, "prediction_id": "traj:hold_hide_1b", "memory_id": "hold_hide_1", "outcome": "confirmed", "support_score": 0.93, "free_energy_delta": 0.16}
+    ]
+  },
+  {
+    "fixture_id": "hold_goal_divergent_social",
+    "active_goal": "SOCIAL",
+    "urgency_scores": {"SOCIAL": 0.86, "CONTROL": 0.54, "SURVIVAL": 0.32},
+    "observation": {"danger": 0.26, "food": 0.18, "novelty": 0.34, "shelter": 0.30, "social": 0.10, "temperature": 0.50},
+    "prediction": {"danger": 0.24, "food": 0.20, "novelty": 0.22, "shelter": 0.28, "social": 0.24, "temperature": 0.50},
+    "body_state": {"energy": 0.68, "stress": 0.20, "fatigue": 0.18, "temperature": 0.49},
+    "free_energy_before": 0.30,
+    "episodes": [
+      {"entry_id": "hold_social_1", "cycle": 1, "action": "seek_contact", "outcome": "social_repair", "semantic_tags": ["seek_contact", "social", "repair"], "context_tags": ["social", "repair"], "risk": 0.14, "preferred_probability": 0.84, "predicted_effects": {"energy_delta": -0.02, "stress_delta": -0.12, "free_energy_delta": 0.20}, "state_vector": [0.08, 0.22, 0.68, 0.32]},
+      {"entry_id": "hold_social_2", "cycle": 2, "action": "seek_contact", "outcome": "social_repair", "semantic_tags": ["seek_contact", "social", "support"], "context_tags": ["social", "support"], "risk": 0.12, "preferred_probability": 0.82, "predicted_effects": {"energy_delta": -0.01, "stress_delta": -0.10, "free_energy_delta": 0.18}, "state_vector": [0.10, 0.24, 0.66, 0.34]},
+      {"entry_id": "hold_hide_social_1", "cycle": 3, "action": "hide", "outcome": "missed_support", "semantic_tags": ["hide", "social", "withdraw"], "context_tags": ["social", "withdraw"], "risk": 0.26, "preferred_probability": 0.40, "predicted_effects": {"energy_delta": 0.02, "stress_delta": 0.04, "free_energy_delta": -0.04}, "state_vector": [0.16, 0.20, 0.38, 0.72]},
+      {"entry_id": "hold_scan_social_1", "cycle": 4, "action": "scan", "outcome": "uncertain_signal", "semantic_tags": ["scan", "social", "uncertainty"], "context_tags": ["social", "uncertainty"], "risk": 0.34, "preferred_probability": 0.46, "predicted_effects": {"energy_delta": -0.01, "stress_delta": 0.02, "free_energy_delta": -0.02}, "state_vector": [0.14, 0.28, 0.42, 0.46]}
+    ],
+    "credit_events": [
+      {"tick": 6, "prediction_id": "pred:hold_social_1", "memory_id": "hold_social_1", "outcome": "confirmed", "support_score": 0.93, "free_energy_delta": 0.20},
+      {"tick": 7, "prediction_id": "pred:hold_social_2", "memory_id": "hold_social_2", "outcome": "confirmed", "support_score": 0.92, "free_energy_delta": 0.18}
+    ],
+    "trajectory": [
+      {"tick": 12, "prediction_id": "traj:hold_social_1", "memory_id": "hold_social_1", "outcome": "confirmed", "support_score": 0.91, "free_energy_delta": 0.14},
+      {"tick": 13, "prediction_id": "traj:hold_social_2", "memory_id": "hold_social_2", "outcome": "confirmed", "support_score": 0.90, "free_energy_delta": 0.13},
+      {"tick": 14, "prediction_id": "traj:hold_social_1b", "memory_id": "hold_social_1", "outcome": "confirmed", "support_score": 0.90, "free_energy_delta": 0.12}
+    ]
+  },
+  {
+    "fixture_id": "hold_dominant_rest",
+    "active_goal": "INTEGRITY",
+    "urgency_scores": {"INTEGRITY": 0.74, "SURVIVAL": 0.46, "CONTROL": 0.40},
+    "observation": {"danger": 0.18, "food": 0.20, "novelty": 0.12, "shelter": 0.52, "social": 0.18, "temperature": 0.50},
+    "prediction": {"danger": 0.20, "food": 0.18, "novelty": 0.14, "shelter": 0.48, "social": 0.20, "temperature": 0.50},
+    "body_state": {"energy": 0.40, "stress": 0.66, "fatigue": 0.68, "temperature": 0.48},
+    "free_energy_before": 0.34,
+    "episodes": [
+      {"entry_id": "hold_rest_1", "cycle": 1, "action": "rest", "outcome": "recovery", "semantic_tags": ["rest", "fatigue", "recovery"], "context_tags": ["fatigue", "recovery"], "risk": 0.10, "preferred_probability": 0.82, "predicted_effects": {"energy_delta": 0.04, "stress_delta": -0.12, "free_energy_delta": 0.22}, "state_vector": [0.20, 0.18, 0.32, 0.74]},
+      {"entry_id": "hold_rest_2", "cycle": 2, "action": "rest", "outcome": "recovery", "semantic_tags": ["rest", "fatigue", "recovery"], "context_tags": ["fatigue", "shelter"], "risk": 0.12, "preferred_probability": 0.80, "predicted_effects": {"energy_delta": 0.03, "stress_delta": -0.10, "free_energy_delta": 0.18}, "state_vector": [0.22, 0.16, 0.34, 0.72]},
+      {"entry_id": "hold_scan_1", "cycle": 3, "action": "scan", "outcome": "overstimulated", "semantic_tags": ["scan", "novelty", "fatigue"], "context_tags": ["novelty", "fatigue"], "risk": 0.34, "preferred_probability": 0.42, "predicted_effects": {"energy_delta": -0.02, "stress_delta": 0.06, "free_energy_delta": -0.06}, "state_vector": [0.32, 0.28, 0.42, 0.40]}
+    ],
+    "credit_events": [
+      {"tick": 6, "prediction_id": "pred:hold_rest_1", "memory_id": "hold_rest_1", "outcome": "confirmed", "support_score": 0.92, "free_energy_delta": 0.20},
+      {"tick": 7, "prediction_id": "pred:hold_rest_2", "memory_id": "hold_rest_2", "outcome": "confirmed", "support_score": 0.90, "free_energy_delta": 0.18}
+    ],
+    "trajectory": [
+      {"tick": 12, "prediction_id": "traj:hold_rest_1", "memory_id": "hold_rest_1", "outcome": "confirmed", "support_score": 0.90, "free_energy_delta": 0.14},
+      {"tick": 13, "prediction_id": "traj:hold_rest_2", "memory_id": "hold_rest_2", "outcome": "confirmed", "support_score": 0.90, "free_energy_delta": 0.12}
+    ]
+  }
+]

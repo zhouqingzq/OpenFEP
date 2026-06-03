@@ -2324,6 +2324,9 @@ class SelfModel:
             for payload in episodic_memory
             if int(payload.get("timestamp", payload.get("cycle", 0))) > previous.last_updated_tick
         ]
+        summary_episodes = list(recent_episodes)
+        if not summary_episodes and episodic_memory:
+            summary_episodes = [episodic_memory[-1]]
         recent_decisions = [
             payload
             for payload in decision_history
@@ -2343,7 +2346,7 @@ class SelfModel:
         chapter_end = max(ticks) if ticks else current_tick
         recent_state_summary = self._summarize_chapter_state(
             decisions=recent_decisions,
-            episodes=recent_episodes,
+            episodes=summary_episodes,
             policies=policies,
         )
         recent_key_events = self._extract_key_events(recent_episodes)
@@ -3047,6 +3050,13 @@ class SelfModel:
             for payload in episodes
             if isinstance(payload.get("body_state"), dict)
         ]
+        if not energy_values:
+            energy_values = [
+                float(payload.get("state_snapshot", {}).get("body_state", {}).get("energy", 0.0))
+                for payload in episodes
+                if isinstance(payload.get("state_snapshot"), dict)
+                and isinstance(payload.get("state_snapshot", {}).get("body_state"), dict)
+            ]
         dominant_action_counts = Counter(
             str(payload.get("action", ""))
             for payload in decisions

@@ -7,6 +7,7 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any
 
+from .memory_credit import MemoryCreditSignal
 from .memory_decay import (
     DecayReport,
     LONG_DORMANT_ACCESS_THRESHOLD,
@@ -20,7 +21,16 @@ from .memory_decay import (
     trace_decay_rate,
 )
 from .memory_anchored import AnchoredMemoryItem
-from .memory_model import MemoryClass, MemoryEntry, SourceType, StoreLevel
+from .memory_model import (
+    MemoryClass,
+    MemoryEntry,
+    MemoryPath,
+    PathCueSignature,
+    PathOutcomeProfile,
+    PathRiskProfile,
+    SourceType,
+    StoreLevel,
+)
 from .value_memory import QUARANTINE_KIND, REJECTED_KIND, value_memory_utility_from_metadata
 
 
@@ -68,6 +78,28 @@ def _internal_metadata(entry: MemoryEntry) -> dict[str, object]:
         internal = {}
         entry.compression_metadata["m45_internal"] = internal
     return internal
+
+
+def _credit_metadata(entry: MemoryEntry) -> dict[str, object]:
+    if entry.compression_metadata is None:
+        entry.compression_metadata = {}
+    payload = entry.compression_metadata.get("m17_memory_credit")
+    if not isinstance(payload, dict):
+        payload = {
+            "predictive_reliability": 0.5,
+            "future_path_utility": 0.0,
+            "error_avoidance_gain": 0.0,
+            "contradiction_burden": 0.0,
+            "confirmed_count": 0,
+            "violated_count": 0,
+            "partial_count": 0,
+            "unclear_count": 0,
+            "expired_count": 0,
+            "applied_keys": [],
+            "verification_history": [],
+        }
+        entry.compression_metadata["m17_memory_credit"] = payload
+    return payload
 
 
 def _warn_missing_promotion_evidence(entry: MemoryEntry, missing_sections: list[str]) -> None:
@@ -430,6 +462,7 @@ class MemoryStore:
     last_cleanup_report: dict[str, object] = field(default_factory=dict)
     semantic_schemas: list[dict[str, object]] = field(default_factory=list)
     latest_schema_update: dict[str, object] = field(default_factory=dict)
+    memory_paths: list[MemoryPath] = field(default_factory=list)
     anchored_items: list[AnchoredMemoryItem] = field(default_factory=list)
 
     def _find_index(self, entry_id: str) -> int | None:
@@ -824,6 +857,232 @@ class MemoryStore:
         index = self._find_index(entry_id)
         return None if index is None else self.entries[index]
 
+    def get_path(self, path_id: str) -> MemoryPath | None:
+        for path in self.memory_paths:
+            if path.path_id == path_id:
+                return path
+        return None
+
+    def path_entries(self) -> list[MemoryPath]:
+        return sorted(
+            self.memory_paths,
+            key=lambda item: (-float(item.path_quality), -int(item.support_count), item.path_id),
+        )
+
+    def refresh_memory_paths(
+        self,
+        *,
+        current_cycle: int,
+    ) -> dict[str, object]:
+        from .memory_consolidation import derive_memory_paths
+
+        previous = {path.path_id: path.to_dict() for path in self.memory_paths}
+        refreshed = derive_memory_paths(self, current_cycle=current_cycle)
+        self.memory_paths = list(refreshed)
+        current = {path.path_id: path.to_dict() for path in self.memory_paths}
+        created_ids = sorted(path_id for path_id in current if path_id not in previous)
+        removed_ids = sorted(path_id for path_id in previous if path_id not in current)
+        updated_ids = sorted(
+            path_id
+            for path_id in current
+            if path_id in previous and current[path_id] != previous[path_id]
+        )
+        return {
+            "created_ids": created_ids,
+            "updated_ids": updated_ids,
+            "removed_ids": removed_ids,
+            "path_count": len(self.memory_paths),
+        }
+
+    def propose_path_neighborhood(self, query, *, k: int = 3) -> list[dict[str, object]]:
+        from .memory_retrieval import _QueryTokenCache, _jaccard_overlap
+
+        if not self.memory_paths or k <= 0:
+            return []
+        qcache = _QueryTokenCache.build(query)
+        results: list[tuple[float, dict[str, object]]] = []
+        for path in self.memory_paths:
+            cue = path.cue_signature
+            semantic_overlap = _jaccard_overlap(
+                set(qcache.semantic_tags),
+                {str(item).lower() for item in cue.semantic_tags},
+            )
+            context_overlap = _jaccard_overlap(
+                set(qcache.context_tags),
+                {str(item).lower() for item in cue.context_tags},
+            )
+            channel_overlap = _jaccard_overlap(
+                set(qcache.content_keywords),
+                {str(item).lower() for item in cue.sensitive_channels},
+            )
+            cue_score = max(semantic_overlap, (context_overlap * 0.8) + (channel_overlap * 0.2))
+            support_score = _clamp(min(1.0, float(path.support_count) / 4.0))
+            contradiction_penalty = _clamp(path.risk_profile.contradiction_burden * 0.45)
+            score = (
+                (cue_score * 0.50)
+                + (_clamp(path.path_quality) * 0.30)
+                + (support_score * 0.15)
+                + (_clamp(path.outcome_profile.future_path_utility, -1.0, 1.0) * 0.05)
+                - contradiction_penalty
+            )
+            results.append(
+                (
+                    float(score),
+                    {
+                        "path_id": path.path_id,
+                        "dominant_action": path.dominant_action,
+                        "path_quality": round(float(path.path_quality), 6),
+                        "path_polarity": path.path_polarity,
+                        "support_count": int(path.support_count),
+                        "confirmation_count": int(path.confirmation_count),
+                        "violation_count": int(path.violation_count),
+                        "cue_signature": path.cue_signature.to_dict(),
+                        "outcome_profile": path.outcome_profile.to_dict(),
+                        "risk_profile": path.risk_profile.to_dict(),
+                        "expected_surprise_profile": dict(path.expected_surprise_profile),
+                        "source_episode_ids": list(path.source_episode_ids),
+                        "source_memory_ids": list(path.source_memory_ids),
+                        "proposal_score": round(float(score), 6),
+                        "retrieval_score": round(float(score), 6),
+                        "score_breakdown": {
+                            "cue_match": round(float(cue_score), 6),
+                            "semantic_overlap": round(float(semantic_overlap), 6),
+                            "context_overlap": round(float(context_overlap), 6),
+                            "channel_overlap": round(float(channel_overlap), 6),
+                            "support_score": round(float(support_score), 6),
+                            "contradiction_penalty": round(float(contradiction_penalty), 6),
+                        },
+                    },
+                )
+            )
+        results.sort(key=lambda item: (item[0], item[1]["path_quality"], item[1]["path_id"]), reverse=True)
+        proposed = [payload for _, payload in results[: max(0, int(k))] if float(payload["proposal_score"]) > 0.0]
+        for index, payload in enumerate(proposed, start=1):
+            payload["proposal_rank"] = index
+        return proposed
+
+    def retrieve_paths(self, query, *, k: int = 3) -> list[dict[str, object]]:
+        return self.propose_path_neighborhood(query, k=k)
+
+    def apply_memory_credit(
+        self,
+        signal: MemoryCreditSignal,
+        *,
+        tick: int,
+    ) -> dict[str, object]:
+        applied_ids: list[str] = []
+        skipped_ids: list[str] = []
+        skipped_reasons: dict[str, str] = {}
+        for entry_id in signal.linked_memory_ids:
+            entry = self.get(entry_id)
+            if entry is None:
+                skipped_ids.append(entry_id)
+                skipped_reasons[entry_id] = "missing_entry"
+                continue
+            metadata = _credit_metadata(entry)
+            applied_keys = [
+                str(item)
+                for item in metadata.get("applied_keys", [])
+                if str(item)
+            ]
+            application_key = (
+                f"{signal.linked_prediction_id}:{entry_id}:{signal.settlement_version}"
+            )
+            if application_key in applied_keys:
+                skipped_ids.append(entry_id)
+                skipped_reasons[entry_id] = "duplicate_credit_application"
+                continue
+
+            reliability = _clamp(float(metadata.get("predictive_reliability", 0.5)))
+            contradiction_burden = _clamp(float(metadata.get("contradiction_burden", 0.0)))
+            future_path_utility = max(
+                -1.0,
+                min(1.0, float(metadata.get("future_path_utility", 0.0))),
+            )
+            error_avoidance_gain = _clamp(float(metadata.get("error_avoidance_gain", 0.0)))
+            magnitude = max(
+                0.02,
+                min(
+                    0.18,
+                    (abs(float(signal.free_energy_delta)) * 0.18)
+                    + (float(signal.confidence_weight) * 0.08),
+                ),
+            )
+
+            if signal.outcome == "confirmed":
+                reliability = _clamp(reliability + magnitude)
+                contradiction_burden = _clamp(contradiction_burden - (magnitude * 0.35))
+                future_path_utility = max(-1.0, min(1.0, future_path_utility + (magnitude * 0.75)))
+                error_avoidance_gain = _clamp(error_avoidance_gain + (magnitude * 0.50))
+                entry.trace_strength = _clamp(entry.trace_strength + (magnitude * 0.45))
+                entry.accessibility = _clamp(entry.accessibility + (magnitude * 0.45))
+                entry.retention_adjustment = float(entry.retention_adjustment or 0.0) + (magnitude * 0.35)
+                metadata["confirmed_count"] = int(metadata.get("confirmed_count", 0)) + 1
+            elif signal.outcome == "violated":
+                reliability = _clamp(reliability - (magnitude * 1.10))
+                contradiction_burden = _clamp(contradiction_burden + magnitude)
+                future_path_utility = max(-1.0, min(1.0, future_path_utility - (magnitude * 0.80)))
+                error_avoidance_gain = _clamp(error_avoidance_gain + (magnitude * 0.35))
+                entry.counterevidence_count += 1
+                entry.trace_strength = _clamp(entry.trace_strength - (magnitude * 0.20))
+                entry.accessibility = _clamp(entry.accessibility - (magnitude * 0.28))
+                entry.retention_adjustment = float(entry.retention_adjustment or 0.0) - (magnitude * 0.40)
+                metadata["violated_count"] = int(metadata.get("violated_count", 0)) + 1
+            elif signal.outcome == "partial":
+                reliability = _clamp(reliability + (magnitude * 0.18))
+                contradiction_burden = _clamp(
+                    contradiction_burden + max(0.0, float(signal.contradiction_score) * 0.10)
+                )
+                future_path_utility = max(-1.0, min(1.0, future_path_utility + (magnitude * 0.10)))
+                entry.retention_adjustment = float(entry.retention_adjustment or 0.0) + (magnitude * 0.08)
+                metadata["partial_count"] = int(metadata.get("partial_count", 0)) + 1
+            elif signal.outcome == "expired":
+                reliability = _clamp(reliability - (magnitude * 0.12))
+                contradiction_burden = _clamp(contradiction_burden + (magnitude * 0.05))
+                entry.retention_adjustment = float(entry.retention_adjustment or 0.0) - (magnitude * 0.05)
+                metadata["expired_count"] = int(metadata.get("expired_count", 0)) + 1
+            else:
+                reliability = _clamp(reliability - (magnitude * 0.05))
+                entry.retention_adjustment = float(entry.retention_adjustment or 0.0) - (magnitude * 0.02)
+                metadata["unclear_count"] = int(metadata.get("unclear_count", 0)) + 1
+
+            metadata["predictive_reliability"] = round(reliability, 6)
+            metadata["future_path_utility"] = round(future_path_utility, 6)
+            metadata["error_avoidance_gain"] = round(error_avoidance_gain, 6)
+            metadata["contradiction_burden"] = round(contradiction_burden, 6)
+            metadata["last_signal"] = signal.to_dict()
+            history = metadata.get("verification_history")
+            if not isinstance(history, list):
+                history = []
+            history.append(
+                {
+                    "tick": int(tick),
+                    "prediction_id": signal.linked_prediction_id,
+                    "outcome": signal.outcome,
+                    "support_score": round(signal.support_score, 6),
+                    "contradiction_score": round(signal.contradiction_score, 6),
+                    "free_energy_delta": round(signal.free_energy_delta, 6),
+                    "confidence_weight": round(signal.confidence_weight, 6),
+                }
+            )
+            metadata["verification_history"] = history[-32:]
+            applied_keys.append(application_key)
+            metadata["applied_keys"] = applied_keys[-64:]
+            _refresh_decay_baseline(entry, cycle=max(int(tick), entry.last_accessed, entry.created_at))
+            self._audit_m9_retention_for_entry(
+                entry,
+                cycle=max(int(tick), entry.last_accessed, entry.created_at),
+            )
+            applied_ids.append(entry_id)
+        path_refresh = self.refresh_memory_paths(current_cycle=max(int(tick), 0))
+        return {
+            "prediction_id": signal.linked_prediction_id,
+            "applied_ids": applied_ids,
+            "skipped_ids": skipped_ids,
+            "skipped_reasons": skipped_reasons,
+            "path_refresh": path_refresh,
+        }
+
     def query_by_tags(self, tags: list[str], k: int = 5) -> list[MemoryEntry]:
         normalized = {str(tag).strip().lower() for tag in tags if str(tag).strip()}
         scored: list[tuple[float, float, MemoryEntry]] = []
@@ -887,6 +1146,7 @@ class MemoryStore:
         recall_artifact=None,
         conflict_type=None,
         cognitive_style=None,
+        reuse_event=None,
     ):
         from .memory_consolidation import reconsolidate
 
@@ -903,6 +1163,7 @@ class MemoryStore:
             recall_artifact=recall_artifact,
             conflict_type=conflict_type,
             cognitive_style=cognitive_style,
+            reuse_event=reuse_event,
         )
 
     def run_consolidation_cycle(
@@ -1218,6 +1479,7 @@ class MemoryStore:
             "last_cleanup_report": dict(self.last_cleanup_report),
             "semantic_schemas": [dict(s) for s in self.semantic_schemas if isinstance(s, dict)],
             "latest_schema_update": dict(self.latest_schema_update),
+            "memory_paths": [path.to_dict() for path in self.memory_paths],
             "anchored_items": [it.to_dict() for it in self.anchored_items],
         }
 
@@ -1261,6 +1523,11 @@ class MemoryStore:
             latest_schema_update=dict(payload.get("latest_schema_update", {}))
             if isinstance(payload.get("latest_schema_update"), dict)
             else {},
+            memory_paths=[
+                MemoryPath.from_dict(item)
+                for item in payload.get("memory_paths", [])
+                if isinstance(item, dict)
+            ],
             anchored_items=[
                 AnchoredMemoryItem.from_dict(it)
                 for it in payload.get("anchored_items", [])

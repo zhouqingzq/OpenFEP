@@ -5,6 +5,11 @@ from enum import Enum
 from math import copysign, exp, log, log1p
 from typing import Callable
 
+from .fep_surrogate import (
+    ExpectedFreeEnergySurrogate,
+    build_expected_free_energy_surrogate,
+)
+
 
 CANONICAL_OUTCOMES = (
     "survival_threat",
@@ -237,7 +242,34 @@ class PreferenceModel:
         goal: object | None = None,
         baseline_risk: float | None = None,
     ) -> float:
-        return self.weighted_risk(outcome, goal, baseline=baseline_risk) + predicted_error + action_ambiguity
+        return self.expected_free_energy_details(
+            outcome=outcome,
+            predicted_error=predicted_error,
+            action_ambiguity=action_ambiguity,
+            goal=goal,
+            baseline_risk=baseline_risk,
+        ).expected_free_energy_surrogate
+
+    def expected_free_energy_details(
+        self,
+        *,
+        outcome: str,
+        predicted_error: float,
+        action_ambiguity: float,
+        goal: object | None = None,
+        baseline_risk: float | None = None,
+        free_energy_surrogate_after: float | None = None,
+        free_energy_before: float | None = None,
+    ) -> ExpectedFreeEnergySurrogate:
+        risk_cost = self.weighted_risk(outcome, goal, baseline=baseline_risk)
+        return build_expected_free_energy_surrogate(
+            predicted_error=predicted_error,
+            risk_cost=risk_cost,
+            ambiguity_cost=action_ambiguity,
+            predicted_outcome=outcome,
+            free_energy_surrogate_after=free_energy_surrogate_after,
+            free_energy_before=free_energy_before,
+        )
 
     def map_state_to_outcome(self, predicted_state: dict[str, object]) -> str:
         body_state = _coerce_float_dict(predicted_state.get("body_state"))

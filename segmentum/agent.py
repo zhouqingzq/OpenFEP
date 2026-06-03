@@ -23,11 +23,13 @@ from .memory import (
     suppress_legacy_memory_warnings,
 )
 from .memory_dynamics import (
-    consolidate_successful_path_pattern,
     detect_memory_interference,
     memory_overdominance_detected_from_retrieval,
-    record_failed_path_outcome,
 )
+from .fep_surrogate import build_free_energy_surrogate
+from .goal_priors import build_goal_prior_adjustment
+from .adaptive_compute import decide_adaptive_compute, fixed_budget_decision
+from .memory_field import build_local_memory_field
 from .memory_retrieval import RetrievalQuery
 from .memory_state import AgentStateVector, MemoryAwareAgentMixin
 from .meta_control import MetaControlSignal, adjust_memory_retrieval
@@ -45,6 +47,7 @@ from .predictive_coding import (
 )
 from .counterfactual import CounterfactualInsight, CounterfactualLearning, run_counterfactual_phase
 from .cognitive_state import CognitiveStateMVP
+from .memory_credit import MemoryCreditSignal
 from .preferences import Goal, GoalStack, PreferenceModel
 from .narrative_compiler import NarrativeCompiler
 from .narrative_uncertainty import UncertaintyDecompositionResult
@@ -969,6 +972,14 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.memory_action_rollups_enabled: bool = True
         self.memory_representation_prior_enabled: bool = True
         self.policy_expected_free_energy_only_enabled: bool = False
+        self.goal_prior_enabled: bool = True
+        self.adaptive_compute_enabled: bool = True
+        self.path_substrate_enabled: bool = True
+        self.local_field_enabled: bool = True
+        self.memory_credit_enabled: bool = True
+        self.surprise_reconsolidation_enabled: bool = True
+        self.latest_goal_prior: dict[str, object] = {}
+        self.latest_adaptive_compute_decision: dict[str, object] = {}
         self._sleeping = False
         self._dialogue_decision_context: dict[str, object] | None = None
         self.counterfactual_insights: list[CounterfactualInsight] = []
@@ -1020,6 +1031,160 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.long_term_memory.agent_state_vector = self.agent_state_vector.to_dict()
         self.long_term_memory.memory_cognitive_style = self.memory_cognitive_style.to_dict()
         self.long_term_memory.memory_cycle_interval = self.memory_cycle_interval
+        if self.memory_store is not None:
+            self.long_term_memory.reusable_cognitive_paths = [
+                path.to_dict() for path in self.memory_store.path_entries()
+            ]
+
+    def apply_memory_credit_signals(
+        self,
+        signals: list[dict[str, object]] | tuple[dict[str, object], ...],
+        *,
+        tick: int | None = None,
+    ) -> list[dict[str, object]]:
+        if not self.memory_credit_enabled:
+            return []
+        if not signals:
+            return []
+        resolved_tick = self.cycle if tick is None else int(tick)
+        reports: list[dict[str, object]] = []
+        for payload in signals:
+            signal = MemoryCreditSignal.from_dict(payload)
+            if not signal.linked_prediction_id:
+                continue
+            reports.append(
+                self.long_term_memory.apply_memory_credit_signal(
+                    signal,
+                    tick=resolved_tick,
+                )
+            )
+        if reports:
+            self.sync_memory_awareness_to_long_term_memory()
+        return reports
+
+    def apply_reuse_reconsolidation(
+        self,
+        signals: list[dict[str, object]] | tuple[dict[str, object], ...],
+        *,
+        observation: Mapping[str, object] | None,
+        tick: int | None = None,
+    ) -> list[dict[str, object]]:
+        if not self.surprise_reconsolidation_enabled:
+            return []
+        if not signals or self.memory_store is None:
+            return []
+        from .memory_consolidation import ConflictType, MemoryReuseEvent
+
+        resolved_tick = self.cycle if tick is None else int(tick)
+        recall_payload = dict(self.last_memory_context.get("recall_hypothesis", {}) or {})
+        prediction_before = {
+            str(key): float(value)
+            for key, value in dict(self.last_memory_context.get("prediction_before_memory", {})).items()
+            if isinstance(value, (int, float))
+        }
+        observed = {
+            str(key): float(value)
+            for key, value in dict(observation or {}).items()
+            if isinstance(value, (int, float))
+        }
+        current_context_tags = [
+            key
+            for key, value in observed.items()
+            if abs(float(value)) >= 0.15
+        ][:8]
+        current_state = {
+            **self.agent_state_vector.to_dict(),
+            "active_goals": [str(self.goal_stack.active_goal.name)],
+            "recent_mood_baseline": self.agent_state_vector.recent_mood_baseline,
+            "threat_level": self.subject_state.continuity_score if self.subject_state is not None else 0.0,
+            "cognitive_style": self.memory_cognitive_style.to_dict(),
+        }
+        reports: list[dict[str, object]] = []
+        for payload in signals:
+            signal = MemoryCreditSignal.from_dict(payload)
+            if not signal.linked_memory_ids:
+                continue
+            support_score = float(payload.get("support_score", 0.0))
+            contradiction_score = float(payload.get("contradiction_score", 0.0))
+            contradiction_detected = (
+                signal.outcome == "violated"
+                or contradiction_score >= 0.55
+                or contradiction_score > max(support_score, 0.0)
+            )
+            reuse_prediction_error = max(
+                0.0,
+                contradiction_score,
+                1.0 - max(0.0, min(1.0, support_score)),
+            )
+            for memory_id in signal.linked_memory_ids:
+                reuse_event = MemoryReuseEvent(
+                    reuse_event_id=f"reuse:{signal.linked_prediction_id}:{memory_id}:{resolved_tick}",
+                    memory_id=memory_id,
+                    path_id=signal.linked_path_ids[0] if signal.linked_path_ids else "",
+                    prediction_before_reuse=prediction_before,
+                    observation_after_reuse=observed,
+                    reuse_prediction_error=reuse_prediction_error,
+                    reuse_free_energy_delta=float(signal.free_energy_delta),
+                    recall_confidence=float(signal.confidence_weight),
+                    contradiction_detected=contradiction_detected,
+                    live_reuse=True,
+                )
+                report = self.memory_store.reconsolidate_entry(
+                    memory_id,
+                    current_mood=self.agent_state_vector.recent_mood_baseline,
+                    current_context_tags=current_context_tags,
+                    current_cycle=resolved_tick,
+                    current_state=current_state,
+                    recall_artifact=recall_payload or None,
+                    conflict_type=ConflictType.FACTUAL if contradiction_detected else None,
+                    cognitive_style=self.memory_cognitive_style.to_dict(),
+                    reuse_event=reuse_event,
+                )
+                reports.append(report.to_dict())
+        if reports:
+            self.long_term_memory.episodes = self.memory_store.to_legacy_episodes()
+            self.sync_memory_awareness_to_long_term_memory()
+            self.last_memory_context["reuse_reconsolidation_reports"] = list(reports)
+        return reports
+
+    def _provisional_goal_context(
+        self,
+        current_state_snapshot: Mapping[str, object],
+    ) -> dict[str, object]:
+        return dict(
+            self.goal_stack.get_goal_context_for_decision(
+                dict(current_state_snapshot),
+            )
+        )
+
+    def _adaptive_compute_decision(
+        self,
+        *,
+        field_payload: Mapping[str, object] | None,
+        goal_context: Mapping[str, object] | None,
+        prediction_error_surrogate: float,
+        base_retrieval_k: int,
+        base_path_k: int,
+        candidate_action_count: int,
+    ) -> dict[str, object]:
+        if not self.adaptive_compute_enabled:
+            decision = fixed_budget_decision(
+                base_retrieval_k=base_retrieval_k,
+                base_path_k=base_path_k,
+                candidate_action_limit=min(candidate_action_count, 6),
+            )
+        else:
+            decision = decide_adaptive_compute(
+                field=field_payload,
+                goal_context=goal_context,
+                prediction_error_surrogate=prediction_error_surrogate,
+                base_retrieval_k=base_retrieval_k,
+                base_path_k=base_path_k,
+                candidate_action_count=candidate_action_count,
+            )
+        payload = decision.to_dict()
+        self.latest_adaptive_compute_decision = dict(payload)
+        return payload
 
     def _active_memory_backend(self) -> str:
         return self.long_term_memory._normalize_memory_backend(self.long_term_memory.memory_backend)
@@ -1118,6 +1283,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
         baseline_errors: dict[str, float],
         current_state_snapshot: dict[str, object],
         k: int,
+        goal_context: Mapping[str, object] | None = None,
     ) -> list[dict[str, object]]:
         if not self.memory_enabled:
             self.last_retrieval_result = {
@@ -1142,13 +1308,78 @@ class SegmentAgent(MemoryAwareAgentMixin):
         )
         effective_k = int(adjustment.adjusted["k"])
         query = self._decision_retrieval_query(observed, baseline_prediction, baseline_errors)
-        result = self.retrieve_for_decision(
+        coarse_result = self.retrieve_for_decision(
             query,
             self.cycle,
             current_mood=self.agent_state_vector.recent_mood_baseline,
             k=effective_k,
         )
-        top_candidates = result.candidates[:effective_k]
+        coarse_path_k = max(1, min(4, effective_k))
+        coarse_active_paths = (
+            self.memory_store.propose_path_neighborhood(query, k=coarse_path_k)
+            if self.path_substrate_enabled
+            else []
+        )
+        coarse_local_field = (
+            build_local_memory_field(
+                coarse_active_paths,
+                baseline_prediction=baseline_prediction,
+                errors=baseline_errors,
+                body_state=self._current_body_state(),
+            )
+            if self.local_field_enabled
+            else None
+        )
+        predicted_error_surrogate = build_free_energy_surrogate(
+            errors=baseline_errors,
+            body_state=self._current_body_state(),
+        ).free_energy_surrogate
+        adaptive_compute = self._adaptive_compute_decision(
+            field_payload=coarse_local_field.to_dict() if coarse_local_field is not None else {},
+            goal_context=goal_context,
+            prediction_error_surrogate=predicted_error_surrogate,
+            base_retrieval_k=effective_k,
+            base_path_k=coarse_path_k,
+            candidate_action_count=len(self._available_action_schemas()),
+        )
+        retrieval_k = int(adaptive_compute.get("retrieval_k", effective_k) or effective_k)
+        path_k = int(adaptive_compute.get("path_neighborhood_k", coarse_path_k) or coarse_path_k)
+        if bool(adaptive_compute.get("field_refinement_enabled", True)) and retrieval_k != effective_k:
+            result = self.retrieve_for_decision(
+                query,
+                self.cycle,
+                current_mood=self.agent_state_vector.recent_mood_baseline,
+                k=retrieval_k,
+            )
+        else:
+            result = coarse_result
+            retrieval_k = effective_k
+        active_paths = (
+            self.memory_store.propose_path_neighborhood(query, k=path_k)
+            if self.path_substrate_enabled
+            else []
+        )
+        local_field = (
+            build_local_memory_field(
+                active_paths,
+                baseline_prediction=baseline_prediction,
+                errors=baseline_errors,
+                body_state=self._current_body_state(),
+            )
+            if self.local_field_enabled
+            else None
+        )
+        goal_prior = (
+            build_goal_prior_adjustment(
+                active_goal=str(goal_context.get("active_goal", "")) if isinstance(goal_context, Mapping) else "",
+                current_state=current_state_snapshot,
+                goal_context=goal_context,
+            )
+            if self.goal_prior_enabled
+            else None
+        )
+        self.latest_goal_prior = goal_prior.to_dict() if goal_prior is not None else {}
+        top_candidates = result.candidates[:retrieval_k]
         projected_by_id = self.memory_store.legacy_payloads_for_entries(
             [c.entry for c in top_candidates]
         )
@@ -1168,6 +1399,12 @@ class SegmentAgent(MemoryAwareAgentMixin):
         self.long_term_memory.last_retrieval_result = {
             "memory_backend": "memory_store",
             "meta_control_adjustment": adjustment.to_dict(),
+            "goal_context": dict(goal_context or {}),
+            "goal_prior": goal_prior.to_dict() if goal_prior is not None else {},
+            "adaptive_compute": dict(adaptive_compute),
+            "active_paths": active_paths,
+            "active_path_ids": [str(item.get("path_id", "")) for item in active_paths if str(item.get("path_id", ""))],
+            "local_field": local_field.to_dict() if local_field is not None else {},
             **result.to_dict(),
         }
         interference = detect_memory_interference(
@@ -1592,6 +1829,110 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "dopamine": self.dopamine,
         }
 
+    def _path_action_rollups(
+        self,
+        active_paths: list[dict[str, object]],
+        *,
+        local_field: dict[str, object] | None = None,
+    ) -> dict[str, dict[str, object]]:
+        field_action_influences = (
+            dict(local_field.get("action_influences", {}))
+            if isinstance(local_field, dict) and isinstance(local_field.get("action_influences"), dict)
+            else {}
+        )
+        rollups: dict[str, dict[str, object]] = {}
+        for payload in active_paths:
+            action_key = action_name(payload.get("dominant_action", ""))
+            if not action_key:
+                continue
+            path_quality = float(payload.get("path_quality", 0.0) or 0.0)
+            if path_quality <= 0.0:
+                continue
+            outcome_profile = (
+                dict(payload.get("outcome_profile", {}))
+                if isinstance(payload.get("outcome_profile"), dict)
+                else {}
+            )
+            risk_profile = (
+                dict(payload.get("risk_profile", {}))
+                if isinstance(payload.get("risk_profile"), dict)
+                else {}
+            )
+            surprise_profile = (
+                dict(payload.get("expected_surprise_profile", {}))
+                if isinstance(payload.get("expected_surprise_profile"), dict)
+                else {}
+            )
+            score_breakdown = (
+                dict(payload.get("score_breakdown", {}))
+                if isinstance(payload.get("score_breakdown"), dict)
+                else {}
+            )
+            support_ids = [
+                str(item) for item in payload.get("source_episode_ids", []) if str(item)
+            ]
+            field_influence = (
+                dict(field_action_influences.get(action_key, {}))
+                if isinstance(field_action_influences.get(action_key), dict)
+                else {}
+            )
+            rollups[action_key] = {
+                "weight": max(0.10, float(field_influence.get("field_score", path_quality) or path_quality)),
+                "risk": max(
+                    0.0,
+                    float(field_influence.get("risk", risk_profile.get("mean_risk", 0.0)) or 0.0),
+                ),
+                "preferred_probability": max(
+                    0.0,
+                    min(
+                        1.0,
+                        float(
+                            field_influence.get(
+                                "preferred_probability",
+                                outcome_profile.get("preferred_probability", 0.0),
+                            )
+                            or 0.0
+                        ),
+                    ),
+                ),
+                "expected_surprise": max(
+                    0.0,
+                    float(
+                        field_influence.get(
+                            "expected_surprise",
+                            surprise_profile.get("mean_prediction_error", 0.0),
+                        )
+                        or 0.0
+                    ),
+                ),
+                "observation_projection": {},
+                "predicted_effects": (
+                    dict(outcome_profile.get("predicted_effects", {}))
+                    if isinstance(outcome_profile.get("predicted_effects"), dict)
+                    else {}
+                ),
+                "outcome_distribution": (
+                    dict(outcome_profile.get("outcome_distribution", {}))
+                    if isinstance(outcome_profile.get("outcome_distribution"), dict)
+                    else {}
+                ),
+                "action_descriptor": self._action_schema_for_name(action_key).to_dict(),
+                "path_id": str(payload.get("path_id", "")),
+                "path_quality": round(path_quality, 6),
+                "path_polarity": str(payload.get("path_polarity", "positive")),
+                "support_episode_ids": support_ids,
+                "path_score_breakdown": score_breakdown,
+                "field_adjustment": (
+                    dict(field_influence.get("field_adjustment", {}))
+                    if isinstance(field_influence.get("field_adjustment"), dict)
+                    else {}
+                ),
+                "projected_expected_free_energy": float(
+                    field_influence.get("projected_expected_free_energy", 0.0) or 0.0
+                ),
+            }
+        return rollups
+
     def _zero_memory_context(
         self,
         *,
@@ -1599,12 +1940,26 @@ class SegmentAgent(MemoryAwareAgentMixin):
         baseline_prediction: dict[str, float],
         errors: dict[str, float],
         summary: str,
+        active_paths: list[dict[str, object]] | None = None,
+        local_field: dict[str, object] | None = None,
     ) -> dict[str, object]:
         channels = sorted(set(observed) | set(baseline_prediction))
         zero_projection = {key: 0.0 for key in channels}
         zero_delta = {key: 0.0 for key in channels}
+        active_paths = list(active_paths or [])
+        path_rollups = self._path_action_rollups(active_paths, local_field=local_field)
+        goal_prior = (
+            dict(self.last_retrieval_result.get("goal_prior", {}) or {})
+            if isinstance(self.last_retrieval_result.get("goal_prior"), dict)
+            else {}
+        )
+        adaptive_compute = (
+            dict(self.last_retrieval_result.get("adaptive_compute", {}) or {})
+            if isinstance(self.last_retrieval_result.get("adaptive_compute"), dict)
+            else {}
+        )
         return {
-            "memory_hit": False,
+            "memory_hit": bool(active_paths),
             "retrieved_episode_ids": [],
             "summary": summary,
             "state_projection": zero_projection,
@@ -1618,7 +1973,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 "protected_anchor_bias": 0.0,
                 "outcome_distribution": {},
             },
-            "actions": {},
+            "actions": path_rollups,
             "prediction_blend": 0.0,
             "delta_gain": 0.0,
             "prior_projection": zero_projection,
@@ -1637,6 +1992,12 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "errors": dict(errors),
             "sensitive_channels": [],
             "attention_biases": {},
+            "active_paths": active_paths,
+            "active_path_ids": [str(item.get("path_id", "")) for item in active_paths if str(item.get("path_id", ""))],
+            "path_activation_audit": active_paths,
+            "local_field": dict(local_field or {}),
+            "goal_prior": goal_prior,
+            "adaptive_compute": adaptive_compute,
             "decision_pathways": {
                 "legacy_policy_bias": self.memory_legacy_policy_bias_enabled,
                 "action_rollups": self.memory_action_rollups_enabled,
@@ -1653,19 +2014,49 @@ class SegmentAgent(MemoryAwareAgentMixin):
         errors: dict[str, float],
         similar_memories: list[dict[str, object]],
     ) -> dict[str, object]:
+        active_paths = list(self.last_retrieval_result.get("active_paths", []) or [])
+        local_field = (
+            dict(self.last_retrieval_result.get("local_field", {}) or {})
+            if isinstance(self.last_retrieval_result.get("local_field"), dict)
+            else {}
+        )
+        goal_prior = (
+            dict(self.last_retrieval_result.get("goal_prior", {}) or {})
+            if isinstance(self.last_retrieval_result.get("goal_prior"), dict)
+            else {}
+        )
+        adaptive_compute = (
+            dict(self.last_retrieval_result.get("adaptive_compute", {}) or {})
+            if isinstance(self.last_retrieval_result.get("adaptive_compute"), dict)
+            else {}
+        )
         if not self.memory_enabled:
             return self._zero_memory_context(
                 observed=observed,
                 baseline_prediction=baseline_prediction,
                 errors=errors,
                 summary="episodic memory influence suppressed",
+                active_paths=[],
+                local_field={},
             )
-        if not similar_memories:
+        if not similar_memories and not active_paths:
             return self._zero_memory_context(
                 observed=observed,
                 baseline_prediction=baseline_prediction,
                 errors=errors,
                 summary="no episodic memory influence",
+                local_field={},
+            )
+        if not similar_memories and active_paths:
+            return self._zero_memory_context(
+                observed=observed,
+                baseline_prediction=baseline_prediction,
+                errors=errors,
+                summary=(
+                    f"{len(active_paths)} path match(es), no single raw episode required"
+                ),
+                active_paths=active_paths,
+                local_field=local_field,
             )
 
         weighted_total = sum(
@@ -1883,13 +2274,60 @@ class SegmentAgent(MemoryAwareAgentMixin):
             dominant_outcome = f"{dominant_outcome}|recall:{recall_hypothesis.get('primary_entry_id', '')}"
         if not self.memory_action_rollups_enabled:
             action_rollups = {}
+        path_rollups = self._path_action_rollups(active_paths, local_field=local_field)
+        for action_key, path_rollup in path_rollups.items():
+            if action_key not in action_rollups:
+                action_rollups[action_key] = dict(path_rollup)
+                continue
+            existing = dict(action_rollups[action_key])
+            path_weight = max(0.10, float(path_rollup.get("weight", 0.0) or 0.0))
+            existing_weight = max(1e-9, float(existing.get("weight", 0.0) or 0.0))
+            combined_weight = existing_weight + path_weight
+            existing["weight"] = combined_weight
+            existing["risk"] = (
+                (float(existing.get("risk", 0.0)) * existing_weight)
+                + (float(path_rollup.get("risk", 0.0)) * path_weight)
+            ) / combined_weight
+            existing["preferred_probability"] = (
+                (float(existing.get("preferred_probability", 0.0)) * existing_weight)
+                + (float(path_rollup.get("preferred_probability", 0.0)) * path_weight)
+            ) / combined_weight
+            existing["expected_surprise"] = (
+                (float(existing.get("expected_surprise", 0.0)) * existing_weight)
+                + (float(path_rollup.get("expected_surprise", 0.0)) * path_weight)
+            ) / combined_weight
+            path_effects = dict(path_rollup.get("predicted_effects", {}))
+            existing_effects = dict(existing.get("predicted_effects", {}))
+            for key, value in path_effects.items():
+                existing_effects[key] = (
+                    (float(existing_effects.get(key, 0.0)) * existing_weight)
+                    + (float(value) * path_weight)
+                ) / combined_weight
+            existing["predicted_effects"] = existing_effects
+            path_distribution = dict(path_rollup.get("outcome_distribution", {}))
+            existing_distribution = dict(existing.get("outcome_distribution", {}))
+            merged_distribution = {}
+            all_outcomes = sorted(set(existing_distribution) | set(path_distribution))
+            for outcome_key in all_outcomes:
+                merged_distribution[outcome_key] = (
+                    (float(existing_distribution.get(outcome_key, 0.0)) * existing_weight)
+                    + (float(path_distribution.get(outcome_key, 0.0)) * path_weight)
+                ) / combined_weight
+            existing["outcome_distribution"] = merged_distribution
+            existing["path_id"] = str(path_rollup.get("path_id", ""))
+            existing["path_quality"] = float(path_rollup.get("path_quality", 0.0))
+            existing["path_polarity"] = str(path_rollup.get("path_polarity", "positive"))
+            existing["support_episode_ids"] = list(path_rollup.get("support_episode_ids", []))
+            existing["path_score_breakdown"] = dict(path_rollup.get("path_score_breakdown", {}))
+            action_rollups[action_key] = existing
         memory_context = {
             "memory_hit": True,
             "retrieved_episode_ids": retrieved_episode_ids,
             "summary": (
                 f"{len(similar_memories)} episodic match(es), dominant outcome={dominant_outcome}, "
                 f"risk={aggregate_risk:.3f}, expected_surprise={aggregate_surprise:.3f}, "
-                f"chronic_threat={chronic_threat_bias:.3f}, protected_anchor={protected_anchor_bias:.3f}"
+                f"chronic_threat={chronic_threat_bias:.3f}, protected_anchor={protected_anchor_bias:.3f}, "
+                f"paths={len(active_paths)}"
             ),
             "state_projection": state_projection,
             "state_delta": state_delta,
@@ -1939,6 +2377,12 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "errors": dict(errors),
             "sensitive_channels": sensitive_channels,
             "attention_biases": attention_biases,
+            "active_paths": active_paths,
+            "active_path_ids": [str(item.get("path_id", "")) for item in active_paths if str(item.get("path_id", ""))],
+            "path_activation_audit": active_paths,
+            "local_field": local_field,
+            "goal_prior": goal_prior,
+            "adaptive_compute": adaptive_compute,
             "decision_pathways": {
                 "legacy_policy_bias": self.memory_legacy_policy_bias_enabled,
                 "action_rollups": self.memory_action_rollups_enabled,
@@ -2280,12 +2724,14 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "errors": baseline_errors,
             "body_state": self._current_body_state(),
         }
+        provisional_goal_context = self._provisional_goal_context(current_state_snapshot)
         similar_memories = self._retrieve_decision_memories(
             observed=observed,
             baseline_prediction=baseline_prediction,
             baseline_errors=baseline_errors,
             current_state_snapshot=current_state_snapshot,
             k=3,
+            goal_context=provisional_goal_context,
         )
         memory_context = self._build_memory_context(
             observed=observed,
@@ -2296,6 +2742,11 @@ class SegmentAgent(MemoryAwareAgentMixin):
         sensorimotor_prediction = self.world_model.predict(
             strategic_prediction,
             memory_context=memory_context,
+            goal_prior=(
+                dict(memory_context.get("goal_prior", {}))
+                if isinstance(memory_context.get("goal_prior"), dict)
+                else None
+            ),
         )
         self.last_memory_context = {
             **memory_context,
@@ -2320,6 +2771,8 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "reconstruction_trace": dict(
                 self.last_retrieval_result.get("reconstruction_trace", {}) or {}
             ),
+            "goal_prior": dict(self.last_retrieval_result.get("goal_prior", {}) or {}),
+            "adaptive_compute": dict(self.last_retrieval_result.get("adaptive_compute", {}) or {}),
             "memory_enabled": self.memory_enabled,
             "m11_user_model_enabled": self.m11_user_model_enabled,
             "memory_bias": 0.0,
@@ -2389,28 +2842,17 @@ class SegmentAgent(MemoryAwareAgentMixin):
         errors: dict[str, float],
         precisions: dict[str, float] | None = None,
     ) -> float:
-        """Compute free energy from prediction errors and internal pressure."""
-        def pe(key: str) -> float:
-            magnitude = abs(errors.get(key, 0.0))
-            if precisions and key in precisions:
-                magnitude *= precisions[key]
-            return magnitude
-
-        weighted = (
-            pe("food") * 1.30
-            + pe("danger") * 1.60
-            + pe("novelty") * 0.80
-            + pe("shelter") * 1.00
-            + pe("temperature") * 0.90
-            + pe("social") * 0.70
-        )
-        # Internal complexity from body state
-        energy_pressure = max(0.0, 0.45 - self.energy) * 0.25
-        stress_pressure = self.stress * 0.28
-        fatigue_pressure = self.fatigue * 0.20
-        thermal_pressure = abs(self.temperature - 0.5) * 0.15
-        complexity = energy_pressure + stress_pressure + fatigue_pressure + thermal_pressure
-        return weighted + complexity
+        """Compute the canonical FE surrogate from current errors and body load."""
+        return build_free_energy_surrogate(
+            errors=errors,
+            precisions=precisions,
+            body_state={
+                "energy": self.energy,
+                "stress": self.stress,
+                "fatigue": self.fatigue,
+                "temperature": self.temperature,
+            },
+        ).free_energy_surrogate
 
     def evaluate_internal_update(
         self,
@@ -2705,12 +3147,23 @@ class SegmentAgent(MemoryAwareAgentMixin):
         residual_errors = {key: next_priors[key] - imagined[key] for key in priors}
         predicted_error = compute_prediction_error(next_priors, imagined)
         action_ambiguity = cost + mean(abs(value) for value in residual_errors.values()) * 0.35
+        predicted_fe = build_free_energy_surrogate(
+            errors=residual_errors,
+            body_state={
+                "energy": imagined_energy,
+                "stress": imagined_stress,
+                "fatigue": imagined_fatigue,
+                "temperature": imagined_temp,
+            },
+        )
         predicted_effects = {
             "energy_delta": imagined_energy - self.energy,
             "stress_delta": imagined_stress - self.stress,
             "fatigue_delta": imagined_fatigue - self.fatigue,
             "temperature_delta": imagined_temp - self.temperature,
-            "free_energy_drop": free_energy_before - (predicted_error + action_ambiguity),
+            "free_energy_surrogate_after": predicted_fe.free_energy_surrogate,
+            "free_energy_delta": free_energy_before - predicted_fe.free_energy_surrogate,
+            "free_energy_drop": free_energy_before - predicted_fe.free_energy_surrogate,
         }
         projected_snapshot = {
             "observation": imagined,
@@ -2751,25 +3204,46 @@ class SegmentAgent(MemoryAwareAgentMixin):
         preferred_probability = float(memory_refinement["preferred_probability"])
         risk = float(memory_refinement["risk"])
         predicted_error = float(memory_refinement["expected_surprise"])
-        expected_free_energy = self.preference_model.expected_free_energy(
+        projected_fe = build_free_energy_surrogate(
+            errors=projected_snapshot.get("errors", {}),
+            body_state=projected_snapshot.get("body_state", {}),
+        )
+        predicted_effects["free_energy_surrogate_after"] = projected_fe.free_energy_surrogate
+        predicted_effects["free_energy_delta"] = free_energy_before - projected_fe.free_energy_surrogate
+        predicted_effects["free_energy_drop"] = predicted_effects["free_energy_delta"]
+        goal_prior_payload = (
+            dict(memory_context.get("goal_prior", {}))
+            if isinstance(memory_context, dict) and isinstance(memory_context.get("goal_prior"), dict)
+            else {}
+        )
+        expected_fe_details = self.preference_model.expected_free_energy_details(
             outcome=predicted_outcome,
             predicted_error=predicted_error,
             action_ambiguity=action_ambiguity,
             goal=active_goal,
             baseline_risk=risk,
+            free_energy_surrogate_after=projected_fe.free_energy_surrogate,
+            free_energy_before=free_energy_before,
         )
+        expected_free_energy = expected_fe_details.expected_free_energy_surrogate
         return {
             "predicted_state": imagined,
+            "projected_observation": dict(projected_snapshot.get("observation", {})),
+            "projected_prediction": dict(projected_snapshot.get("prediction", {})),
             "predicted_error": predicted_error,
             "action_ambiguity": action_ambiguity,
             "risk": risk,
             "preferred_probability": preferred_probability,
             "expected_free_energy": expected_free_energy,
+            "free_energy_surrogate": projected_fe.to_dict(),
+            "expected_free_energy_surrogate": expected_fe_details.to_dict(),
             "predicted_outcome": predicted_outcome,
             "predicted_effects": predicted_effects,
             "value_score": value_score,
             "cost": cost,
             "action_schema": action_schema,
+            "goal_prior": goal_prior_payload,
+            "goal_prior_applied": bool(memory_refinement.get("applied_goal_prior", False)),
             "observation_distance": compute_prediction_error(
                 observed,
                 projected_snapshot["observation"],
@@ -2928,6 +3402,17 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 filtered = [action.name for action in available_actions if is_dialogue_action(action.name)]
             if filtered:
                 candidate_actions = filtered
+        adaptive_compute = (
+            dict(memory_context.get("adaptive_compute", {}))
+            if isinstance(memory_context, dict) and isinstance(memory_context.get("adaptive_compute"), dict)
+            else {}
+        )
+        candidate_limit = int(adaptive_compute.get("candidate_action_limit", 0) or 0)
+        if candidate_limit > 0 and len(candidate_actions) > candidate_limit:
+            candidate_actions = sorted(
+                candidate_actions,
+                key=lambda action_name_: (self._action_cost(action_name_), action_name_),
+            )[:candidate_limit]
         options: dict[str, dict[str, object]] = {}
         for action in candidate_actions:
             options[action] = self._project_action(
@@ -2968,6 +3453,29 @@ class SegmentAgent(MemoryAwareAgentMixin):
             tick=self.cycle,
         )
         active_goal = Goal[str(goal_context["active_goal"])]
+        if self.goal_prior_enabled:
+            refreshed_goal_prior = build_goal_prior_adjustment(
+                active_goal=active_goal,
+                current_state=current_state_snapshot,
+                goal_context=goal_context,
+            )
+            if refreshed_goal_prior is not None:
+                self.latest_goal_prior = refreshed_goal_prior.to_dict()
+                self.last_retrieval_result["goal_prior"] = dict(self.latest_goal_prior)
+                self.last_memory_context["goal_prior"] = dict(self.latest_goal_prior)
+        adaptive_compute = (
+            dict(self.last_memory_context.get("adaptive_compute", {}) or {})
+            if isinstance(self.last_memory_context.get("adaptive_compute"), dict)
+            else dict(self.latest_adaptive_compute_decision)
+        )
+        verification_target_limit = int(
+            adaptive_compute.get(
+                "verification_target_limit",
+                getattr(self.verification_loop, "max_active_targets", 3),
+            )
+            or getattr(self.verification_loop, "max_active_targets", 3)
+        )
+        self.verification_loop.max_active_targets = max(1, verification_target_limit)
         self.latest_narrative_experiment = self.narrative_experiment_designer.design(
             tick=self.cycle,
             uncertainty=self.latest_narrative_uncertainty,
@@ -3665,6 +4173,15 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 )
                 > 1e-9,
                 "decision_changed_by_recall": decision_changed_by_recall,
+                "local_field": dict(self.last_memory_context.get("local_field", {}) or {}),
+                "local_field_counterfactual_audit": dict(
+                    dict(self.last_memory_context.get("local_field", {}) or {}).get(
+                        "counterfactual_audit",
+                        {},
+                    )
+                ),
+                "goal_prior": dict(self.last_memory_context.get("goal_prior", {}) or {}),
+                "adaptive_compute": dict(self.last_memory_context.get("adaptive_compute", {}) or {}),
                 "representation_mode": str(self.last_memory_context.get("representation_mode", "")),
                 "acceptance_path": str(self.last_memory_context.get("acceptance_path", "")),
             },
@@ -3679,6 +4196,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
             diagnostics=diagnostics,
             prediction=prediction,
             subject_state=self.subject_state,
+            memory_context=self.last_memory_context,
             narrative_uncertainty=self.latest_narrative_uncertainty,
             experiment_design=self.latest_narrative_experiment,
         )
@@ -3743,6 +4261,12 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "counterfactual_rankings": dict(diagnostics.recall_counterfactual_rankings),
             **dict(diagnostics.recall_audit),
         }
+        diagnostics.structured_explanation["goal_prior"] = dict(
+            self.last_memory_context.get("goal_prior", {}) or {}
+        )
+        diagnostics.structured_explanation["adaptive_compute"] = dict(
+            self.last_memory_context.get("adaptive_compute", {}) or {}
+        )
         diagnostics.structured_explanation["narrative_uncertainty"] = (
             self.latest_narrative_uncertainty.explanation_payload()
         )
@@ -4110,6 +4634,9 @@ class SegmentAgent(MemoryAwareAgentMixin):
         outcome = {
             "energy_delta": body_state["energy"] - previous_body_state["energy"],
             "stress_delta": body_state["stress"] - previous_body_state["stress"],
+            "free_energy_surrogate_before": free_energy_before,
+            "free_energy_surrogate_after": free_energy_after,
+            "free_energy_delta": fe_delta,
             "free_energy_drop": fe_delta,
         }
         action = ensure_action_schema(choice)
@@ -4186,28 +4713,15 @@ class SegmentAgent(MemoryAwareAgentMixin):
                         or list(self.last_decision_diagnostics.commitment_focus)
                     ),
                 )
+        path_refresh = self.memory_store.refresh_memory_paths(current_cycle=self.cycle)
+        self.sync_memory_awareness_to_long_term_memory()
         self.action_history.append(action.name)
-        patterns_before = list(self.long_term_memory.reusable_cognitive_paths)
-        patterns_after, updated_pattern = consolidate_successful_path_pattern(
-            patterns_before,
-            diagnostics=self.last_decision_diagnostics,
-            outcome_label=memory_decision.predicted_outcome,
-            cycle=self.cycle,
-            outcome=outcome,
-        )
-        if updated_pattern is None:
-            patterns_after, updated_pattern = record_failed_path_outcome(
-                patterns_before,
-                diagnostics=self.last_decision_diagnostics,
-                outcome_label=memory_decision.predicted_outcome,
-                cycle=self.cycle,
-            )
-        self.long_term_memory.reusable_cognitive_paths = patterns_after
         self.latest_memory_consolidation = {
-            "updated": updated_pattern is not None,
-            "pattern": dict(updated_pattern or {}),
-            "pattern_count": len(patterns_after),
-            "source": "integrate_outcome",
+            "updated": bool(path_refresh.get("created_ids") or path_refresh.get("updated_ids")),
+            "pattern": {},
+            "pattern_count": int(path_refresh.get("path_count", len(self.long_term_memory.reusable_cognitive_paths))),
+            "source": "integrate_outcome_path_refresh",
+            "path_refresh": path_refresh,
         }
         self.action_history = self.action_history[-self.action_history_limit :]
         self.last_body_state_snapshot = dict(body_state)
@@ -5022,6 +5536,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
 
         # Counterfactual phase: replay high-surprise episodes with alternative
         # actions, compute EFE, and absorb policy insights.
+        adaptive_counterfactual = dict(self.latest_adaptive_compute_decision or {})
         cf_insights, cf_summary = run_counterfactual_phase(
             agent_energy=self.energy,
             current_cycle=self.cycle,
@@ -5030,6 +5545,8 @@ class SegmentAgent(MemoryAwareAgentMixin):
             preference_model=self.preference_model,
             action_registry=self.action_registry,
             rng=self.rng,
+            max_depth=int(adaptive_counterfactual.get("counterfactual_max_depth", 3) or 3),
+            energy_budget=float(adaptive_counterfactual.get("counterfactual_energy_budget", 0.08) or 0.08),
             surprise_threshold=self.long_term_memory.surprise_threshold,
         )
         self.energy = clamp(self.energy - cf_summary.energy_spent)
@@ -5146,6 +5663,10 @@ class SegmentAgent(MemoryAwareAgentMixin):
             ledger=self.prediction_ledger,
             source="sleep_review",
             subject_state=self.subject_state,
+        )
+        self.apply_memory_credit_signals(
+            verification_sleep.memory_credit_signals,
+            tick=self.cycle,
         )
         reconciliation_sleep = self.reconciliation_engine.sleep_review(
             tick=self.cycle,

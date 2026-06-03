@@ -4,11 +4,22 @@ import random
 from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
+import hashlib
 from math import sqrt
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Mapping
 
 from .memory_encoding import EncodingDynamics
-from .memory_model import AnchorStrength, MemoryClass, MemoryEntry, SourceType, StoreLevel
+from .memory_model import (
+    AnchorStrength,
+    MemoryClass,
+    MemoryEntry,
+    MemoryPath,
+    PathCueSignature,
+    PathOutcomeProfile,
+    PathRiskProfile,
+    SourceType,
+    StoreLevel,
+)
 from .memory_state import identity_match_ratio_for_entry, normalize_agent_state
 from .memory_retrieval import RecallArtifact
 
@@ -29,6 +40,11 @@ PATTERN_BRIDGE_MIN_SCORE = 0.42
 PATTERN_SEMANTIC_MIN_OVERLAP = 0.20
 PATTERN_CONTEXT_MIN_OVERLAP = 0.15
 PATTERN_VECTOR_DISTANCE_MAX = 1.05
+LOW_SURPRISE_MAX = 0.20
+MEDIUM_SURPRISE_MAX = 0.45
+HIGH_SURPRISE_MIN = 0.45
+SOURCE_REWRITE_FLOOR = 0.70
+IDENTITY_REWRITE_FLOOR = 0.80
 
 
 def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
@@ -262,6 +278,34 @@ class ReconsolidationUpdateType(str, Enum):
 
 
 @dataclass(frozen=True)
+class MemoryReuseEvent:
+    reuse_event_id: str
+    memory_id: str
+    path_id: str = ""
+    prediction_before_reuse: dict[str, float] | None = None
+    observation_after_reuse: dict[str, float] | None = None
+    reuse_prediction_error: float = 0.0
+    reuse_free_energy_delta: float = 0.0
+    recall_confidence: float = 0.0
+    contradiction_detected: bool = False
+    live_reuse: bool = True
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "reuse_event_id": self.reuse_event_id,
+            "memory_id": self.memory_id,
+            "path_id": self.path_id,
+            "prediction_before_reuse": dict(self.prediction_before_reuse or {}),
+            "observation_after_reuse": dict(self.observation_after_reuse or {}),
+            "reuse_prediction_error": round(self.reuse_prediction_error, 6),
+            "reuse_free_energy_delta": round(self.reuse_free_energy_delta, 6),
+            "recall_confidence": round(self.recall_confidence, 6),
+            "contradiction_detected": bool(self.contradiction_detected),
+            "live_reuse": bool(self.live_reuse),
+        }
+
+
+@dataclass(frozen=True)
 class ReconstructionConfig:
     abstract_threshold: float = RECONSTRUCTION_ABSTRACT_THRESHOLD
     content_min_length: int = RECONSTRUCTION_CONTENT_MIN_LENGTH
@@ -303,6 +347,10 @@ class ReconsolidationReport:
     conflict_flags: list[str]
     confidence_delta: dict[str, float]
     version_changed: bool
+    reuse_event_id: str = ""
+    reuse_surprise_level: str = ""
+    reason_code: str = ""
+    suppressed: bool = False
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -314,6 +362,10 @@ class ReconsolidationReport:
             "conflict_flags": list(self.conflict_flags),
             "confidence_delta": dict(self.confidence_delta),
             "version_changed": self.version_changed,
+            "reuse_event_id": self.reuse_event_id,
+            "reuse_surprise_level": self.reuse_surprise_level,
+            "reason_code": self.reason_code,
+            "suppressed": self.suppressed,
         }
 
 
@@ -552,13 +604,17 @@ def maybe_reconstruct(
 
 def resolve_conflict(
     existing: MemoryEntry,
-    incoming: MemoryEntry | RecallArtifact,
+    incoming: MemoryEntry | RecallArtifact | Mapping[str, object] | None,
     conflict_type: ConflictType,
 ) -> ConflictResolution:
     if isinstance(incoming, RecallArtifact):
         interpretation = f"recall:{incoming.primary_entry_id}"
-    else:
+    elif isinstance(incoming, Mapping):
+        interpretation = f"recall:{str(incoming.get('primary_entry_id', 'unknown'))}"
+    elif incoming is not None:
         interpretation = f"entry:{incoming.id}"
+    else:
+        interpretation = "recall:unknown"
     if conflict_type is ConflictType.FACTUAL:
         return ConflictResolution(
             conflict_type=conflict_type.value,
@@ -587,6 +643,44 @@ def resolve_conflict(
     )
 
 
+def _entry_is_identity_critical(entry: MemoryEntry) -> bool:
+    if entry.relevance_self >= 0.60:
+        return True
+    metadata = dict(entry.compression_metadata or {})
+    legacy = metadata.get("legacy_template")
+    if isinstance(legacy, dict) and bool(legacy.get("identity_critical", False)):
+        return True
+    return False
+
+
+def _entry_is_source_sensitive(entry: MemoryEntry) -> bool:
+    metadata = dict(entry.compression_metadata or {})
+    if bool(metadata.get("source_conflict")) or bool(metadata.get("source_sensitive")):
+        return True
+    if entry.source_type in {SourceType.HEARSAY, SourceType.RECONSTRUCTION}:
+        return True
+    return False
+
+
+def _reuse_surprise_score(event: MemoryReuseEvent) -> float:
+    mismatch = max(0.0, float(event.reuse_prediction_error))
+    destabilization = max(0.0, -float(event.reuse_free_energy_delta))
+    confidence_penalty = max(0.0, 1.0 - float(event.recall_confidence)) * 0.15
+    contradiction_bonus = 0.35 if event.contradiction_detected else 0.0
+    return _clamp(max(mismatch, destabilization) + confidence_penalty + contradiction_bonus)
+
+
+def classify_reuse_surprise(event: MemoryReuseEvent) -> str:
+    score = _reuse_surprise_score(event)
+    if event.contradiction_detected:
+        return "conflict"
+    if score < LOW_SURPRISE_MAX:
+        return "low"
+    if score < MEDIUM_SURPRISE_MAX:
+        return "medium"
+    return "high"
+
+
 def reconsolidate(
     entry: MemoryEntry,
     current_mood: str | None,
@@ -598,6 +692,7 @@ def reconsolidate(
     recall_artifact: RecallArtifact | None = None,
     conflict_type: ConflictType | None = None,
     cognitive_style=None,
+    reuse_event: MemoryReuseEvent | None = None,
 ) -> ReconsolidationReport:
     before_version = entry.version
     before_source_confidence = entry.source_confidence
@@ -616,6 +711,50 @@ def reconsolidate(
     if error_aversion >= 0.60 and entry.valence < 0.0:
         effective_boost_access *= 1.05
 
+    update_type = ReconsolidationUpdateType.REINFORCEMENT_ONLY
+    reuse_surprise_level = ""
+    reason_code = ""
+    suppressed = False
+    if reuse_event is not None:
+        metadata = dict(entry.compression_metadata or {})
+        reuse_gate = dict(metadata.get("m17_reuse_gate", {}))
+        processed_ids = [
+            str(item) for item in reuse_gate.get("processed_event_ids", []) if str(item)
+        ]
+        if not reuse_event.live_reuse:
+            suppressed = True
+            reason_code = "background_access_not_live_reuse"
+        elif reuse_event.reuse_event_id in processed_ids:
+            suppressed = True
+            reason_code = "duplicate_reuse_event"
+        reuse_surprise_level = classify_reuse_surprise(reuse_event)
+        if suppressed:
+            return ReconsolidationReport(
+                entry_id=entry.id,
+                update_type=update_type.value,
+                fields_strengthened=[],
+                fields_rebound=[],
+                fields_reconstructed=[],
+                conflict_flags=[],
+                confidence_delta={"source_confidence": 0.0, "reality_confidence": 0.0},
+                version_changed=False,
+                reuse_event_id=reuse_event.reuse_event_id,
+                reuse_surprise_level=reuse_surprise_level,
+                reason_code=reason_code,
+                suppressed=True,
+            )
+        reason_code = {
+            "low": "low_surprise_reinforcement",
+            "medium": "medium_surprise_context_rebinding",
+            "high": "high_surprise_candidate_reconstruction",
+            "conflict": "explicit_conflict_marking",
+        }.get(reuse_surprise_level, "")
+        reuse_gate["last_event"] = reuse_event.to_dict()
+        reuse_gate["last_surprise_level"] = reuse_surprise_level
+        reuse_gate["processed_event_ids"] = [*processed_ids, reuse_event.reuse_event_id][-64:]
+        metadata["m17_reuse_gate"] = reuse_gate
+        entry.compression_metadata = metadata
+
     entry.accessibility = _clamp(entry.accessibility + effective_boost_access)
     entry.trace_strength = _clamp(entry.trace_strength + BOOST_TRACE)
     entry.retrieval_count += 1
@@ -623,9 +762,12 @@ def reconsolidate(
     if current_cycle is not None:
         entry.last_accessed = max(entry.last_accessed, int(current_cycle))
 
-    update_type = ReconsolidationUpdateType.REINFORCEMENT_ONLY
-    if conflict_type is not None and recall_artifact is not None:
-        resolution = resolve_conflict(entry, recall_artifact, conflict_type)
+    effective_conflict_type = conflict_type
+    if reuse_event is not None and reuse_event.contradiction_detected and effective_conflict_type is None:
+        effective_conflict_type = ConflictType.FACTUAL
+
+    if effective_conflict_type is not None:
+        resolution = resolve_conflict(entry, recall_artifact, effective_conflict_type)
         entry.source_confidence = _clamp(entry.source_confidence + resolution.source_confidence_delta)
         entry.reality_confidence = _clamp(entry.reality_confidence + resolution.reality_confidence_delta)
         entry.counterevidence_count += resolution.counterevidence_delta
@@ -634,13 +776,24 @@ def reconsolidate(
             if interpretation not in interpretations:
                 interpretations.append(interpretation)
         entry.competing_interpretations = interpretations or None
-        conflict_flags.append(conflict_type.value)
+        conflict_flags.append(effective_conflict_type.value)
         update_type = ReconsolidationUpdateType.CONFLICT_MARKING
-    elif current_mood and current_mood != entry.mood_context:
+    elif reuse_event is not None and reuse_surprise_level == "medium":
+        if current_mood and current_mood != entry.mood_context:
+            entry.mood_context = current_mood
+            fields_rebound.append("mood_context")
+        if current_context_tags:
+            merged_contexts = list(dict.fromkeys([*entry.context_tags, *_string_list(current_context_tags)]))
+            if merged_contexts != entry.context_tags:
+                entry.context_tags = merged_contexts
+                fields_rebound.append("context_tags")
+        if fields_rebound:
+            update_type = ReconsolidationUpdateType.CONTEXTUAL_REBINDING
+    elif reuse_event is None and current_mood and current_mood != entry.mood_context:
         entry.mood_context = current_mood
         fields_rebound.append("mood_context")
         update_type = ReconsolidationUpdateType.CONTEXTUAL_REBINDING
-    if current_context_tags:
+    if reuse_event is None and current_context_tags:
         merged_contexts = list(dict.fromkeys([*entry.context_tags, *_string_list(current_context_tags)]))
         if merged_contexts != entry.context_tags:
             entry.context_tags = merged_contexts
@@ -648,7 +801,7 @@ def reconsolidate(
             if update_type is ReconsolidationUpdateType.REINFORCEMENT_ONLY:
                 update_type = ReconsolidationUpdateType.CONTEXTUAL_REBINDING
 
-    if store is not None and conflict_type is None:
+    if store is not None and effective_conflict_type is None:
         config = ReconstructionConfig(
             current_cycle=current_cycle or entry.last_accessed,
             current_state=current_state,
@@ -658,6 +811,16 @@ def reconsolidate(
             reconstruction_blocked = True
         if error_aversion >= 0.60 and entry.valence < 0.0:
             reconstruction_blocked = True
+        if reuse_event is not None:
+            surprise_score = _reuse_surprise_score(reuse_event)
+            if reuse_surprise_level != "high":
+                reconstruction_blocked = True
+            if _entry_is_identity_critical(entry) and surprise_score < IDENTITY_REWRITE_FLOOR:
+                reconstruction_blocked = True
+                reason_code = "identity_rewrite_floor_not_met"
+            if _entry_is_source_sensitive(entry) and surprise_score < SOURCE_REWRITE_FLOOR:
+                reconstruction_blocked = True
+                reason_code = "source_rewrite_floor_not_met"
         if not reconstruction_blocked:
             reconstruction = maybe_reconstruct(entry, store.entries, store, config)
             if reconstruction.triggered:
@@ -672,6 +835,18 @@ def reconsolidate(
                 entry.version = reconstructed_entry.version
                 fields_reconstructed.extend(reconstruction.reconstructed_fields)
                 update_type = ReconsolidationUpdateType.STRUCTURAL_RECONSTRUCTION
+                if reuse_event is not None:
+                    metadata = dict(entry.compression_metadata or {})
+                    metadata["m17_reuse_gate"] = {
+                        **dict(metadata.get("m17_reuse_gate", {})),
+                        "last_reconstruction_event_id": reuse_event.reuse_event_id,
+                        "last_surprise_level": reuse_surprise_level,
+                    }
+                    entry.compression_metadata = metadata
+            elif reuse_event is not None and reuse_surprise_level == "high":
+                reason_code = reason_code or "high_surprise_reconstruction_not_triggered"
+        elif reuse_event is not None and reuse_surprise_level == "high" and not reason_code:
+            reason_code = "high_surprise_reconstruction_blocked"
     if entry.memory_class is MemoryClass.PROCEDURAL:
         fields_reconstructed = [field_name for field_name in fields_reconstructed if field_name != "procedure_steps"]
 
@@ -687,6 +862,10 @@ def reconsolidate(
             "reality_confidence": round(entry.reality_confidence - before_reality_confidence, 6),
         },
         version_changed=entry.version != before_version,
+        reuse_event_id=reuse_event.reuse_event_id if reuse_event is not None else "",
+        reuse_surprise_level=reuse_surprise_level,
+        reason_code=reason_code,
+        suppressed=suppressed,
     )
 
 
@@ -887,6 +1066,317 @@ def extract_patterns(
         results.append(inferred)
         break
     return results
+
+
+def _path_legacy_template(entry: MemoryEntry) -> dict[str, object]:
+    metadata = dict(entry.compression_metadata or {})
+    payload = metadata.get("legacy_template")
+    return dict(payload) if isinstance(payload, dict) else {}
+
+
+def _path_action(entry: MemoryEntry) -> str:
+    action = str(entry.anchor_slots.get("action") or "").strip().lower()
+    if action:
+        return action
+    legacy = _path_legacy_template(entry)
+    return str(legacy.get("action", legacy.get("action_taken", ""))).strip().lower()
+
+
+def _path_outcome(entry: MemoryEntry) -> str:
+    outcome = str(entry.anchor_slots.get("outcome") or "").strip().lower()
+    if outcome:
+        return outcome
+    legacy = _path_legacy_template(entry)
+    return str(
+        legacy.get("predicted_outcome", legacy.get("value_label", entry.content))
+    ).strip().lower()
+
+
+def _path_effect_profile(entry: MemoryEntry) -> dict[str, float]:
+    legacy = _path_legacy_template(entry)
+    outcome = legacy.get("outcome")
+    if isinstance(outcome, dict):
+        return {
+            str(key): float(value)
+            for key, value in outcome.items()
+            if isinstance(value, (int, float))
+        }
+    outcome_state = legacy.get("outcome_state")
+    if isinstance(outcome_state, dict):
+        return {
+            str(key): float(value)
+            for key, value in outcome_state.items()
+            if isinstance(value, (int, float))
+        }
+    return {}
+
+
+def _path_credit(entry: MemoryEntry) -> dict[str, object]:
+    metadata = dict(entry.compression_metadata or {})
+    payload = metadata.get("m17_memory_credit")
+    return dict(payload) if isinstance(payload, dict) else {}
+
+
+def _path_quality(
+    *,
+    support_count: int,
+    confirmation_count: int,
+    violation_count: int,
+    future_path_utility: float,
+    contradiction_burden: float,
+    maintenance_cost: float,
+    error_avoidance_gain: float,
+) -> float:
+    support_signal = min(1.0, float(support_count) / 4.0) * 0.28
+    confirmation_total = max(1.0, float(confirmation_count + violation_count))
+    confirmation_signal = (float(confirmation_count) / confirmation_total) * 0.28
+    utility_signal = max(0.0, float(future_path_utility)) * 0.20
+    avoidance_signal = max(0.0, float(error_avoidance_gain)) * 0.12
+    contradiction_penalty = max(0.0, float(contradiction_burden)) * 0.35
+    maintenance_penalty = max(0.0, float(maintenance_cost)) * 0.10
+    raw = (
+        0.12
+        + support_signal
+        + confirmation_signal
+        + utility_signal
+        + avoidance_signal
+        - contradiction_penalty
+        - maintenance_penalty
+    )
+    if violation_count > confirmation_count:
+        raw -= min(0.18, (violation_count - confirmation_count) * 0.06)
+    return _clamp(raw)
+
+
+def _path_sensitive_channels(entries: list[MemoryEntry]) -> list[str]:
+    totals: dict[str, float] = {}
+    for entry in entries:
+        legacy = _path_legacy_template(entry)
+        for bucket_name in ("observation", "errors"):
+            bucket = legacy.get(bucket_name)
+            if not isinstance(bucket, dict):
+                continue
+            for key, value in bucket.items():
+                if not isinstance(value, (int, float)):
+                    continue
+                if abs(float(value)) < 0.12:
+                    continue
+                totals[str(key)] = totals.get(str(key), 0.0) + abs(float(value))
+    return [
+        key
+        for key, _ in sorted(totals.items(), key=lambda item: (-item[1], item[0]))
+    ][:4]
+
+
+def _path_cue_signature(entries: list[MemoryEntry]) -> PathCueSignature:
+    semantic_counter: dict[str, int] = {}
+    context_counter: dict[str, int] = {}
+    for entry in entries:
+        for tag in entry.semantic_tags:
+            token = str(tag).strip().lower()
+            if not token or token == _path_action(entry):
+                continue
+            semantic_counter[token] = semantic_counter.get(token, 0) + 1
+        for tag in entry.context_tags:
+            token = str(tag).strip().lower()
+            if not token:
+                continue
+            context_counter[token] = context_counter.get(token, 0) + 1
+    semantic_tags = [
+        key
+        for key, _ in sorted(semantic_counter.items(), key=lambda item: (-item[1], item[0]))
+    ][:4]
+    context_tags = [
+        key
+        for key, _ in sorted(context_counter.items(), key=lambda item: (-item[1], item[0]))
+    ][:4]
+    return PathCueSignature(
+        semantic_tags=semantic_tags,
+        context_tags=context_tags,
+        sensitive_channels=_path_sensitive_channels(entries),
+    )
+
+
+def _path_component_id(action: str, cue_signature: PathCueSignature) -> str:
+    seed = "|".join(
+        [
+            action,
+            ",".join(cue_signature.semantic_tags[:3]),
+            ",".join(cue_signature.context_tags[:3]),
+            ",".join(cue_signature.sensitive_channels[:3]),
+        ]
+    )
+    digest = hashlib.sha1(seed.encode("utf-8")).hexdigest()[:12]
+    return f"path:{action}:{digest}"
+
+
+def _path_polarity(
+    *,
+    future_path_utility: float,
+    confirmation_count: int,
+    violation_count: int,
+    mean_risk: float,
+    contradiction_burden: float,
+    expected_surprise: float,
+) -> str:
+    if future_path_utility < -0.10 or violation_count > confirmation_count + 1:
+        return "negative"
+    if contradiction_burden >= 0.20 or mean_risk >= 0.45 or expected_surprise >= 0.45:
+        return "cautionary"
+    return "positive"
+
+
+def derive_memory_paths(
+    store: "MemoryStore",
+    *,
+    current_cycle: int,
+) -> list[MemoryPath]:
+    grouped_by_action: dict[str, list[MemoryEntry]] = {}
+    for entry in store.entries:
+        if entry.memory_class is not MemoryClass.EPISODIC or entry.is_dormant:
+            continue
+        metadata = dict(entry.compression_metadata or {})
+        value_memory = metadata.get("value_memory")
+        candidate_kind = value_memory.get("candidate_kind") if isinstance(value_memory, dict) else None
+        if candidate_kind in {"quarantined_candidate", "rejected_candidate"}:
+            continue
+        action = _path_action(entry)
+        if not action:
+            continue
+        grouped_by_action.setdefault(action, []).append(entry)
+
+    paths: list[MemoryPath] = []
+    for action, action_entries in sorted(grouped_by_action.items()):
+        action_entries = sorted(action_entries, key=lambda item: (item.created_at, item.id))
+        visited: set[str] = set()
+        for seed in action_entries:
+            if seed.id in visited:
+                continue
+            component: list[MemoryEntry] = []
+            frontier = [seed]
+            visited.add(seed.id)
+            while frontier:
+                current = frontier.pop()
+                component.append(current)
+                for candidate in action_entries:
+                    if candidate.id in visited:
+                        continue
+                    if _pattern_neighbor(current, candidate):
+                        visited.add(candidate.id)
+                        frontier.append(candidate)
+            if len(component) < 2:
+                continue
+            component.sort(key=lambda item: (item.created_at, item.id))
+            cue_signature = _path_cue_signature(component)
+            path_id = _path_component_id(action, cue_signature)
+            outcome_counts: dict[str, float] = {}
+            effect_totals: dict[str, float] = {}
+            preferred_probability_total = 0.0
+            mean_risk_total = 0.0
+            max_risk = 0.0
+            future_path_utility_total = 0.0
+            contradiction_total = 0.0
+            error_avoidance_total = 0.0
+            novelty_total = 0.0
+            free_energy_delta_total = 0.0
+            confirmation_count = 0
+            violation_count = 0
+            for entry in component:
+                legacy = _path_legacy_template(entry)
+                outcome = _path_outcome(entry)
+                if outcome:
+                    outcome_counts[outcome] = outcome_counts.get(outcome, 0.0) + 1.0
+                for key, value in _path_effect_profile(entry).items():
+                    effect_totals[key] = effect_totals.get(key, 0.0) + float(value)
+                preferred_probability_total += float(legacy.get("preferred_probability", 0.0) or 0.0)
+                risk = float(legacy.get("risk", 0.0) or 0.0)
+                mean_risk_total += risk
+                max_risk = max(max_risk, risk)
+                novelty_total += float(entry.novelty)
+                credit = _path_credit(entry)
+                future_path_utility_total += float(credit.get("future_path_utility", 0.0) or 0.0)
+                contradiction_total += float(credit.get("contradiction_burden", 0.0) or 0.0)
+                error_avoidance_total += float(credit.get("error_avoidance_gain", 0.0) or 0.0)
+                confirmation_count += int(credit.get("confirmed_count", 0) or 0)
+                violation_count += (
+                    int(credit.get("violated_count", 0) or 0) + int(entry.counterevidence_count or 0)
+                )
+                last_signal = credit.get("last_signal")
+                if isinstance(last_signal, dict):
+                    free_energy_delta_total += float(last_signal.get("free_energy_delta", 0.0) or 0.0)
+            support_count = len(component)
+            effect_profile = {
+                key: round(float(value) / support_count, 6)
+                for key, value in sorted(effect_totals.items())
+            }
+            total_outcomes = sum(outcome_counts.values()) or 1.0
+            outcome_distribution = {
+                key: round(float(value) / total_outcomes, 6)
+                for key, value in sorted(outcome_counts.items())
+            }
+            future_path_utility = future_path_utility_total / support_count
+            contradiction_burden = contradiction_total / support_count
+            error_avoidance_gain = error_avoidance_total / support_count
+            maintenance_cost = min(
+                0.60,
+                0.08
+                + (0.03 * max(0, len(cue_signature.semantic_tags) - 1))
+                + (0.02 * max(0, len(cue_signature.context_tags) - 1)),
+            )
+            mean_risk = mean_risk_total / support_count
+            expected_surprise = novelty_total / support_count
+            polarity = _path_polarity(
+                future_path_utility=future_path_utility,
+                confirmation_count=confirmation_count,
+                violation_count=violation_count,
+                mean_risk=mean_risk,
+                contradiction_burden=contradiction_burden,
+                expected_surprise=expected_surprise,
+            )
+            path_quality = _path_quality(
+                support_count=support_count,
+                confirmation_count=confirmation_count,
+                violation_count=violation_count,
+                future_path_utility=future_path_utility,
+                contradiction_burden=contradiction_burden,
+                maintenance_cost=maintenance_cost,
+                error_avoidance_gain=error_avoidance_gain,
+            )
+            paths.append(
+                MemoryPath(
+                    path_id=path_id,
+                    source_episode_ids=[entry.id for entry in component],
+                    source_memory_ids=[entry.id for entry in component],
+                    dominant_action=action,
+                    cue_signature=cue_signature,
+                    outcome_profile=PathOutcomeProfile(
+                        outcome_distribution=outcome_distribution,
+                        predicted_effects=effect_profile,
+                        preferred_probability=preferred_probability_total / support_count,
+                        future_path_utility=future_path_utility,
+                    ),
+                    risk_profile=PathRiskProfile(
+                        mean_risk=mean_risk,
+                        max_risk=max_risk,
+                        contradiction_burden=contradiction_burden,
+                        maintenance_cost=maintenance_cost,
+                        caution_score=max(mean_risk, contradiction_burden, expected_surprise * 0.70),
+                    ),
+                    expected_surprise_profile={
+                        "mean_prediction_error": round(expected_surprise, 6),
+                        "mean_free_energy_delta": round(free_energy_delta_total / support_count, 6),
+                        "error_avoidance_gain": round(error_avoidance_gain, 6),
+                    },
+                    support_count=support_count,
+                    confirmation_count=confirmation_count,
+                    violation_count=violation_count,
+                    path_quality=path_quality,
+                    path_polarity=polarity,
+                    last_updated_cycle=int(current_cycle),
+                )
+            )
+    paths.sort(key=lambda item: (-float(item.path_quality), -int(item.support_count), item.path_id))
+    return paths
 
 
 def _support_ids(entry: MemoryEntry) -> set[str]:
@@ -1166,6 +1656,7 @@ def run_consolidation_cycle(
             if validation.passed:
                 validated_ids.append(entry.id)
     cleanup = consolidation_cleanup(store, current_cycle)
+    store.refresh_memory_paths(current_cycle=current_cycle)
     return ConsolidationReport(
         upgrade=upgrade,
         extracted_patterns=extracted_ids,

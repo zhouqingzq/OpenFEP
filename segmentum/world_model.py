@@ -36,18 +36,33 @@ class GenerativeWorldModel:
         self,
         priors: dict[str, float],
         memory_context: dict[str, object] | None = None,
+        goal_prior: dict[str, object] | None = None,
     ) -> dict[str, float]:
         """Generate predictions, optionally modulated by retrieved memory."""
         baseline = self.sensorimotor_layer.predict(priors)
-        if not memory_context:
+        goal_prior_payload = goal_prior
+        if goal_prior_payload is None and isinstance(memory_context, dict):
+            candidate = memory_context.get("goal_prior")
+            if isinstance(candidate, dict):
+                goal_prior_payload = candidate
+        if not memory_context and not goal_prior_payload:
             self.last_prediction_details = {
                 "memory_hit": False,
+                "goal_prior_applied": False,
                 "prediction_before_memory": dict(baseline),
                 "prediction_after_memory": dict(baseline),
                 "prediction_delta": {key: 0.0 for key in baseline},
                 "memory_context_summary": "",
             }
             return baseline
+        if goal_prior_payload:
+            modality_shifts = goal_prior_payload.get("modality_shifts", {})
+            if isinstance(modality_shifts, dict):
+                for key, shift in modality_shifts.items():
+                    if key in baseline:
+                        baseline[key] = clamp(baseline[key] + float(shift))
+        if not memory_context:
+            memory_context = {}
 
         state_projection = memory_context.get("state_projection", {})
         state_delta = memory_context.get("state_delta", {})
@@ -87,6 +102,7 @@ class GenerativeWorldModel:
         }
         self.last_prediction_details = {
             "memory_hit": bool(memory_context.get("memory_hit")),
+            "goal_prior_applied": bool(goal_prior_payload),
             "prediction_before_memory": dict(baseline),
             "prediction_after_memory": dict(adjusted),
             "prediction_delta": delta,
@@ -105,6 +121,8 @@ class GenerativeWorldModel:
                 if key in residual_prior
             },
         }
+        if goal_prior_payload:
+            self.last_prediction_details["goal_prior"] = dict(goal_prior_payload)
         return adjusted
 
     def refine_action_prediction(
@@ -138,7 +156,10 @@ class GenerativeWorldModel:
         action_context = action_memory.get(action_key, {})
         if not isinstance(action_context, dict):
             action_context = {}
-        if not action_context:
+        goal_prior_payload = memory_context.get("goal_prior", {}) if isinstance(memory_context, dict) else {}
+        if not isinstance(goal_prior_payload, dict):
+            goal_prior_payload = {}
+        if not action_context and not goal_prior_payload:
             # Narrative/event memories can still help with state prediction, but
             # they are not valid action-specific evidence. Falling back to the
             # aggregate memory payload here leaks risk/surprise from unrelated
@@ -151,6 +172,8 @@ class GenerativeWorldModel:
                 "risk": risk,
                 "expected_surprise": predicted_error,
                 "applied_memory": False,
+                "applied_goal_prior": False,
+                "goal_prior": {},
                 "action_descriptor": ensure_action_schema(action).to_dict(),
             }
 
@@ -185,6 +208,48 @@ class GenerativeWorldModel:
                 key=lambda item: (-float(item[1]), item[0]),
             )[0][0]
 
+        field_adjustment = action_context.get("field_adjustment", {})
+        applied_field = False
+        if isinstance(field_adjustment, dict) and field_adjustment:
+            applied_field = True
+            for channel in field_adjustment.get("dominant_channels", []):
+                if channel in projected_snapshot["observation"]:
+                    gradient = float(field_adjustment.get("risk_adjustment", 0.0))
+                    projected_snapshot["observation"][channel] = clamp(
+                        projected_snapshot["observation"][channel] - (gradient * 0.10)
+                    )
+            predicted_effects["field_gradient_magnitude"] = float(
+                field_adjustment.get("gradient_magnitude", 0.0)
+            )
+            predicted_effects["field_basin_strength"] = float(
+                field_adjustment.get("basin_strength", 0.0)
+            )
+            predicted_effects["field_ridge_strength"] = float(
+                field_adjustment.get("ridge_strength", 0.0)
+            )
+
+        applied_goal_prior = False
+        if goal_prior_payload:
+            modality_shifts = goal_prior_payload.get("modality_shifts", {})
+            if isinstance(modality_shifts, dict) and modality_shifts:
+                applied_goal_prior = True
+                for channel, shift in modality_shifts.items():
+                    numeric_shift = float(shift)
+                    if channel in projected_snapshot["observation"]:
+                        projected_snapshot["observation"][channel] = clamp(
+                            projected_snapshot["observation"][channel] + numeric_shift
+                        )
+                    if channel in projected_snapshot["prediction"]:
+                        projected_snapshot["prediction"][channel] = clamp(
+                            projected_snapshot["prediction"][channel] + numeric_shift
+                        )
+                danger_shift = float(modality_shifts.get("danger", 0.0))
+                social_shift = float(modality_shifts.get("social", 0.0))
+                novelty_shift = float(modality_shifts.get("novelty", 0.0))
+                predicted_effects["goal_prior_danger_shift"] = round(danger_shift, 6)
+                predicted_effects["goal_prior_social_shift"] = round(social_shift, 6)
+                predicted_effects["goal_prior_novelty_shift"] = round(novelty_shift, 6)
+
         preferred_probability = max(
             1e-12,
             min(
@@ -197,11 +262,36 @@ class GenerativeWorldModel:
             0.0,
             (risk * 0.65) + (float(action_context.get("risk", risk)) * 0.35),
         )
+        if applied_goal_prior:
+            modality_shifts = goal_prior_payload.get("modality_shifts", {})
+            risk = max(
+                0.0,
+                risk
+                + max(0.0, float(modality_shifts.get("danger", 0.0))) * 0.30
+                - max(0.0, float(modality_shifts.get("shelter", 0.0))) * 0.20
+            )
+            preferred_probability = max(
+                1e-12,
+                min(
+                    1.0,
+                    preferred_probability
+                    + max(0.0, float(modality_shifts.get("social", 0.0))) * 0.08
+                    + max(0.0, float(modality_shifts.get("food", 0.0))) * 0.05,
+                ),
+            )
         expected_surprise = max(
             0.0,
             (predicted_error * 0.60)
             + (float(action_context.get("expected_surprise", predicted_error)) * 0.40),
         )
+        if applied_goal_prior:
+            modality_shifts = goal_prior_payload.get("modality_shifts", {})
+            expected_surprise = max(
+                0.0,
+                expected_surprise
+                + max(0.0, float(modality_shifts.get("novelty", 0.0))) * 0.12
+                - max(0.0, float(modality_shifts.get("shelter", 0.0))) * 0.08
+            )
         return {
             "projected_snapshot": projected_snapshot,
             "predicted_effects": predicted_effects,
@@ -210,6 +300,14 @@ class GenerativeWorldModel:
             "risk": risk,
             "expected_surprise": expected_surprise,
             "applied_memory": bool(action_context),
+            "applied_goal_prior": applied_goal_prior,
+            "goal_prior": dict(goal_prior_payload) if goal_prior_payload else {},
+            "applied_field": applied_field,
+            "field_diagnostics": (
+                dict(field_adjustment)
+                if isinstance(field_adjustment, dict)
+                else {}
+            ),
             "action_descriptor": ensure_action_schema(action).to_dict(),
         }
 

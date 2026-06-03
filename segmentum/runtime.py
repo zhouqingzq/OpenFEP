@@ -620,6 +620,15 @@ class SegmentRuntime:
             source="validation_observation",
             subject_state=self.subject_state,
         )
+        self.agent.apply_memory_credit_signals(
+            verification_validation.memory_credit_signals,
+            tick=self.agent.cycle,
+        )
+        self.agent.apply_reuse_reconsolidation(
+            verification_validation.memory_credit_signals,
+            observation=asdict(validation_observation),
+            tick=self.agent.cycle,
+        )
         memory_decision = self.agent.integrate_outcome(
             choice=choice,
             observed=observed,

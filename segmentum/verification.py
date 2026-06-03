@@ -11,6 +11,7 @@ except ImportError:
         pass
 from typing import Mapping
 
+from .memory_credit import build_memory_credit_signal
 from .prediction_ledger import (
     DiscrepancySource,
     PredictionHypothesis,
@@ -231,9 +232,10 @@ class PredictionUpdateResult:
     ledger_discrepancy_id: str = ""
     discharged_discrepancy_ids: tuple[str, ...] = ()
     subject_pressure_delta: float = 0.0
+    memory_credit_signal: dict[str, object] | None = None
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        payload = {
             "prediction_id": self.prediction_id,
             "previous_status": self.previous_status,
             "new_status": self.new_status,
@@ -243,6 +245,9 @@ class PredictionUpdateResult:
             "discharged_discrepancy_ids": list(self.discharged_discrepancy_ids),
             "subject_pressure_delta": round(self.subject_pressure_delta, 6),
         }
+        if self.memory_credit_signal is not None:
+            payload["memory_credit_signal"] = dict(self.memory_credit_signal)
+        return payload
 
 
 @dataclass(frozen=True)
@@ -342,6 +347,7 @@ class VerificationLoopUpdate:
     escalated_discrepancies: tuple[str, ...] = ()
     expired_targets: tuple[str, ...] = ()
     deferred_targets: tuple[str, ...] = ()
+    memory_credit_signals: tuple[dict[str, object], ...] = ()
     summary: str = ""
 
     def to_dict(self) -> dict[str, object]:
@@ -355,6 +361,7 @@ class VerificationLoopUpdate:
             "escalated_discrepancies": list(self.escalated_discrepancies),
             "expired_targets": list(self.expired_targets),
             "deferred_targets": list(self.deferred_targets),
+            "memory_credit_signals": list(self.memory_credit_signals),
             "summary": self.summary,
         }
 
@@ -581,6 +588,7 @@ class VerificationLoop:
         expired: list[str] = []
         deferred: list[str] = []
         updated_targets: list[VerificationTarget] = []
+        memory_credit_signals: list[dict[str, object]] = []
         for target in self.active_targets:
             prediction = self._prediction_by_id(ledger, target.prediction_id)
             if prediction is None:
@@ -634,6 +642,8 @@ class VerificationLoop:
                     subject_state=subject_state,
                 )
                 prediction_updates.append(update_result.to_dict())
+                if update_result.memory_credit_signal is not None:
+                    memory_credit_signals.append(dict(update_result.memory_credit_signal))
                 discharged.extend(update_result.discharged_discrepancy_ids)
                 if update_result.ledger_discrepancy_id:
                     escalated.append(update_result.ledger_discrepancy_id)
@@ -701,6 +711,7 @@ class VerificationLoop:
             escalated_discrepancies=tuple(dict.fromkeys(escalated)),
             expired_targets=tuple(dict.fromkeys(expired)),
             deferred_targets=tuple(dict.fromkeys(deferred)),
+            memory_credit_signals=tuple(memory_credit_signals),
             summary=summary,
         )
 
@@ -1078,6 +1089,15 @@ class VerificationLoop:
         discrepancy_id = ""
         discharged: tuple[str, ...] = ()
         subject_pressure_delta = 0.0
+        memory_credit_signal = build_memory_credit_signal(
+            prediction_id=prediction.prediction_id,
+            semantic_provenance=prediction.semantic_provenance,
+            outcome=outcome,
+            support_score=(evidence.support_score if evidence is not None else 0.0),
+            contradiction_score=(evidence.contradiction_score if evidence is not None else 0.0),
+            confidence_weight=prediction.confidence,
+            source_module="verification_loop",
+        )
         if outcome == VerificationOutcome.CONFIRMED.value:
             discharged = tuple(
                 ledger._discharge_matching(
@@ -1231,6 +1251,9 @@ class VerificationLoop:
             ledger_discrepancy_id=discrepancy_id,
             discharged_discrepancy_ids=discharged,
             subject_pressure_delta=subject_pressure_delta,
+            memory_credit_signal=(
+                memory_credit_signal.to_dict() if memory_credit_signal is not None else None
+            ),
         )
 
     def _expire_missing_targets(

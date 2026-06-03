@@ -1,0 +1,50 @@
+[
+  {
+    "fixture_id": "train_dominant_hide",
+    "active_goal": "SURVIVAL",
+    "urgency_scores": {"SURVIVAL": 0.82, "RESOURCES": 0.48, "CONTROL": 0.44},
+    "observation": {"danger": 0.76, "food": 0.22, "novelty": 0.18, "shelter": 0.74, "social": 0.14, "temperature": 0.50},
+    "prediction": {"danger": 0.42, "food": 0.24, "novelty": 0.24, "shelter": 0.44, "social": 0.20, "temperature": 0.50},
+    "body_state": {"energy": 0.62, "stress": 0.26, "fatigue": 0.22, "temperature": 0.48},
+    "free_energy_before": 0.42,
+    "episodes": [
+      {"entry_id": "train_hide_1", "cycle": 1, "action": "hide", "outcome": "safe_escape", "semantic_tags": ["hide", "danger", "shelter"], "context_tags": ["danger", "shelter"], "risk": 0.12, "preferred_probability": 0.84, "predicted_effects": {"energy_delta": 0.02, "stress_delta": -0.14, "free_energy_delta": 0.28}, "state_vector": [0.18, 0.82, 0.12, 0.78]},
+      {"entry_id": "train_hide_2", "cycle": 2, "action": "hide", "outcome": "safe_escape", "semantic_tags": ["hide", "danger", "cover"], "context_tags": ["danger", "cover"], "risk": 0.10, "preferred_probability": 0.82, "predicted_effects": {"energy_delta": 0.03, "stress_delta": -0.12, "free_energy_delta": 0.24}, "state_vector": [0.20, 0.80, 0.10, 0.76]},
+      {"entry_id": "train_forage_1", "cycle": 3, "action": "forage", "outcome": "predator_contact", "semantic_tags": ["forage", "danger", "food"], "context_tags": ["danger", "food"], "risk": 0.74, "preferred_probability": 0.24, "predicted_effects": {"energy_delta": -0.06, "stress_delta": 0.24, "free_energy_delta": -0.26}, "state_vector": [0.44, 0.86, 0.12, 0.22]},
+      {"entry_id": "train_forage_2", "cycle": 4, "action": "forage", "outcome": "predator_contact", "semantic_tags": ["forage", "danger", "food"], "context_tags": ["danger", "exposed"], "risk": 0.78, "preferred_probability": 0.20, "predicted_effects": {"energy_delta": -0.04, "stress_delta": 0.20, "free_energy_delta": -0.22}, "state_vector": [0.46, 0.84, 0.14, 0.20]}
+    ],
+    "credit_events": [
+      {"tick": 6, "prediction_id": "pred:train_hide_1", "memory_id": "train_hide_1", "outcome": "confirmed", "support_score": 0.94, "free_energy_delta": 0.30},
+      {"tick": 7, "prediction_id": "pred:train_hide_2", "memory_id": "train_hide_2", "outcome": "confirmed", "support_score": 0.92, "free_energy_delta": 0.26},
+      {"tick": 8, "prediction_id": "pred:train_forage_1", "memory_id": "train_forage_1", "outcome": "violated", "support_score": 0.18, "contradiction_score": 0.90, "free_energy_delta": -0.24},
+      {"tick": 9, "prediction_id": "pred:train_forage_2", "memory_id": "train_forage_2", "outcome": "violated", "support_score": 0.16, "contradiction_score": 0.88, "free_energy_delta": -0.20}
+    ],
+    "trajectory": [
+      {"tick": 12, "prediction_id": "traj:train_hide_1", "memory_id": "train_hide_1", "outcome": "confirmed", "support_score": 0.94, "free_energy_delta": 0.18},
+      {"tick": 13, "prediction_id": "traj:train_hide_2", "memory_id": "train_hide_2", "outcome": "confirmed", "support_score": 0.92, "free_energy_delta": 0.16},
+      {"tick": 14, "prediction_id": "traj:train_hide_1b", "memory_id": "train_hide_1", "outcome": "confirmed", "support_score": 0.93, "free_energy_delta": 0.15}
+    ]
+  },
+  {
+    "fixture_id": "train_social_repair",
+    "active_goal": "SOCIAL",
+    "urgency_scores": {"SOCIAL": 0.80, "CONTROL": 0.46, "SURVIVAL": 0.38},
+    "observation": {"danger": 0.24, "food": 0.18, "novelty": 0.28, "shelter": 0.34, "social": 0.12, "temperature": 0.50},
+    "prediction": {"danger": 0.26, "food": 0.20, "novelty": 0.24, "shelter": 0.30, "social": 0.22, "temperature": 0.50},
+    "body_state": {"energy": 0.66, "stress": 0.22, "fatigue": 0.18, "temperature": 0.49},
+    "free_energy_before": 0.30,
+    "episodes": [
+      {"entry_id": "train_social_1", "cycle": 1, "action": "seek_contact", "outcome": "social_repair", "semantic_tags": ["seek_contact", "social", "repair"], "context_tags": ["social", "repair"], "risk": 0.16, "preferred_probability": 0.80, "predicted_effects": {"energy_delta": -0.02, "stress_delta": -0.10, "free_energy_delta": 0.18}, "state_vector": [0.10, 0.24, 0.66, 0.34]},
+      {"entry_id": "train_social_2", "cycle": 2, "action": "seek_contact", "outcome": "social_repair", "semantic_tags": ["seek_contact", "social", "support"], "context_tags": ["social", "support"], "risk": 0.12, "preferred_probability": 0.82, "predicted_effects": {"energy_delta": -0.01, "stress_delta": -0.08, "free_energy_delta": 0.16}, "state_vector": [0.12, 0.26, 0.64, 0.36]},
+      {"entry_id": "train_hide_social", "cycle": 3, "action": "hide", "outcome": "missed_support", "semantic_tags": ["hide", "social", "withdraw"], "context_tags": ["social", "danger"], "risk": 0.30, "preferred_probability": 0.44, "predicted_effects": {"energy_delta": 0.01, "stress_delta": 0.02, "free_energy_delta": -0.02}, "state_vector": [0.18, 0.22, 0.40, 0.70]}
+    ],
+    "credit_events": [
+      {"tick": 6, "prediction_id": "pred:train_social_1", "memory_id": "train_social_1", "outcome": "confirmed", "support_score": 0.90, "free_energy_delta": 0.18},
+      {"tick": 7, "prediction_id": "pred:train_social_2", "memory_id": "train_social_2", "outcome": "confirmed", "support_score": 0.92, "free_energy_delta": 0.17}
+    ],
+    "trajectory": [
+      {"tick": 12, "prediction_id": "traj:train_social_1", "memory_id": "train_social_1", "outcome": "confirmed", "support_score": 0.91, "free_energy_delta": 0.14},
+      {"tick": 13, "prediction_id": "traj:train_social_2", "memory_id": "train_social_2", "outcome": "confirmed", "support_score": 0.90, "free_energy_delta": 0.13}
+    ]
+  }
+]

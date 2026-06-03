@@ -10,6 +10,8 @@ from statistics import mean
 import warnings
 
 from .action_schema import ActionSchema, action_name, ensure_action_schema
+from .memory_credit import MemoryCreditSignal
+from .fep_surrogate import build_free_energy_surrogate
 from .memory_encoding import EncodingDynamics, EncodingDynamicsInput
 from .memory_store import MemoryStore
 from .preferences import PreferenceModel, ValueHierarchy
@@ -56,6 +58,7 @@ class Episode:
     embedding: list[float]
     preferred_probability: float
     preference_log_value: float
+    free_energy_surrogate_breakdown: dict[str, object] = field(default_factory=dict)
 
     @property
     def value_label(self) -> str:
@@ -63,6 +66,14 @@ class Episode:
 
     def to_dict(self) -> dict[str, object]:
         state_snapshot = _split_state_vector(self.state_vector)
+        breakdown = (
+            dict(self.free_energy_surrogate_breakdown)
+            if self.free_energy_surrogate_breakdown
+            else build_free_energy_surrogate(
+                errors=state_snapshot["errors"],
+                body_state=state_snapshot["body_state"],
+            ).to_dict()
+        )
         return {
             "timestamp": self.timestamp,
             "cycle": self.timestamp,
@@ -74,10 +85,18 @@ class Episode:
             "outcome": dict(self.outcome_state),
             "predicted_outcome": self.predicted_outcome,
             "prediction_error": self.prediction_error,
+            "raw_prediction_error": float(breakdown.get("raw_prediction_error", self.prediction_error)),
+            "precision_weighted_prediction_error": float(
+                breakdown.get("precision_weighted_prediction_error", self.prediction_error)
+            ),
             "risk": self.risk,
             "value_score": self.value_score,
             "total_surprise": self.total_surprise,
             "weighted_surprise": self.total_surprise,
+            "free_energy_surrogate_breakdown": breakdown,
+            "free_energy_surrogate": float(
+                breakdown.get("free_energy_surrogate", self.prediction_error)
+            ),
             "embedding": list(self.embedding),
             "value_label": self.predicted_outcome,
             "preferred_probability": self.preferred_probability,
@@ -124,6 +143,11 @@ class Episode:
             embedding=list(embedding) if isinstance(embedding, list) else [],
             preferred_probability=float(payload.get("preferred_probability", 0.0)),
             preference_log_value=float(payload.get("preference_log_value", 0.0)),
+            free_energy_surrogate_breakdown=(
+                dict(payload.get("free_energy_surrogate_breakdown"))
+                if isinstance(payload.get("free_energy_surrogate_breakdown"), dict)
+                else {}
+            ),
         )
 
 
@@ -488,6 +512,10 @@ class LongTermMemory:
             self.episodes = staged_episodes
             self._refresh_semantic_patterns()
             self.memory_store = staged_store
+            if self.memory_store is not None:
+                self.reusable_cognitive_paths = [
+                    path.to_dict() for path in self.memory_store.path_entries()
+                ]
             self._assert_dual_write_invariant()
         except Exception:
             self.episodes = previous_episodes
@@ -554,6 +582,28 @@ class LongTermMemory:
             return None
         self.memory_store.replace_legacy_group(payloads)
         return self.memory_store
+
+    def apply_memory_credit_signal(
+        self,
+        signal: MemoryCreditSignal,
+        *,
+        tick: int,
+    ) -> dict[str, object]:
+        store = self.ensure_memory_store()
+        if store is None:
+            return {
+                "prediction_id": signal.linked_prediction_id,
+                "applied_ids": [],
+                "skipped_ids": list(signal.linked_memory_ids),
+                "skipped_reasons": {
+                    entry_id: "memory_store_unavailable"
+                    for entry_id in signal.linked_memory_ids
+                },
+            }
+        report = store.apply_memory_credit(signal, tick=tick)
+        self.episodes = store.to_legacy_episodes()
+        self.reusable_cognitive_paths = [path.to_dict() for path in store.path_entries()]
+        return report
 
     def store_episode(
         self,
@@ -1834,6 +1884,10 @@ class LongTermMemory:
         )
         state_vector = _flatten_state_snapshot(state_snapshot)
         prediction_error = compute_prediction_error(observation, prediction)
+        free_energy_surrogate = build_free_energy_surrogate(
+            errors=state_snapshot.get("errors"),
+            body_state=state_snapshot.get("body_state"),
+        )
         return Episode(
             timestamp=timestamp,
             state_vector=state_vector,
@@ -1850,6 +1904,7 @@ class LongTermMemory:
             embedding=self._build_embedding(state_vector),
             preferred_probability=preference.preferred_probability,
             preference_log_value=preference.log_preference,
+            free_energy_surrogate_breakdown=free_energy_surrogate.to_dict(),
         )
 
     def _build_embedding(
@@ -2221,6 +2276,28 @@ class LongTermMemory:
         payload["encoding_strength"] = float(encoding_audit.get("encoding_strength", 0.0))
         payload["fep_prediction_error"] = float(encoding_audit.get("fep_prediction_error", raw_pe))
         payload["surprise"] = float(encoding_audit.get("surprise", payload.get("total_surprise", 0.0)))
+        fe_breakdown = payload.get("free_energy_surrogate_breakdown")
+        if not isinstance(fe_breakdown, dict):
+            fe_breakdown = build_free_energy_surrogate(
+                errors=payload.get("errors"),
+                body_state=payload.get("body_state"),
+            ).to_dict()
+            payload["free_energy_surrogate_breakdown"] = fe_breakdown
+        payload["raw_prediction_error"] = float(
+            fe_breakdown.get("raw_prediction_error", payload.get("prediction_error", 0.0))
+        )
+        payload["precision_weighted_prediction_error"] = float(
+            fe_breakdown.get(
+                "precision_weighted_prediction_error",
+                payload.get("prediction_error", 0.0),
+            )
+        )
+        payload["free_energy_surrogate"] = float(
+            fe_breakdown.get("free_energy_surrogate", payload.get("prediction_error", 0.0))
+        )
+        payload["free_energy_delta"] = float(
+            payload.get("free_energy_delta", payload.get("outcome", {}).get("free_energy_delta", payload.get("outcome", {}).get("free_energy_drop", 0.0)))
+        )
         payload["arousal"] = float(encoding_audit.get("arousal", self._episode_arousal(payload)))
         payload["raw_drive"] = float(encoding_audit.get("raw_drive", 0.0))
         payload["attention_budget_raw_drive_total"] = float(
