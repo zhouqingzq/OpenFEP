@@ -422,6 +422,88 @@ def test_reply_shortens_when_brevity_preference_reliable_and_active():
     assert any(effect.adjustment == "prefer_shorter_reply" for effect in result.reply_policy_effects)
 
 
+def test_reply_shortens_after_repeated_confirmed_preference_predictions_without_hypothesis():
+    state = M11RuntimeState.clean(user_id="u")
+    state, _ = run_m11_turn(
+        state,
+        user_id="u",
+        turn_id=1,
+        extractor=_extractor(
+            proposals=[
+                {
+                    "id": "p1",
+                    "prediction_type": "preference_prediction",
+                    "predicted_value_summary": "user will prefer shorter replies",
+                    "confidence_band": "med",
+                    "raw_confidence": 0.68,
+                    "evidence_basis": ["current_user_request"],
+                    "evidence_quote_ids": ["q1"],
+                    "source_hypothesis_ids": [],
+                    "source_judgment_ids": [],
+                    "expires_after_turns": 2,
+                }
+            ]
+        ),
+        config=M11RuntimeConfig(m11_user_model_enabled=True),
+    )
+    state, _ = run_m11_turn(
+        state,
+        user_id="u",
+        turn_id=2,
+        extractor=_extractor(
+            proposals=[
+                {
+                    "id": "p2",
+                    "prediction_type": "preference_prediction",
+                    "predicted_value_summary": "user will prefer shorter replies",
+                    "confidence_band": "med",
+                    "raw_confidence": 0.69,
+                    "evidence_basis": ["current_user_request"],
+                    "evidence_quote_ids": ["q2"],
+                    "source_hypothesis_ids": [],
+                    "source_judgment_ids": [],
+                    "expires_after_turns": 2,
+                }
+            ],
+            judgments=[
+                {
+                    "prediction_id": "pred:p1",
+                    "status": "confirmed",
+                    "settlement_confidence": 0.81,
+                    "evidence_quote_ids": ["q2"],
+                    "evidence_refs": [],
+                    "reason_codes": [],
+                }
+            ],
+        ),
+        config=M11RuntimeConfig(m11_user_model_enabled=True),
+    )
+    state, result = run_m11_turn(
+        state,
+        user_id="u",
+        turn_id=3,
+        extractor=_extractor(
+            judgments=[
+                {
+                    "prediction_id": "pred:p2",
+                    "status": "confirmed",
+                    "settlement_confidence": 0.83,
+                    "evidence_quote_ids": ["q3"],
+                    "evidence_refs": [],
+                    "reason_codes": [],
+                }
+            ]
+        ),
+        config=M11RuntimeConfig(m11_user_model_enabled=True),
+    )
+
+    assert any(
+        effect.adjustment == "prefer_shorter_reply"
+        and effect.reason == "repeated_confirmed_preference_prediction"
+        for effect in result.reply_policy_effects
+    )
+
+
 def test_reply_asks_clarification_when_intent_prediction_just_violated():
     state = M11RuntimeState.clean(user_id="u")
     state, _ = run_m11_turn(

@@ -122,6 +122,14 @@ class Hyperparams:
         default=3,
         metadata={"doc": "Minimum evidence refs before brevity preference can shorten replies."},
     )
+    reply_policy_recent_prediction_window_turns: int = field(
+        default=6,
+        metadata={"doc": "Recent-turn window for reply-policy effects derived from settled M17 predictions."},
+    )
+    reply_policy_confirmed_preference_min_count: int = field(
+        default=2,
+        metadata={"doc": "Minimum repeated confirmed preference-predictions before M17 may shorten replies without a hypothesis."},
+    )
     float_round_digits: int = field(
         default=6,
         metadata={"doc": "Canonical decimal precision for reproducible diagnostic floats."},

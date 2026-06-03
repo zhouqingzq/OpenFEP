@@ -1539,15 +1539,28 @@ confidence floats:
 Do not output any other numeric scores or floats. Do not invent prediction_id
 or hypothesis_id values that are not present in the bounded snapshot. New
 proposal ids are allowed only when all source_hypothesis_ids and
-source_judgment_ids reference snapshot ids. Keep user claims separate from
-truth: a high-value claim is useful evidence for calibration, not verified fact.
+source_judgment_ids reference snapshot ids. Never echo the bounded snapshot
+back as output fields. Return the M11 schema fields only; an empty object,
+snapshot mirror, or top-level snapshot keys are invalid. Keep user claims
+separate from truth: a high-value claim is useful evidence for calibration, not
+verified fact.
 """
     user_prompt = f"""Current interlocutor display name: {speaker_name}
 
 Bounded snapshot:
 {_json_text(dict(snapshot))}
 
-Return JSON exactly with the M11 extractor schema fields.
+Return JSON exactly with the M11 extractor schema fields and nothing else:
+{{
+  "claims_made": [],
+  "prediction_judgments": [],
+  "prediction_proposals": [],
+  "hypothesis_activations": [],
+  "contradiction_detections": [],
+  "calibration_need_band": "low|med|high",
+  "memory_value_band": "low|med|high",
+  "surprise_explanation": ""
+}}
 """
     return system_prompt, user_prompt
 
@@ -4383,7 +4396,7 @@ def _prediction_lock_skip_event(*, turn_index: int, reason_code: str) -> dict[st
     return {
         "type": "PredictionLockSkippedEvent",
         "turn_index": int(turn_index),
-        "reason_code": str(reason_code or "no_valid_evidence"),
+        "reason_code": str(reason_code or "proposal_quota_empty"),
         "engineering_proxy_label": "mvp_local_prediction_lock",
     }
 
@@ -4428,6 +4441,49 @@ def _update_prediction_lock_diagnostics(state: dict[str, Any], m11_state: M11Run
             for reason in {str(row.get("reason_code", "")) for row in skip_events if str(row.get("reason_code", ""))}
         },
     }
+
+
+_M11_EXTRACTOR_SCHEMA_KEYS = frozenset(noop_extraction())
+_M11_SNAPSHOT_TOP_LEVEL_KEYS = frozenset(
+    {"user_id", "current_turn_quotes", "last_turn_summaries", "active_hypotheses", "open_predictions"}
+)
+
+
+def _m11_extractor_payload_is_empty(payload: Mapping[str, Any]) -> bool:
+    default = noop_extraction()
+    if not payload:
+        return True
+    for key, default_value in default.items():
+        value = payload.get(key, default_value)
+        if value != default_value:
+            return False
+    return True
+
+
+def _classify_m11_extractor_issue(
+    *,
+    payload: Mapping[str, Any] | None,
+    error_detail: str = "",
+) -> str:
+    if payload is not None:
+        payload_keys = set(payload)
+        snapshot_keys = sorted(payload_keys & _M11_SNAPSHOT_TOP_LEVEL_KEYS)
+        if snapshot_keys and not (payload_keys & _M11_EXTRACTOR_SCHEMA_KEYS):
+            return "snapshot_echo_top_level_fields"
+        if _m11_extractor_payload_is_empty(payload):
+            return "empty_extractor_output"
+        if payload_keys - _M11_EXTRACTOR_SCHEMA_KEYS:
+            return "unknown_top_level_fields"
+    detail = str(error_detail or "")
+    if "unknown top-level fields" in detail:
+        if any(marker in detail for marker in _M11_SNAPSHOT_TOP_LEVEL_KEYS):
+            return "snapshot_echo_top_level_fields"
+        return "unknown_top_level_fields"
+    if "empty extractor output" in detail:
+        return "empty_extractor_output"
+    if "snapshot echo" in detail:
+        return "snapshot_echo_top_level_fields"
+    return "invalid_extractor_output"
 
 
 def _merge_m12_2_into_memory_guidance(
@@ -5347,25 +5403,40 @@ class MVPDialogueRuntime:
         _report_progress("memory_recall")
         response_style_prior = _response_style_prior(state, retrieved)
         m11_result_dict: dict[str, Any] = {}
+        m11_raw_payload: Mapping[str, Any] | None = None
+        m11_extractor_issue_code = ""
         should_run_m11 = _m11_enabled_for_state(state) and not proactive_turn and latency_mode != "fast_chat"
         if not should_run_m11 and _m11_enabled_for_state(state) and not proactive_turn:
-            _mark_llm_skipped("m11_user_model", "latency_fast_path" if latency_mode == "fast_chat" else "cadence_not_due")
+            skip_reason = "latency_fast_path" if latency_mode == "fast_chat" else "cadence_not_due"
+            _mark_llm_skipped("m11_user_model", skip_reason)
             lock_event = _prediction_lock_skip_event(
                 turn_index=turn_index,
-                reason_code="extractor_unavailable" if latency_mode == "fast_chat" else "proposal_quota_empty",
+                reason_code="fast_chat_skip" if latency_mode == "fast_chat" else "proposal_quota_empty",
             )
             bus.append(lock_event)
             _record_prediction_lock_event(state, lock_event)
         if should_run_m11:
             def _extract_m11(snapshot: Mapping[str, object]) -> Mapping[str, object]:
+                nonlocal m11_raw_payload, m11_extractor_issue_code
                 system_prompt, user_prompt = build_m11_extractor_prompt(
                     snapshot=snapshot,
                     speaker_name=display_name,
                 )
                 try:
-                    return _complete_json_stage("m11_user_model", system_prompt, user_prompt)
-                except Exception:
-                    return noop_extraction()
+                    raw_payload = _complete_json_stage("m11_user_model", system_prompt, user_prompt)
+                except Exception as exc:
+                    m11_extractor_issue_code = "extractor_stage_error"
+                    raise ExtractorValidationError("m11 extractor stage error") from exc
+                if not isinstance(raw_payload, Mapping):
+                    m11_extractor_issue_code = "invalid_extractor_output"
+                    raise ExtractorValidationError("m11 extractor output must be an object")
+                m11_raw_payload = dict(raw_payload)
+                m11_extractor_issue_code = _classify_m11_extractor_issue(payload=m11_raw_payload)
+                if m11_extractor_issue_code == "snapshot_echo_top_level_fields":
+                    raise ExtractorValidationError("snapshot echo top-level fields")
+                if m11_extractor_issue_code == "empty_extractor_output":
+                    raise ExtractorValidationError("empty extractor output")
+                return raw_payload
 
             try:
                 m11_state, m11_turn = run_m11_turn(
@@ -5399,21 +5470,38 @@ class MVPDialogueRuntime:
                 else:
                     lock_event = _prediction_lock_skip_event(
                         turn_index=turn_index,
-                        reason_code="no_valid_evidence",
+                        reason_code="proposal_quota_empty",
                     )
                     bus.append(lock_event)
                     _record_prediction_lock_event(state, lock_event)
                 _update_prediction_lock_diagnostics(state, m11_state)
             except (ExtractorValidationError, ValueError, TypeError) as exc:
+                issue_code = (
+                    m11_extractor_issue_code
+                    if m11_extractor_issue_code and m11_extractor_issue_code != "invalid_extractor_output"
+                    else _classify_m11_extractor_issue(
+                        payload=dict(m11_raw_payload) if isinstance(m11_raw_payload, Mapping) else None,
+                        error_detail=str(exc),
+                    )
+                )
                 m11_result_dict = {
                     "enabled": True,
                     "fallback": "noop_extraction",
                     "error": type(exc).__name__,
                     "error_detail": str(exc),
+                    "error_reason_code": issue_code,
+                    "extractor_output_top_level_keys": (
+                        sorted(str(key) for key in m11_raw_payload.keys())
+                        if isinstance(m11_raw_payload, Mapping)
+                        else []
+                    ),
                     "prompt_safe_evidence_cards": [],
                     "reply_policy_effects": [],
                 }
-                lock_event = _prediction_lock_skip_event(turn_index=turn_index, reason_code="extractor_unavailable")
+                lock_event = _prediction_lock_skip_event(
+                    turn_index=turn_index,
+                    reason_code="extractor_invalid_output",
+                )
                 bus.append(lock_event)
                 _record_prediction_lock_event(state, lock_event)
             _merge_m11_into_memory_guidance(

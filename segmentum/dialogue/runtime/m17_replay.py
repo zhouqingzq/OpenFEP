@@ -62,27 +62,49 @@ def _read_any_json(path: Path) -> list[dict[str, Any]]:
 def _session_files(session: Path) -> list[Path]:
     if session.is_file():
         return [session]
-    candidates = [
+    event_files = [
         session / "conversation_log.jsonl",
         session / "memory_dynamics_episodes.jsonl",
+    ]
+    state_candidates = [
+        session / "m11_user_models.json",
+        session / "m11_state.json",
         session / "session_state.json",
         session / "state.json",
-        session / "m11_state.json",
     ]
-    return [path for path in candidates if path.exists()]
+    selected_state = next((path for path in state_candidates if path.exists()), None)
+    files = [path for path in event_files if path.exists()]
+    if selected_state is not None:
+        files.append(selected_state)
+    return files
 
 
-def _load_prediction_entries(payload: Mapping[str, Any]) -> list[PredictionEntry]:
+def _prediction_entries_from_ledger_payload(payload: Mapping[str, Any]) -> list[PredictionEntry]:
     rows: list[PredictionEntry] = []
     ledger = _mapping(payload.get("prediction_ledger"))
     for row in ledger.get("entries", []):
         if isinstance(row, Mapping):
             rows.append(PredictionEntry.from_dict(row))
+    return rows
+
+
+def _prediction_entries_from_user_model_map(payload: Mapping[str, Any]) -> list[PredictionEntry]:
+    rows: list[PredictionEntry] = []
+    for value in payload.values():
+        if not isinstance(value, Mapping):
+            continue
+        rows.extend(_prediction_entries_from_ledger_payload(dict(value)))
+    return rows
+
+
+def _load_prediction_entries(payload: Mapping[str, Any]) -> list[PredictionEntry]:
+    rows: list[PredictionEntry] = []
+    rows.extend(_prediction_entries_from_ledger_payload(payload))
     m11_state = _mapping(payload.get("m11_state"))
-    ledger = _mapping(m11_state.get("prediction_ledger"))
-    for row in ledger.get("entries", []):
-        if isinstance(row, Mapping):
-            rows.append(PredictionEntry.from_dict(row))
+    rows.extend(_prediction_entries_from_ledger_payload(m11_state))
+    rows.extend(_prediction_entries_from_user_model_map(_mapping(payload.get("m11_user_models"))))
+    if "m11_user_models" not in payload:
+        rows.extend(_prediction_entries_from_user_model_map(payload))
     return rows
 
 
@@ -90,25 +112,49 @@ def load_m17_replay_data(session_paths: Sequence[Path]) -> dict[str, Any]:
     events: list[dict[str, Any]] = []
     prediction_entries: list[PredictionEntry] = []
     warnings: list[str] = []
+    session_summaries: list[dict[str, Any]] = []
     for session_path in session_paths:
         files = _session_files(session_path)
         if not files:
             warnings.append(f"missing_files:{session_path}")
             continue
+        state_source = ""
+        event_file_count = 0
+        session_entry_count = 0
         for file_path in files:
+            if file_path.name.endswith(".jsonl"):
+                event_file_count += 1
+            elif not state_source:
+                state_source = str(file_path)
             for row in _read_any_json(file_path):
                 events.append(row)
-                prediction_entries.extend(_load_prediction_entries(row))
+                loaded_entries = _load_prediction_entries(row)
+                prediction_entries.extend(loaded_entries)
+                session_entry_count += len(loaded_entries)
+        if session_path.is_dir() and not state_source:
+            warnings.append(f"missing_prediction_state:{session_path}")
+        elif state_source and session_entry_count == 0:
+            warnings.append(f"no_prediction_entries:{session_path}")
+        session_summaries.append(
+            {
+                "session_path": str(session_path),
+                "state_source": state_source,
+                "event_file_count": event_file_count,
+                "prediction_entry_count": session_entry_count,
+            }
+        )
     return {
         "events": events,
         "prediction_entries": prediction_entries,
         "warnings": warnings,
+        "session_summaries": session_summaries,
     }
 
 
 def replay_coverage_metrics(payload: Mapping[str, Any]) -> dict[str, Any]:
     events = [row for row in payload.get("events", []) if isinstance(row, Mapping)]
     entries = [row for row in payload.get("prediction_entries", []) if isinstance(row, PredictionEntry)]
+    session_summaries = [row for row in payload.get("session_summaries", []) if isinstance(row, Mapping)]
     turns_seen = max(
         [int(row.get("turn_index", 0) or 0) for row in events] + [int(entry.turn_id) for entry in entries] + [0]
     )
@@ -156,6 +202,20 @@ def replay_coverage_metrics(payload: Mapping[str, Any]) -> dict[str, Any]:
         "novelty_signal_coverage": round(novelty_seen / float(max(1, len(events))), 6),
         "structured_linkage_coverage": round(structured_linkable / float(max(1, retrieval_eligible_count)), 6),
         "bundle_linkable_prediction_rate": round(bundle_linkable_count / float(max(1, retrieval_eligible_count)), 6),
+        "prediction_state_loaded_session_count": len(
+            [row for row in session_summaries if str(row.get("state_source", "") or "").strip()]
+        ),
+        "prediction_state_missing_session_count": len(
+            [row for row in session_summaries if not str(row.get("state_source", "") or "").strip()]
+        ),
+        "prediction_sample_empty_session_count": len(
+            [
+                row
+                for row in session_summaries
+                if str(row.get("state_source", "") or "").strip()
+                and int(row.get("prediction_entry_count", 0) or 0) == 0
+            ]
+        ),
     }
 
 

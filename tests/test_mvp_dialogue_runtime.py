@@ -271,6 +271,117 @@ def _latest_prompt_for(llm: FakeJSONLLM, marker: str) -> str:
     raise AssertionError(f"missing LLM call for {marker}")
 
 
+def _jsonl_rows(path: Path) -> list[dict[str, object]]:
+    if not path.exists():
+        return []
+    rows: list[dict[str, object]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        rows.append(json.loads(line))
+    return rows
+
+
+class InvalidM11LLM(FakeJSONLLM):
+    def __init__(self, mode: str) -> None:
+        super().__init__()
+        self.mode = mode
+
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        if "M11 user-model extractor" in system_prompt:
+            if self.mode == "snapshot_echo":
+                return {
+                    "user_id": "default_user",
+                    "current_turn_quotes": {"q_current": "hello"},
+                    "last_turn_summaries": [],
+                    "active_hypotheses": [],
+                    "open_predictions": [],
+                }
+            if self.mode == "unknown_top_level":
+                return {
+                    "claims_made": [],
+                    "prediction_judgments": [],
+                    "prediction_proposals": [],
+                    "hypothesis_activations": [],
+                    "contradiction_detections": [],
+                    "calibration_need_band": "low",
+                    "memory_value_band": "low",
+                    "surprise_explanation": "",
+                    "unexpected": [],
+                }
+            return {}
+        return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+
+class ScriptedM17LLM(FakeJSONLLM):
+    def __init__(self, *, prediction_type: str, predicted_value_summary: str, outcome: str) -> None:
+        super().__init__()
+        self.prediction_type = prediction_type
+        self.predicted_value_summary = predicted_value_summary
+        self.outcome = outcome
+        self.m11_calls = 0
+
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        if "M11 user-model extractor" in system_prompt:
+            self.m11_calls += 1
+            if self.m11_calls == 1:
+                return {
+                    "claims_made": [],
+                    "prediction_judgments": [],
+                    "prediction_proposals": [
+                        {
+                            "id": "p1",
+                            "prediction_type": self.prediction_type,
+                            "predicted_value_summary": self.predicted_value_summary,
+                            "confidence_band": "med",
+                            "raw_confidence": 0.68,
+                            "evidence_basis": ["current_user_request"],
+                            "evidence_quote_ids": ["q_current"],
+                            "source_hypothesis_ids": [],
+                            "source_judgment_ids": [],
+                            "expires_after_turns": 2,
+                        }
+                    ],
+                    "hypothesis_activations": [],
+                    "contradiction_detections": [],
+                    "calibration_need_band": "med",
+                    "memory_value_band": "low",
+                    "surprise_explanation": "",
+                }
+            if self.m11_calls == 2:
+                return {
+                    "claims_made": [],
+                    "prediction_judgments": [
+                        {
+                            "prediction_id": "pred:p1",
+                            "status": self.outcome,
+                            "settlement_confidence": 0.82,
+                            "evidence_quote_ids": ["q_current"],
+                            "evidence_refs": [],
+                            "evidence_span": "scripted settlement evidence",
+                            "reason_codes": ["scripted_test"],
+                        }
+                    ],
+                    "prediction_proposals": [],
+                    "hypothesis_activations": [],
+                    "contradiction_detections": [],
+                    "calibration_need_band": "med",
+                    "memory_value_band": "low",
+                    "surprise_explanation": "",
+                }
+            return {
+                "claims_made": [],
+                "prediction_judgments": [],
+                "prediction_proposals": [],
+                "hypothesis_activations": [],
+                "contradiction_detections": [],
+                "calibration_need_band": "low",
+                "memory_value_band": "low",
+                "surprise_explanation": "",
+            }
+        return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+
 def test_mvp_runtime_initializes_system_files_and_runs_llm_loop(tmp_path: Path) -> None:
     llm = FakeJSONLLM()
     runtime = MVPDialogueRuntime(
@@ -1102,6 +1213,8 @@ def test_fast_chat_skips_m12_identity_even_when_enabled(tmp_path: Path) -> None:
     assert not any("identity-continuity extractor" in system for system in systems)
     skipped = {row["stage"]: row["reason"] for row in result.diagnostics["skipped_llm_stages"]}
     assert skipped["m12_identity_pre"] == "latency_fast_path"
+    saved = store.load()
+    assert saved["prediction_lock_audit_tail"][-1]["reason_code"] == "fast_chat_skip"
 
 
 def test_preference_feedback_uses_normal_latency_path(tmp_path: Path) -> None:
@@ -1437,6 +1550,103 @@ def test_mvp_runtime_m11_keeps_distinct_user_models_by_speaker_name(tmp_path: Pa
     assert "Alice" in alice_summary
     assert "Bob" in bob_summary
     assert models["Alice"] != models["Bob"]
+
+
+def test_mvp_runtime_audits_snapshot_echo_m11_output_as_invalid(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=InvalidM11LLM("snapshot_echo"),
+        persona_name="test persona",
+    )
+
+    result = runtime.run_turn("Please review this milestone carefully.", turn_index=0, now=7200)
+
+    saved = runtime.store.load()
+    assert result.diagnostics["m11_user_model"]["error_reason_code"] == "snapshot_echo_top_level_fields"
+    assert saved["prediction_lock_audit_tail"][-1]["reason_code"] == "extractor_invalid_output"
+    assert saved["m11_user_models"] == {}
+
+
+def test_mvp_runtime_audits_unknown_top_level_m11_output_as_invalid(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=InvalidM11LLM("unknown_top_level"),
+        persona_name="test persona",
+    )
+
+    result = runtime.run_turn("Please inspect this implementation in detail.", turn_index=0, now=7210)
+
+    saved = runtime.store.load()
+    assert result.diagnostics["m11_user_model"]["error_reason_code"] == "unknown_top_level_fields"
+    assert saved["prediction_lock_audit_tail"][-1]["reason_code"] == "extractor_invalid_output"
+
+
+def test_mvp_runtime_audits_empty_m11_output_as_invalid(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=InvalidM11LLM("empty"),
+        persona_name="test persona",
+    )
+
+    result = runtime.run_turn("Please help me think through this design.", turn_index=0, now=7220)
+
+    saved = runtime.store.load()
+    assert result.diagnostics["m11_user_model"]["error_reason_code"] == "empty_extractor_output"
+    assert saved["prediction_lock_audit_tail"][-1]["reason_code"] == "extractor_invalid_output"
+
+
+def test_mvp_runtime_scripted_m17_confirmed_path_writes_settlement_and_calibration(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=ScriptedM17LLM(
+            prediction_type="preference_prediction",
+            predicted_value_summary="user will prefer shorter replies",
+            outcome="confirmed",
+        ),
+        persona_name="test persona",
+    )
+
+    first = runtime.run_turn("I prefer short replies when we review code.", turn_index=0, now=7300)
+    second = runtime.run_turn("Yes, keep it short.", turn_index=1, now=7360)
+
+    first_bus_types = {row.get("type") for row in first.diagnostics["bus_messages"]}
+    second_bus_types = {row.get("type") for row in second.diagnostics["bus_messages"]}
+    saved = runtime.store.load()
+    calibration = saved["m11_user_models"]["default_user"]["prediction_calibration"]["by_type"]["preference_prediction"]
+    episode_rows = _jsonl_rows(runtime.store.root / "memory_dynamics_episodes.jsonl")
+
+    assert "PredictionLockedEvent" in first_bus_types
+    assert "PredictionSettlementAddendum" in second_bus_types
+    assert "PredictionSettlementAuditEvent" not in second_bus_types
+    assert calibration["sample_count"] == 1
+    assert any(row.get("type") == "PredictionSettlementAddendum" and row.get("prediction_id") == "pred:p1" for row in episode_rows)
+
+
+def test_mvp_runtime_scripted_m17_violated_path_biases_reply_toward_clarification(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=ScriptedM17LLM(
+            prediction_type="intent_prediction",
+            predicted_value_summary="user will ask for code edits",
+            outcome="violated",
+        ),
+        persona_name="test persona",
+    )
+
+    runtime.run_turn("Please help me plan code edits for this module.", turn_index=0, now=7400)
+    result = runtime.run_turn("Actually I want a high-level review first.", turn_index=1, now=7460)
+
+    bus_types = {row.get("type") for row in result.diagnostics["bus_messages"]}
+    effects = result.diagnostics["m11_user_model"]["reply_policy_effects"]
+
+    assert "PredictionSettlementAddendum" in bus_types
+    assert "PredictionSettlementAuditEvent" not in bus_types
+    assert result.diagnostics["reply_contract"]["prefer_clarification"] is True
+    assert any(
+        effect.get("adjustment") == "ask_clarifying_question"
+        and effect.get("reason") == "recent_intent_or_preference_prediction_violated"
+        for effect in effects
+    )
 
 
 def test_mvp_state_store_shares_recent_short_term_memory_across_sessions(tmp_path: Path) -> None:

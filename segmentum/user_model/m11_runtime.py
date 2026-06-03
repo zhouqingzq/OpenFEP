@@ -278,16 +278,33 @@ def derive_reply_policy_effects(
                     reason="reliable_active_preference",
                 )
             )
-    for entry in reversed(ledger.entries):
-        if entry.validation_status == "violated" and entry.event_kind == "judgment":
-            effects.append(
-                ReplyPolicyAdjustment(
-                    adjustment="ask_clarifying_question",
-                    caused_by_id=entry.prediction_id,
-                    reason="recent_intent_prediction_violated",
-                )
+    prediction_judgments = _recent_prediction_judgments(ledger, hyperparams=hyperparams)
+    violated_candidates = [
+        entry
+        for entry in prediction_judgments
+        if entry.prediction_type in {"intent_prediction", "preference_prediction"}
+        and entry.settlement_outcome == "violated"
+        and entry.m17_prediction_error is not None
+    ]
+    if violated_candidates:
+        entry = max(
+            violated_candidates,
+            key=lambda row: (int(row.turn_id), float(row.m17_prediction_error or 0.0)),
+        )
+        effects.append(
+            ReplyPolicyAdjustment(
+                adjustment="ask_clarifying_question",
+                caused_by_id=entry.prediction_id,
+                reason="recent_intent_or_preference_prediction_violated",
             )
-            break
+        )
+    if not any(effect.adjustment == "prefer_shorter_reply" for effect in effects):
+        confirmed_brevity_predictions = _confirmed_brevity_prediction_effect(
+            prediction_judgments,
+            hyperparams=hyperparams,
+        )
+        if confirmed_brevity_predictions is not None:
+            effects.append(confirmed_brevity_predictions)
     social_reliability = model.source_reliability_by_domain.get("social_relationship_claims", hyperparams.prior_mean)
     if social_reliability < hyperparams.low_reliability_threshold:
         effects.append(
@@ -308,6 +325,83 @@ def derive_reply_policy_effects(
             )
             break
     return tuple(effects)
+
+
+def _recent_prediction_judgments(
+    ledger: UserPredictionLedger,
+    *,
+    hyperparams: Hyperparams,
+) -> tuple[PredictionEntry, ...]:
+    latest_turn = max((int(entry.turn_id) for entry in ledger.entries), default=0)
+    window_floor = max(0, latest_turn - hyperparams.reply_policy_recent_prediction_window_turns + 1)
+    return tuple(
+        entry
+        for entry in ledger.entries
+        if entry.event_kind == "judgment" and int(entry.turn_id) >= window_floor
+    )
+
+
+def _confirmed_brevity_prediction_effect(
+    entries: Sequence[PredictionEntry],
+    *,
+    hyperparams: Hyperparams,
+) -> ReplyPolicyAdjustment | None:
+    by_summary: dict[str, list[PredictionEntry]] = {}
+    for entry in entries:
+        if entry.prediction_type != "preference_prediction":
+            continue
+        if entry.settlement_outcome != "confirmed":
+            continue
+        if entry.m17_prediction_error is None and entry.m17_brier_score is None:
+            continue
+        summary_key = _brevity_prediction_summary_key(entry.predicted_value_summary)
+        if not summary_key:
+            continue
+        by_summary.setdefault(summary_key, []).append(entry)
+    qualified_groups = [
+        rows
+        for rows in by_summary.values()
+        if len(rows) >= hyperparams.reply_policy_confirmed_preference_min_count
+    ]
+    if not qualified_groups:
+        return None
+    latest_group = max(
+        qualified_groups,
+        key=lambda rows: max((int(row.turn_id), float(row.m17_brier_score or 0.0)) for row in rows),
+    )
+    latest_entry = max(latest_group, key=lambda row: (int(row.turn_id), float(row.m17_brier_score or 0.0)))
+    return ReplyPolicyAdjustment(
+        adjustment="prefer_shorter_reply",
+        caused_by_id=latest_entry.prediction_id,
+        reason="repeated_confirmed_preference_prediction",
+    )
+
+
+def _brevity_prediction_summary_key(summary: object) -> str:
+    text = " ".join(str(summary or "").strip().casefold().split())
+    if not text:
+        return ""
+    stems = (
+        "short reply",
+        "shorter repl",
+        "brief repl",
+        "concise repl",
+        "compact repl",
+        "short responses",
+        "shorter responses",
+        "brief responses",
+        "concise responses",
+        "compact responses",
+        "简短",
+        "更短",
+        "简洁",
+        "精简",
+        "少一点",
+        "短一点",
+    )
+    if any(stem in text for stem in stems):
+        return text
+    return ""
 
 
 def _bounded_snapshot(
