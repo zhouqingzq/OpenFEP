@@ -14,7 +14,6 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
-from ..conversation_loop import run_conversation
 from ..fep_prompt import normalize_dialogue_outcome
 from ..generator import LLMGenerator, ResponseGenerator, RuleBasedGenerator
 from ..observer import DialogueObserver
@@ -179,7 +178,7 @@ def _llm_api_key_available() -> bool:
 
 class _PromptInjector:
     """Generator wrapper that injects a fresh PromptBuilder system prompt
-    before each generate() call inside run_conversation."""
+    before each legacy generator call."""
 
     def __init__(self, real_gen: ResponseGenerator, chat_iface: "ChatInterface") -> None:
         self._real = real_gen
@@ -409,111 +408,10 @@ class ChatInterface:
 
         if self._mvp_runtime is not None:
             return self._send_mvp(request)
-        if self._use_mvp_runtime:
-            raise RuntimeError(
-                "MVP LLM runtime is not active. Check secrets/openrouter.json and restart Streamlit."
-            )
-
-        pre_traits = self._agent.slow_variable_learner.state.traits.to_dict()
-        pp = self._agent.self_model.personality_profile
-        pre_big_five = {
-            "openness": pp.openness, "conscientiousness": pp.conscientiousness,
-            "extraversion": pp.extraversion, "agreeableness": pp.agreeableness,
-            "neuroticism": pp.neuroticism,
-        }
-
-        turn_seed = (42 + self._turn_index * 7919) % (2**31)
-        turns = run_conversation(
-            self._agent, [request.user_text],
-            generator=_PromptInjector(self._generator, self),
-            observer=self._observer, partner_uid=0, session_id=self._session_id,
-            master_seed=turn_seed,
-            initial_prior_observation=self._last_obs_channels or None,
-            initial_last_action=self._last_action or None,
-            initial_transcript=list(self._transcript),
-            persona_id=self._resolved_persona_id(),
-            conscious_writer=self._conscious_writer,
-            turn_index_offset=self._turn_index,
+        raise RuntimeError(
+            "Legacy conversation_loop fallback has been removed. "
+            "Use the Path B MVP runtime via the M16 runner/gateway."
         )
-        turn = turns[0] if turns else None
-        if turn is None:
-            raise RuntimeError("Conversation loop returned no turns")
-
-        post_traits = self._agent.slow_variable_learner.state.traits.to_dict()
-        post_big_five = {
-            "openness": pp.openness, "conscientiousness": pp.conscientiousness,
-            "extraversion": pp.extraversion, "agreeableness": pp.agreeableness,
-            "neuroticism": pp.neuroticism,
-        }
-        delta_traits = {k: round(post_traits[k] - pre_traits.get(k, 0.0), 6) for k in post_traits}
-        delta_big_five = {k: round(post_big_five[k] - pre_big_five.get(k, 0.0), 6) for k in post_big_five}
-
-        obs_channels = turn.observation or {}
-        repaired_text = self._repair_high_conflict_reply(
-            request.user_text,
-            turn.text,
-        )
-        safe_text, checks = self._safety.enforce(repaired_text, obs_channels)
-
-        llm_latency = 0.0
-        if isinstance(self._generator, LLMGenerator):
-            diag = self._generator.last_diagnostics
-            llm_latency = float(diag.get("llm_latency_ms", 0.0))
-
-        # FEP bridge: classify previous outcome for next turn
-        if self._last_action and self._last_obs_channels and obs_channels:
-            from ..outcome import classify_dialogue_outcome
-            try:
-                self._last_outcome = normalize_dialogue_outcome(classify_dialogue_outcome(
-                    self._last_action,
-                    obs_channels,
-                    {},
-                    previous_observation=self._last_obs_channels,
-                ))
-            except Exception:
-                self._last_outcome = "neutral"
-        else:
-            self._last_outcome = "neutral"
-        # Store for next classification
-        self._last_action = str(turn.action or "")
-        self._last_obs_channels = dict(obs_channels)
-        self._transcript.append(
-            TranscriptUtterance(role="interlocutor", text=request.user_text)
-        )
-        self._transcript.append(TranscriptUtterance(role="agent", text=safe_text))
-        fep_capsule = {}
-        if isinstance(turn.generation_diagnostics, dict):
-            maybe_capsule = turn.generation_diagnostics.get("fep_prompt_capsule")
-            if isinstance(maybe_capsule, dict):
-                fep_capsule = dict(maybe_capsule)
-                try:
-                    self._last_efe_margin = float(fep_capsule.get("efe_margin", 1.0) or 1.0)
-                except (TypeError, ValueError):
-                    self._last_efe_margin = 1.0
-
-        generation_diagnostics = dict(turn.generation_diagnostics or {})
-        llm_generation = (
-            dict(self._generator.last_diagnostics)
-            if isinstance(self._generator, LLMGenerator)
-            else {}
-        )
-        generation_diagnostics["fep_prompt_capsule"] = fep_capsule
-        generation_diagnostics["llm_generation"] = llm_generation
-        generation_diagnostics["selected_action"] = turn.action or "ask_question"
-
-        self._dashboard.snapshot(self._agent)
-        self._turn_index += 1
-
-        response = ChatResponse(
-            reply=safe_text, action=turn.action or "ask_question",
-            observation=obs_channels, delta_traits=delta_traits,
-            delta_big_five=delta_big_five,
-            diagnostics=generation_diagnostics,
-            safety_checks=checks, turn_index=self._turn_index,
-            llm_latency_ms=llm_latency,
-        )
-        self._last_response_diagnostics = dict(generation_diagnostics)
-        return response
 
     def chat(self, user_text: str) -> str:
         return self.send(ChatRequest(user_text=user_text)).reply

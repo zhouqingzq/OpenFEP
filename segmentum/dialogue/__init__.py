@@ -13,7 +13,6 @@ from .channel_registry import (
     is_precision_anomalous,
 )
 from .observation import DialogueObservation
-from .conversation_loop import ConversationTurn, run_conversation
 from .generator import LLMGenerator, ResponseGenerator, RuleBasedGenerator
 from .policy import DialoguePolicyEvaluator
 from .observer import DialogueObserver, normalize_conversation_history
@@ -22,7 +21,6 @@ from .types import DialogueTurn, TranscriptUtterance
 from .world import DialogueWorld
 
 __all__ = [
-    "ConversationTurn",
     "DialoguePolicyEvaluator",
     "ChannelPrecisionBounds",
     "DIALOGUE_CHANNEL_NAMES",
@@ -38,7 +36,6 @@ __all__ = [
     "LLMGenerator",
     "ResponseGenerator",
     "RuleBasedGenerator",
-    "run_conversation",
     "TranscriptUtterance",
     "normalize_conversation_history",
     "ObservabilityTier",

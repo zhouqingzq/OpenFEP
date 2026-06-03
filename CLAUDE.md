@@ -27,9 +27,14 @@ requirements.
 
 ### Path A — frozen / out of scope
 
-Path A is the research stack built around `conversation_loop.py`, `SegmentAgent`,
-`CognitiveLoop`, `SelfThoughtProducer`, and related M6–M10 wiring. Treat it as
-**legacy experiment code**, not the product direction.
+Path A is the research stack built around `conversation_loop.py`,
+`CognitiveLoop`, `SelfThoughtProducer`, and related M6–M10 dialogue wiring.
+Treat it as **legacy experiment code**, not the product direction.
+
+The older organism/survival runtime centered on `segmentum/agent.py`
+(`SegmentAgent`, `compute_free_energy`, homeostasis, autobiographical memory)
+is a separate legacy stack. It is **not Path B**, but it is also **not the
+frozen Path A dialogue stack**.
 
 When touching shared modules, avoid expanding Path A integration. Do not add new
 call sites, milestones, or acceptance criteria that require Path A ↔ Path B
