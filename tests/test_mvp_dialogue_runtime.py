@@ -319,12 +319,26 @@ class ScriptedM17LLM(FakeJSONLLM):
         self.prediction_type = prediction_type
         self.predicted_value_summary = predicted_value_summary
         self.outcome = outcome
-        self.m11_calls = 0
+        self.proposal_calls = 0
 
     def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        if "M17 settlement assessor" in system_prompt:
+            return {
+                "prediction_judgments": [
+                    {
+                        "prediction_id": "pred:p1",
+                        "status": self.outcome,
+                        "settlement_confidence": 0.82,
+                        "evidence_quote_ids": ["q_current"],
+                        "evidence_refs": [],
+                        "evidence_span": "scripted settlement evidence",
+                        "reason_codes": ["scripted_test"],
+                    }
+                ]
+            }
         if "M11 user-model extractor" in system_prompt:
-            self.m11_calls += 1
-            if self.m11_calls == 1:
+            self.proposal_calls += 1
+            if self.proposal_calls == 1:
                 return {
                     "claims_made": [],
                     "prediction_judgments": [],
@@ -348,21 +362,45 @@ class ScriptedM17LLM(FakeJSONLLM):
                     "memory_value_band": "low",
                     "surprise_explanation": "",
                 }
-            if self.m11_calls == 2:
+            return {
+                "claims_made": [],
+                "prediction_judgments": [],
+                "prediction_proposals": [],
+                "hypothesis_activations": [],
+                "contradiction_detections": [],
+                "calibration_need_band": "low",
+                "memory_value_band": "low",
+                "surprise_explanation": "",
+            }
+        return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+
+class ExpiringM17LLM(FakeJSONLLM):
+    def __init__(self) -> None:
+        super().__init__()
+        self.proposal_calls = 0
+
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        if "M11 user-model extractor" in system_prompt:
+            self.proposal_calls += 1
+            if self.proposal_calls == 1:
                 return {
                     "claims_made": [],
-                    "prediction_judgments": [
+                    "prediction_judgments": [],
+                    "prediction_proposals": [
                         {
-                            "prediction_id": "pred:p1",
-                            "status": self.outcome,
-                            "settlement_confidence": 0.82,
+                            "id": "p1",
+                            "prediction_type": "intent_prediction",
+                            "predicted_value_summary": "user will ask for implementation details",
+                            "confidence_band": "med",
+                            "raw_confidence": 0.67,
+                            "evidence_basis": ["current_user_request"],
                             "evidence_quote_ids": ["q_current"],
-                            "evidence_refs": [],
-                            "evidence_span": "scripted settlement evidence",
-                            "reason_codes": ["scripted_test"],
+                            "source_hypothesis_ids": [],
+                            "source_judgment_ids": [],
+                            "expires_after_turns": 1,
                         }
                     ],
-                    "prediction_proposals": [],
                     "hypothesis_activations": [],
                     "contradiction_detections": [],
                     "calibration_need_band": "med",
@@ -1646,6 +1684,36 @@ def test_mvp_runtime_scripted_m17_violated_path_biases_reply_toward_clarificatio
         effect.get("adjustment") == "ask_clarifying_question"
         and effect.get("reason") == "recent_intent_or_preference_prediction_violated"
         for effect in effects
+    )
+
+
+def test_fast_chat_skip_still_advances_m17_expiration_without_llm_settlement(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=ExpiringM17LLM(),
+        persona_name="test persona",
+    )
+
+    runtime.run_turn("Please help me inspect this implementation detail.", turn_index=0, now=7500)
+    second = runtime.run_turn("ok", turn_index=1, now=7560)
+    third = runtime.run_turn("嗯", turn_index=2, now=7620)
+
+    saved = runtime.store.load()
+    latest_entries = saved["m11_user_models"]["default_user"]["prediction_ledger"]["entries"]
+    latest_status = latest_entries[-1]["validation_status"]
+    latest_outcome = latest_entries[-1]["settlement_outcome"]
+    episode_rows = _jsonl_rows(runtime.store.root / "memory_dynamics_episodes.jsonl")
+    third_skips = {row["stage"]: row["reason"] for row in third.diagnostics["skipped_llm_stages"]}
+
+    assert second.diagnostics["latency_mode"] == "fast_chat"
+    assert third.diagnostics["latency_mode"] == "fast_chat"
+    assert third_skips["m17_settlement_assessor"] == "latency_fast_path"
+    assert third_skips["m11_user_model"] == "latency_fast_path"
+    assert latest_status == "uncertain"
+    assert latest_outcome == "expired"
+    assert any(
+        row.get("type") == "PredictionSettlementAddendum" and row.get("outcome") == "expired"
+        for row in episode_rows
     )
 
 

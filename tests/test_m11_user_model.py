@@ -465,35 +465,34 @@ def test_reply_shortens_after_repeated_confirmed_preference_predictions_without_
                     "expires_after_turns": 2,
                 }
             ],
-            judgments=[
-                {
-                    "prediction_id": "pred:p1",
-                    "status": "confirmed",
-                    "settlement_confidence": 0.81,
-                    "evidence_quote_ids": ["q2"],
-                    "evidence_refs": [],
-                    "reason_codes": [],
-                }
-            ],
         ),
+        settlement_judgments=[
+            {
+                "prediction_id": "pred:p1",
+                "status": "confirmed",
+                "settlement_confidence": 0.81,
+                "evidence_quote_ids": ["q2"],
+                "evidence_refs": [],
+                "reason_codes": [],
+            }
+        ],
         config=M11RuntimeConfig(m11_user_model_enabled=True),
     )
     state, result = run_m11_turn(
         state,
         user_id="u",
         turn_id=3,
-        extractor=_extractor(
-            judgments=[
-                {
-                    "prediction_id": "pred:p2",
-                    "status": "confirmed",
-                    "settlement_confidence": 0.83,
-                    "evidence_quote_ids": ["q3"],
-                    "evidence_refs": [],
-                    "reason_codes": [],
-                }
-            ]
-        ),
+        extractor=_extractor(),
+        settlement_judgments=[
+            {
+                "prediction_id": "pred:p2",
+                "status": "confirmed",
+                "settlement_confidence": 0.83,
+                "evidence_quote_ids": ["q3"],
+                "evidence_refs": [],
+                "reason_codes": [],
+            }
+        ],
         config=M11RuntimeConfig(m11_user_model_enabled=True),
     )
 
@@ -532,6 +531,50 @@ def test_reply_asks_clarification_when_intent_prediction_just_violated():
         state,
         user_id="u",
         turn_id=2,
+        extractor=_extractor(),
+        settlement_judgments=[
+            {
+                "prediction_id": "pred:p1",
+                "status": "violated",
+                "settlement_confidence": 0.81,
+                "evidence_quote_ids": ["q2"],
+                "evidence_refs": [],
+                "reason_codes": [],
+            }
+        ],
+        config=M11RuntimeConfig(m11_user_model_enabled=True),
+    )
+    assert any(effect.adjustment == "ask_clarifying_question" for effect in result.reply_policy_effects)
+
+
+def test_legacy_extractor_prediction_judgments_do_not_settle_new_m17_rows_by_default():
+    state = M11RuntimeState.clean(user_id="u")
+    state, _ = run_m11_turn(
+        state,
+        user_id="u",
+        turn_id=1,
+        extractor=_extractor(
+            proposals=[
+                {
+                    "id": "p1",
+                    "prediction_type": "intent_prediction",
+                    "predicted_value_summary": "user will ask for code",
+                    "confidence_band": "med",
+                    "raw_confidence": 0.67,
+                    "evidence_basis": ["current_user_request"],
+                    "evidence_quote_ids": ["q1"],
+                    "source_hypothesis_ids": [],
+                    "source_judgment_ids": [],
+                    "expires_after_turns": 2,
+                }
+            ]
+        ),
+        config=M11RuntimeConfig(m11_user_model_enabled=True),
+    )
+    state, result = run_m11_turn(
+        state,
+        user_id="u",
+        turn_id=2,
         extractor=_extractor(
             judgments=[
                 {
@@ -546,7 +589,9 @@ def test_reply_asks_clarification_when_intent_prediction_just_violated():
         ),
         config=M11RuntimeConfig(m11_user_model_enabled=True),
     )
-    assert any(effect.adjustment == "ask_clarifying_question" for effect in result.reply_policy_effects)
+
+    assert state.prediction_ledger.latest_status("pred:p1") == "pending"
+    assert not any(effect.adjustment == "ask_clarifying_question" for effect in result.reply_policy_effects)
 
 
 def test_reply_softens_when_domain_reliability_below_threshold():

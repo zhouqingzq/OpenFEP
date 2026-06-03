@@ -1535,7 +1535,8 @@ def build_m11_extractor_prompt(
 You may classify only bounded enum fields, short summaries, and the two allowed
 confidence floats:
 - prediction_proposals[].raw_confidence
-- prediction_judgments[].settlement_confidence
+Do not emit prediction_judgments in this stage. Settlement happens in the
+separate M17 settlement assessor stage.
 Do not output any other numeric scores or floats. Do not invent prediction_id
 or hypothesis_id values that are not present in the bounded snapshot. New
 proposal ids are allowed only when all source_hypothesis_ids and
@@ -1560,6 +1561,45 @@ Return JSON exactly with the M11 extractor schema fields and nothing else:
   "calibration_need_band": "low|med|high",
   "memory_value_band": "low|med|high",
   "surprise_explanation": ""
+}}
+"""
+    return system_prompt, user_prompt
+
+
+def build_m17_settlement_assessor_prompt(
+    *,
+    open_predictions: Sequence[Mapping[str, Any]],
+    user_text: str,
+    speaker_name: str,
+) -> tuple[str, str]:
+    system_prompt = """You are the M17 settlement assessor. Return strict JSON only.
+
+Your only job is to classify the observed outcome of already-open predictions.
+Do not emit new proposals, claims, hypothesis activations, or contradictions.
+Do not invent prediction ids. Do not reuse or quote the bounded snapshot as
+top-level fields. Weak evidence must become "uncertain", not forced confirmed
+or violated.
+"""
+    user_prompt = f"""Current interlocutor display name: {speaker_name}
+Current user message:
+{user_text}
+
+Open predictions to assess:
+{_json_text(list(open_predictions))}
+
+Return JSON with this exact shape:
+{{
+  "prediction_judgments": [
+    {{
+      "prediction_id": "pred:...",
+      "status": "confirmed|violated|uncertain",
+      "settlement_confidence": 0.55,
+      "evidence_quote_ids": ["q_current"],
+      "evidence_refs": [],
+      "evidence_span": "",
+      "reason_codes": []
+    }}
+  ]
 }}
 """
     return system_prompt, user_prompt
@@ -5405,6 +5445,70 @@ class MVPDialogueRuntime:
         m11_result_dict: dict[str, Any] = {}
         m11_raw_payload: Mapping[str, Any] | None = None
         m11_extractor_issue_code = ""
+        settlement_judgments: list[Mapping[str, Any]] = []
+        open_predictions_for_settlement = [
+            {
+                "prediction_id": entry.prediction_id,
+                "prediction_type": entry.prediction_type,
+                "predicted_value_summary": entry.predicted_value_summary,
+                "committed_confidence": entry.committed_confidence,
+                "created_at_turn": entry.created_at_turn,
+                "expires_after_turns": entry.expires_after_turns,
+            }
+            for entry in m11_state.prediction_ledger.pending_entries()
+        ]
+        if _m11_enabled_for_state(state) and not proactive_turn:
+            if latency_mode == "fast_chat":
+                _mark_llm_skipped("m17_settlement_assessor", "latency_fast_path")
+            elif not open_predictions_for_settlement:
+                _mark_llm_skipped("m17_settlement_assessor", "no_open_predictions")
+            else:
+                try:
+                    assessor_system, assessor_user = build_m17_settlement_assessor_prompt(
+                        open_predictions=open_predictions_for_settlement,
+                        user_text=user_text,
+                        speaker_name=display_name,
+                    )
+                    settlement_payload = _complete_json_stage(
+                        "m17_settlement_assessor",
+                        assessor_system,
+                        assessor_user,
+                    )
+                    validated_settlement_payload = validate_extractor_output(
+                        dict(settlement_payload) if isinstance(settlement_payload, Mapping) else {},
+                        snapshot_prediction_ids={
+                            str(row.get("prediction_id", "") or "")
+                            for row in open_predictions_for_settlement
+                        },
+                        snapshot_hypothesis_ids=set(),
+                        snapshot_judgment_ids=set(),
+                    )
+                    settlement_judgments = [
+                        dict(row)
+                        for row in validated_settlement_payload.get("prediction_judgments", [])
+                        if isinstance(row, Mapping)
+                    ]
+                    bus.append(
+                        {
+                            "type": "M17SettlementAssessorEvent",
+                            "turn_index": turn_index,
+                            "assessed_prediction_count": len(open_predictions_for_settlement),
+                            "judgment_count": len(settlement_judgments),
+                            "engineering_proxy_label": "mvp_local_prediction_error",
+                        }
+                    )
+                except Exception as exc:
+                    bus.append(
+                        {
+                            "type": "M17SettlementAssessorEvent",
+                            "turn_index": turn_index,
+                            "assessed_prediction_count": len(open_predictions_for_settlement),
+                            "judgment_count": 0,
+                            "error": type(exc).__name__,
+                            "reason_code": "assessor_error",
+                            "engineering_proxy_label": "mvp_local_prediction_error",
+                        }
+                    )
         should_run_m11 = _m11_enabled_for_state(state) and not proactive_turn and latency_mode != "fast_chat"
         if not should_run_m11 and _m11_enabled_for_state(state) and not proactive_turn:
             skip_reason = "latency_fast_path" if latency_mode == "fast_chat" else "cadence_not_due"
@@ -5415,6 +5519,28 @@ class MVPDialogueRuntime:
             )
             bus.append(lock_event)
             _record_prediction_lock_event(state, lock_event)
+            m11_state, m11_turn = run_m11_turn(
+                m11_state,
+                user_id=user_id,
+                turn_id=turn_index + 1,
+                current_turn_quotes={"q_current": user_text},
+                last_turn_summaries=[],
+                extractor=lambda _: noop_extraction(),
+                settlement_judgments=(),
+                allow_extractor_prediction_judgments=False,
+                config=M11RuntimeConfig(m11_user_model_enabled=True, persona_kind="ui_chat"),
+                legacy_memory_rows=[
+                    *(state.get("short_term_memory", []) if isinstance(state.get("short_term_memory"), list) else []),
+                    *(state.get("long_term_memory", []) if isinstance(state.get("long_term_memory"), list) else []),
+                ],
+            )
+            _save_m11_state(state, user_id=user_id, m11_state=m11_state)
+            m11_result_dict = {
+                **m11_turn.to_dict(),
+                "skipped": True,
+                "skip_reason": "fast_chat_skip" if latency_mode == "fast_chat" else "proposal_quota_empty",
+            }
+            _update_prediction_lock_diagnostics(state, m11_state)
         if should_run_m11:
             def _extract_m11(snapshot: Mapping[str, object]) -> Mapping[str, object]:
                 nonlocal m11_raw_payload, m11_extractor_issue_code
@@ -5446,6 +5572,8 @@ class MVPDialogueRuntime:
                     current_turn_quotes={"q_current": user_text},
                     last_turn_summaries=[],
                     extractor=_extract_m11,
+                    settlement_judgments=settlement_judgments,
+                    allow_extractor_prediction_judgments=False,
                     config=M11RuntimeConfig(m11_user_model_enabled=True, persona_kind="ui_chat"),
                     legacy_memory_rows=[
                         *(state.get("short_term_memory", []) if isinstance(state.get("short_term_memory"), list) else []),

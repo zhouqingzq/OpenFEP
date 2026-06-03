@@ -109,6 +109,8 @@ def run_m11_turn(
     current_turn_quotes: Mapping[str, str] | None = None,
     last_turn_summaries: Sequence[Mapping[str, object]] = (),
     extractor: Extractor | None = None,
+    settlement_judgments: Sequence[Mapping[str, object]] = (),
+    allow_extractor_prediction_judgments: bool = False,
     config: M11RuntimeConfig | None = None,
     legacy_memory_rows: Sequence[Mapping[str, object]] = (),
     hyperparams: Hyperparams = DEFAULT_HYPERPARAMS,
@@ -152,6 +154,15 @@ def run_m11_turn(
         snapshot_hypothesis_ids=hypothesis_ids,
         snapshot_judgment_ids=judgment_ids,
     )
+    validated_settlement_judgments = list(validated["prediction_judgments"]) if allow_extractor_prediction_judgments else []
+    if settlement_judgments:
+        validated_settlement_payload = validate_extractor_output(
+            {"prediction_judgments": list(settlement_judgments)},
+            snapshot_prediction_ids=open_prediction_ids,
+            snapshot_hypothesis_ids=hypothesis_ids,
+            snapshot_judgment_ids=judgment_ids,
+        )
+        validated_settlement_judgments = list(validated_settlement_payload["prediction_judgments"])
 
     turn_key = str(turn_id)
     next_model = apply_claims_to_user_model(
@@ -183,7 +194,7 @@ def run_m11_turn(
         state.prediction_ledger,
         turn_id=turn_id,
         proposals=list(validated["prediction_proposals"]),
-        judgments=list(validated["prediction_judgments"]),
+        judgments=validated_settlement_judgments,
         known_hypothesis_ids=current_hypothesis_ids,
         known_judgment_ids=judgment_ids,
         calibration_need_band=str(validated["calibration_need_band"]),  # type: ignore[arg-type]

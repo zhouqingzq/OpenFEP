@@ -7,6 +7,11 @@ from typing import Any, Mapping
 import hashlib
 import uuid
 
+from .m17_bundle_features import (
+    aggregate_memory_bundle_support,
+    scored_memory_evidence_from_mapping,
+)
+
 
 ENGINEERING_PROXY_LABEL = "mvp_local_memory_gate"
 MEMORY_GATE_THRESHOLD_SHORT_TERM = 0.30
@@ -221,7 +226,10 @@ class MemoryGate:
             + GATE_WEIGHTS["confidence"] * factors["confidence"]
         )
         score = legacy_score
-        if policy_profile == "m17_blended":
+        if policy_profile == "m17_observe_only":
+            # Preserve legacy write behavior while still exposing M17 sidecar factors.
+            score = legacy_score
+        elif policy_profile == "m17_blended":
             score = (
                 sum(M17_POSITIVE_WEIGHTS[key] * factors[key] for key in M17_POSITIVE_WEIGHTS)
                 - sum(M17_NEGATIVE_WEIGHTS[key] * factors[key] for key in M17_NEGATIVE_WEIGHTS)
@@ -387,41 +395,14 @@ def memory_gate_signals_from_prediction_settlement(
 
 
 def aggregate_memory_gate_bundle_support(rows: list[Mapping[str, Any]]) -> dict[str, float]:
-    supports = sorted((_bounded_float(row.get("item_support"), default=0.0) for row in rows), reverse=True)
-    evidence_refs: set[str] = set()
-    memory_ids: set[str] = set()
-    for row in rows:
-        memory_id = str(row.get("memory_id", "") or "").strip()
-        if memory_id:
-            memory_ids.add(memory_id)
-        for value in _string_list(row.get("evidence_refs"), limit=16):
-            evidence_refs.add(value)
-    if not supports:
-        return {
-            "aggregated_support": 0.0,
-            "max_single_support": 0.0,
-            "synergy_margin": 0.0,
-            "bundle_required": False,
-            "unique_memory_count": len(memory_ids),
-            "unique_evidence_ref_count": len(evidence_refs),
-        }
-    aggregate = 1.0
-    for support in supports[:4]:
-        aggregate *= 1.0 - support
-    aggregate = 1.0 - aggregate
-    max_single = supports[0]
-    synergy = max(0.0, aggregate - max_single)
-    bundle_required = (
-        aggregate >= M17_BUNDLE_TRIGGER_THRESHOLD
-        and max_single < M17_SINGLE_TRIGGER_THRESHOLD
-        and len(memory_ids) >= 2
-        and len(evidence_refs) >= 2
+    summary = aggregate_memory_bundle_support(
+        [scored_memory_evidence_from_mapping(row) for row in rows]
     )
     return {
-        "aggregated_support": round(_bounded_float(aggregate), 6),
-        "max_single_support": round(_bounded_float(max_single), 6),
-        "synergy_margin": round(_bounded_float(synergy), 6),
-        "bundle_required": bool(bundle_required),
-        "unique_memory_count": len(memory_ids),
-        "unique_evidence_ref_count": len(evidence_refs),
+        "aggregated_support": round(_bounded_float(summary.get("aggregated_support", 0.0)), 6),
+        "max_single_support": round(_bounded_float(summary.get("max_single_support", 0.0)), 6),
+        "synergy_margin": round(_bounded_float(summary.get("synergy_margin", 0.0)), 6),
+        "bundle_required": bool(summary.get("bundle_required", False)),
+        "unique_memory_count": int(summary.get("unique_memory_count", 0) or 0),
+        "unique_evidence_ref_count": int(summary.get("unique_evidence_ref_count", 0) or 0),
     }
