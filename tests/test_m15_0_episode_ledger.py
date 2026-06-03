@@ -280,3 +280,25 @@ def test_memory_efe_outreach_margin_reads_worse_ledger_history(tmp_path: Path) -
         episode_ledger=ledger,
     )
     assert result.policy_costs["ledger_outreach_margin_requirement_delta"] > 0
+
+
+def test_prediction_settlement_addendum_is_written_with_m17_fields(tmp_path: Path) -> None:
+    ledger = EpisodeLedger(tmp_path)
+
+    event = ledger.append_prediction_settlement_addendum(
+        at=NOW,
+        turn_index=3,
+        source_episode_id="ep:source",
+        prediction_id="pred:p1",
+        prediction_type="intent_prediction",
+        outcome="violated",
+        committed_confidence=0.78,
+        prediction_error=1.514128,
+        brier_score=0.6084,
+        evidence_refs=["e1", "e2"],
+        reason_codes=["counterfactual_failed"],
+    )
+
+    assert event["type"] == "PredictionSettlementAddendum"
+    rows = _episode_rows(ledger.path)
+    assert any(row.get("type") == "PredictionSettlementAddendum" and row.get("prediction_id") == "pred:p1" for row in rows)

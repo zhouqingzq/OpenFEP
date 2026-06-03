@@ -20,6 +20,12 @@ from segmentum.dialogue.runtime.m13_drive import (
     _string_list,
     normalize_m13_drive_state,
 )
+from segmentum.dialogue.runtime.m17_bundle_policy import (
+    assemble_memory_evidence_bundles,
+    bundle_decision_event,
+    evaluate_bundle_decision,
+)
+from segmentum.dialogue.runtime.m17_bundle_features import scored_memory_evidence_from_mapping
 from segmentum.dialogue.runtime.m14_7_recall_scoring import MEMORY_EFE_RECALL_FLOOR, score_recall_candidate
 from segmentum.dialogue.runtime.m15_3_cleanup_control import (
     cleanup_ineligibility_reason,
@@ -479,6 +485,8 @@ class M13MemoryEfeEvaluationResult:
     evidence_refs: list[str]
     bound_recall_seed_ids: list[str] = field(default_factory=list)
     bound_recall_floor_bypassed_ids: list[str] = field(default_factory=list)
+    bundle_decisions: list[dict[str, Any]] = field(default_factory=list)
+    bundle_linkage_diagnostics: dict[str, int] = field(default_factory=dict)
     events: list[dict[str, Any]] = field(default_factory=list)
 
 
@@ -1260,6 +1268,14 @@ def evaluate_memory_efe(
     repetition = _round(_repetition_tension(m13_boredom_evaluation, m13_reward_evaluation, state))
     traceable_id = _traceable_expectation_id(expectations.eligible_for_efe, social_by_id)
     traceable = next((e for e in expectations.eligible_for_efe if e.expectation_id == traceable_id), None)
+    bundle_summaries, bundle_linkage = assemble_memory_evidence_bundles(
+        retrieved_memories or [],
+        allowed_expectation_ids=[row.expectation_id for row in expectations.eligible_for_efe if row.expectation_id],
+    )
+    bundle_candidates = [
+        scored_memory_evidence_from_mapping(row).to_dict()
+        for row in (retrieved_memories or [])[:8]
+    ]
     evidence_refs = list(dict.fromkeys((traceable.evidence_refs if traceable else [])[:8]))
     conscious = _mapping(conscious_plan)
     control = _mapping(_mapping(memory_dynamics).get("control_guidance"))
@@ -1274,6 +1290,25 @@ def evaluate_memory_efe(
     reply_angle_bias = "none"
     selected_policy = ""
     expected_resolution = 0.0
+    bundle_decisions: list[dict[str, Any]] = []
+    bundle_events: list[dict[str, Any]] = []
+    bundle_repair_bias = False
+    for bundle in bundle_summaries[:3]:
+        if traceable_id and bundle.shared_target_kind == "expectation_id" and bundle.shared_target_id != traceable_id:
+            continue
+        decision = evaluate_bundle_decision(bundle, consumer_kind="reply_policy_bias")
+        bundle_decisions.append(decision.to_dict())
+        bundle_events.append(
+            bundle_decision_event(
+                bundle=bundle,
+                decision=decision,
+                turn_index=turn_index,
+                now=now,
+            )
+        )
+        if traceable_id and bundle.shared_target_kind == "expectation_id" and bundle.shared_target_id == traceable_id:
+            bundle_repair_bias = decision.commit
+            break
 
     if phase == "in_turn":
         reply_angle_bias = _choose_reply_angle_bias(
@@ -1283,6 +1318,8 @@ def evaluate_memory_efe(
             repetition_tension=repetition,
             progress_signal=progress_signal,
         )
+        if bundle_repair_bias:
+            reply_angle_bias = "repair_expectation"
         efe_by_policy, policy_costs = _continue_reply_efe(
             repetition_tension=repetition,
             information_gain_proxy=info_gain,
@@ -1348,6 +1385,8 @@ def evaluate_memory_efe(
         reason_codes.append("repetition_tension_read_only")
     if reply_angle_bias != "none":
         reason_codes.append(f"reply_angle_bias:{reply_angle_bias}")
+    if bundle_repair_bias:
+        reason_codes.append("bundle_required_reply_policy_bias")
     if traceable and traceable.resolution_class == "mixed_specific_and_generic":
         reason_codes.append("mixed_specific_and_generic")
     reason_codes.extend(suppression)
@@ -1396,6 +1435,9 @@ def evaluate_memory_efe(
         "selected_policy": selected_policy,
         "should_outreach": should_outreach,
         "traceable_expectation_id": traceable_id,
+        "bundle_linkage_diagnostics": bundle_linkage.to_dict(),
+        "bundle_decisions": list(bundle_decisions[:3]),
+        "bundle_candidate_rows": bundle_candidates,
         "bound_recall_seed_ids": list(expectations.bound_recall_seed_ids[:12]),
         "bound_recall_floor_bypassed_ids": list(expectations.bound_recall_floor_bypassed_ids[:12]),
         "suppression_reasons": list(dict.fromkeys(suppression))[:12],
@@ -1442,6 +1484,7 @@ def evaluate_memory_efe(
                 "engineering_proxy_label": ENGINEERING_PROXY_LABEL,
             }
         )
+    events.extend(bundle_events)
 
     return M13MemoryEfeEvaluationResult(
         event_id=event_id,
@@ -1464,6 +1507,8 @@ def evaluate_memory_efe(
         evidence_refs=evidence_refs,
         bound_recall_seed_ids=list(expectations.bound_recall_seed_ids[:12]),
         bound_recall_floor_bypassed_ids=list(expectations.bound_recall_floor_bypassed_ids[:12]),
+        bundle_decisions=list(bundle_decisions[:3]),
+        bundle_linkage_diagnostics=bundle_linkage.to_dict(),
         events=events,
     )
 
@@ -1496,6 +1541,8 @@ def apply_memory_efe_state(
         "suppression_reasons": list(evaluation.suppression_reasons[:12]),
         "evidence_refs": list(evaluation.evidence_refs[:8]),
         "reason_codes": list(evaluation.reason_codes[:12]),
+        "bundle_decisions": list(evaluation.bundle_decisions[:3]),
+        "bundle_linkage_diagnostics": dict(evaluation.bundle_linkage_diagnostics),
         **durable,
         "engineering_proxy_label": ENGINEERING_PROXY_LABEL,
     }

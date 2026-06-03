@@ -21,11 +21,13 @@ from typing import Any, Mapping, Protocol
 from segmentum.user_model import (
     M11RuntimeConfig,
     M11RuntimeState,
+    PredictionCalibrationState,
     SourceReliabilityLedger,
     SocialSharingCandidate,
     UserModel,
     UserPredictionLedger,
     abstract_memory_content,
+    attach_prediction_source_episode,
     boundary_strength_from_constraints,
     candidate_from_memory,
     decide_social_sharing,
@@ -160,7 +162,7 @@ from segmentum.dialogue.runtime.m14_7_memory_gate import (
     intent_from_mapping,
     memory_gate_event,
 )
-from segmentum.dialogue.runtime.m14_7_recall_scoring import score_recall_candidate
+from segmentum.dialogue.runtime.m14_7_recall_scoring import explain_recall_candidate, score_recall_candidate
 from segmentum.dialogue.runtime.m15_episode_ledger import (
     ENGINEERING_PROXY_LABEL as M15_ENGINEERING_PROXY_LABEL,
     EpisodeLedger,
@@ -595,6 +597,45 @@ def _memory_topics(item: Mapping[str, Any]) -> list[str]:
     explicit = [str(topic).strip() for topic in item.get("topics", []) or [] if str(topic).strip()]
     inferred = _topic_ids_for_text(_memory_fact_text(item), item.get("evidence"), item.get("keywords"))
     return sorted({*explicit, *inferred})
+
+
+def _structured_id_list(item: Mapping[str, Any], *, singular: str, plural: str, limit: int = 8) -> list[str]:
+    values = _string_list(item.get(plural), limit=limit)
+    single = str(item.get(singular, "") or "").strip()
+    if single and single not in values:
+        values.insert(0, single)
+    return values[:limit]
+
+
+def _memory_prediction_ids(item: Mapping[str, Any]) -> list[str]:
+    return _structured_id_list(item, singular="prediction_id", plural="prediction_ids")
+
+
+def _memory_expectation_ids(item: Mapping[str, Any], *, source: str) -> list[str]:
+    values = _structured_id_list(item, singular="expectation_id", plural="expectation_ids")
+    fallback_id = str(item.get("id", "") or "").strip()
+    kind = str(item.get("kind", source) or source).strip().casefold()
+    if fallback_id and kind in {"expectation", "expectation_result", "open_item"} and fallback_id not in values:
+        values.insert(0, fallback_id)
+    return values[:8]
+
+
+def _memory_episode_ids(item: Mapping[str, Any]) -> list[str]:
+    values = _structured_id_list(item, singular="episode_id", plural="episode_ids")
+    values.extend(_string_list(item.get("source_episode_ids"), limit=8))
+    source_episode_id = str(item.get("source_episode_id", "") or "").strip()
+    if source_episode_id and source_episode_id not in values:
+        values.insert(0, source_episode_id)
+    return list(dict.fromkeys(values))[:8]
+
+
+def _memory_contradiction_risk(item: Mapping[str, Any]) -> float:
+    if item.get("contradiction_refs"):
+        return 0.65
+    status = str(item.get("status", "") or "").strip().casefold()
+    if status in {"violated", "uncertain"}:
+        return 0.40
+    return 0.0
 
 
 def _shareability_for_memory_text(
@@ -1491,12 +1532,15 @@ def build_m11_extractor_prompt(
 ) -> tuple[str, str]:
     system_prompt = """You are the M11 user-model extractor. Return strict JSON only.
 
-You may classify only bounded enum fields and short summaries. Do not output
-floats or numeric scores. Do not invent prediction_id or hypothesis_id values
-that are not present in the bounded snapshot. New proposal ids are allowed only
-when all source_hypothesis_ids and source_judgment_ids reference snapshot ids.
-Keep user claims separate from truth: a high-value claim is useful evidence for
-calibration, not verified fact.
+You may classify only bounded enum fields, short summaries, and the two allowed
+confidence floats:
+- prediction_proposals[].raw_confidence
+- prediction_judgments[].settlement_confidence
+Do not output any other numeric scores or floats. Do not invent prediction_id
+or hypothesis_id values that are not present in the bounded snapshot. New
+proposal ids are allowed only when all source_hypothesis_ids and
+source_judgment_ids reference snapshot ids. Keep user claims separate from
+truth: a high-value claim is useful evidence for calibration, not verified fact.
 """
     user_prompt = f"""Current interlocutor display name: {speaker_name}
 
@@ -1910,7 +1954,8 @@ def retrieve_memories(state: Mapping[str, Any], keywords: list[str], *, limit: i
                 parts = [p for p in re.split(r"\s+", needle) if p]
                 score += sum(0.4 for p in parts if p in text)
         if score > 0.0:
-            recall_score = score_recall_candidate(item, query=needles, now=now, retrieved_context={})
+            recall = explain_recall_candidate(item, query=needles, now=now, retrieved_context={})
+            recall_score = recall.score
             if recall_score <= 0.0:
                 continue
             score *= max(0.05, recall_score)
@@ -1918,6 +1963,8 @@ def retrieve_memories(state: Mapping[str, Any], keywords: list[str], *, limit: i
             payload["_source_file"] = source
             payload["_retrieval_score"] = round(score, 3)
             payload["_m14_7_recall_score"] = recall_score
+            payload["_m17_item_support"] = recall_score
+            payload["_m17_factor_breakdown"] = recall.to_dict()
             scored.append((score, payload))
     scored.sort(key=lambda row: row[0], reverse=True)
     return [item for _, item in scored[:limit]]
@@ -2782,6 +2829,16 @@ def _evidence_card(
         "sharing_decision": dict(sharing_decision or {}),
         "_retrieval_score": round(score, 3),
         "_source_file": source,
+        "_m17_item_support": round(_bounded_float(item.get("_m17_item_support", item.get("_m14_7_recall_score", 0.0)), default=0.0), 6),
+        "_m17_evidence_refs": _string_list(item.get("evidence_refs"), limit=8),
+        "_m17_prediction_ids": _memory_prediction_ids(item),
+        "_m17_expectation_ids": _memory_expectation_ids(item, source=source),
+        "_m17_episode_ids": _memory_episode_ids(item),
+        "_m17_contradiction_risk": round(_memory_contradiction_risk(item), 6),
+        "_m17_factor_breakdown": {
+            "confidence": round(confidence, 6),
+            "salience": round(salience, 6),
+        },
     }
 
 
@@ -2898,12 +2955,13 @@ def retrieve_memories_for_guidance(
             if shareability == "restricted_implicit":
                 score -= 0.8
                 reasons.append("cross_user_implicit_risk")
-        recall_score = score_recall_candidate(
+        recall = explain_recall_candidate(
             item,
             query=semantic_terms + list(expectation_ids) + list(memory_kinds),
             now=now,
             retrieved_context={"source": source, "reasons": reasons},
         )
+        recall_score = recall.score
         if recall_score <= 0.0:
             continue
         score *= max(0.05, recall_score)
@@ -2923,6 +2981,8 @@ def retrieve_memories_for_guidance(
         card["audience_user_id"] = current_user_id
         card["is_cross_user"] = bool(cross_user)
         card["_m14_7_recall_score"] = recall_score
+        card["_m17_item_support"] = recall_score
+        card["_m17_factor_breakdown"] = recall.to_dict()
         if cross_user and card.get("shareability") == "restricted_implicit":
             card["epistemic_stance"] = "known_with_caveat"
         scored.append((score, card))
@@ -4000,6 +4060,7 @@ def _load_m11_state(state: Mapping[str, Any], *, user_id: str, display_name: str
         user_model=user_model,
         prediction_ledger=UserPredictionLedger.from_dict(_mapping(payload.get("prediction_ledger"))),
         reliability_ledger=SourceReliabilityLedger.from_dict(_mapping(payload.get("reliability_ledger"))),
+        prediction_calibration=PredictionCalibrationState.from_dict(_mapping(payload.get("prediction_calibration"))),
     )
 
 
@@ -4299,6 +4360,74 @@ def _merge_m12_1_into_memory_guidance(
         "permitted_surface": "internal_thinking_material",
     }
     memory_dynamics["control_guidance"] = control
+
+
+def _prediction_lock_event(
+    *,
+    turn_index: int,
+    prediction_ids: list[str],
+    max_committed_confidence: float,
+) -> dict[str, Any]:
+    return {
+        "type": "PredictionLockedEvent",
+        "turn_index": int(turn_index),
+        "prediction_ids": list(prediction_ids[:8]),
+        "prediction_count": len(prediction_ids),
+        "created_before_response": True,
+        "max_committed_confidence": round(max_committed_confidence, 6),
+        "engineering_proxy_label": "mvp_local_prediction_lock",
+    }
+
+
+def _prediction_lock_skip_event(*, turn_index: int, reason_code: str) -> dict[str, Any]:
+    return {
+        "type": "PredictionLockSkippedEvent",
+        "turn_index": int(turn_index),
+        "reason_code": str(reason_code or "no_valid_evidence"),
+        "engineering_proxy_label": "mvp_local_prediction_lock",
+    }
+
+
+def _record_prediction_lock_event(state: dict[str, Any], event: Mapping[str, Any]) -> None:
+    events = state.setdefault("prediction_lock_audit_tail", [])
+    if not isinstance(events, list):
+        events = []
+        state["prediction_lock_audit_tail"] = events
+    events.append(dict(event))
+    state["prediction_lock_audit_tail"] = events[-80:]
+
+
+def _update_prediction_lock_diagnostics(state: dict[str, Any], m11_state: M11RuntimeState) -> None:
+    latest_entries: dict[str, Mapping[str, Any]] = {}
+    for entry in m11_state.prediction_ledger.entries:
+        latest_entries[entry.prediction_id] = entry.to_dict()
+    pending = [entry for entry in latest_entries.values() if entry.get("validation_status") == "pending"]
+    type_counts: dict[str, int] = {}
+    cap_reason_counts: dict[str, int] = {}
+    for entry in latest_entries.values():
+        prediction_type = str(entry.get("prediction_type", "") or "")
+        cap_reason = str(entry.get("confidence_cap_reason", "") or "")
+        if prediction_type:
+            type_counts[prediction_type] = type_counts.get(prediction_type, 0) + 1
+        if cap_reason:
+            cap_reason_counts[cap_reason] = cap_reason_counts.get(cap_reason, 0) + 1
+    audit_tail = state.get("prediction_lock_audit_tail", [])
+    if not isinstance(audit_tail, list):
+        audit_tail = []
+    lock_events = [row for row in audit_tail if isinstance(row, Mapping) and str(row.get("type", "")) == "PredictionLockedEvent"]
+    skip_events = [row for row in audit_tail if isinstance(row, Mapping) and str(row.get("type", "")) == "PredictionLockSkippedEvent"]
+    latest_lock_turn = max((int(row.get("turn_index", 0) or 0) for row in lock_events), default=0)
+    state["m17_prediction_lock_diagnostics"] = {
+        "pending_prediction_count": len(pending),
+        "latest_prediction_lock_turn": latest_lock_turn,
+        "prediction_type_counts": type_counts,
+        "confidence_cap_reason_counts": cap_reason_counts,
+        "prediction_lock_coverage_rate": round(len(lock_events) / float(max(1, int(_mapping(state.get("temporal_state")).get("last_turn_index", 0) or 0))), 6),
+        "prediction_lock_skip_reason_counts": {
+            reason: sum(1 for row in skip_events if str(row.get("reason_code", "")) == reason)
+            for reason in {str(row.get("reason_code", "")) for row in skip_events if str(row.get("reason_code", ""))}
+        },
+    }
 
 
 def _merge_m12_2_into_memory_guidance(
@@ -5221,6 +5350,12 @@ class MVPDialogueRuntime:
         should_run_m11 = _m11_enabled_for_state(state) and not proactive_turn and latency_mode != "fast_chat"
         if not should_run_m11 and _m11_enabled_for_state(state) and not proactive_turn:
             _mark_llm_skipped("m11_user_model", "latency_fast_path" if latency_mode == "fast_chat" else "cadence_not_due")
+            lock_event = _prediction_lock_skip_event(
+                turn_index=turn_index,
+                reason_code="extractor_unavailable" if latency_mode == "fast_chat" else "proposal_quota_empty",
+            )
+            bus.append(lock_event)
+            _record_prediction_lock_event(state, lock_event)
         if should_run_m11:
             def _extract_m11(snapshot: Mapping[str, object]) -> Mapping[str, object]:
                 system_prompt, user_prompt = build_m11_extractor_prompt(
@@ -5248,6 +5383,27 @@ class MVPDialogueRuntime:
                 )
                 _save_m11_state(state, user_id=user_id, m11_state=m11_state)
                 m11_result_dict = m11_turn.to_dict()
+                locked_entries = [
+                    entry
+                    for entry in m11_state.prediction_ledger.entries
+                    if entry.turn_id == turn_index + 1 and entry.event_kind == "prediction"
+                ]
+                if locked_entries:
+                    lock_event = _prediction_lock_event(
+                        turn_index=turn_index,
+                        prediction_ids=[entry.prediction_id for entry in locked_entries],
+                        max_committed_confidence=max(entry.committed_confidence for entry in locked_entries),
+                    )
+                    bus.append(lock_event)
+                    _record_prediction_lock_event(state, lock_event)
+                else:
+                    lock_event = _prediction_lock_skip_event(
+                        turn_index=turn_index,
+                        reason_code="no_valid_evidence",
+                    )
+                    bus.append(lock_event)
+                    _record_prediction_lock_event(state, lock_event)
+                _update_prediction_lock_diagnostics(state, m11_state)
             except (ExtractorValidationError, ValueError, TypeError) as exc:
                 m11_result_dict = {
                     "enabled": True,
@@ -5257,6 +5413,9 @@ class MVPDialogueRuntime:
                     "prompt_safe_evidence_cards": [],
                     "reply_policy_effects": [],
                 }
+                lock_event = _prediction_lock_skip_event(turn_index=turn_index, reason_code="extractor_unavailable")
+                bus.append(lock_event)
+                _record_prediction_lock_event(state, lock_event)
             _merge_m11_into_memory_guidance(
                 memory_dynamics,
                 speaker_name=display_name,
@@ -5495,6 +5654,9 @@ class MVPDialogueRuntime:
         state["m13_drive_state"] = m13_state
         for m13_memory_efe_event in m13_memory_efe_evaluation.events:
             bus.append(m13_memory_efe_event)
+            if str(m13_memory_efe_event.get("type", "")).startswith("BundleDecision"):
+                self._record_bundle_policy_event(state, m13_memory_efe_event)
+        state["bundle_policy_linkage_diagnostics"] = dict(m13_memory_efe_evaluation.bundle_linkage_diagnostics)
         merge_memory_efe_guidance_into_control(memory_dynamics, m13_memory_efe_evaluation)
         _report_progress("m13_eval")
 
@@ -5801,6 +5963,46 @@ class MVPDialogueRuntime:
             ),
         )
         self._tag_pending_settlements_with_episode(state, episode_id=episode.episode_id, turn_index=turn_index)
+        m11_state = M11RuntimeState(
+            user_model=m11_state.user_model,
+            prediction_ledger=attach_prediction_source_episode(
+                m11_state.prediction_ledger,
+                created_at_turn=turn_index + 1,
+                source_episode_id=episode.episode_id,
+            ),
+            reliability_ledger=m11_state.reliability_ledger,
+            prediction_calibration=m11_state.prediction_calibration,
+        )
+        _save_m11_state(state, user_id=user_id, m11_state=m11_state)
+        for entry in m11_state.prediction_ledger.entries:
+            if entry.turn_id != turn_index + 1 or entry.event_kind not in {"judgment", "expiration"}:
+                continue
+            if not entry.source_episode_id:
+                bus.append(
+                    {
+                        "type": "PredictionSettlementAuditEvent",
+                        "turn_index": turn_index,
+                        "at": now,
+                        "prediction_id": entry.prediction_id,
+                        "reason_code": "missing_source_episode_id",
+                        "engineering_proxy_label": "mvp_local_prediction_error",
+                    }
+                )
+                continue
+            addendum = episode_ledger.append_prediction_settlement_addendum(
+                at=now,
+                turn_index=turn_index,
+                source_episode_id=entry.source_episode_id,
+                prediction_id=entry.prediction_id,
+                prediction_type=entry.prediction_type,
+                outcome=entry.settlement_outcome or entry.validation_status,
+                committed_confidence=entry.committed_confidence,
+                prediction_error=entry.m17_prediction_error,
+                brier_score=entry.m17_brier_score,
+                evidence_refs=entry.evidence_refs,
+                reason_codes=(),
+            )
+            bus.append(addendum)
         self.store.save(state)
         self._record_episode(episode)
         llm_thinking_result = thinking.get("llm_thinking_result")
@@ -6139,6 +6341,10 @@ class MVPDialogueRuntime:
         )
         m13_state, memory_efe_events = apply_memory_efe_state(m13_state, memory_efe_evaluation)
         state["m13_drive_state"] = m13_state
+        for event in memory_efe_evaluation.events:
+            if str(event.get("type", "")).startswith("BundleDecision"):
+                self._record_bundle_policy_event(state, event)
+        state["bundle_policy_linkage_diagnostics"] = dict(memory_efe_evaluation.bundle_linkage_diagnostics)
         band_summary = self._idle_drive_band_summary(
             m13_state,
             state=state,
@@ -7529,6 +7735,10 @@ class MVPDialogueRuntime:
             m13_memory_efe_evaluation,
         )
         state["m13_drive_state"] = m13_state
+        for event in m13_memory_efe_evaluation.events:
+            if str(event.get("type", "")).startswith("BundleDecision"):
+                self._record_bundle_policy_event(state, event)
+        state["bundle_policy_linkage_diagnostics"] = dict(m13_memory_efe_evaluation.bundle_linkage_diagnostics)
         self.store.save(state)
         audit_events.extend(m13_memory_efe_evaluation.events)
         idle_drive_band_summary = self._idle_drive_band_summary(m13_state, state=state)
@@ -8018,6 +8228,14 @@ class MVPDialogueRuntime:
             state["memory_gate_audit_tail"] = events
         events.append(dict(event))
         state["memory_gate_audit_tail"] = events[-80:]
+
+    def _record_bundle_policy_event(self, state: dict[str, Any], event: Mapping[str, Any]) -> None:
+        events = state.setdefault("bundle_policy_audit_tail", [])
+        if not isinstance(events, list):
+            events = []
+            state["bundle_policy_audit_tail"] = events
+        events.append(dict(event))
+        state["bundle_policy_audit_tail"] = events[-80:]
 
     def _recent_memory_gate_fingerprints(self, state: Mapping[str, Any], intent: MemoryWriteIntent) -> set[str]:
         events = state.get("memory_gate_audit_tail", [])

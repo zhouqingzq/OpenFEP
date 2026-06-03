@@ -2,8 +2,14 @@ from __future__ import annotations
 
 from segmentum.dialogue.runtime.m13_memory_efe import normalize_expectations_for_efe
 from segmentum.dialogue.runtime.m14_7_memory_decay import apply_memory_decay_tick
-from segmentum.dialogue.runtime.m14_7_memory_gate import MemoryGate, MemoryWriteIntent, memory_intent_fingerprint
-from segmentum.dialogue.runtime.m14_7_recall_scoring import score_recall_candidate
+from segmentum.dialogue.runtime.m14_7_memory_gate import (
+    MemoryGate,
+    MemoryWriteIntent,
+    aggregate_memory_gate_bundle_support,
+    memory_gate_signals_from_prediction_settlement,
+    memory_intent_fingerprint,
+)
+from segmentum.dialogue.runtime.m14_7_recall_scoring import explain_recall_candidate, score_recall_candidate
 from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore
 
 
@@ -98,6 +104,68 @@ def test_recall_scoring_cancels_archived_and_uses_precision() -> None:
     assert score_recall_candidate(active_high, query=["benchmark"], now=NOW, retrieved_context={}) > score_recall_candidate(
         active_low, query=["benchmark"], now=NOW, retrieved_context={}
     )
+
+
+def test_explain_recall_candidate_exposes_bundle_safe_factors() -> None:
+    explained = explain_recall_candidate(
+        {"id": "m1", "content": "benchmark result", "salience": 0.8, "precision": 0.9, "evidence_refs": ["e1"]},
+        query=["benchmark"],
+        now=NOW,
+        retrieved_context={},
+    )
+
+    assert explained.memory_id == "m1"
+    assert explained.score > 0.0
+    assert explained.evidence_refs == ("e1",)
+    assert explained.precision_factor == 0.9
+
+
+def test_memory_gate_observe_only_is_byte_stable_but_blended_uses_m17_signals() -> None:
+    intent = MemoryWriteIntent(
+        target="short_term",
+        kind="episode",
+        content="prediction repair episode",
+        confidence=0.8,
+        evidence_refs=["turn_1", "mem_1"],
+        value_proxy=0.3,
+        surprise_proxy=0.2,
+        prediction_error_signal=0.9,
+        confirmation_signal=0.0,
+        novelty_signal=0.1,
+        recurrence_signal=0.2,
+        maintenance_cost=0.0,
+        contradiction_risk=0.0,
+        proposer="test",
+        source="test",
+    )
+
+    legacy = MemoryGate().evaluate(intent, policy_profile="legacy")
+    observe_only = MemoryGate().evaluate(intent, policy_profile="m17_observe_only")
+    blended = MemoryGate().evaluate(intent, policy_profile="m17_blended")
+
+    assert legacy.write_score == observe_only.write_score
+    assert legacy.factors["prediction_error_signal"] == 0.9
+    assert blended.write_score != legacy.write_score
+    assert 0.0 <= blended.write_score <= 1.0
+
+
+def test_memory_gate_signal_and_bundle_support_helpers_are_bounded() -> None:
+    signals = memory_gate_signals_from_prediction_settlement(
+        settlement_outcome="violated",
+        committed_confidence=0.8,
+        prediction_error=1.6,
+        novelty_signal=0.4,
+    )
+    bundle = aggregate_memory_gate_bundle_support(
+        [
+            {"memory_id": "m1", "item_support": 0.53, "evidence_refs": ["e1"]},
+            {"memory_id": "m2", "item_support": 0.49, "evidence_refs": ["e2"]},
+        ]
+    )
+
+    assert signals["prediction_error_signal"] == 0.8
+    assert bundle["bundle_required"] is True
+    assert bundle["max_single_support"] < 0.60
 
 
 def test_memory_efe_filters_archived_bound_memory() -> None:

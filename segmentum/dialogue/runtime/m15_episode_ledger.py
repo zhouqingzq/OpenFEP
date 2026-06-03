@@ -541,6 +541,43 @@ class EpisodeLedger:
             handle.write(json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n")
         return event
 
+    def append_prediction_settlement_addendum(
+        self,
+        *,
+        at: int,
+        turn_index: int,
+        source_episode_id: str,
+        prediction_id: str,
+        prediction_type: str,
+        outcome: str,
+        committed_confidence: float,
+        prediction_error: float | None,
+        brier_score: float | None,
+        evidence_refs: Iterable[Any] | None = None,
+        reason_codes: Iterable[Any] | None = None,
+    ) -> dict[str, Any]:
+        self._ensure()
+        event = {
+            "record_type": "prediction_settlement_addendum",
+            "type": "PredictionSettlementAddendum",
+            "episode_id": str(source_episode_id or ""),
+            "source_episode_id": str(source_episode_id or ""),
+            "prediction_id": str(prediction_id or ""),
+            "prediction_type": str(prediction_type or ""),
+            "outcome": str(outcome or ""),
+            "committed_confidence": _round(committed_confidence),
+            "m17_prediction_error": _round(prediction_error) if prediction_error is not None else None,
+            "m17_brier_score": _round(brier_score) if brier_score is not None else None,
+            "evidence_refs": _string_list(list(evidence_refs or []), limit=12),
+            "reason_codes": _string_list(list(reason_codes or []), limit=8),
+            "at": int(at),
+            "turn_index": int(turn_index),
+            "engineering_proxy_label": ENGINEERING_PROXY_LABEL,
+        }
+        with self.path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n")
+        return event
+
     def recent(self, n: int = RECENT_CACHE_LIMIT) -> list[MemoryDynamicsEpisode]:
         self._load_recent_once()
         limit = max(0, int(n))

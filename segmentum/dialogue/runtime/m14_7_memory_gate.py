@@ -12,6 +12,8 @@ ENGINEERING_PROXY_LABEL = "mvp_local_memory_gate"
 MEMORY_GATE_THRESHOLD_SHORT_TERM = 0.30
 MEMORY_GATE_THRESHOLD_LONG_TERM = 0.55
 MAX_GATE_COMMITS_PER_SESSION_PER_PROPOSER = 8
+M17_BUNDLE_TRIGGER_THRESHOLD = 0.74
+M17_SINGLE_TRIGGER_THRESHOLD = 0.60
 
 GATE_WEIGHTS = {
     "surprise": 0.30,
@@ -19,6 +21,19 @@ GATE_WEIGHTS = {
     "identity": 0.15,
     "evidence": 0.20,
     "confidence": 0.10,
+}
+M17_POSITIVE_WEIGHTS = {
+    "prediction_error_signal": 0.24,
+    "confirmation_signal": 0.18,
+    "novelty_signal": 0.10,
+    "recurrence_signal": 0.12,
+    "evidence_factor": 0.16,
+    "identity_relevance": 0.10,
+    "confidence": 0.10,
+}
+M17_NEGATIVE_WEIGHTS = {
+    "maintenance_cost": 0.08,
+    "contradiction_risk": 0.12,
 }
 
 VIOLATION_CODES = frozenset(
@@ -93,6 +108,22 @@ class MemoryWriteIntent:
     source: str = ""
     proposer: str = ""
     audit_reason: str = ""
+    prediction_error_signal: float = 0.0
+    confirmation_signal: float = 0.0
+    novelty_signal: float = 0.0
+    recurrence_signal: float = 0.0
+    maintenance_cost: float = 0.0
+    contradiction_risk: float = 0.0
+    linked_prediction_ids: list[str] = field(default_factory=list)
+    bundle_id: str = ""
+    member_memory_ids: list[str] = field(default_factory=list)
+    member_evidence_refs: list[str] = field(default_factory=list)
+    aggregated_support: float = 0.0
+    max_single_support: float = 0.0
+    synergy_margin: float = 0.0
+    bundle_required: bool = False
+    unique_memory_count: int = 0
+    unique_evidence_ref_count: int = 0
     intent_id: str = field(default_factory=lambda: _new_id("mem_gate_intent"))
 
     def to_dict(self) -> dict[str, Any]:
@@ -109,6 +140,22 @@ class MemoryWriteIntent:
             "source": self.source,
             "proposer": self.proposer,
             "audit_reason": self.audit_reason,
+            "prediction_error_signal": round(self.prediction_error_signal, 6),
+            "confirmation_signal": round(self.confirmation_signal, 6),
+            "novelty_signal": round(self.novelty_signal, 6),
+            "recurrence_signal": round(self.recurrence_signal, 6),
+            "maintenance_cost": round(self.maintenance_cost, 6),
+            "contradiction_risk": round(self.contradiction_risk, 6),
+            "linked_prediction_ids": list(self.linked_prediction_ids[:8]),
+            "bundle_id": self.bundle_id,
+            "member_memory_ids": list(self.member_memory_ids[:8]),
+            "member_evidence_refs": list(self.member_evidence_refs[:8]),
+            "aggregated_support": round(self.aggregated_support, 6),
+            "max_single_support": round(self.max_single_support, 6),
+            "synergy_margin": round(self.synergy_margin, 6),
+            "bundle_required": self.bundle_required,
+            "unique_memory_count": self.unique_memory_count,
+            "unique_evidence_ref_count": self.unique_evidence_ref_count,
             "intent_fingerprint": memory_intent_fingerprint(self),
             "engineering_proxy_label": ENGINEERING_PROXY_LABEL,
         }
@@ -121,6 +168,7 @@ class MemoryGateDecision:
     threshold: float
     factors: dict[str, float]
     violation_codes: list[str] = field(default_factory=list)
+    policy_profile: str = "legacy"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -129,6 +177,7 @@ class MemoryGateDecision:
             "threshold": round(self.threshold, 6),
             "factors": dict(self.factors),
             "violation_codes": list(self.violation_codes),
+            "policy_profile": self.policy_profile,
         }
 
 
@@ -143,6 +192,7 @@ class MemoryGate:
         *,
         proposer_commits_this_session: int = 0,
         recent_intent_fingerprints: set[str] | None = None,
+        policy_profile: str = "legacy",
     ) -> MemoryGateDecision:
         target = str(intent.target or "short_term")
         threshold = self.long_threshold if target == "long_term" else self.short_threshold
@@ -153,14 +203,29 @@ class MemoryGate:
             "identity_relevance": _bounded_float(intent.identity_relevance),
             "evidence_factor": round(evidence_factor, 6),
             "confidence": _bounded_float(intent.confidence),
+            "prediction_error_signal": _bounded_float(intent.prediction_error_signal),
+            "confirmation_signal": _bounded_float(intent.confirmation_signal),
+            "novelty_signal": _bounded_float(intent.novelty_signal),
+            "recurrence_signal": _bounded_float(intent.recurrence_signal),
+            "maintenance_cost": _bounded_float(intent.maintenance_cost),
+            "contradiction_risk": _bounded_float(intent.contradiction_risk),
+            "aggregated_support": _bounded_float(intent.aggregated_support),
+            "max_single_support": _bounded_float(intent.max_single_support),
+            "synergy_margin": _bounded_float(intent.synergy_margin),
         }
-        score = (
+        legacy_score = (
             GATE_WEIGHTS["surprise"] * factors["surprise_proxy"]
             + GATE_WEIGHTS["value"] * factors["value_proxy"]
             + GATE_WEIGHTS["identity"] * factors["identity_relevance"]
             + GATE_WEIGHTS["evidence"] * factors["evidence_factor"]
             + GATE_WEIGHTS["confidence"] * factors["confidence"]
         )
+        score = legacy_score
+        if policy_profile == "m17_blended":
+            score = (
+                sum(M17_POSITIVE_WEIGHTS[key] * factors[key] for key in M17_POSITIVE_WEIGHTS)
+                - sum(M17_NEGATIVE_WEIGHTS[key] * factors[key] for key in M17_NEGATIVE_WEIGHTS)
+            )
         violations: list[str] = []
         content_len = len(str(intent.content or "").strip())
         if not intent.evidence_refs:
@@ -177,12 +242,23 @@ class MemoryGate:
             violations.append("proposer_session_cap_reached")
         if score < threshold:
             violations.append("gate_score_below_threshold")
+        if (
+            intent.bundle_required
+            and (
+                factors["aggregated_support"] < M17_BUNDLE_TRIGGER_THRESHOLD
+                or factors["max_single_support"] >= M17_SINGLE_TRIGGER_THRESHOLD
+                or int(intent.unique_memory_count) < 2
+                or int(intent.unique_evidence_ref_count) < 2
+            )
+        ):
+            violations.append("bundle_support_contract_failed")
         return MemoryGateDecision(
             commit=not violations,
             write_score=round(score, 6),
             threshold=threshold,
             factors=factors,
             violation_codes=list(dict.fromkeys(violations)),
+            policy_profile=policy_profile,
         )
 
 
@@ -208,6 +284,7 @@ def memory_gate_event(
         "threshold": decision.threshold,
         "factors": dict(decision.factors),
         "violation_codes": list(decision.violation_codes),
+        "policy_profile": decision.policy_profile,
         "engineering_proxy_label": ENGINEERING_PROXY_LABEL,
     }
     if store_target:
@@ -231,6 +308,22 @@ def intent_from_mapping(
     identity_relevance: float = 0.0,
     value_proxy: float = 0.0,
     surprise_proxy: float = 0.0,
+    prediction_error_signal: float = 0.0,
+    confirmation_signal: float = 0.0,
+    novelty_signal: float = 0.0,
+    recurrence_signal: float = 0.0,
+    maintenance_cost: float = 0.0,
+    contradiction_risk: float = 0.0,
+    linked_prediction_ids: list[str] | None = None,
+    bundle_id: str = "",
+    member_memory_ids: list[str] | None = None,
+    member_evidence_refs: list[str] | None = None,
+    aggregated_support: float = 0.0,
+    max_single_support: float = 0.0,
+    synergy_margin: float = 0.0,
+    bundle_required: bool = False,
+    unique_memory_count: int = 0,
+    unique_evidence_ref_count: int = 0,
 ) -> MemoryWriteIntent:
     del row
     return MemoryWriteIntent(
@@ -245,4 +338,90 @@ def intent_from_mapping(
         source=source,
         proposer=proposer,
         audit_reason=audit_reason,
+        prediction_error_signal=_bounded_float(prediction_error_signal),
+        confirmation_signal=_bounded_float(confirmation_signal),
+        novelty_signal=_bounded_float(novelty_signal),
+        recurrence_signal=_bounded_float(recurrence_signal),
+        maintenance_cost=_bounded_float(maintenance_cost),
+        contradiction_risk=_bounded_float(contradiction_risk),
+        linked_prediction_ids=_string_list(linked_prediction_ids, limit=8),
+        bundle_id=str(bundle_id or "")[:120],
+        member_memory_ids=_string_list(member_memory_ids, limit=8),
+        member_evidence_refs=_string_list(member_evidence_refs, limit=8),
+        aggregated_support=_bounded_float(aggregated_support),
+        max_single_support=_bounded_float(max_single_support),
+        synergy_margin=_bounded_float(synergy_margin),
+        bundle_required=bool(bundle_required),
+        unique_memory_count=max(int(unique_memory_count or 0), 0),
+        unique_evidence_ref_count=max(int(unique_evidence_ref_count or 0), 0),
     )
+
+
+def memory_gate_signals_from_prediction_settlement(
+    *,
+    settlement_outcome: str,
+    committed_confidence: float,
+    prediction_error: float | None = None,
+    confirmation_count: int = 0,
+    novelty_signal: float = 0.0,
+    recurrence_signal: float = 0.0,
+    maintenance_cost: float = 0.0,
+    contradiction_risk: float = 0.0,
+) -> dict[str, float]:
+    outcome = str(settlement_outcome or "").strip().casefold()
+    error_signal = 0.0
+    confirmation_signal = 0.0
+    if outcome == "violated":
+        source_error = prediction_error if prediction_error is not None else max(0.0, float(committed_confidence))
+        error_signal = _bounded_float(source_error / 2.0)
+    elif outcome == "confirmed":
+        confirmation_signal = _bounded_float(0.35 + 0.10 * max(0, int(confirmation_count)))
+    return {
+        "prediction_error_signal": error_signal,
+        "confirmation_signal": confirmation_signal,
+        "novelty_signal": _bounded_float(novelty_signal),
+        "recurrence_signal": _bounded_float(recurrence_signal),
+        "maintenance_cost": _bounded_float(maintenance_cost),
+        "contradiction_risk": _bounded_float(contradiction_risk),
+    }
+
+
+def aggregate_memory_gate_bundle_support(rows: list[Mapping[str, Any]]) -> dict[str, float]:
+    supports = sorted((_bounded_float(row.get("item_support"), default=0.0) for row in rows), reverse=True)
+    evidence_refs: set[str] = set()
+    memory_ids: set[str] = set()
+    for row in rows:
+        memory_id = str(row.get("memory_id", "") or "").strip()
+        if memory_id:
+            memory_ids.add(memory_id)
+        for value in _string_list(row.get("evidence_refs"), limit=16):
+            evidence_refs.add(value)
+    if not supports:
+        return {
+            "aggregated_support": 0.0,
+            "max_single_support": 0.0,
+            "synergy_margin": 0.0,
+            "bundle_required": False,
+            "unique_memory_count": len(memory_ids),
+            "unique_evidence_ref_count": len(evidence_refs),
+        }
+    aggregate = 1.0
+    for support in supports[:4]:
+        aggregate *= 1.0 - support
+    aggregate = 1.0 - aggregate
+    max_single = supports[0]
+    synergy = max(0.0, aggregate - max_single)
+    bundle_required = (
+        aggregate >= M17_BUNDLE_TRIGGER_THRESHOLD
+        and max_single < M17_SINGLE_TRIGGER_THRESHOLD
+        and len(memory_ids) >= 2
+        and len(evidence_refs) >= 2
+    )
+    return {
+        "aggregated_support": round(_bounded_float(aggregate), 6),
+        "max_single_support": round(_bounded_float(max_single), 6),
+        "synergy_margin": round(_bounded_float(synergy), 6),
+        "bundle_required": bool(bundle_required),
+        "unique_memory_count": len(memory_ids),
+        "unique_evidence_ref_count": len(evidence_refs),
+    }

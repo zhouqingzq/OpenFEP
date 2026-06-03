@@ -17,7 +17,11 @@ from segmentum.user_model import (
 from segmentum.user_model.evidence_cards import evidence_cards_from_user_model, prompt_safe_cards
 from segmentum.user_model.hyperparams import DEFAULT_HYPERPARAMS
 from segmentum.user_model.llm_extractor import ExtractorValidationError, EXTRACTOR_OUTPUT_SCHEMA, EXTRACTOR_PROMPT_TEMPLATE
-from segmentum.user_model.prediction_ledger import UserPredictionLedger, apply_prediction_updates
+from segmentum.user_model.prediction_ledger import (
+    UserPredictionLedger,
+    apply_prediction_updates,
+    attach_prediction_source_episode,
+)
 from segmentum.user_model.reliability_ledger import (
     ReliabilityJudgment,
     SourceReliabilityLedger,
@@ -65,7 +69,9 @@ def test_m11_does_not_import_memory_dynamics_or_value_memory_or_memory_retrieval
 
 def test_extractor_schema_has_no_number_or_float_fields():
     text = json.dumps(EXTRACTOR_OUTPUT_SCHEMA, sort_keys=True) + EXTRACTOR_PROMPT_TEMPLATE
-    forbidden = ("float", "number", "value_score", "source_reliability", "prediction_error", "retrieval_score")
+    assert "raw_confidence" in text
+    assert "settlement_confidence" in text
+    forbidden = ("value_score", "source_reliability", "prediction_error", "retrieval_score")
     assert not any(word in text for word in forbidden)
 
 
@@ -73,6 +79,38 @@ def test_extractor_output_with_any_float_is_rejected():
     payload = _extractor(claims=[{**_claim(1), "confidence": 0.8}])({})
     with pytest.raises(ExtractorValidationError):
         validate_extractor_output(payload)
+
+
+def test_extractor_output_accepts_only_narrow_prediction_float_fields():
+    payload = _extractor(
+        proposals=[
+                {
+                    "id": "p1",
+                    "prediction_type": "intent_prediction",
+                    "predicted_value_summary": "user will clarify scope",
+                    "confidence_band": "med",
+                    "raw_confidence": 0.74,
+                    "evidence_basis": ["current_user_request"],
+                    "evidence_quote_ids": ["q1"],
+                    "source_hypothesis_ids": [],
+                    "source_judgment_ids": [],
+                    "expires_after_turns": 1,
+                }
+            ],
+            judgments=[
+                {
+                    "prediction_id": "pred:p1",
+                    "status": "confirmed",
+                    "settlement_confidence": 0.81,
+                    "evidence_quote_ids": ["q2"],
+                    "evidence_refs": [],
+                    "reason_codes": [],
+                }
+            ],
+        )({})
+    validated = validate_extractor_output(payload, snapshot_prediction_ids={"pred:p1"})
+    assert validated["prediction_proposals"][0]["raw_confidence"] == 0.74
+    assert validated["prediction_judgments"][0]["settlement_confidence"] == 0.81
 
 
 def test_extractor_output_with_unknown_field_is_rejected():
@@ -219,14 +257,16 @@ def test_prediction_ledger_records_confirmed_violated_and_uncertain():
         turn_id=1,
         proposals=[
             {
-                "id": "p1",
-                "prediction_type": "intent_prediction",
-                "predicted_value_summary": "user will clarify scope",
-                "confidence_band": "med",
-                "source_hypothesis_ids": [],
-                "source_judgment_ids": [],
-                "expires_after_turns": 1,
-            }
+            "id": "p1",
+            "prediction_type": "intent_prediction",
+            "predicted_value_summary": "user will clarify scope",
+            "raw_confidence": 0.68,
+            "evidence_basis": ["current_user_question"],
+            "evidence_quote_ids": ["q1"],
+            "source_hypothesis_ids": [],
+            "source_judgment_ids": [],
+            "expires_after_turns": 1,
+        }
         ],
         judgments=[],
         known_hypothesis_ids=set(),
@@ -250,7 +290,9 @@ def test_prediction_proposal_acceptance_and_expiration_are_deterministic():
             "id": "p1",
             "prediction_type": "intent_prediction",
             "predicted_value_summary": "one",
-            "confidence_band": "med",
+            "raw_confidence": 0.66,
+            "evidence_basis": ["current_user_question"],
+            "evidence_quote_ids": ["q1"],
             "source_hypothesis_ids": ["h1"],
             "source_judgment_ids": [],
             "expires_after_turns": 1,
@@ -259,7 +301,9 @@ def test_prediction_proposal_acceptance_and_expiration_are_deterministic():
             "id": "p2",
             "prediction_type": "intent_prediction",
             "predicted_value_summary": "two",
-            "confidence_band": "med",
+            "raw_confidence": 0.66,
+            "evidence_basis": ["current_user_question"],
+            "evidence_quote_ids": ["q2"],
             "source_hypothesis_ids": ["missing"],
             "source_judgment_ids": [],
             "expires_after_turns": 1,
@@ -272,6 +316,33 @@ def test_prediction_proposal_acceptance_and_expiration_are_deterministic():
     expired = apply_prediction_updates(a, turn_id=3, proposals=[], judgments=[], known_hypothesis_ids={"h1"}, known_judgment_ids=set())
     assert expired.latest_status("pred:p1") == "uncertain"
     assert any(p.rejection_reason == "expired" for p in expired.proposals)
+
+
+def test_prediction_source_episode_linkage_attaches_after_response_commit():
+    ledger = apply_prediction_updates(
+        UserPredictionLedger(),
+        turn_id=1,
+        proposals=[
+            {
+                "id": "p1",
+                "prediction_type": "intent_prediction",
+                "predicted_value_summary": "one",
+                "confidence_band": "med",
+                "raw_confidence": 0.66,
+                "evidence_basis": ["current_user_question"],
+                "evidence_quote_ids": ["q1"],
+                "source_hypothesis_ids": [],
+                "source_judgment_ids": [],
+                "expires_after_turns": 1,
+            }
+        ],
+        judgments=[],
+        known_hypothesis_ids=set(),
+        known_judgment_ids=set(),
+    )
+
+    linked = attach_prediction_source_episode(ledger, created_at_turn=1, source_episode_id="ep:1")
+    assert linked.entries[-1].source_episode_id == "ep:1"
 
 
 def test_value_score_rises_monotonically_with_reliability_at_fixed_band():
@@ -359,12 +430,15 @@ def test_reply_asks_clarification_when_intent_prediction_just_violated():
         turn_id=1,
         extractor=_extractor(
             proposals=[
-                {
-                    "id": "p1",
-                    "prediction_type": "intent_prediction",
-                    "predicted_value_summary": "user will ask for code",
-                    "confidence_band": "med",
-                    "source_hypothesis_ids": [],
+                    {
+                        "id": "p1",
+                        "prediction_type": "intent_prediction",
+                        "predicted_value_summary": "user will ask for code",
+                        "confidence_band": "med",
+                        "raw_confidence": 0.67,
+                        "evidence_basis": ["current_user_request"],
+                        "evidence_quote_ids": ["q1"],
+                        "source_hypothesis_ids": [],
                     "source_judgment_ids": [],
                     "expires_after_turns": 2,
                 }
@@ -376,7 +450,18 @@ def test_reply_asks_clarification_when_intent_prediction_just_violated():
         state,
         user_id="u",
         turn_id=2,
-        extractor=_extractor(judgments=[{"prediction_id": "pred:p1", "status": "violated", "evidence_quote_ids": ["q2"]}]),
+        extractor=_extractor(
+            judgments=[
+                {
+                    "prediction_id": "pred:p1",
+                    "status": "violated",
+                    "settlement_confidence": 0.81,
+                    "evidence_quote_ids": ["q2"],
+                    "evidence_refs": [],
+                    "reason_codes": [],
+                }
+            ]
+        ),
         config=M11RuntimeConfig(m11_user_model_enabled=True),
     )
     assert any(effect.adjustment == "ask_clarifying_question" for effect in result.reply_policy_effects)

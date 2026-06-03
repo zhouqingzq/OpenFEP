@@ -28,6 +28,18 @@ ALLOWED_PREDICTION_TYPES = {
     "relationship_state_prediction",
     "needed_memory_prediction",
 }
+ALLOWED_EVIDENCE_BASIS = {
+    "no_evidence",
+    "current_user_question",
+    "current_user_request",
+    "current_user_statement",
+    "recent_topic_continuity",
+    "direct_user_statement",
+    "repeated_evidence",
+    "prior_confirmation",
+    "system_invariant",
+    "product_invariant",
+}
 ALLOWED_STATUSES = {"confirmed", "violated", "uncertain"}
 ALLOWED_RELATIONS = {"activates", "contradicts", "irrelevant"}
 ALLOWED_SEVERITY = {"minor", "major"}
@@ -57,18 +69,33 @@ Use only the bounded snapshot:
 
 Do not invent prediction ids or hypothesis ids from the snapshot. New proposal
 ids are allowed, but each proposal source id must already appear in the bounded
-snapshot. Return only strict JSON matching the schema.
+snapshot. Floats remain forbidden except:
+- prediction_proposals[].raw_confidence
+- prediction_judgments[].settlement_confidence
+Return only strict JSON matching the schema.
 """
 
 TOP_LEVEL_KEYS = set(EXTRACTOR_OUTPUT_SCHEMA["properties"])  # type: ignore[index]
 CLAIM_KEYS = {"id", "domain", "modality", "content_summary", "evidence_quote_ids", "confidence_band", "tags", "permitted_use", "hypothesis_id"}
-JUDGMENT_KEYS = {"prediction_id", "status", "evidence_quote_ids"}
+JUDGMENT_KEYS = {
+    "prediction_id",
+    "status",
+    "outcome",
+    "evidence_quote_ids",
+    "evidence_refs",
+    "settlement_confidence",
+    "evidence_span",
+    "reason_codes",
+}
 PROPOSAL_KEYS = {
     "id",
     "prediction_type",
     "proposed_prediction_type",
     "predicted_value_summary",
     "confidence_band",
+    "raw_confidence",
+    "evidence_basis",
+    "evidence_quote_ids",
     "source_hypothesis_ids",
     "source_judgment_ids",
     "expires_after_turns",
@@ -90,7 +117,7 @@ def validate_extractor_output(
 ) -> dict[str, object]:
     if not isinstance(payload, Mapping):
         raise ExtractorValidationError("extractor output must be an object")
-    _reject_float(payload)
+    _reject_float(payload, path=())
     unknown = set(payload) - TOP_LEVEL_KEYS
     if unknown:
         raise ExtractorValidationError(f"unknown top-level fields: {sorted(unknown)}")
@@ -117,16 +144,25 @@ def validate_extractor_output(
         pred_id = str(judgment.get("prediction_id", ""))
         if pred_id not in prediction_ids:
             raise ExtractorValidationError("unknown prediction_id")
-        _enum(judgment.get("status"), ALLOWED_STATUSES, "judgment.status")
+        status_value = judgment.get("outcome", judgment.get("status"))
+        _enum(status_value, ALLOWED_STATUSES, "judgment.status")
         _string_list(judgment.get("evidence_quote_ids"), "judgment.evidence_quote_ids")
+        _string_list(judgment.get("evidence_refs", []), "judgment.evidence_refs")
+        _string_list(judgment.get("reason_codes", []), "judgment.reason_codes")
+        _max_len(judgment.get("evidence_span"), 200, "judgment.evidence_span")
+        _confidence_float(judgment.get("settlement_confidence"), "judgment.settlement_confidence", low=0.0)
 
     for proposal in _list(result["prediction_proposals"], "prediction_proposals"):
         _check_keys(proposal, PROPOSAL_KEYS, "proposal")
         ptype = proposal.get("prediction_type", proposal.get("proposed_prediction_type"))
         _enum(ptype, ALLOWED_PREDICTION_TYPES, "proposal.prediction_type")
         _enum(proposal.get("confidence_band"), ALLOWED_BANDS, "proposal.confidence_band")
-        _max_len(proposal.get("predicted_value_summary"), 120, "proposal.predicted_value_summary")
+        _max_len(proposal.get("predicted_value_summary"), 200, "proposal.predicted_value_summary")
         _positive_int(proposal.get("expires_after_turns"), "proposal.expires_after_turns")
+        _confidence_float(proposal.get("raw_confidence"), "proposal.raw_confidence")
+        for basis in _string_list(proposal.get("evidence_basis", []), "proposal.evidence_basis"):
+            _enum(basis, ALLOWED_EVIDENCE_BASIS, "proposal.evidence_basis")
+        _string_list(proposal.get("evidence_quote_ids", []), "proposal.evidence_quote_ids")
         for hyp_id in _string_list(proposal.get("source_hypothesis_ids"), "proposal.source_hypothesis_ids"):
             if hyp_id not in hypothesis_ids:
                 raise ExtractorValidationError("unknown source_hypothesis_id")
@@ -171,15 +207,16 @@ def _default_output() -> dict[str, object]:
     }
 
 
-def _reject_float(value: object) -> None:
+def _reject_float(value: object, *, path: tuple[object, ...]) -> None:
     if isinstance(value, float):
-        raise ExtractorValidationError("floats are forbidden in extractor output")
+        if not _float_allowed(path):
+            raise ExtractorValidationError("floats are forbidden in extractor output")
     if isinstance(value, Mapping):
-        for child in value.values():
-            _reject_float(child)
+        for key, child in value.items():
+            _reject_float(child, path=(*path, str(key)))
     elif isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
-        for child in value:
-            _reject_float(child)
+        for index, child in enumerate(value):
+            _reject_float(child, path=(*path, index))
 
 
 def _list(value: object, field: str) -> list[Mapping[str, object]]:
@@ -218,3 +255,21 @@ def _string_list(value: object, field: str) -> tuple[str, ...]:
     if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
         raise ExtractorValidationError(f"{field} must be a list")
     return tuple(str(item) for item in value)
+
+
+def _confidence_float(value: object, field: str, *, low: float = 0.50, high: float = 0.90) -> float:
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        raise ExtractorValidationError(f"{field} must be a float")
+    if parsed < low or parsed > high:
+        raise ExtractorValidationError(f"{field} must be within bounds")
+    return parsed
+
+
+def _float_allowed(path: tuple[object, ...]) -> bool:
+    if len(path) >= 3 and path[0] == "prediction_proposals" and isinstance(path[1], int) and path[2] == "raw_confidence":
+        return True
+    if len(path) >= 3 and path[0] == "prediction_judgments" and isinstance(path[1], int) and path[2] == "settlement_confidence":
+        return True
+    return False

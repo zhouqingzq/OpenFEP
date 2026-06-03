@@ -5,6 +5,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Callable, Mapping, Sequence
 
+from segmentum.user_model.m17_calibration import (
+    PredictionCalibrationState,
+    update_prediction_calibration,
+)
+
 from .evidence_cards import UserModelEvidenceCard, evidence_cards_from_user_model, prompt_safe_cards
 from .hyperparams import DEFAULT_HYPERPARAMS, Hyperparams
 from .llm_extractor import noop_extraction, validate_extractor_output
@@ -49,6 +54,7 @@ class M11RuntimeState:
     user_model: UserModel
     prediction_ledger: UserPredictionLedger = field(default_factory=UserPredictionLedger)
     reliability_ledger: SourceReliabilityLedger = field(default_factory=SourceReliabilityLedger.empty)
+    prediction_calibration: PredictionCalibrationState = field(default_factory=PredictionCalibrationState)
 
     @classmethod
     def clean(cls, *, user_id: str, display_name: str = "") -> "M11RuntimeState":
@@ -59,6 +65,7 @@ class M11RuntimeState:
             "user_model": self.user_model.to_dict(),
             "prediction_ledger": self.prediction_ledger.to_dict(),
             "reliability_ledger": self.reliability_ledger.to_dict(),
+            "prediction_calibration": self.prediction_calibration.to_dict(),
         }
 
 
@@ -181,7 +188,29 @@ def run_m11_turn(
         known_judgment_ids=judgment_ids,
         calibration_need_band=str(validated["calibration_need_band"]),  # type: ignore[arg-type]
         hyperparams=hyperparams,
+        type_precision_by_type={
+            key: calibration.precision_ema
+            for key, calibration in state.prediction_calibration.by_type.items()
+        },
+        type_sample_count_by_type={
+            key: calibration.sample_count
+            for key, calibration in state.prediction_calibration.by_type.items()
+        },
     )
+    next_prediction_calibration = state.prediction_calibration
+    for entry in next_prediction_ledger.entries:
+        if entry.turn_id != turn_id or entry.event_kind not in {"judgment", "expiration"}:
+            continue
+        if entry.settlement_outcome not in {"confirmed", "violated"}:
+            continue
+        next_prediction_calibration = update_prediction_calibration(
+            next_prediction_calibration,
+            prediction_type=entry.prediction_type,
+            committed_confidence=entry.committed_confidence,
+            outcome=entry.settlement_outcome,
+            brier_score=entry.m17_brier_score,
+            turn_id=turn_id,
+        )
     compositions = _compose_for_claims(
         validated,
         reliability=next_reliability,
@@ -208,6 +237,7 @@ def run_m11_turn(
         user_model=next_model,
         prediction_ledger=next_prediction_ledger,
         reliability_ledger=next_reliability,
+        prediction_calibration=next_prediction_calibration,
     )
     result = M11TurnResult(
         enabled=True,
@@ -301,8 +331,12 @@ def _bounded_snapshot(
         "open_predictions": [
             {
                 "prediction_id": entry.prediction_id,
+                "prediction_type": entry.prediction_type,
                 "predicted_value_summary": entry.predicted_value_summary,
                 "confidence_band": entry.confidence_band,
+                "committed_confidence": entry.committed_confidence,
+                "created_at_turn": entry.created_at_turn,
+                "expires_after_turns": entry.expires_after_turns,
             }
             for entry in state.prediction_ledger.entries
             if state.prediction_ledger.latest_status(entry.prediction_id) == "pending"
