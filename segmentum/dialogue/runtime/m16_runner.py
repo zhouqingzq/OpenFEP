@@ -146,9 +146,12 @@ class ConsciousnessRunner:
     def nudge(self) -> None:
         self._nudge.set()
 
-    def run_once_for_tests(self, *, now: int | None = None, max_steps: int = 1) -> RunnerStepResult:
+    def run_once(self, *, now: int | None = None, max_steps: int = 1) -> RunnerStepResult:
         ts = int(now if now is not None else self._now())
         return self._run_cycle(ts, max_event_steps=max(1, int(max_steps)))
+
+    def run_once_for_tests(self, *, now: int | None = None, max_steps: int = 1) -> RunnerStepResult:
+        return self.run_once(now=now, max_steps=max_steps)
 
     def _loop(self) -> None:
         while not self._stop.is_set():
