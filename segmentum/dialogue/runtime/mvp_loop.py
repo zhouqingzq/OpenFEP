@@ -36,6 +36,7 @@ from segmentum.user_model import (
     run_m11_turn,
     sharing_feedback_negative,
     update_regret_bias,
+    validate_extractor_output,
 )
 from segmentum.cognitive_events import CognitiveEventBus
 from segmentum.user_model.llm_extractor import ExtractorValidationError, noop_extraction
@@ -179,6 +180,12 @@ from segmentum.dialogue.runtime.m15_meta_control import (
     detect_and_emit_intents,
 )
 from segmentum.dialogue.runtime.m15_3_cleanup_control import CleanupOwner, detect_cleanup_intents
+from segmentum.m17_12_path_b_bridge import (
+    apply_path_b_settlement_writeback,
+    build_path_b_recall_bridge,
+    merge_path_b_field_guidance,
+    register_prediction_provenance,
+)
 from segmentum.dialogue.runtime.m14_self_continuity import (
     MIN_BASELINE_UPDATE_CONFIDENCE,
     apply_self_cognition_patch_to_continuity,
@@ -271,6 +278,12 @@ SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
         "by_user": {},
     },
     "m13_drive_state": {},
+    "m17_path_b_bridge": {
+        "prediction_provenance": {},
+        "last_recall_bridge": {},
+        "last_settlement_writeback": {},
+        "last_turn_index": -1,
+    },
 }
 
 SYSTEM_FILE_NAMES: dict[str, str] = {
@@ -1676,6 +1689,10 @@ reply 字段只能包含会直接显示给用户的自然对话文本；禁止�
 
 记忆动力学指导（只作为回复控制和证据边界，不要当成要说出口的内容）:
 {_json_text(dict(memory_guidance or {}))}
+
+If memory_guidance.recall_bridge.counterfactual_status == "field_required",
+follow reply_contract.path_b_field_reply_strategy and the related prefer_*
+fields even when no single retrieved item looks decisive by itself.
 
 检索到的相关记忆证据卡（压缩证据，不是原始记忆转储）:
 {_json_text(retrieved_memories)}
@@ -3872,6 +3889,59 @@ def validate_visible_reply(reply: str, contract: Mapping[str, Any] | None) -> tu
     return cleaned, validation
 
 
+def _enforce_path_b_field_reply_contract(
+    *,
+    reply: str,
+    reply_action: str,
+    reply_contract: Mapping[str, Any] | None,
+) -> tuple[str, str, list[str]]:
+    contract = _mapping(reply_contract)
+    strategy = str(contract.get("path_b_field_reply_strategy", "") or "").strip().lower()
+    selected_action = str(contract.get("path_b_field_selected_action", "") or "").strip().lower()
+    guided = bool(contract.get("path_b_field_required", False)) or (
+        bool(contract.get("path_b_field_guided", False))
+        and strategy == "clarify"
+        and selected_action == "scan"
+        and bool(contract.get("prefer_clarification", False))
+    )
+    if not guided:
+        return str(reply or "").strip(), str(reply_action or "answer").strip() or "answer", []
+    normalized_reply = str(reply or "").strip()
+    normalized_action = str(reply_action or "answer").strip().lower() or "answer"
+    actions: list[str] = []
+
+    if strategy == "clarify":
+        if normalized_action != "clarify":
+            normalized_action = "clarify"
+            actions.append("path_b_field_forced_clarify_action")
+        if "?" not in normalized_reply and "？" not in normalized_reply:
+            if selected_action == "scan":
+                normalized_reply = (
+                    "先别直接动手，我先确认一下："
+                    "你是想先检查风险点和隐患，再决定怎么改，还是要我直接给修改方案？"
+                )
+            else:
+                normalized_reply = "我先确认一下你的目标：你是想先核实风险和前提，还是要我直接给结论？"
+            actions.append("path_b_field_forced_clarify_reply")
+    elif strategy == "deflect":
+        if normalized_action not in {"deflect", "clarify"}:
+            normalized_action = "deflect"
+            actions.append("path_b_field_forced_deflect_action")
+        if not normalized_reply:
+            normalized_reply = "这一步我不建议直接推进。先把边界和风险条件说清楚，我们再决定怎么做。"
+            actions.append("path_b_field_forced_deflect_reply")
+    elif strategy == "self_disclose":
+        if normalized_action not in {"self_disclose", "clarify"}:
+            normalized_action = "self_disclose"
+            actions.append("path_b_field_forced_self_disclose_action")
+    elif strategy == "answer":
+        if normalized_action == "clarify" and not bool(contract.get("prefer_clarification", False)):
+            normalized_action = "answer"
+            actions.append("path_b_field_forced_answer_action")
+
+    return normalized_reply, normalized_action, actions
+
+
 def _should_run_post_reply_observer(
     *,
     user_text: str,
@@ -4708,6 +4778,7 @@ class MVPDialogueRuntime:
     store: MVPStateStore
     llm: JSONLLMClient
     persona_name: str = ""
+    path_b_field_consumer_enabled: bool = True
 
     def _episode_ledger(self) -> EpisodeLedger:
         return EpisodeLedger(self.store.root)
@@ -5421,17 +5492,55 @@ class MVPDialogueRuntime:
                 }
         _apply_evidence_judgment_contract(memory_dynamics, evidence_judgment)
         _report_progress("evidence_judge")
-        retrieved = retrieve_memories_for_guidance(
+        retrieved_ranked = retrieve_memories_for_guidance(
             state,
             recall_query,
             now=now,
         )
         if lexical_candidates:
-            existing_ids = {str(item.get("id", "")) for item in retrieved if item.get("id")}
-            retrieved = [
+            existing_ids = {str(item.get("id", "")) for item in retrieved_ranked if item.get("id")}
+            retrieved_ranked = [
                 *[item for item in lexical_candidates if str(item.get("id", "")) not in existing_ids],
-                *retrieved,
+                *retrieved_ranked,
             ][:8]
+        recall_bridge = build_path_b_recall_bridge(
+            state,
+            recall_query,
+            retrieved_items=retrieved_ranked,
+            now=turn_index + 1,
+            field_consumer_enabled=self.path_b_field_consumer_enabled,
+        )
+        if (
+            recall_bridge.field_required
+            and self.path_b_field_consumer_enabled
+            and latency_mode == "fast_chat"
+        ):
+            reason_codes = _string_list(latency_mode_info.get("reason_codes"), limit=12)
+            if "path_b_field_required" not in reason_codes:
+                reason_codes.append("path_b_field_required")
+            latency_mode_info = {
+                **latency_mode_info,
+                "mode": "normal",
+                "reason_codes": reason_codes,
+                "escalated_from": "fast_chat",
+            }
+            latency_mode = "normal"
+            bus.append(
+                {
+                    "type": "PathBFieldLatencyEscalationEvent",
+                    "turn_index": turn_index,
+                    "from_mode": "fast_chat",
+                    "to_mode": "normal",
+                    "reason_code": "path_b_field_required",
+                    "field_selected_action": recall_bridge.field_selected_action,
+                }
+            )
+        retrieved = [dict(item) for item in recall_bridge.retrieved_items]
+        merge_path_b_field_guidance(
+            memory_dynamics,
+            recall_bridge,
+            field_consumer_enabled=self.path_b_field_consumer_enabled,
+        )
         memory_dynamics["recall"] = {
             **_mapping(memory_dynamics.get("recall")),
             "retrieved": len(retrieved),
@@ -5439,6 +5548,37 @@ class MVPDialogueRuntime:
             "lexical_candidate_ids": [str(item.get("id", "")) for item in lexical_candidates if item.get("id")],
             "query_plan": query_plan,
         }
+        bus.append(
+            {
+                "type": "PathBRecallBridgeBuiltEvent",
+                "turn_index": turn_index,
+                "active_path_ids": list(recall_bridge.provenance_refs.get("active_path_ids", [])),
+                "counterfactual_status": recall_bridge.counterfactual_status,
+                "field_selected_action": recall_bridge.field_selected_action,
+                "writeback_targets": dict(recall_bridge.writeback_targets),
+            }
+        )
+        if recall_bridge.field_required:
+            bus.append(
+                {
+                    "type": "PathBFieldDecisionEvent",
+                    "turn_index": turn_index,
+                    "counterfactual_status": recall_bridge.counterfactual_status,
+                    "reply_strategy": recall_bridge.reply_strategy,
+                    "field_selected_action": recall_bridge.field_selected_action,
+                    "best_single_action": recall_bridge.counterfactual_audit.get("best_single_action", ""),
+                    "naive_topk_action": recall_bridge.counterfactual_audit.get("naive_topk_action", ""),
+                }
+            )
+        else:
+            bus.append(
+                {
+                    "type": "PathBFieldSuppressedEvent",
+                    "turn_index": turn_index,
+                    "counterfactual_status": recall_bridge.counterfactual_status,
+                    "field_selected_action": recall_bridge.field_selected_action,
+                }
+            )
         self._mark_recalled(state, retrieved, now)
         _report_progress("memory_recall")
         response_style_prior = _response_style_prior(state, retrieved)
@@ -5588,6 +5728,12 @@ class MVPDialogueRuntime:
                     if entry.turn_id == turn_index + 1 and entry.event_kind == "prediction"
                 ]
                 if locked_entries:
+                    register_prediction_provenance(
+                        state,
+                        prediction_ids=[entry.prediction_id for entry in locked_entries],
+                        bridge_result=recall_bridge,
+                        turn_index=turn_index,
+                    )
                     lock_event = _prediction_lock_event(
                         turn_index=turn_index,
                         prediction_ids=[entry.prediction_id for entry in locked_entries],
@@ -5888,6 +6034,7 @@ class MVPDialogueRuntime:
             memory_guidance={
                 "memory_value": memory_dynamics.get("memory_value", {}),
                 "recall": memory_dynamics.get("recall", {}),
+                "recall_bridge": memory_dynamics.get("recall_bridge", {}),
                 "control_guidance": prompt_safe_control_guidance_for_thinking(
                     memory_dynamics.get("control_guidance", {})
                 ),
@@ -5951,11 +6098,27 @@ class MVPDialogueRuntime:
             raw_reply = "我需要想一下这个。"
         control_guidance = _mapping(memory_dynamics.get("control_guidance"))
         reply_contract = _mapping(control_guidance.get("reply_contract"))
+        raw_reply, enforced_reply_action, path_b_field_enforcement_actions = _enforce_path_b_field_reply_contract(
+            reply=raw_reply,
+            reply_action=str(thinking.get("reply_action") or "answer"),
+            reply_contract=reply_contract,
+        )
+        if path_b_field_enforcement_actions:
+            thinking["reply"] = raw_reply
+            thinking["reply_action"] = enforced_reply_action
+            thinking["path_b_field_enforcement_actions"] = list(path_b_field_enforcement_actions)
         reply_contract["identity_anchored_action"] = identity_anchored_action
         reply_contract["selected_disclosure_action"] = str(thinking.get("disclosure_action", "none") or "none")
         reply, reply_validation = validate_visible_reply(raw_reply, reply_contract)
+        if path_b_field_enforcement_actions:
+            reply_validation = dict(reply_validation)
+            reply_validation["changed"] = True
+            reply_validation["actions"] = [
+                *list(reply_validation.get("actions", [])),
+                *path_b_field_enforcement_actions,
+            ]
         action = normalize_recorded_reply_action(
-            str(thinking.get("reply_action") or "answer"),
+            enforced_reply_action if path_b_field_enforcement_actions else str(thinking.get("reply_action") or "answer"),
             allowed=set(m13_evaluation.candidate_actions),
         )
         temporal_assessment = conscious.get("temporal_assessment")
@@ -6219,6 +6382,46 @@ class MVPDialogueRuntime:
                 reason_codes=(),
             )
             bus.append(addendum)
+        settlement_writeback_entries: list[dict[str, Any]] = []
+        if settlement_judgments:
+            committed_confidence_by_prediction = {
+                str(row.get("prediction_id", "")).strip(): _bounded_float(row.get("committed_confidence"), default=0.0)
+                for row in open_predictions_for_settlement
+                if str(row.get("prediction_id", "")).strip()
+            }
+            for row in settlement_judgments:
+                prediction_id = str(row.get("prediction_id", "")).strip()
+                if not prediction_id:
+                    continue
+                settlement_writeback_entries.append(
+                    {
+                        **dict(row),
+                        "committed_confidence": committed_confidence_by_prediction.get(prediction_id, 0.0),
+                    }
+                )
+        else:
+            settlement_writeback_entries = [
+                entry.to_dict()
+                for entry in m11_state.prediction_ledger.entries
+                if entry.turn_id == turn_index + 1 and entry.event_kind in {"judgment", "expiration"}
+            ]
+        path_b_settlement_writeback = apply_path_b_settlement_writeback(
+            state,
+            ledger_entries=settlement_writeback_entries,
+            turn_index=turn_index,
+            current_user_text=user_text,
+            now=now,
+        )
+        if path_b_settlement_writeback.settled_prediction_ids:
+            bus.append(
+                {
+                    "type": "PathBSettlementWritebackEvent",
+                    "turn_index": turn_index,
+                    "settled_prediction_ids": list(path_b_settlement_writeback.settled_prediction_ids),
+                    "updated_path_ids": list(path_b_settlement_writeback.updated_path_ids),
+                    "writeback_targets": dict(path_b_settlement_writeback.writeback_targets),
+                }
+            )
         self.store.save(state)
         self._record_episode(episode)
         llm_thinking_result = thinking.get("llm_thinking_result")
@@ -6283,6 +6486,8 @@ class MVPDialogueRuntime:
             "m13_reward_ui_labels": prompt_safe_m13_reward_ui_labels(),
             "m13_drive_state": prompt_safe_m13_state_summary(m13_state, user_id=user_id),
             "m15_episode": episode.to_dict(),
+            "path_b_recall_bridge": recall_bridge.to_dict(),
+            "path_b_settlement_writeback": path_b_settlement_writeback.to_dict(),
             "retrieved_memories": retrieved,
             "thinking": thinking,
             "llm_thinking_result": llm_thinking_result,
