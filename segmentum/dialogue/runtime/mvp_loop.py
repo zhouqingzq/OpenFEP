@@ -640,7 +640,17 @@ def _participant_id_matches(raw: str, candidates: set[str]) -> bool:
     if not value:
         return False
     lowered = value.casefold()
-    return any(lowered == str(candidate).strip().casefold() for candidate in candidates if str(candidate).strip())
+    aliases = {lowered}
+    parts = [part.strip().casefold() for part in value.split(":") if part.strip()]
+    if parts:
+        aliases.update(parts)
+        if len(parts) >= 2:
+            aliases.add(":".join(parts[-2:]))
+    return any(
+        str(candidate).strip().casefold() in aliases
+        for candidate in candidates
+        if str(candidate).strip()
+    )
 
 
 def _group_audience_scope_label(participant_ids: list[str]) -> str:

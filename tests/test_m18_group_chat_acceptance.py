@@ -293,6 +293,31 @@ def test_m18_5_reply_to_named_third_party_when_assistant_is_asked_about_them(tmp
     assert result.diagnostics["group_chat_state"]["thread_policy_state"]["pending_answer_participant_id"] == "bob"
 
 
+def test_m18_5_private_surface_with_structured_assistant_id_still_replies(tmp_path: Path) -> None:
+    runtime = _runtime(tmp_path)
+
+    result = runtime.run_turn(
+        "hello, 胡桃晚上好",
+        speaker_name="Sophia",
+        turn_index=0,
+        now=9375,
+        group_turn_envelope={
+            "speaker_participant_id": "telegram:tg_main:user:5324160085",
+            "visible_participant_ids": [
+                "telegram:tg_main:user:5324160085",
+                "telegram:tg_main:assistant:8771595985",
+            ],
+            "addressed_participant_ids": ["telegram:tg_main:assistant:8771595985"],
+        },
+    )
+
+    assert result.action != "no_reply"
+    assert result.reply
+    assert result.diagnostics["group_reply_policy"]["assistant_addressed"] is True
+    assert result.diagnostics["group_reply_policy"]["action"] == "reply_to_current_speaker"
+    assert result.diagnostics["group_chat_state"]["thread_policy_state"]["pending_wait_for_mention"] is False
+
+
 def test_m18_5_defer_side_thread_when_prior_pending_answer_is_still_active(tmp_path: Path) -> None:
     runtime = _runtime(tmp_path)
     state = runtime.store.load()
