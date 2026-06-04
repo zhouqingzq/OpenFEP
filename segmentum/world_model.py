@@ -7,6 +7,7 @@ from .action_schema import ActionSchema, action_name, ensure_action_schema
 from .constants import ACTION_IMAGINED_EFFECTS
 from .dialogue.actions import DIALOGUE_IMAGINED_EFFECTS, is_dialogue_action
 from .environment import clamp
+from .preferences import canonicalize_outcome_label
 from .predictive_coding import LayerBeliefUpdate, SensorimotorLayer, default_beliefs
 
 
@@ -202,11 +203,17 @@ class GenerativeWorldModel:
                 )
 
         outcome_distribution = action_context.get("outcome_distribution", {})
+        outcome_distribution_applied = False
         if isinstance(outcome_distribution, dict) and outcome_distribution:
-            predicted_outcome = sorted(
+            outcome_distribution_applied = True
+            predicted_outcome = canonicalize_outcome_label(
+                sorted(
                 outcome_distribution.items(),
                 key=lambda item: (-float(item[1]), item[0]),
-            )[0][0]
+                )[0][0],
+                risk=float(risk),
+                free_energy_delta=float(predicted_effects.get("free_energy_delta", 0.0) or 0.0),
+            )
 
         field_adjustment = action_context.get("field_adjustment", {})
         applied_field = False
@@ -258,6 +265,17 @@ class GenerativeWorldModel:
                 + (float(action_context.get("preferred_probability", preferred_probability)) * 0.30),
             ),
         )
+        # If retrieved memory rewrites the predicted outcome label, we must
+        # recalibrate risk against the rewritten action belief. Otherwise a
+        # stale catastrophic base label (for example `survival_threat`) can
+        # leak forward even after memory has shifted the action toward a
+        # positive outcome distribution, which blows up EFE and masks any
+        # genuine field advantage.
+        if outcome_distribution_applied:
+            risk = min(
+                max(0.0, float(risk)),
+                max(0.0, -log(max(1e-12, preferred_probability))),
+            )
         risk = max(
             0.0,
             (risk * 0.65) + (float(action_context.get("risk", risk)) * 0.35),
@@ -299,6 +317,14 @@ class GenerativeWorldModel:
             "preferred_probability": preferred_probability,
             "risk": risk,
             "expected_surprise": expected_surprise,
+            "field_projected_expected_free_energy": max(
+                0.0,
+                float(action_context.get("projected_expected_free_energy", 0.0) or 0.0),
+            ),
+            "field_guidance_strength": max(
+                0.0,
+                min(0.65, float(action_context.get("field_guidance_strength", 0.0) or 0.0)),
+            ),
             "applied_memory": bool(action_context),
             "applied_goal_prior": applied_goal_prior,
             "goal_prior": dict(goal_prior_payload) if goal_prior_payload else {},

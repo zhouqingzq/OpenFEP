@@ -410,9 +410,13 @@ def build_local_memory_field(
         key=lambda item: (float(item[1]["support"]), float(item[1]["path_quality"]), item[0]),
     )[0]
     naive_topk_channels = list(action_influences[naive_topk_action].get("dominant_channels", []))
-    field_selected_action = max(
+    field_selected_action = min(
         action_influences.items(),
-        key=lambda item: (float(item[1]["field_score"]), -float(item[1]["projected_expected_free_energy"]), item[0]),
+        key=lambda item: (
+            float(item[1]["projected_expected_free_energy"]),
+            -float(item[1]["field_score"]),
+            item[0],
+        ),
     )[0]
     field_channels = list(action_influences[field_selected_action].get("dominant_channels", []))
     best_single_signature = _counterfactual_signature(best_single_action, best_single_channels)
@@ -457,6 +461,7 @@ def build_local_memory_field(
         neighborhood_members=[member.to_dict() for member in members],
         counterfactual_audit={
             "best_single_action": best_single_action,
+            "best_single_path_id": best_single_member.path_id,
             "naive_topk_action": naive_topk_action,
             "field_selected_action": field_selected_action,
             "best_single_signature": [best_single_signature[0], list(best_single_signature[1])],

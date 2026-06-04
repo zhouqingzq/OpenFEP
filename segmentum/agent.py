@@ -1840,6 +1840,17 @@ class SegmentAgent(MemoryAwareAgentMixin):
             if isinstance(local_field, dict) and isinstance(local_field.get("action_influences"), dict)
             else {}
         )
+        field_counterfactual = (
+            dict(local_field.get("counterfactual_audit", {}))
+            if isinstance(local_field, dict) and isinstance(local_field.get("counterfactual_audit"), dict)
+            else {}
+        )
+        selected_field_action = action_name(field_counterfactual.get("field_selected_action", ""))
+        field_required = bool(field_counterfactual.get("field_required", False))
+        field_confidence = float(local_field.get("field_confidence", 0.0)) if isinstance(local_field, dict) else 0.0
+        synergy_margin = float(local_field.get("synergy_margin", 0.0)) if isinstance(local_field, dict) else 0.0
+        conflict_density = float(local_field.get("conflict_density", 0.0)) if isinstance(local_field, dict) else 0.0
+        effective_member_count = float(local_field.get("effective_member_count", 0.0)) if isinstance(local_field, dict) else 0.0
         rollups: dict[str, dict[str, object]] = {}
         for payload in active_paths:
             action_key = action_name(payload.get("dominant_action", ""))
@@ -1873,9 +1884,23 @@ class SegmentAgent(MemoryAwareAgentMixin):
             ]
             field_influence = (
                 dict(field_action_influences.get(action_key, {}))
-                if isinstance(field_action_influences.get(action_key), dict)
+                if field_required and isinstance(field_action_influences.get(action_key), dict)
                 else {}
             )
+            guidance_strength = 0.0
+            if field_influence:
+                support_signal = max(0.0, min(1.0, float(field_influence.get("support", 0.0) or 0.0)))
+                guidance_strength = (
+                    0.08
+                    + (max(0.0, min(1.0, field_confidence)) * 0.18)
+                    + (max(0.0, min(1.0, synergy_margin)) * 0.14)
+                    + (max(0.0, min(1.0, effective_member_count / 3.0)) * 0.10)
+                    + (support_signal * 0.10)
+                    - (max(0.0, min(1.0, conflict_density)) * 0.10)
+                )
+                if field_required and action_key == selected_field_action:
+                    guidance_strength += 0.12
+                guidance_strength = max(0.0, min(0.55, guidance_strength))
             rollups[action_key] = {
                 "weight": max(0.10, float(field_influence.get("field_score", path_quality) or path_quality)),
                 "risk": max(
@@ -1930,6 +1955,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
                 "projected_expected_free_energy": float(
                     field_influence.get("projected_expected_free_energy", 0.0) or 0.0
                 ),
+                "field_guidance_strength": round(guidance_strength, 6),
             }
         return rollups
 
@@ -3226,6 +3252,30 @@ class SegmentAgent(MemoryAwareAgentMixin):
             free_energy_before=free_energy_before,
         )
         expected_free_energy = expected_fe_details.expected_free_energy_surrogate
+        field_projected_expected_free_energy = max(
+            0.0,
+            float(memory_refinement.get("field_projected_expected_free_energy", 0.0) or 0.0),
+        )
+        field_guidance_strength = max(
+            0.0,
+            min(0.65, float(memory_refinement.get("field_guidance_strength", 0.0) or 0.0)),
+        )
+        if field_guidance_strength > 0.0 and field_projected_expected_free_energy > 0.0:
+            expected_free_energy = (
+                (expected_free_energy * (1.0 - field_guidance_strength))
+                + (field_projected_expected_free_energy * field_guidance_strength)
+            )
+        expected_fe_payload = expected_fe_details.to_dict()
+        if field_guidance_strength > 0.0:
+            expected_fe_payload["field_guidance_strength"] = round(field_guidance_strength, 6)
+            expected_fe_payload["field_projected_expected_free_energy"] = round(
+                field_projected_expected_free_energy,
+                6,
+            )
+            expected_fe_payload["expected_free_energy_surrogate_post_field"] = round(
+                expected_free_energy,
+                6,
+            )
         return {
             "predicted_state": imagined,
             "projected_observation": dict(projected_snapshot.get("observation", {})),
@@ -3236,7 +3286,7 @@ class SegmentAgent(MemoryAwareAgentMixin):
             "preferred_probability": preferred_probability,
             "expected_free_energy": expected_free_energy,
             "free_energy_surrogate": projected_fe.to_dict(),
-            "expected_free_energy_surrogate": expected_fe_details.to_dict(),
+            "expected_free_energy_surrogate": expected_fe_payload,
             "predicted_outcome": predicted_outcome,
             "predicted_effects": predicted_effects,
             "value_score": value_score,

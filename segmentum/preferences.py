@@ -42,6 +42,24 @@ LABEL_ALIASES = {
 }
 
 
+def canonicalize_outcome_label(
+    label: str,
+    *,
+    risk: float = 0.0,
+    free_energy_delta: float = 0.0,
+) -> str:
+    token = str(label or "").strip().lower()
+    if token in LABEL_ALIASES:
+        return LABEL_ALIASES[token]
+    if free_energy_delta >= 0.12 and risk <= 0.24:
+        return "resource_gain"
+    if free_energy_delta <= -0.16 or risk >= 0.70:
+        return "integrity_loss"
+    if free_energy_delta < 0.0:
+        return "resource_loss"
+    return "neutral"
+
+
 def _coerce_float_dict(payload: object) -> dict[str, float]:
     if not isinstance(payload, dict):
         return {}
@@ -103,8 +121,9 @@ class PreferenceModel:
         return self.integrity_loss
 
     def _canonical_label(self, label: str) -> str:
+        normalized = canonicalize_outcome_label(label)
         try:
-            return LABEL_ALIASES[label]
+            return LABEL_ALIASES[normalized]
         except KeyError as exc:
             raise ValueError(f"unknown preference label: {label}") from exc
 
@@ -261,12 +280,20 @@ class PreferenceModel:
         free_energy_surrogate_after: float | None = None,
         free_energy_before: float | None = None,
     ) -> ExpectedFreeEnergySurrogate:
-        risk_cost = self.weighted_risk(outcome, goal, baseline=baseline_risk)
+        free_energy_delta = None
+        if free_energy_before is not None and free_energy_surrogate_after is not None:
+            free_energy_delta = float(free_energy_before) - float(free_energy_surrogate_after)
+        canonical_outcome = canonicalize_outcome_label(
+            outcome,
+            risk=0.0 if baseline_risk is None else float(baseline_risk),
+            free_energy_delta=0.0 if free_energy_delta is None else float(free_energy_delta),
+        )
+        risk_cost = self.weighted_risk(canonical_outcome, goal, baseline=baseline_risk)
         return build_expected_free_energy_surrogate(
             predicted_error=predicted_error,
             risk_cost=risk_cost,
             ambiguity_cost=action_ambiguity,
-            predicted_outcome=outcome,
+            predicted_outcome=canonical_outcome,
             free_energy_surrogate_after=free_energy_surrogate_after,
             free_energy_before=free_energy_before,
         )

@@ -188,6 +188,59 @@ class TestM178PathFirstMemorySubstrate(unittest.TestCase):
         self.assertEqual(len(store.memory_paths), 1)
         self.assertIn(store.memory_paths[0].path_polarity, {"negative", "cautionary"})
 
+    def test_same_action_paths_do_not_merge_on_action_token_alone(self) -> None:
+        store = MemoryStore()
+        cover_a = _entry(
+            "ep:cover_a",
+            cycle=1,
+            action="hide",
+            outcome="safe_escape",
+            semantic_tags=["hide", "danger", "cover"],
+            context_tags=["danger", "cover"],
+            state_vector=[0.18, 0.82, 0.10, 0.78],
+        )
+        cover_b = _entry(
+            "ep:cover_b",
+            cycle=2,
+            action="hide",
+            outcome="safe_escape",
+            semantic_tags=["hide", "danger", "cover"],
+            context_tags=["danger", "cover"],
+            state_vector=[0.20, 0.80, 0.12, 0.76],
+        )
+        brush_a = _entry(
+            "ep:brush_a",
+            cycle=3,
+            action="hide",
+            outcome="safe_escape",
+            semantic_tags=["hide", "brush", "shelter"],
+            context_tags=["brush", "shelter"],
+            state_vector=[0.12, 0.68, 0.24, 0.62],
+        )
+        brush_b = _entry(
+            "ep:brush_b",
+            cycle=4,
+            action="hide",
+            outcome="safe_escape",
+            semantic_tags=["hide", "brush", "shelter"],
+            context_tags=["brush", "shelter"],
+            state_vector=[0.14, 0.66, 0.26, 0.60],
+        )
+        for entry in (cover_a, cover_b, brush_a, brush_b):
+            store.add(entry)
+            _apply_signal(
+                store,
+                entry.id,
+                prediction_id=f"pred:{entry.id}",
+                outcome="confirmed",
+                free_energy_delta=0.24,
+            )
+
+        self.assertEqual(len(store.memory_paths), 2)
+        cue_sets = {tuple(path.cue_signature.semantic_tags) for path in store.memory_paths}
+        self.assertIn(("cover", "danger"), cue_sets)
+        self.assertIn(("brush", "shelter"), cue_sets)
+
     def test_live_runtime_consumer_can_use_path_without_single_raw_episode(self) -> None:
         agent = SegmentAgent(rng=random.Random(31))
         store = agent.memory_store

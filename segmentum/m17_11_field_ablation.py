@@ -359,12 +359,24 @@ def _evaluate_fixture_on_agent(
     active_paths = list(full_context.get("active_paths", []) or [])
     counterfactual_audit = dict(full_field.get("counterfactual_audit", {}) or {})
     best_single_action = str(counterfactual_audit.get("best_single_action", ""))
+    best_single_path_id = str(counterfactual_audit.get("best_single_path_id", ""))
     naive_topk_action = str(counterfactual_audit.get("naive_topk_action", ""))
     field_action = str(counterfactual_audit.get("field_selected_action", ""))
+    field_enabled_context = agent._zero_memory_context(
+        observed=observation,
+        baseline_prediction=prediction,
+        errors=baseline_errors,
+        summary="field-enabled baseline",
+        active_paths=active_paths,
+        local_field=full_field,
+    )
+    field_enabled_context["goal_prior"] = dict(full_context.get("goal_prior", {}) or {})
+    field_enabled_context["adaptive_compute"] = fixed_budget_decision().to_dict()
+    field_enabled_context = _canonicalize_memory_context(field_enabled_context)
     field_enabled = _evaluate_with_context(
         agent,
         fixture,
-        memory_context=full_context,
+        memory_context=field_enabled_context,
         chosen_action=field_action,
     )
     best_single_context = agent._zero_memory_context(
@@ -372,7 +384,11 @@ def _evaluate_fixture_on_agent(
         baseline_prediction=prediction,
         errors=baseline_errors,
         summary="best single baseline",
-        active_paths=active_paths[:1],
+        active_paths=[
+            payload
+            for payload in active_paths
+            if str(payload.get("path_id", "")) == best_single_path_id
+        ] or active_paths[:1],
         local_field={},
     )
     best_single_context["goal_prior"] = dict(full_context.get("goal_prior", {}) or {})
@@ -465,9 +481,11 @@ def run_adaptation_trajectory(
     agent = _build_agent_from_fixture(fixture, seed=seed)
     _apply_ablation(agent, ablation)
     scores: list[float] = []
+    statuses: list[str] = []
     for index, item in enumerate(fixture.get("trajectory", []), start=1):
         evaluation = _evaluate_fixture_on_agent(agent, fixture, seed=seed)
         scores.append(float(evaluation["field_enabled"]["expected_free_energy"]))
+        statuses.append(str(dict(evaluation.get("counterfactual_audit", {})).get("status", "")))
         if frozen_memory or not isinstance(item, Mapping):
             continue
         signal = {
@@ -497,6 +515,7 @@ def run_adaptation_trajectory(
     return {
         "fixture_id": str(fixture.get("fixture_id", "")),
         "trajectory": scores,
+        "status_trajectory": statuses,
         "trajectory_slope": round(_trajectory_slope(scores), 6),
     }
 
@@ -703,7 +722,19 @@ def render_field_validation_report(result: Mapping[str, object]) -> str:
         f"- full_loop_mean_slope: {trajectory.get('full_loop_mean_slope', 0.0)}",
         f"- frozen_memory_mean_slope: {trajectory.get('frozen_memory_mean_slope', 0.0)}",
         "",
+        "## Held-out Rows",
+    ]
+    for row in held_out.get("paired_rows", []):
+        lines.append(
+            f"- {row.get('fixture_id', '')}: status={row.get('field_status', '')}, "
+            f"field={row.get('field_enabled_fe', 0.0)}, best_single={row.get('best_single_fe', 0.0)}, "
+            f"naive_topk={row.get('naive_topk_fe', 0.0)}, field_off={row.get('field_off_fe', 0.0)}"
+        )
+    lines.extend(
+        [
+            "",
         "## Honesty Statement",
         f"- {result.get('honesty_statement', '')}",
-    ]
+        ]
+    )
     return "\n".join(lines)

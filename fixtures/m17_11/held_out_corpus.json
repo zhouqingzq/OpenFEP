@@ -70,5 +70,144 @@
       {"tick": 12, "prediction_id": "traj:hold_rest_1", "memory_id": "hold_rest_1", "outcome": "confirmed", "support_score": 0.90, "free_energy_delta": 0.14},
       {"tick": 13, "prediction_id": "traj:hold_rest_2", "memory_id": "hold_rest_2", "outcome": "confirmed", "support_score": 0.90, "free_energy_delta": 0.12}
     ]
+  },
+  {
+    "fixture_id": "hold_field_required_scan_corridor",
+    "active_goal": "CONTROL",
+    "urgency_scores": {"CONTROL": 0.80, "SURVIVAL": 0.60, "RESOURCES": 0.40},
+    "observation": {"danger": 0.78, "food": 0.22, "novelty": 0.22, "shelter": 0.60, "social": 0.14, "temperature": 0.50},
+    "prediction": {"danger": 0.42, "food": 0.20, "novelty": 0.08, "shelter": 0.38, "social": 0.18, "temperature": 0.50},
+    "body_state": {"energy": 0.70, "stress": 0.28, "fatigue": 0.18, "temperature": 0.48},
+    "free_energy_before": 0.42,
+    "retrieval_k": 4,
+    "episodes": [
+      {
+        "entry_id": "hold_scan_corridor_forage_1",
+        "cycle": 1,
+        "action": "forage",
+        "outcome": "predator_contact",
+        "semantic_tags": ["forage", "danger", "food"],
+        "context_tags": ["danger", "food"],
+        "risk": 0.58,
+        "preferred_probability": 0.48,
+        "predicted_effects": {"energy_delta": 0.02, "stress_delta": 0.04, "free_energy_delta": -0.06},
+        "observation": {"food": 0.82, "danger": 0.82, "novelty": 0.16, "shelter": 0.08, "temperature": 0.50, "social": 0.06},
+        "errors": {"food": 0.52, "danger": 0.34, "novelty": -0.04, "shelter": -0.32, "temperature": 0.00, "social": -0.08},
+        "state_vector": [0.48, 0.84, 0.14, 0.16]
+      },
+      {
+        "entry_id": "hold_scan_corridor_forage_2",
+        "cycle": 2,
+        "action": "forage",
+        "outcome": "predator_contact",
+        "semantic_tags": ["forage", "danger", "food"],
+        "context_tags": ["danger", "food"],
+        "risk": 0.56,
+        "preferred_probability": 0.50,
+        "predicted_effects": {"energy_delta": 0.03, "stress_delta": 0.06, "free_energy_delta": -0.04},
+        "observation": {"food": 0.78, "danger": 0.80, "novelty": 0.18, "shelter": 0.10, "temperature": 0.50, "social": 0.06},
+        "errors": {"food": 0.48, "danger": 0.32, "novelty": -0.02, "shelter": -0.30, "temperature": 0.00, "social": -0.08},
+        "state_vector": [0.50, 0.82, 0.16, 0.18]
+      },
+      {
+        "entry_id": "hold_scan_corridor_hide_cover_1",
+        "cycle": 3,
+        "action": "hide",
+        "outcome": "safe_escape",
+        "semantic_tags": ["hide", "danger", "cover"],
+        "context_tags": ["danger", "cover"],
+        "risk": 0.12,
+        "preferred_probability": 0.84,
+        "predicted_effects": {"energy_delta": 0.02, "stress_delta": -0.14, "free_energy_delta": 0.26},
+        "observation": {"food": 0.12, "danger": 0.84, "novelty": 0.12, "shelter": 0.82, "temperature": 0.50, "social": 0.08},
+        "errors": {"food": -0.10, "danger": 0.36, "novelty": -0.08, "shelter": 0.40, "temperature": 0.00, "social": -0.08},
+        "state_vector": [0.18, 0.82, 0.10, 0.78]
+      },
+      {
+        "entry_id": "hold_scan_corridor_hide_cover_2",
+        "cycle": 4,
+        "action": "hide",
+        "outcome": "safe_escape",
+        "semantic_tags": ["hide", "danger", "cover"],
+        "context_tags": ["danger", "cover"],
+        "risk": 0.10,
+        "preferred_probability": 0.86,
+        "predicted_effects": {"energy_delta": 0.02, "stress_delta": -0.16, "free_energy_delta": 0.30},
+        "observation": {"food": 0.10, "danger": 0.86, "novelty": 0.10, "shelter": 0.80, "temperature": 0.50, "social": 0.08},
+        "errors": {"food": -0.12, "danger": 0.38, "novelty": -0.10, "shelter": 0.38, "temperature": 0.00, "social": -0.08},
+        "state_vector": [0.20, 0.80, 0.12, 0.76]
+      },
+      {
+        "entry_id": "hold_scan_corridor_hide_brush_1",
+        "cycle": 5,
+        "action": "hide",
+        "outcome": "safe_escape",
+        "semantic_tags": ["hide", "brush", "shelter"],
+        "context_tags": ["brush", "shelter"],
+        "risk": 0.14,
+        "preferred_probability": 0.80,
+        "predicted_effects": {"energy_delta": 0.01, "stress_delta": -0.10, "free_energy_delta": 0.20},
+        "observation": {"food": 0.08, "danger": 0.76, "novelty": 0.18, "shelter": 0.88, "temperature": 0.50, "social": 0.08},
+        "errors": {"food": -0.14, "danger": 0.28, "novelty": 0.00, "shelter": 0.46, "temperature": 0.00, "social": -0.08},
+        "state_vector": [0.14, 0.74, 0.20, 0.70]
+      },
+      {
+        "entry_id": "hold_scan_corridor_hide_brush_2",
+        "cycle": 6,
+        "action": "hide",
+        "outcome": "safe_escape",
+        "semantic_tags": ["hide", "brush", "shelter"],
+        "context_tags": ["brush", "shelter"],
+        "risk": 0.16,
+        "preferred_probability": 0.78,
+        "predicted_effects": {"energy_delta": 0.01, "stress_delta": -0.08, "free_energy_delta": 0.18},
+        "observation": {"food": 0.08, "danger": 0.74, "novelty": 0.20, "shelter": 0.86, "temperature": 0.50, "social": 0.08},
+        "errors": {"food": -0.14, "danger": 0.26, "novelty": 0.02, "shelter": 0.44, "temperature": 0.00, "social": -0.08},
+        "state_vector": [0.16, 0.72, 0.22, 0.68]
+      },
+      {
+        "entry_id": "hold_scan_corridor_scan_1",
+        "cycle": 7,
+        "action": "scan",
+        "outcome": "signal_lock",
+        "semantic_tags": ["scan", "signal", "novelty"],
+        "context_tags": ["signal", "novelty"],
+        "risk": 0.06,
+        "preferred_probability": 0.94,
+        "predicted_effects": {"energy_delta": 0.00, "stress_delta": -0.16, "free_energy_delta": 0.42},
+        "observation": {"food": 0.10, "danger": 0.56, "novelty": 0.82, "shelter": 0.10, "temperature": 0.50, "social": 0.10},
+        "errors": {"food": -0.02, "danger": 0.10, "novelty": 0.56, "shelter": -0.08, "temperature": 0.00, "social": -0.06},
+        "state_vector": [0.18, 0.80, 0.32, 0.42]
+      },
+      {
+        "entry_id": "hold_scan_corridor_scan_2",
+        "cycle": 8,
+        "action": "scan",
+        "outcome": "signal_lock",
+        "semantic_tags": ["scan", "signal", "novelty"],
+        "context_tags": ["signal", "novelty"],
+        "risk": 0.05,
+        "preferred_probability": 0.96,
+        "predicted_effects": {"energy_delta": 0.00, "stress_delta": -0.18, "free_energy_delta": 0.46},
+        "observation": {"food": 0.10, "danger": 0.54, "novelty": 0.84, "shelter": 0.08, "temperature": 0.50, "social": 0.10},
+        "errors": {"food": -0.02, "danger": 0.08, "novelty": 0.58, "shelter": -0.10, "temperature": 0.00, "social": -0.06},
+        "state_vector": [0.20, 0.78, 0.34, 0.44]
+      }
+    ],
+    "credit_events": [
+      {"tick": 10, "prediction_id": "pred:hold_scan_corridor_forage_1", "memory_id": "hold_scan_corridor_forage_1", "outcome": "partial", "support_score": 0.62, "contradiction_score": 0.34, "free_energy_delta": 0.04},
+      {"tick": 11, "prediction_id": "pred:hold_scan_corridor_forage_2", "memory_id": "hold_scan_corridor_forage_2", "outcome": "partial", "support_score": 0.64, "contradiction_score": 0.30, "free_energy_delta": 0.06},
+      {"tick": 12, "prediction_id": "pred:hold_scan_corridor_hide_cover_1", "memory_id": "hold_scan_corridor_hide_cover_1", "outcome": "confirmed", "support_score": 0.94, "free_energy_delta": 0.26},
+      {"tick": 13, "prediction_id": "pred:hold_scan_corridor_hide_cover_2", "memory_id": "hold_scan_corridor_hide_cover_2", "outcome": "confirmed", "support_score": 0.96, "free_energy_delta": 0.30},
+      {"tick": 14, "prediction_id": "pred:hold_scan_corridor_hide_brush_1", "memory_id": "hold_scan_corridor_hide_brush_1", "outcome": "confirmed", "support_score": 0.90, "free_energy_delta": 0.20},
+      {"tick": 15, "prediction_id": "pred:hold_scan_corridor_hide_brush_2", "memory_id": "hold_scan_corridor_hide_brush_2", "outcome": "confirmed", "support_score": 0.88, "free_energy_delta": 0.18},
+      {"tick": 16, "prediction_id": "pred:hold_scan_corridor_scan_1", "memory_id": "hold_scan_corridor_scan_1", "outcome": "confirmed", "support_score": 0.98, "free_energy_delta": 0.40},
+      {"tick": 17, "prediction_id": "pred:hold_scan_corridor_scan_2", "memory_id": "hold_scan_corridor_scan_2", "outcome": "confirmed", "support_score": 0.98, "free_energy_delta": 0.42}
+    ],
+    "trajectory": [
+      {"tick": 20, "prediction_id": "traj:hold_scan_corridor_scan_1", "memory_id": "hold_scan_corridor_scan_1", "outcome": "confirmed", "support_score": 0.96, "free_energy_delta": 0.18},
+      {"tick": 21, "prediction_id": "traj:hold_scan_corridor_scan_2", "memory_id": "hold_scan_corridor_scan_2", "outcome": "confirmed", "support_score": 0.96, "free_energy_delta": 0.16},
+      {"tick": 22, "prediction_id": "traj:hold_scan_corridor_hide_cover_1", "memory_id": "hold_scan_corridor_hide_cover_1", "outcome": "partial", "support_score": 0.58, "contradiction_score": 0.22, "free_energy_delta": 0.04}
+    ]
   }
 ]

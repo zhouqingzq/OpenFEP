@@ -80,8 +80,18 @@ def _style_value(current_state: dict[str, object] | None, key: str, default: flo
 
 
 def _shared_semantic_overlap(left: MemoryEntry, right: MemoryEntry) -> float:
-    left_tags = {item.lower() for item in left.semantic_tags}
-    right_tags = {item.lower() for item in right.semantic_tags}
+    left_action = _path_action(left)
+    right_action = _path_action(right)
+    left_tags = {
+        item.lower()
+        for item in left.semantic_tags
+        if item and item.lower() != left_action
+    }
+    right_tags = {
+        item.lower()
+        for item in right.semantic_tags
+        if item and item.lower() != right_action
+    }
     if not left_tags or not right_tags:
         return 0.0
     return len(left_tags & right_tags) / max(len(left_tags | right_tags), 1)

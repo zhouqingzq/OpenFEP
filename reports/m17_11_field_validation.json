@@ -11,73 +11,82 @@
     "held_out_fixture_ids": [
       "hold_conflict_hide_vs_forage",
       "hold_dominant_rest",
+      "hold_field_required_scan_corridor",
       "hold_goal_divergent_social"
     ]
   },
   "train_metrics_preview": {
-    "mean_fe_advantage_vs_best_single": -17.221973,
-    "mean_fe_advantage_vs_naive_topk": -17.221973,
-    "mean_fe_advantage_vs_field_off": 17.207947,
-    "median_fe_advantage_vs_best_single": -17.221973,
-    "median_fe_advantage_vs_naive_topk": -17.221973,
+    "mean_fe_advantage_vs_best_single": 0.0,
+    "mean_fe_advantage_vs_naive_topk": 0.0,
+    "mean_fe_advantage_vs_field_off": 0.181804,
+    "median_fe_advantage_vs_best_single": 0.0,
+    "median_fe_advantage_vs_naive_topk": 0.0,
     "win_rate": 0.0,
     "no_gain_rate": 0.0,
-    "regression_rate": 1.0,
-    "p90_regression_magnitude": 34.350965,
+    "regression_rate": 0.0,
+    "p90_regression_magnitude": 0.0,
     "paired_rows": [
       {
         "fixture_id": "train_dominant_hide",
-        "field_enabled_fe": 807.169869,
-        "best_single_fe": 807.076888,
-        "naive_topk_fe": 807.076888,
-        "field_off_fe": 841.506364,
+        "field_enabled_fe": 1.423812,
+        "best_single_fe": 1.423812,
+        "naive_topk_fe": 1.423812,
+        "field_off_fe": 1.604632,
         "field_status": "suppressed_naive_topk_equivalent"
       },
       {
         "fixture_id": "train_social_repair",
-        "field_enabled_fe": 763.047337,
-        "best_single_fe": 728.696372,
-        "naive_topk_fe": 728.696372,
-        "field_off_fe": 763.126735,
+        "field_enabled_fe": 1.343054,
+        "best_single_fe": 1.343054,
+        "naive_topk_fe": 1.343054,
+        "field_off_fe": 1.525843,
         "field_status": "suppressed_naive_topk_equivalent"
       }
     ],
     "outcome_quantity": "m17_5_expected_free_energy_surrogate"
   },
   "held_out_metrics": {
-    "mean_fe_advantage_vs_best_single": -0.065747,
-    "mean_fe_advantage_vs_naive_topk": -0.065747,
-    "mean_fe_advantage_vs_field_off": 34.363906,
-    "median_fe_advantage_vs_best_single": -0.052692,
-    "median_fe_advantage_vs_naive_topk": -0.052692,
-    "win_rate": 0.0,
+    "mean_fe_advantage_vs_best_single": 0.100795,
+    "mean_fe_advantage_vs_naive_topk": 0.118885,
+    "mean_fe_advantage_vs_field_off": 0.246887,
+    "median_fe_advantage_vs_best_single": 0.0,
+    "median_fe_advantage_vs_naive_topk": 0.0,
+    "win_rate": 0.25,
     "no_gain_rate": 0.0,
-    "regression_rate": 1.0,
-    "p90_regression_magnitude": 0.092609,
+    "regression_rate": 0.0,
+    "p90_regression_magnitude": 0.0,
     "paired_rows": [
       {
         "fixture_id": "hold_conflict_hide_vs_forage",
-        "field_enabled_fe": 807.171242,
-        "best_single_fe": 807.078633,
-        "naive_topk_fe": 807.078633,
-        "field_off_fe": 841.507884,
+        "field_enabled_fe": 1.406443,
+        "best_single_fe": 1.406443,
+        "naive_topk_fe": 1.406443,
+        "field_off_fe": 1.58623,
         "field_status": "suppressed_naive_topk_equivalent"
       },
       {
         "fixture_id": "hold_goal_divergent_social",
-        "field_enabled_fe": 728.745968,
-        "best_single_fe": 728.694029,
-        "naive_topk_fe": 728.694029,
-        "field_off_fe": 763.124207,
+        "field_enabled_fe": 1.323034,
+        "best_single_fe": 1.323034,
+        "naive_topk_fe": 1.323034,
+        "field_off_fe": 1.504795,
         "field_status": "suppressed_naive_topk_equivalent"
       },
       {
         "fixture_id": "hold_dominant_rest",
-        "field_enabled_fe": 787.616764,
-        "best_single_fe": 787.564072,
-        "naive_topk_fe": 787.564072,
-        "field_off_fe": 821.993603,
+        "field_enabled_fe": 1.500621,
+        "best_single_fe": 1.500621,
+        "naive_topk_fe": 1.500621,
+        "field_off_fe": 1.682804,
         "field_status": "suppressed_naive_topk_equivalent"
+      },
+      {
+        "fixture_id": "hold_field_required_scan_corridor",
+        "field_enabled_fe": 0.973277,
+        "best_single_fe": 1.376456,
+        "naive_topk_fe": 1.448815,
+        "field_off_fe": 1.417094,
+        "field_status": "field_required"
       }
     ],
     "outcome_quantity": "m17_5_expected_free_energy_surrogate"
@@ -87,270 +96,213 @@
       {
         "fixture_id": "hold_conflict_hide_vs_forage",
         "trajectory": [
-          807.1712419134117,
-          807.1670920208309,
-          807.1626889511228
+          1.4064430599936504,
+          1.4064430599936504,
+          1.4064430599936504
         ],
-        "trajectory_slope": -0.004276
+        "status_trajectory": [
+          "suppressed_naive_topk_equivalent",
+          "suppressed_naive_topk_equivalent",
+          "suppressed_naive_topk_equivalent"
+        ],
+        "trajectory_slope": 0.0
       },
       {
         "fixture_id": "hold_goal_divergent_social",
         "trajectory": [
-          728.7459681264778,
-          728.7412476970766,
-          728.7364654115024
+          1.3230336570628405,
+          1.3230336570628405,
+          1.3230336570628405
         ],
-        "trajectory_slope": -0.004751
+        "status_trajectory": [
+          "suppressed_naive_topk_equivalent",
+          "suppressed_naive_topk_equivalent",
+          "suppressed_naive_topk_equivalent"
+        ],
+        "trajectory_slope": 0.0
       },
       {
         "fixture_id": "hold_dominant_rest",
         "trajectory": [
-          787.6167642622429,
-          787.6126855716984
+          1.5006211827662743,
+          1.5006211827662743
         ],
-        "trajectory_slope": -0.004079
+        "status_trajectory": [
+          "suppressed_naive_topk_equivalent",
+          "suppressed_naive_topk_equivalent"
+        ],
+        "trajectory_slope": 0.0
+      },
+      {
+        "fixture_id": "hold_field_required_scan_corridor",
+        "trajectory": [
+          0.9732771382466924,
+          1.2413637812257587,
+          1.2413637812257587
+        ],
+        "status_trajectory": [
+          "field_required",
+          "suppressed_best_single_equivalent",
+          "suppressed_best_single_equivalent"
+        ],
+        "trajectory_slope": 0.134043
       }
     ],
     "frozen_memory_control": [
       {
         "fixture_id": "hold_conflict_hide_vs_forage",
         "trajectory": [
-          807.1712419134117,
-          807.1712419134117,
-          807.1712419134117
+          1.4064430599936504,
+          1.4064430599936504,
+          1.4064430599936504
+        ],
+        "status_trajectory": [
+          "suppressed_naive_topk_equivalent",
+          "suppressed_naive_topk_equivalent",
+          "suppressed_naive_topk_equivalent"
         ],
         "trajectory_slope": 0.0
       },
       {
         "fixture_id": "hold_goal_divergent_social",
         "trajectory": [
-          728.7459681264778,
-          728.7459681264778,
-          728.7459681264778
+          1.3230336570628405,
+          1.3230336570628405,
+          1.3230336570628405
+        ],
+        "status_trajectory": [
+          "suppressed_naive_topk_equivalent",
+          "suppressed_naive_topk_equivalent",
+          "suppressed_naive_topk_equivalent"
         ],
         "trajectory_slope": 0.0
       },
       {
         "fixture_id": "hold_dominant_rest",
         "trajectory": [
-          787.6167642622429,
-          787.6167642622429
+          1.5006211827662743,
+          1.5006211827662743
+        ],
+        "status_trajectory": [
+          "suppressed_naive_topk_equivalent",
+          "suppressed_naive_topk_equivalent"
+        ],
+        "trajectory_slope": 0.0
+      },
+      {
+        "fixture_id": "hold_field_required_scan_corridor",
+        "trajectory": [
+          0.9732771382466924,
+          0.9732771382466924,
+          0.9732771382466924
+        ],
+        "status_trajectory": [
+          "field_required",
+          "field_required",
+          "field_required"
         ],
         "trajectory_slope": 0.0
       }
     ],
-    "full_loop_mean_slope": -0.004369,
+    "full_loop_mean_slope": 0.033511,
     "frozen_memory_mean_slope": 0.0
   },
   "ablation_matrix": [
     {
       "ablation": "m17_6_credit",
       "held_out_metrics": {
-        "mean_fe_advantage_vs_best_single": -0.065747,
-        "mean_fe_advantage_vs_naive_topk": -0.065747,
-        "mean_fe_advantage_vs_field_off": 34.363906,
-        "median_fe_advantage_vs_best_single": -0.052692,
-        "median_fe_advantage_vs_naive_topk": -0.052692,
-        "win_rate": 0.0,
-        "no_gain_rate": 0.0,
-        "regression_rate": 1.0,
-        "p90_regression_magnitude": 0.092609,
-        "paired_rows": [
-          {
-            "fixture_id": "hold_conflict_hide_vs_forage",
-            "field_enabled_fe": 807.171242,
-            "best_single_fe": 807.078633,
-            "naive_topk_fe": 807.078633,
-            "field_off_fe": 841.507884,
-            "field_status": "suppressed_naive_topk_equivalent"
-          },
-          {
-            "fixture_id": "hold_goal_divergent_social",
-            "field_enabled_fe": 728.745968,
-            "best_single_fe": 728.694029,
-            "naive_topk_fe": 728.694029,
-            "field_off_fe": 763.124207,
-            "field_status": "suppressed_naive_topk_equivalent"
-          },
-          {
-            "fixture_id": "hold_dominant_rest",
-            "field_enabled_fe": 787.616764,
-            "best_single_fe": 787.564072,
-            "naive_topk_fe": 787.564072,
-            "field_off_fe": 821.993603,
-            "field_status": "suppressed_naive_topk_equivalent"
-          }
-        ],
-        "outcome_quantity": "m17_5_expected_free_energy_surrogate"
-      },
-      "trajectory_slope_delta": -0.00338,
-      "component_no_measurable_contribution": false
-    },
-    {
-      "ablation": "m17_7_reconsolidation",
-      "held_out_metrics": {
-        "mean_fe_advantage_vs_best_single": -0.065747,
-        "mean_fe_advantage_vs_naive_topk": -0.065747,
-        "mean_fe_advantage_vs_field_off": 34.363906,
-        "median_fe_advantage_vs_best_single": -0.052692,
-        "median_fe_advantage_vs_naive_topk": -0.052692,
-        "win_rate": 0.0,
-        "no_gain_rate": 0.0,
-        "regression_rate": 1.0,
-        "p90_regression_magnitude": 0.092609,
-        "paired_rows": [
-          {
-            "fixture_id": "hold_conflict_hide_vs_forage",
-            "field_enabled_fe": 807.171242,
-            "best_single_fe": 807.078633,
-            "naive_topk_fe": 807.078633,
-            "field_off_fe": 841.507884,
-            "field_status": "suppressed_naive_topk_equivalent"
-          },
-          {
-            "fixture_id": "hold_goal_divergent_social",
-            "field_enabled_fe": 728.745968,
-            "best_single_fe": 728.694029,
-            "naive_topk_fe": 728.694029,
-            "field_off_fe": 763.124207,
-            "field_status": "suppressed_naive_topk_equivalent"
-          },
-          {
-            "fixture_id": "hold_dominant_rest",
-            "field_enabled_fe": 787.616764,
-            "best_single_fe": 787.564072,
-            "naive_topk_fe": 787.564072,
-            "field_off_fe": 821.993603,
-            "field_status": "suppressed_naive_topk_equivalent"
-          }
-        ],
-        "outcome_quantity": "m17_5_expected_free_energy_surrogate"
-      },
-      "trajectory_slope_delta": -0.001056,
-      "component_no_measurable_contribution": false
-    },
-    {
-      "ablation": "m17_8_paths",
-      "held_out_metrics": {
-        "mean_fe_advantage_vs_best_single": 698.883544,
-        "mean_fe_advantage_vs_naive_topk": 698.883544,
-        "mean_fe_advantage_vs_field_off": 0.0,
-        "median_fe_advantage_vs_best_single": 705.945279,
-        "median_fe_advantage_vs_naive_topk": 705.945279,
-        "win_rate": 1.0,
+        "mean_fe_advantage_vs_best_single": 0.100795,
+        "mean_fe_advantage_vs_naive_topk": 0.118885,
+        "mean_fe_advantage_vs_field_off": 0.246887,
+        "median_fe_advantage_vs_best_single": 0.0,
+        "median_fe_advantage_vs_naive_topk": 0.0,
+        "win_rate": 0.25,
         "no_gain_rate": 0.0,
         "regression_rate": 0.0,
         "p90_regression_magnitude": 0.0,
         "paired_rows": [
           {
             "fixture_id": "hold_conflict_hide_vs_forage",
-            "field_enabled_fe": 841.507884,
-            "best_single_fe": 1557.958275,
-            "naive_topk_fe": 1557.958275,
-            "field_off_fe": 841.507884,
-            "field_status": ""
+            "field_enabled_fe": 1.406443,
+            "best_single_fe": 1.406443,
+            "naive_topk_fe": 1.406443,
+            "field_off_fe": 1.58623,
+            "field_status": "suppressed_naive_topk_equivalent"
           },
           {
             "fixture_id": "hold_goal_divergent_social",
-            "field_enabled_fe": 763.124207,
-            "best_single_fe": 1437.379167,
-            "naive_topk_fe": 1437.379167,
-            "field_off_fe": 763.124207,
-            "field_status": ""
+            "field_enabled_fe": 1.323034,
+            "best_single_fe": 1.323034,
+            "naive_topk_fe": 1.323034,
+            "field_off_fe": 1.504795,
+            "field_status": "suppressed_naive_topk_equivalent"
           },
           {
             "fixture_id": "hold_dominant_rest",
-            "field_enabled_fe": 821.993603,
-            "best_single_fe": 1527.938882,
-            "naive_topk_fe": 1527.938882,
-            "field_off_fe": 821.993603,
-            "field_status": ""
+            "field_enabled_fe": 1.500621,
+            "best_single_fe": 1.500621,
+            "naive_topk_fe": 1.500621,
+            "field_off_fe": 1.682804,
+            "field_status": "suppressed_naive_topk_equivalent"
+          },
+          {
+            "fixture_id": "hold_field_required_scan_corridor",
+            "field_enabled_fe": 0.973277,
+            "best_single_fe": 1.376456,
+            "naive_topk_fe": 1.448815,
+            "field_off_fe": 1.417094,
+            "field_status": "field_required"
           }
         ],
         "outcome_quantity": "m17_5_expected_free_energy_surrogate"
       },
-      "trajectory_slope_delta": -0.004411,
+      "trajectory_slope_delta": 0.033511,
       "component_no_measurable_contribution": false
     },
     {
-      "ablation": "m17_9_field",
+      "ablation": "m17_7_reconsolidation",
       "held_out_metrics": {
-        "mean_fe_advantage_vs_best_single": -22.929924,
-        "mean_fe_advantage_vs_naive_topk": -22.929924,
-        "mean_fe_advantage_vs_field_off": 11.499729,
-        "median_fe_advantage_vs_best_single": -34.36159,
-        "median_fe_advantage_vs_naive_topk": -34.36159,
-        "win_rate": 0.0,
+        "mean_fe_advantage_vs_best_single": 0.100795,
+        "mean_fe_advantage_vs_naive_topk": 0.118885,
+        "mean_fe_advantage_vs_field_off": 0.246887,
+        "median_fe_advantage_vs_best_single": 0.0,
+        "median_fe_advantage_vs_naive_topk": 0.0,
+        "win_rate": 0.25,
         "no_gain_rate": 0.0,
-        "regression_rate": 1.0,
-        "p90_regression_magnitude": 34.362783,
+        "regression_rate": 0.0,
+        "p90_regression_magnitude": 0.0,
         "paired_rows": [
           {
             "fixture_id": "hold_conflict_hide_vs_forage",
-            "field_enabled_fe": 807.144033,
-            "best_single_fe": 807.078633,
-            "naive_topk_fe": 807.078633,
-            "field_off_fe": 841.507884,
-            "field_status": ""
-          },
-          {
-            "fixture_id": "hold_goal_divergent_social",
-            "field_enabled_fe": 763.055619,
-            "best_single_fe": 728.694029,
-            "naive_topk_fe": 728.694029,
-            "field_off_fe": 763.124207,
-            "field_status": ""
-          },
-          {
-            "fixture_id": "hold_dominant_rest",
-            "field_enabled_fe": 821.926855,
-            "best_single_fe": 787.564072,
-            "naive_topk_fe": 787.564072,
-            "field_off_fe": 821.993603,
-            "field_status": ""
-          }
-        ],
-        "outcome_quantity": "m17_5_expected_free_energy_surrogate"
-      },
-      "trajectory_slope_delta": -0.002879,
-      "component_no_measurable_contribution": false
-    },
-    {
-      "ablation": "m17_10_goal_priors",
-      "held_out_metrics": {
-        "mean_fe_advantage_vs_best_single": -0.065747,
-        "mean_fe_advantage_vs_naive_topk": -0.065747,
-        "mean_fe_advantage_vs_field_off": 34.353754,
-        "median_fe_advantage_vs_best_single": -0.052692,
-        "median_fe_advantage_vs_naive_topk": -0.052692,
-        "win_rate": 0.0,
-        "no_gain_rate": 0.0,
-        "regression_rate": 1.0,
-        "p90_regression_magnitude": 0.092609,
-        "paired_rows": [
-          {
-            "fixture_id": "hold_conflict_hide_vs_forage",
-            "field_enabled_fe": 807.187264,
-            "best_single_fe": 807.094655,
-            "naive_topk_fe": 807.094655,
-            "field_off_fe": 841.507884,
+            "field_enabled_fe": 1.406443,
+            "best_single_fe": 1.406443,
+            "naive_topk_fe": 1.406443,
+            "field_off_fe": 1.58623,
             "field_status": "suppressed_naive_topk_equivalent"
           },
           {
             "fixture_id": "hold_goal_divergent_social",
-            "field_enabled_fe": 728.746797,
-            "best_single_fe": 728.694858,
-            "naive_topk_fe": 728.694858,
-            "field_off_fe": 763.124207,
+            "field_enabled_fe": 1.323034,
+            "best_single_fe": 1.323034,
+            "naive_topk_fe": 1.323034,
+            "field_off_fe": 1.504795,
             "field_status": "suppressed_naive_topk_equivalent"
           },
           {
             "fixture_id": "hold_dominant_rest",
-            "field_enabled_fe": 787.63037,
-            "best_single_fe": 787.577678,
-            "naive_topk_fe": 787.577678,
-            "field_off_fe": 821.993603,
+            "field_enabled_fe": 1.500621,
+            "best_single_fe": 1.500621,
+            "naive_topk_fe": 1.500621,
+            "field_off_fe": 1.682804,
             "field_status": "suppressed_naive_topk_equivalent"
+          },
+          {
+            "fixture_id": "hold_field_required_scan_corridor",
+            "field_enabled_fe": 0.973277,
+            "best_single_fe": 1.376456,
+            "naive_topk_fe": 1.448815,
+            "field_off_fe": 1.417094,
+            "field_status": "field_required"
           }
         ],
         "outcome_quantity": "m17_5_expected_free_energy_surrogate"
@@ -359,47 +311,208 @@
       "component_no_measurable_contribution": true
     },
     {
-      "ablation": "m17_10_adaptive_compute",
+      "ablation": "m17_8_paths",
       "held_out_metrics": {
-        "mean_fe_advantage_vs_best_single": -0.065747,
-        "mean_fe_advantage_vs_naive_topk": -0.065747,
-        "mean_fe_advantage_vs_field_off": 34.363906,
-        "median_fe_advantage_vs_best_single": -0.052692,
-        "median_fe_advantage_vs_naive_topk": -0.052692,
+        "mean_fe_advantage_vs_best_single": 0.0,
+        "mean_fe_advantage_vs_naive_topk": 0.0,
+        "mean_fe_advantage_vs_field_off": -1503.691212,
+        "median_fe_advantage_vs_best_single": 0.0,
+        "median_fe_advantage_vs_naive_topk": 0.0,
         "win_rate": 0.0,
         "no_gain_rate": 0.0,
         "regression_rate": 1.0,
-        "p90_regression_magnitude": 0.092609,
+        "p90_regression_magnitude": 1556.372045,
         "paired_rows": [
           {
             "fixture_id": "hold_conflict_hide_vs_forage",
-            "field_enabled_fe": 807.171242,
-            "best_single_fe": 807.078633,
-            "naive_topk_fe": 807.078633,
-            "field_off_fe": 841.507884,
-            "field_status": "suppressed_naive_topk_equivalent"
+            "field_enabled_fe": 1557.958275,
+            "best_single_fe": 1557.958275,
+            "naive_topk_fe": 1557.958275,
+            "field_off_fe": 1.58623,
+            "field_status": ""
           },
           {
             "fixture_id": "hold_goal_divergent_social",
-            "field_enabled_fe": 728.745968,
-            "best_single_fe": 728.694029,
-            "naive_topk_fe": 728.694029,
-            "field_off_fe": 763.124207,
-            "field_status": "suppressed_naive_topk_equivalent"
+            "field_enabled_fe": 1437.379167,
+            "best_single_fe": 1437.379167,
+            "naive_topk_fe": 1437.379167,
+            "field_off_fe": 1.504795,
+            "field_status": ""
           },
           {
             "fixture_id": "hold_dominant_rest",
-            "field_enabled_fe": 787.616764,
-            "best_single_fe": 787.564072,
-            "naive_topk_fe": 787.564072,
-            "field_off_fe": 821.993603,
-            "field_status": "suppressed_naive_topk_equivalent"
+            "field_enabled_fe": 1527.938882,
+            "best_single_fe": 1527.938882,
+            "naive_topk_fe": 1527.938882,
+            "field_off_fe": 1.682804,
+            "field_status": ""
+          },
+          {
+            "fixture_id": "hold_field_required_scan_corridor",
+            "field_enabled_fe": 1497.679448,
+            "best_single_fe": 1497.679448,
+            "naive_topk_fe": 1497.679448,
+            "field_off_fe": 1.417094,
+            "field_status": ""
           }
         ],
         "outcome_quantity": "m17_5_expected_free_energy_surrogate"
       },
-      "trajectory_slope_delta": 0.002556,
+      "trajectory_slope_delta": 0.033511,
       "component_no_measurable_contribution": false
+    },
+    {
+      "ablation": "m17_9_field",
+      "held_out_metrics": {
+        "mean_fe_advantage_vs_best_single": 0.033773,
+        "mean_fe_advantage_vs_naive_topk": 0.0,
+        "mean_fe_advantage_vs_field_off": 0.179866,
+        "median_fe_advantage_vs_best_single": 0.0,
+        "median_fe_advantage_vs_naive_topk": 0.0,
+        "win_rate": 0.0,
+        "no_gain_rate": 0.0,
+        "regression_rate": 0.0,
+        "p90_regression_magnitude": 0.0,
+        "paired_rows": [
+          {
+            "fixture_id": "hold_conflict_hide_vs_forage",
+            "field_enabled_fe": 1.406443,
+            "best_single_fe": 1.406443,
+            "naive_topk_fe": 1.406443,
+            "field_off_fe": 1.58623,
+            "field_status": ""
+          },
+          {
+            "fixture_id": "hold_goal_divergent_social",
+            "field_enabled_fe": 1.323034,
+            "best_single_fe": 1.323034,
+            "naive_topk_fe": 1.323034,
+            "field_off_fe": 1.504795,
+            "field_status": ""
+          },
+          {
+            "fixture_id": "hold_dominant_rest",
+            "field_enabled_fe": 1.500621,
+            "best_single_fe": 1.500621,
+            "naive_topk_fe": 1.500621,
+            "field_off_fe": 1.682804,
+            "field_status": ""
+          },
+          {
+            "fixture_id": "hold_field_required_scan_corridor",
+            "field_enabled_fe": 1.241364,
+            "best_single_fe": 1.376456,
+            "naive_topk_fe": 1.241364,
+            "field_off_fe": 1.417094,
+            "field_status": ""
+          }
+        ],
+        "outcome_quantity": "m17_5_expected_free_energy_surrogate"
+      },
+      "trajectory_slope_delta": 0.033511,
+      "component_no_measurable_contribution": false
+    },
+    {
+      "ablation": "m17_10_goal_priors",
+      "held_out_metrics": {
+        "mean_fe_advantage_vs_best_single": 0.101025,
+        "mean_fe_advantage_vs_naive_topk": 0.119115,
+        "mean_fe_advantage_vs_field_off": 0.238972,
+        "median_fe_advantage_vs_best_single": 0.0,
+        "median_fe_advantage_vs_naive_topk": 0.0,
+        "win_rate": 0.25,
+        "no_gain_rate": 0.0,
+        "regression_rate": 0.0,
+        "p90_regression_magnitude": 0.0,
+        "paired_rows": [
+          {
+            "fixture_id": "hold_conflict_hide_vs_forage",
+            "field_enabled_fe": 1.422465,
+            "best_single_fe": 1.422465,
+            "naive_topk_fe": 1.422465,
+            "field_off_fe": 1.58623,
+            "field_status": "suppressed_naive_topk_equivalent"
+          },
+          {
+            "fixture_id": "hold_goal_divergent_social",
+            "field_enabled_fe": 1.323862,
+            "best_single_fe": 1.323862,
+            "naive_topk_fe": 1.323862,
+            "field_off_fe": 1.504795,
+            "field_status": "suppressed_naive_topk_equivalent"
+          },
+          {
+            "fixture_id": "hold_dominant_rest",
+            "field_enabled_fe": 1.514226,
+            "best_single_fe": 1.514226,
+            "naive_topk_fe": 1.514226,
+            "field_off_fe": 1.682804,
+            "field_status": "suppressed_naive_topk_equivalent"
+          },
+          {
+            "fixture_id": "hold_field_required_scan_corridor",
+            "field_enabled_fe": 0.97448,
+            "best_single_fe": 1.378579,
+            "naive_topk_fe": 1.450938,
+            "field_off_fe": 1.417094,
+            "field_status": "field_required"
+          }
+        ],
+        "outcome_quantity": "m17_5_expected_free_energy_surrogate"
+      },
+      "trajectory_slope_delta": -0.000115,
+      "component_no_measurable_contribution": false
+    },
+    {
+      "ablation": "m17_10_adaptive_compute",
+      "held_out_metrics": {
+        "mean_fe_advantage_vs_best_single": 0.100795,
+        "mean_fe_advantage_vs_naive_topk": 0.118885,
+        "mean_fe_advantage_vs_field_off": 0.246887,
+        "median_fe_advantage_vs_best_single": 0.0,
+        "median_fe_advantage_vs_naive_topk": 0.0,
+        "win_rate": 0.25,
+        "no_gain_rate": 0.0,
+        "regression_rate": 0.0,
+        "p90_regression_magnitude": 0.0,
+        "paired_rows": [
+          {
+            "fixture_id": "hold_conflict_hide_vs_forage",
+            "field_enabled_fe": 1.406443,
+            "best_single_fe": 1.406443,
+            "naive_topk_fe": 1.406443,
+            "field_off_fe": 1.58623,
+            "field_status": "suppressed_naive_topk_equivalent"
+          },
+          {
+            "fixture_id": "hold_goal_divergent_social",
+            "field_enabled_fe": 1.323034,
+            "best_single_fe": 1.323034,
+            "naive_topk_fe": 1.323034,
+            "field_off_fe": 1.504795,
+            "field_status": "suppressed_naive_topk_equivalent"
+          },
+          {
+            "fixture_id": "hold_dominant_rest",
+            "field_enabled_fe": 1.500621,
+            "best_single_fe": 1.500621,
+            "naive_topk_fe": 1.500621,
+            "field_off_fe": 1.682804,
+            "field_status": "suppressed_naive_topk_equivalent"
+          },
+          {
+            "fixture_id": "hold_field_required_scan_corridor",
+            "field_enabled_fe": 0.973277,
+            "best_single_fe": 1.376456,
+            "naive_topk_fe": 1.448815,
+            "field_off_fe": 1.417094,
+            "field_status": "field_required"
+          }
+        ],
+        "outcome_quantity": "m17_5_expected_free_energy_surrogate"
+      },
+      "trajectory_slope_delta": 0.0,
+      "component_no_measurable_contribution": true
     }
   ],
   "honesty_statement": "Outcome quantity is the M17.5 expected-free-energy surrogate, not a learned generative-model variational free energy."

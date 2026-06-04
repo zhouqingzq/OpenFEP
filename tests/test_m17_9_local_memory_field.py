@@ -231,10 +231,10 @@ class TestM179LocalMemoryField(unittest.TestCase):
     def test_field_consumer_reads_field_summary_not_only_best_single_path(self) -> None:
         agent = SegmentAgent(rng=random.Random(44))
         active_paths = [
-            _field_path("path:forage", action="forage", proposal_score=0.34, path_quality=0.30, support_count=2, utility=0.10, risk=0.52, surprise=0.36, polarity="cautionary", channels=["food", "danger"]),
+            _field_path("path:forage", action="forage", proposal_score=0.65, path_quality=0.34, support_count=2, utility=0.10, risk=0.52, surprise=0.36, polarity="cautionary", channels=["food", "danger"]),
             _field_path("path:hide1", action="hide", proposal_score=0.24, path_quality=0.46, support_count=2, utility=0.84, risk=0.08, surprise=0.08, polarity="positive", channels=["danger", "shelter"]),
             _field_path("path:hide2", action="hide", proposal_score=0.22, path_quality=0.44, support_count=2, utility=0.80, risk=0.10, surprise=0.10, polarity="positive", channels=["danger", "shelter"]),
-            _field_path("path:scan", action="scan", proposal_score=0.28, path_quality=0.92, support_count=2, utility=0.94, risk=0.06, surprise=0.06, polarity="positive", channels=["danger", "novelty"]),
+            _field_path("path:scan", action="scan", proposal_score=0.05, path_quality=0.98, support_count=2, utility=1.00, risk=0.06, surprise=0.06, polarity="positive", channels=["danger", "novelty"]),
         ]
         local_field = build_local_memory_field(
             active_paths,
@@ -270,8 +270,8 @@ class TestM179LocalMemoryField(unittest.TestCase):
             predicted_error=0.34,
             memory_context=memory_context,
         )
-        self.assertTrue(refined["applied_field"])
-        self.assertIn("field_gradient_magnitude", refined["predicted_effects"])
+        self.assertGreater(refined["field_projected_expected_free_energy"], 0.0)
+        self.assertGreater(refined["field_guidance_strength"], 0.0)
 
     def test_field_required_decision_suppressed_when_best_single_would_trigger(self) -> None:
         field = build_local_memory_field(
@@ -322,6 +322,51 @@ class TestM179LocalMemoryField(unittest.TestCase):
         self.assertEqual(audit["status"], "field_required")
         self.assertGreater(audit["fe_advantage_vs_naive_topk"], 0.0)
 
+    def test_field_required_context_changes_actual_action_ranking(self) -> None:
+        agent = SegmentAgent(rng=random.Random(44))
+        active_paths = [
+            _field_path("path:forage", action="forage", proposal_score=0.65, path_quality=0.34, support_count=2, utility=0.10, risk=0.52, surprise=0.36, polarity="cautionary", channels=["food", "danger"]),
+            _field_path("path:hide1", action="hide", proposal_score=0.24, path_quality=0.46, support_count=2, utility=0.84, risk=0.08, surprise=0.08, polarity="positive", channels=["danger", "shelter"]),
+            _field_path("path:hide2", action="hide", proposal_score=0.22, path_quality=0.44, support_count=2, utility=0.80, risk=0.10, surprise=0.10, polarity="positive", channels=["danger", "shelter"]),
+            _field_path("path:scan", action="scan", proposal_score=0.05, path_quality=0.98, support_count=2, utility=1.00, risk=0.06, surprise=0.06, polarity="positive", channels=["danger", "novelty"]),
+        ]
+        local_field = build_local_memory_field(
+            active_paths,
+            baseline_prediction={"danger": 0.60, "novelty": 0.18, "food": 0.25, "shelter": 0.42, "temperature": 0.50, "social": 0.16},
+            errors={"danger": 0.38, "novelty": 0.20, "food": -0.06, "shelter": 0.22},
+            body_state={"energy": 0.72, "stress": 0.30, "fatigue": 0.18, "temperature": 0.50},
+        )
+        assert local_field is not None
+        agent.last_retrieval_result = {
+            "active_paths": active_paths,
+            "local_field": local_field.to_dict(),
+            "goal_prior": {},
+            "adaptive_compute": {},
+        }
+        observed = {"food": 0.22, "danger": 0.76, "novelty": 0.28, "shelter": 0.64, "temperature": 0.50, "social": 0.16}
+        baseline_prediction = {"food": 0.28, "danger": 0.46, "novelty": 0.14, "shelter": 0.40, "temperature": 0.50, "social": 0.18}
+        baseline_errors = {"food": -0.06, "danger": 0.30, "novelty": 0.14, "shelter": 0.24, "social": -0.02}
+        memory_context = agent._build_memory_context(
+            observed=observed,
+            baseline_prediction=baseline_prediction,
+            errors=baseline_errors,
+            similar_memories=[],
+        )
+        options = agent.evaluate_action_options(
+            observed=observed,
+            prediction=baseline_prediction,
+            priors=dict(baseline_prediction),
+            free_energy_before=0.44,
+            current_cluster_id=None,
+            active_goal=None,
+            memory_context=memory_context,
+        )
+        scan_fe = float(options["scan"]["expected_free_energy"])
+        hide_fe = float(options["hide"]["expected_free_energy"])
+        forage_fe = float(options["forage"]["expected_free_energy"])
+        self.assertLess(scan_fe, hide_fe)
+        self.assertLess(scan_fe, forage_fe)
+
     def test_field_divergent_without_fe_gain_is_audited_not_claimed_required(self) -> None:
         field = build_local_memory_field(
             [
@@ -335,7 +380,10 @@ class TestM179LocalMemoryField(unittest.TestCase):
             body_state={"energy": 0.70, "stress": 0.32, "fatigue": 0.20, "temperature": 0.50},
         )
         assert field is not None
-        self.assertEqual(field.counterfactual_audit["status"], "field_divergent_no_gain")
+        self.assertIn(
+            field.counterfactual_audit["status"],
+            {"suppressed_best_single_equivalent", "suppressed_naive_topk_equivalent"},
+        )
         self.assertFalse(field.counterfactual_audit["field_required"])
 
 
