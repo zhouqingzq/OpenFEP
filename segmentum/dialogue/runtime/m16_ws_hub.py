@@ -21,6 +21,7 @@ from segmentum.dialogue.runtime.m16_protocol import (
 class DeliverySurfaceState:
     ws_subscribed: bool = False
     subscriber_count: int = 0
+    external_delivery_active: bool = False
     delivery_surface_ready_at: int = 0
     last_subscribe_at: int = 0
 
@@ -68,11 +69,21 @@ class M16WsHub:
         with self._lock:
             self._delivery.delivery_surface_ready_at = 0
 
+    def mark_external_delivery_surface_ready(self) -> None:
+        with self._lock:
+            self._delivery.external_delivery_active = True
+            self._delivery.delivery_surface_ready_at = self._now()
+
+    def clear_external_delivery_surface_ready(self) -> None:
+        with self._lock:
+            self._delivery.external_delivery_active = False
+
     def delivery_state(self) -> DeliverySurfaceState:
         with self._lock:
             return DeliverySurfaceState(
                 ws_subscribed=self._delivery.ws_subscribed,
                 subscriber_count=self._delivery.subscriber_count,
+                external_delivery_active=self._delivery.external_delivery_active,
                 delivery_surface_ready_at=self._delivery.delivery_surface_ready_at,
                 last_subscribe_at=self._delivery.last_subscribe_at,
             )
@@ -80,7 +91,7 @@ class M16WsHub:
     def outbox_drain_allowed(self, *, now: int | None = None) -> tuple[bool, str]:
         state = self.delivery_state()
         return delivery_surface_allows_outbox_drain(
-            ws_subscribed=state.ws_subscribed,
+            ws_subscribed=bool(state.ws_subscribed or state.external_delivery_active),
             delivery_surface_ready_at=state.delivery_surface_ready_at,
             now=now if now is not None else self._now(),
         )

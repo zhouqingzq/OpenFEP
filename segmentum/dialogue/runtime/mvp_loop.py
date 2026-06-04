@@ -680,6 +680,10 @@ def _group_audience_relation(source_ids: list[str], current_ids: list[str]) -> s
     return "different_audience"
 
 
+def _bounded_ingress_evidence_band(raw: Any) -> str:
+    return str(raw or "").strip()[:32]
+
+
 def _group_memory_policy_for_card(
     card: Mapping[str, Any],
     *,
@@ -4216,6 +4220,11 @@ def _append_relationship_value_memory(
     source: str,
     confidence: float,
     created_at: int | None = None,
+    session_id: str = "",
+    turn_index: int | None = None,
+    source_participant_id: str = "",
+    source_audience_participant_ids: list[str] | None = None,
+    ingress_evidence_band: str = "",
 ) -> dict[str, Any] | None:
     clean_user = str(user_id or "").strip()
     clean_summary = str(summary or "").strip()
@@ -4247,6 +4256,19 @@ def _append_relationship_value_memory(
         "source": str(source or "feedback").strip(),
         "created_at": now,
     }
+    if str(source_participant_id or "").strip():
+        row["source_participant_id"] = str(source_participant_id).strip()[:64]
+    audience_ids = _bounded_string_list(source_audience_participant_ids or [], limit=8, item_max_chars=64)
+    if audience_ids:
+        row["source_audience_participant_ids"] = audience_ids
+        row["source_audience_scope"] = _group_audience_scope_label(audience_ids)
+    if str(session_id or "").strip():
+        row["session_id"] = str(session_id).strip()[:160]
+    if turn_index is not None:
+        row["turn_index"] = int(turn_index)
+    band = _bounded_ingress_evidence_band(ingress_evidence_band)
+    if band:
+        row["ingress_evidence_band"] = band
     rows.append(row)
     by_user[clean_user] = rows[-24:]
     return row
@@ -4257,7 +4279,13 @@ def _apply_habit_updates(
     thinking: Mapping[str, Any],
     *,
     user_id: str = "",
+    display_name: str = "",
     now: int | None = None,
+    turn_index: int = 0,
+    session_id: str = "",
+    ingress_evidence_band: str = "",
+    default_shareability: str = "default_social",
+    group_turn_binding: Mapping[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     updates = thinking.get("habit_updates")
     if not isinstance(updates, list):
@@ -4289,6 +4317,33 @@ def _apply_habit_updates(
             "confidence": round(confidence, 6),
             "source": "thinking_prompt",
         }
+        shareability = _shareability_for_memory_text(content, evidence, requested=default_shareability)
+        source_participant_id = str(
+            _mapping(group_turn_binding).get("current_speaker_participant_id", "")
+            or user_id
+            or ""
+        ).strip()
+        source_audience_participant_ids = _bounded_string_list(
+            _mapping(group_turn_binding).get("visible_participant_ids"),
+            limit=8,
+            item_max_chars=64,
+        )
+        _stamp_memory_policy(
+            row,
+            user_id=user_id,
+            display_name=display_name,
+            shareability=shareability,
+            restriction_reason=_restriction_reason_for_shareability(
+                shareability,
+                existing="thinking_habit_update",
+            ),
+            confidence=confidence,
+            source_participant_id=source_participant_id,
+            source_audience_participant_ids=source_audience_participant_ids,
+            session_id=session_id,
+            turn_index=turn_index,
+            ingress_evidence_band=ingress_evidence_band,
+        )
         target.append(row)
         existing.add(content)
         applied.append(row)
@@ -4303,6 +4358,11 @@ def _apply_habit_updates(
                 source="thinking_habit_feedback",
                 confidence=confidence,
                 created_at=now,
+                session_id=session_id,
+                turn_index=turn_index,
+                source_participant_id=source_participant_id,
+                source_audience_participant_ids=source_audience_participant_ids,
+                ingress_evidence_band=ingress_evidence_band,
             )
     return applied
 
@@ -4351,6 +4411,9 @@ def _stamp_memory_policy(
     confidence: float = 0.8,
     source_participant_id: str = "",
     source_audience_participant_ids: list[str] | None = None,
+    session_id: str = "",
+    turn_index: int | None = None,
+    ingress_evidence_band: str = "",
 ) -> dict[str, Any]:
     row["source_user_id"] = str(user_id or "").strip()
     row["source_display_name"] = str(display_name or "").strip()
@@ -4360,6 +4423,13 @@ def _stamp_memory_policy(
     if audience_ids:
         row["source_audience_participant_ids"] = audience_ids
         row["source_audience_scope"] = _group_audience_scope_label(audience_ids)
+    if str(session_id or "").strip():
+        row["session_id"] = str(session_id).strip()[:160]
+    if turn_index is not None:
+        row["turn_index"] = int(turn_index)
+    band = _bounded_ingress_evidence_band(ingress_evidence_band)
+    if band:
+        row["ingress_evidence_band"] = band
     row["shareability"] = shareability
     if restriction_reason:
         row["restriction_reason"] = restriction_reason
@@ -5749,6 +5819,7 @@ class MVPDialogueRuntime:
         turn_index: int = 0,
         speaker_name: str = "",
         group_turn_envelope: Mapping[str, Any] | None = None,
+        ingress_evidence_band: str = "",
         bus_messages: list[Mapping[str, Any]] | None = None,
         now: int | None = None,
         proactive_context: Mapping[str, Any] | None = None,
@@ -5764,7 +5835,9 @@ class MVPDialogueRuntime:
         display_name = str(speaker_name or "").strip() or "default_user"
         participant_key = str(bounded_group_turn.get("speaker_participant_id", "") or "").strip()
         user_id = _safe_user_id(participant_key or display_name)
+        session_id = self.store.root.name
         proactive_turn = isinstance(proactive_context, Mapping) and bool(proactive_context)
+        ingress_band = _bounded_ingress_evidence_band(ingress_evidence_band)
         prior_last_user_text = str(_mapping(state.get("temporal_state")).get("last_user_text", "") or "")
         proactive_surrogate_text = str(user_text or "") if proactive_turn else ""
         proactive_defer_audit_log = bool(proactive_context.get("defer_audit_log")) if proactive_turn else False
@@ -5831,6 +5904,7 @@ class MVPDialogueRuntime:
                 "reply_to_turn_id": str(bounded_group_turn.get("reply_to_turn_id", "") or "").strip()[:120],
                 "quoted_turn_ids": _bounded_string_list(bounded_group_turn.get("quoted_turn_ids"), limit=8, item_max_chars=120),
                 "explicit_mentions": _bounded_string_list(bounded_group_turn.get("explicit_mentions"), limit=8, item_max_chars=64),
+                "ingress_evidence_band": ingress_band,
                 "text": user_text,
                 "at": now,
             })
@@ -6817,6 +6891,8 @@ class MVPDialogueRuntime:
             turn_index=turn_index,
             user_id=user_id,
             display_name=display_name,
+            session_id=session_id,
+            ingress_evidence_band=ingress_band,
             explicit_secrecy=bool(_mapping(_mapping(memory_dynamics.get("control_guidance")).get("sharing_policy")).get("explicit_secrecy_detected")),
             memory_dynamics=memory_dynamics,
             group_turn_binding=group_turn_binding,
@@ -6828,6 +6904,8 @@ class MVPDialogueRuntime:
             turn_index=turn_index,
             user_id=user_id,
             display_name=display_name,
+            session_id=session_id,
+            ingress_evidence_band=ingress_band,
             default_shareability=(
                 "restricted_explicit"
                 if bool(_mapping(_mapping(memory_dynamics.get("control_guidance")).get("sharing_policy")).get("explicit_secrecy_detected"))
@@ -6844,7 +6922,17 @@ class MVPDialogueRuntime:
             state,
             thinking,
             user_id=user_id,
+            display_name=display_name,
             now=now,
+            turn_index=turn_index,
+            session_id=session_id,
+            ingress_evidence_band=ingress_band,
+            default_shareability=(
+                "restricted_explicit"
+                if bool(_mapping(_mapping(memory_dynamics.get("control_guidance")).get("sharing_policy")).get("explicit_secrecy_detected"))
+                else "default_social"
+            ),
+            group_turn_binding=group_turn_binding,
         )
 
         raw_reply = str(thinking.get("reply") or "").strip()
@@ -6970,13 +7058,20 @@ class MVPDialogueRuntime:
             turn_index=turn_index,
             user_id=user_id,
             display_name=display_name,
+            session_id=session_id,
+            ingress_evidence_band=ingress_band,
+            group_turn_binding=group_turn_binding,
         )
         pacing_feedback_habits_applied = self._apply_pacing_feedback_habit(
             state,
             user_text=user_text,
             user_id=user_id,
+            display_name=display_name,
             now=now,
             turn_index=turn_index,
+            session_id=session_id,
+            ingress_evidence_band=ingress_band,
+            group_turn_binding=group_turn_binding,
         )
         safety_repair = resolve_m13_safety_repair(
             reply_validation=reply_validation,
@@ -7119,6 +7214,7 @@ class MVPDialogueRuntime:
                 "mentioned_participant_ids": group_turn_binding.get("mentioned_participant_ids", []),
                 "reply_to_turn_id": group_turn_binding.get("reply_to_turn_id", ""),
                 "group_reply_policy_action": group_reply_policy.get("action", ""),
+                "ingress_evidence_band": ingress_band,
             },
         )
         episode_components_after = aggregate_fe_components(
@@ -7281,6 +7377,7 @@ class MVPDialogueRuntime:
             "group_reply_policy": group_reply_policy,
             "group_privacy_policy": group_privacy_policy,
             "group_chat_state": group_chat_state,
+            "ingress_evidence_band": ingress_band,
             "entity_binding": entity_binding,
             "alias_updates_applied": alias_updates_applied,
             "memory_candidates_applied": memory_candidates_applied,
@@ -7371,6 +7468,7 @@ class MVPDialogueRuntime:
                     "reply_to_turn_id": group_turn_binding.get("reply_to_turn_id", ""),
                     "quoted_turn_ids": group_turn_binding.get("quoted_turn_ids", []),
                     "explicit_mentions": group_turn_binding.get("explicit_mentions", []),
+                    "ingress_evidence_band": ingress_band,
                     "group_turn_binding": group_turn_binding,
                     "group_reply_policy": group_reply_policy,
                     "group_privacy_policy": group_privacy_policy,
@@ -9549,6 +9647,8 @@ class MVPDialogueRuntime:
         turn_index: int = 0,
         user_id: str = "",
         display_name: str = "",
+        session_id: str = "",
+        ingress_evidence_band: str = "",
         default_shareability: str = "default_social",
         restriction_reason: str = "",
         group_turn_binding: Mapping[str, Any] | None = None,
@@ -9636,6 +9736,9 @@ class MVPDialogueRuntime:
                 confidence=confidence,
                 source_participant_id=source_participant_id,
                 source_audience_participant_ids=source_audience_participant_ids,
+                session_id=session_id,
+                turn_index=turn_index,
+                ingress_evidence_band=ingress_evidence_band,
             )
             if store_target == "long_term":
                 state.setdefault("long_term_memory", []).append(row)
@@ -9653,11 +9756,24 @@ class MVPDialogueRuntime:
         turn_index: int = 0,
         user_id: str = "",
         display_name: str = "",
+        session_id: str = "",
+        ingress_evidence_band: str = "",
         default_shareability: str = "default_social",
+        group_turn_binding: Mapping[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         if not isinstance(updates, list):
             return []
         applied: list[dict[str, Any]] = []
+        source_participant_id = str(
+            _mapping(group_turn_binding).get("current_speaker_participant_id", "")
+            or user_id
+            or ""
+        ).strip()
+        source_audience_participant_ids = _bounded_string_list(
+            _mapping(group_turn_binding).get("visible_participant_ids"),
+            limit=8,
+            item_max_chars=64,
+        )
         for item in updates:
             if not isinstance(item, Mapping):
                 continue
@@ -9721,6 +9837,11 @@ class MVPDialogueRuntime:
                         existing="post_reply_update",
                     ),
                     confidence=confidence,
+                    source_participant_id=source_participant_id,
+                    source_audience_participant_ids=source_audience_participant_ids,
+                    session_id=session_id,
+                    turn_index=turn_index,
+                    ingress_evidence_band=ingress_evidence_band,
                 )
                 target.append(row)
                 applied.append(row)
@@ -9735,6 +9856,11 @@ class MVPDialogueRuntime:
                         source="post_reply_observer",
                         confidence=confidence,
                         created_at=now,
+                        session_id=session_id,
+                        turn_index=turn_index,
+                        source_participant_id=source_participant_id,
+                        source_audience_participant_ids=source_audience_participant_ids,
+                        ingress_evidence_band=ingress_evidence_band,
                     )
                 continue
             row = {
@@ -9790,6 +9916,11 @@ class MVPDialogueRuntime:
                     existing="post_reply_update",
                 ),
                 confidence=confidence,
+                source_participant_id=source_participant_id,
+                source_audience_participant_ids=source_audience_participant_ids,
+                session_id=session_id,
+                turn_index=turn_index,
+                ingress_evidence_band=ingress_evidence_band,
             )
             state.setdefault("short_term_memory", []).append(row)
             applied.append(row)
@@ -9801,8 +9932,12 @@ class MVPDialogueRuntime:
         *,
         user_text: str,
         user_id: str = "",
+        display_name: str = "",
         now: int | None = None,
         turn_index: int = 0,
+        session_id: str = "",
+        ingress_evidence_band: str = "",
+        group_turn_binding: Mapping[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         if not _has_any_marker(user_text, _BREVITY_FEEDBACK_MARKERS):
             return []
@@ -9850,6 +9985,33 @@ class MVPDialogueRuntime:
             return []
         row["evidence_refs"] = [evidence_ref]
         row["created_at"] = int(now or _utc_timestamp())
+        shareability = _shareability_for_memory_text(content, str(user_text), requested="default_social")
+        source_participant_id = str(
+            _mapping(group_turn_binding).get("current_speaker_participant_id", "")
+            or user_id
+            or ""
+        ).strip()
+        source_audience_participant_ids = _bounded_string_list(
+            _mapping(group_turn_binding).get("visible_participant_ids"),
+            limit=8,
+            item_max_chars=64,
+        )
+        _stamp_memory_policy(
+            row,
+            user_id=user_id,
+            display_name=display_name,
+            shareability=shareability,
+            restriction_reason=_restriction_reason_for_shareability(
+                shareability,
+                existing="pacing_feedback",
+            ),
+            confidence=0.82,
+            source_participant_id=source_participant_id,
+            source_audience_participant_ids=source_audience_participant_ids,
+            session_id=session_id,
+            turn_index=turn_index,
+            ingress_evidence_band=ingress_evidence_band,
+        )
         target.append(row)
         abstract = _abstract_relationship_constraint_from_feedback(content, str(user_text))
         if abstract is not None:
@@ -9862,6 +10024,11 @@ class MVPDialogueRuntime:
                 source="pacing_feedback",
                 confidence=0.82,
                 created_at=now,
+                session_id=session_id,
+                turn_index=turn_index,
+                source_participant_id=source_participant_id,
+                source_audience_participant_ids=source_audience_participant_ids,
+                ingress_evidence_band=ingress_evidence_band,
             )
         return [row]
 
@@ -10058,6 +10225,8 @@ class MVPDialogueRuntime:
         turn_index: int = 0,
         user_id: str = "",
         display_name: str = "",
+        session_id: str = "",
+        ingress_evidence_band: str = "",
         explicit_secrecy: bool = False,
         memory_dynamics: Mapping[str, Any] | None = None,
         group_turn_binding: Mapping[str, Any] | None = None,
@@ -10134,6 +10303,9 @@ class MVPDialogueRuntime:
                     confidence=0.85,
                     source_participant_id=source_participant_id,
                     source_audience_participant_ids=source_audience_participant_ids,
+                    session_id=session_id,
+                    turn_index=turn_index,
+                    ingress_evidence_band=ingress_evidence_band,
                 )
                 short.append(row)
                 state["short_term_memory"] = short[-24:]
@@ -10205,6 +10377,9 @@ class MVPDialogueRuntime:
                 confidence=_bounded_float(write.get("confidence"), default=0.75),
                 source_participant_id=source_participant_id,
                 source_audience_participant_ids=source_audience_participant_ids,
+                session_id=session_id,
+                turn_index=turn_index,
+                ingress_evidence_band=ingress_evidence_band,
             )
             if store_target == "long_term":
                 state.setdefault("long_term_memory", []).append(row)

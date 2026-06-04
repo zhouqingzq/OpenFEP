@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
-from segmentum.dialogue.runtime.m16_api import M16Gateway
+from segmentum.dialogue.runtime.m16_api import M16Gateway, M16SessionHandle
 
 
 TELEGRAM_PLATFORM = "telegram"
@@ -137,6 +137,44 @@ def telegram_turn_id(
         message_thread_id=message_thread_id,
     )
     return f"{session}:msg:{message_id}"
+
+
+def telegram_delivery_target_from_session_id(session_id: str) -> TelegramDeliveryTarget | None:
+    value = str(session_id or "").strip()
+    if not value.startswith(f"{TELEGRAM_PLATFORM}:"):
+        return None
+    parts = [part.strip() for part in value.split(":") if part.strip()]
+    if len(parts) < 4:
+        return None
+    account_scope = parts[1]
+    surface_kind = parts[2]
+    if surface_kind == "dm" and len(parts) >= 4 and parts[3].startswith("user_"):
+        return TelegramDeliveryTarget(
+            chat_id=parts[3][5:],
+            surface_kind=surface_kind,
+            surface_id=parts[3],
+            account_scope=account_scope,
+        )
+    if surface_kind == "group" and len(parts) >= 4 and parts[3].startswith("chat_"):
+        return TelegramDeliveryTarget(
+            chat_id=parts[3][5:],
+            surface_kind=surface_kind,
+            surface_id=parts[3],
+            account_scope=account_scope,
+        )
+    if surface_kind == "topic" and len(parts) >= 5 and parts[3].startswith("chat_") and parts[4].startswith("thread_"):
+        try:
+            thread_id = int(parts[4][7:])
+        except ValueError:
+            return None
+        return TelegramDeliveryTarget(
+            chat_id=parts[3][5:],
+            surface_kind=surface_kind,
+            surface_id=f"{parts[3]}:{parts[4]}",
+            account_scope=account_scope,
+            message_thread_id=thread_id,
+        )
+    return None
 
 
 @dataclass(frozen=True)
@@ -572,6 +610,7 @@ class TelegramConnector:
             source="telegram_connector",
             speaker_name=normalized.speaker_name,
             group_turn_envelope=normalized.group_turn_envelope,
+            ingress_evidence_band=normalized.ingress_evidence_band,
         )
         target_store.record(
             event_id=event_id,
@@ -624,6 +663,68 @@ class TelegramConnector:
             sent.append({"event_id": event_id, "chat_id": target.chat_id, "message_id": message.get("message_id", "")})
         return sent
 
+    def _deliver_proactive_rows(self, session_id: str, processed_rows: list[Mapping[str, Any]]) -> list[dict[str, Any]]:
+        target = telegram_delivery_target_from_session_id(session_id)
+        if target is None:
+            return []
+        sent: list[dict[str, Any]] = []
+        for row in processed_rows:
+            if str(row.get("phase", "") or "") != "outbox_drain":
+                continue
+            if not bool(row.get("drained")):
+                continue
+            reply = str(row.get("reply", "") or "").strip()
+            proposal_id = str(row.get("proposal_id", "") or "").strip()
+            if not reply or not proposal_id:
+                continue
+            message = self.api.send_message(
+                chat_id=target.chat_id,
+                text=reply,
+                message_thread_id=target.message_thread_id,
+                reply_to_message_id=None,
+            )
+            sent.append(
+                {
+                    "proposal_id": proposal_id,
+                    "chat_id": target.chat_id,
+                    "message_id": message.get("message_id", ""),
+                    "message_thread_id": target.message_thread_id,
+                    "delivery_kind": "proactive",
+                }
+            )
+        return sent
+
+    def _telegram_handles(self) -> list[M16SessionHandle]:
+        prefix = f"{TELEGRAM_PLATFORM}:{self.account_scope}:"
+        return [
+            handle
+            for handle in self.gateway.sessions.values()
+            if handle.persona_id == self.persona_id and handle.session_id.startswith(prefix)
+        ]
+
+    def drain_proactive_once(self, *, max_sessions: int = 8) -> dict[str, Any]:
+        results: list[dict[str, Any]] = []
+        sent_messages: list[dict[str, Any]] = []
+        for handle in self._telegram_handles()[: max(0, int(max_sessions))]:
+            handle.hub.mark_external_delivery_surface_ready()
+            runner = self.gateway.ensure_runner(handle)
+            step = runner.run_once(now=_now(self.clock), max_steps=1)
+            processed_rows = [dict(row) for row in step.processed if isinstance(row, Mapping)]
+            proactive_sent = self._deliver_proactive_rows(handle.session_id, step.processed)
+            sent_messages.extend(proactive_sent)
+            results.append(
+                {
+                    "session_id": handle.session_id,
+                    "processed": processed_rows,
+                    "sent_messages": proactive_sent,
+                }
+            )
+        return {
+            "sessions_considered": len(results),
+            "sent_messages": sent_messages,
+            "results": results,
+        }
+
     def poll_once(
         self,
         *,
@@ -664,6 +765,7 @@ class TelegramConnector:
             if offset_file is not None and next_offset is not None:
                 _write_offset(offset_file, int(next_offset))
             if int(batch.get("updates", 0) or 0) <= 0:
+                self.drain_proactive_once()
                 time.sleep(max(0.1, float(idle_sleep_seconds)))
 
 

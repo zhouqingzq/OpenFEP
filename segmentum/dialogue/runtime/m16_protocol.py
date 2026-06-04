@@ -23,6 +23,14 @@ MAX_MESSAGE_ID_CHARS = 120
 MAX_SNAPSHOT_CHAT_ROWS = 40
 DELIVERY_SURFACE_READY_TTL_SECONDS = 45
 RUNNER_CONTROL_MAX_REASON_CHARS = 160
+KNOWN_INGRESS_EVIDENCE_BANDS = frozenset(
+    {
+        "structured_full",
+        "structured_partial",
+        "reply_chain_only",
+        "speaker_name_only",
+    }
+)
 
 WS_CLIENT_MESSAGE_KINDS = frozenset(
     {
@@ -173,6 +181,13 @@ def _bounded_string_list(
         if len(out) >= limit:
             break
     return out
+
+
+def bounded_ingress_evidence_band(raw: Any) -> str:
+    value = str(raw or "").strip()[:32]
+    if value in KNOWN_INGRESS_EVIDENCE_BANDS:
+        return value
+    return ""
 
 
 def bounded_group_turn_envelope(raw: Mapping[str, Any] | None) -> dict[str, Any]:
@@ -377,6 +392,7 @@ def build_client_input_committed_event(
     event_id: str | None = None,
     speaker_name: str = "",
     group_turn_envelope: Mapping[str, Any] | None = None,
+    ingress_evidence_band: str = "",
 ) -> dict[str, Any]:
     bounded_text = str(text or "")[:MAX_INPUT_TEXT_CHARS]
     payload: dict[str, Any] = {
@@ -389,6 +405,9 @@ def build_client_input_committed_event(
     bounded_envelope = bounded_group_turn_envelope(group_turn_envelope)
     if bounded_envelope:
         payload["group_turn_envelope"] = bounded_envelope
+    bounded_ingress_band = bounded_ingress_evidence_band(ingress_evidence_band)
+    if bounded_ingress_band:
+        payload["ingress_evidence_band"] = bounded_ingress_band
     event = {
         "event_id": event_id or _new_id("m16evt"),
         "event_type": "ClientInputCommittedEvent",

@@ -1,0 +1,219 @@
+{
+  "milestone_id": "group_memory_alpha",
+  "schema_version": "group_memory_alpha_audit_v1",
+  "generated_at": "2026-06-04T17:48:48+00:00",
+  "status": "PASS",
+  "readiness_checklist": {
+    "structured_ingress_traceability": {
+      "passed": true,
+      "evidence": [
+        "tests/test_telegram_connector.py::test_normalize_private_message_routes_to_dm_session",
+        "tests/test_telegram_connector.py::test_normalize_group_topic_message_captures_reply_and_mentions",
+        "tests/test_mvp_dialogue_runtime.py::test_mvp_runtime_persists_ingress_evidence_band_in_turn_diagnostics"
+      ]
+    },
+    "memory_write_traceability": {
+      "passed": true,
+      "evidence": [
+        "tests/test_m18_group_chat_acceptance.py::test_m18_4_memory_rows_stamp_source_audience_scope",
+        "tests/test_mvp_dialogue_runtime.py::test_group_long_term_memory_write_carries_traceable_owner_fields",
+        "tests/test_mvp_dialogue_runtime.py::test_group_thinking_habit_updates_carry_traceable_owner_fields",
+        "tests/test_mvp_dialogue_runtime.py::test_group_pacing_feedback_habit_carries_traceable_owner_fields",
+        "tests/test_mvp_dialogue_runtime.py::test_group_post_reply_memory_updates_carry_traceable_owner_fields"
+      ]
+    },
+    "group_recall_privacy_policy": {
+      "passed": true,
+      "evidence": [
+        "tests/test_m18_group_chat_acceptance.py::test_m18_4_scenario_c_cross_user_memory_privacy_boundary",
+        "tests/test_m18_group_chat_acceptance.py::test_m18_4_group_common_memory_allows_bounded_cross_user_reuse",
+        "tests/test_m18_group_chat_acceptance.py::test_m18_4_soft_boundary_cross_user_recall_is_abstracted"
+      ]
+    },
+    "dm_only_fact_not_publicly_reused": {
+      "passed": true,
+      "evidence": [
+        "tests/test_m18_group_chat_acceptance.py::test_m18_4_dm_only_fact_is_not_reused_as_group_visible_fact"
+      ]
+    },
+    "deterministic_group_replay_and_settlement": {
+      "passed": true,
+      "evidence": [
+        "tests/test_m18_group_chat_acceptance.py::test_m18_5_scenario_a_turn_taking_correction_continuity_with_restart",
+        "tests/test_m18_group_chat_acceptance.py::test_m18_5_scenario_b_ambiguous_addressee_clarification",
+        "tests/test_m18_group_chat_acceptance.py::test_m18_6_held_out_group_replay_fixture",
+        "tests/test_mvp_dialogue_runtime.py::test_mvp_runtime_scripted_m17_confirmed_path_writes_settlement_and_calibration",
+        "tests/test_mvp_dialogue_runtime.py::test_group_m17_settlement_stays_on_origin_speaker_across_other_group_turns"
+      ]
+    },
+    "telegram_delivery_paths": {
+      "passed": true,
+      "evidence": [
+        "tests/test_telegram_connector.py::test_connector_ingest_update_sends_runtime_reply_back_to_telegram",
+        "tests/test_telegram_connector.py::test_connector_no_reply_does_not_send_telegram_message",
+        "tests/test_telegram_connector.py::test_connector_restart_preserves_group_thread_continuity",
+        "tests/test_m16_1_runner_loop.py::test_runner_treats_group_no_reply_as_completed_without_error"
+      ]
+    },
+    "telegram_bounded_proactive_delivery": {
+      "passed": true,
+      "evidence": [
+        "tests/test_m16_1_delivery_surface.py::test_external_delivery_surface_ready_allows_drain_without_ws",
+        "tests/test_telegram_connector.py::test_connector_idle_drain_no_traceable_outreach_sends_nothing",
+        "tests/test_telegram_connector.py::test_connector_idle_drain_sends_traceable_proactive_message_once",
+        "tests/test_telegram_connector.py::test_connector_idle_drain_blocks_when_m13_assessor_disallows_delivery"
+      ]
+    },
+    "blocking_failure_classes": {
+      "passed": true,
+      "evidence": [
+        "wrong speaker attribution -> tests/test_m18_group_chat_acceptance.py::test_m18_5_scenario_a_turn_taking_correction_continuity_with_restart",
+        "wrong addressee selection -> tests/test_m18_group_chat_acceptance.py::test_m18_5_scenario_b_ambiguous_addressee_clarification",
+        "privacy leak -> tests/test_m18_group_chat_acceptance.py::test_m18_4_scenario_c_cross_user_memory_privacy_boundary",
+        "lost thread continuity -> tests/test_telegram_connector.py::test_connector_restart_preserves_group_thread_continuity",
+        "replay inconsistency -> tests/test_m18_group_chat_acceptance.py::test_m18_6_held_out_group_replay_fixture"
+      ]
+    }
+  },
+  "scenario_execution": {
+    "label": "group-memory-alpha-scenarios",
+    "executed": true,
+    "passed": true,
+    "returncode": 0,
+    "command": [
+      "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-m",
+      "pytest",
+      "-o",
+      "addopts=",
+      "tests/test_m18_group_chat_acceptance.py::test_m18_4_memory_rows_stamp_source_audience_scope",
+      "tests/test_m18_group_chat_acceptance.py::test_m18_4_scenario_c_cross_user_memory_privacy_boundary",
+      "tests/test_m18_group_chat_acceptance.py::test_m18_4_group_common_memory_allows_bounded_cross_user_reuse",
+      "tests/test_m18_group_chat_acceptance.py::test_m18_4_soft_boundary_cross_user_recall_is_abstracted",
+      "tests/test_m18_group_chat_acceptance.py::test_m18_4_dm_only_fact_is_not_reused_as_group_visible_fact",
+      "tests/test_m18_group_chat_acceptance.py::test_m18_5_scenario_a_turn_taking_correction_continuity_with_restart",
+      "tests/test_m18_group_chat_acceptance.py::test_m18_5_scenario_b_ambiguous_addressee_clarification",
+      "tests/test_m18_group_chat_acceptance.py::test_m18_6_held_out_group_replay_fixture"
+    ],
+    "nodeids": [
+      "tests/test_m18_group_chat_acceptance.py::test_m18_4_memory_rows_stamp_source_audience_scope",
+      "tests/test_m18_group_chat_acceptance.py::test_m18_4_scenario_c_cross_user_memory_privacy_boundary",
+      "tests/test_m18_group_chat_acceptance.py::test_m18_4_group_common_memory_allows_bounded_cross_user_reuse",
+      "tests/test_m18_group_chat_acceptance.py::test_m18_4_soft_boundary_cross_user_recall_is_abstracted",
+      "tests/test_m18_group_chat_acceptance.py::test_m18_4_dm_only_fact_is_not_reused_as_group_visible_fact",
+      "tests/test_m18_group_chat_acceptance.py::test_m18_5_scenario_a_turn_taking_correction_continuity_with_restart",
+      "tests/test_m18_group_chat_acceptance.py::test_m18_5_scenario_b_ambiguous_addressee_clarification",
+      "tests/test_m18_group_chat_acceptance.py::test_m18_6_held_out_group_replay_fixture"
+    ],
+    "stdout": "============================= test session starts =============================\nplatform win32 -- Python 3.11.7, pytest-9.0.2, pluggy-1.6.0\nrootdir: E:\\workspace\\segments\nconfigfile: pyproject.toml\nplugins: anyio-4.13.0\ncollected 8 items\n\ntests\\test_m18_group_chat_acceptance.py ........                         [100%]\n\n============================== 8 passed in 1.75s ==============================",
+    "stderr": "",
+    "started_at": "2026-06-04T17:48:48+00:00",
+    "completed_at": "2026-06-04T17:48:51+00:00"
+  },
+  "regression_execution": {
+    "label": "group-memory-alpha-regressions",
+    "executed": true,
+    "passed": true,
+    "returncode": 0,
+    "command": [
+      "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-m",
+      "pytest",
+      "-o",
+      "addopts=",
+      "tests/test_mvp_dialogue_runtime.py::test_mvp_runtime_persists_ingress_evidence_band_in_turn_diagnostics",
+      "tests/test_mvp_dialogue_runtime.py::test_group_long_term_memory_write_carries_traceable_owner_fields",
+      "tests/test_mvp_dialogue_runtime.py::test_group_thinking_habit_updates_carry_traceable_owner_fields",
+      "tests/test_mvp_dialogue_runtime.py::test_group_pacing_feedback_habit_carries_traceable_owner_fields",
+      "tests/test_mvp_dialogue_runtime.py::test_group_post_reply_memory_updates_carry_traceable_owner_fields",
+      "tests/test_mvp_dialogue_runtime.py::test_mvp_runtime_scripted_m17_confirmed_path_writes_settlement_and_calibration",
+      "tests/test_mvp_dialogue_runtime.py::test_group_m17_settlement_stays_on_origin_speaker_across_other_group_turns",
+      "tests/test_m16_1_runner_loop.py::test_runner_treats_group_no_reply_as_completed_without_error",
+      "tests/test_m16_1_delivery_surface.py::test_external_delivery_surface_ready_allows_drain_without_ws",
+      "tests/test_telegram_connector.py::test_normalize_private_message_routes_to_dm_session",
+      "tests/test_telegram_connector.py::test_normalize_group_topic_message_captures_reply_and_mentions",
+      "tests/test_telegram_connector.py::test_connector_ingest_update_sends_runtime_reply_back_to_telegram",
+      "tests/test_telegram_connector.py::test_connector_no_reply_does_not_send_telegram_message",
+      "tests/test_telegram_connector.py::test_connector_restart_preserves_group_thread_continuity",
+      "tests/test_telegram_connector.py::test_connector_idle_drain_no_traceable_outreach_sends_nothing",
+      "tests/test_telegram_connector.py::test_connector_idle_drain_sends_traceable_proactive_message_once",
+      "tests/test_telegram_connector.py::test_connector_idle_drain_blocks_when_m13_assessor_disallows_delivery"
+    ],
+    "nodeids": [
+      "tests/test_mvp_dialogue_runtime.py::test_mvp_runtime_persists_ingress_evidence_band_in_turn_diagnostics",
+      "tests/test_mvp_dialogue_runtime.py::test_group_long_term_memory_write_carries_traceable_owner_fields",
+      "tests/test_mvp_dialogue_runtime.py::test_group_thinking_habit_updates_carry_traceable_owner_fields",
+      "tests/test_mvp_dialogue_runtime.py::test_group_pacing_feedback_habit_carries_traceable_owner_fields",
+      "tests/test_mvp_dialogue_runtime.py::test_group_post_reply_memory_updates_carry_traceable_owner_fields",
+      "tests/test_mvp_dialogue_runtime.py::test_mvp_runtime_scripted_m17_confirmed_path_writes_settlement_and_calibration",
+      "tests/test_mvp_dialogue_runtime.py::test_group_m17_settlement_stays_on_origin_speaker_across_other_group_turns",
+      "tests/test_m16_1_runner_loop.py::test_runner_treats_group_no_reply_as_completed_without_error",
+      "tests/test_m16_1_delivery_surface.py::test_external_delivery_surface_ready_allows_drain_without_ws",
+      "tests/test_telegram_connector.py::test_normalize_private_message_routes_to_dm_session",
+      "tests/test_telegram_connector.py::test_normalize_group_topic_message_captures_reply_and_mentions",
+      "tests/test_telegram_connector.py::test_connector_ingest_update_sends_runtime_reply_back_to_telegram",
+      "tests/test_telegram_connector.py::test_connector_no_reply_does_not_send_telegram_message",
+      "tests/test_telegram_connector.py::test_connector_restart_preserves_group_thread_continuity",
+      "tests/test_telegram_connector.py::test_connector_idle_drain_no_traceable_outreach_sends_nothing",
+      "tests/test_telegram_connector.py::test_connector_idle_drain_sends_traceable_proactive_message_once",
+      "tests/test_telegram_connector.py::test_connector_idle_drain_blocks_when_m13_assessor_disallows_delivery"
+    ],
+    "stdout": "============================= test session starts =============================\nplatform win32 -- Python 3.11.7, pytest-9.0.2, pluggy-1.6.0\nrootdir: E:\\workspace\\segments\nconfigfile: pyproject.toml\nplugins: anyio-4.13.0\ncollected 17 items\n\ntests\\test_mvp_dialogue_runtime.py .......                               [ 41%]\ntests\\test_m16_1_runner_loop.py .                                        [ 47%]\ntests\\test_m16_1_delivery_surface.py .                                   [ 52%]\ntests\\test_telegram_connector.py ........                                [100%]\n\n============================= 17 passed in 5.75s ==============================",
+    "stderr": "",
+    "started_at": "2026-06-04T17:48:51+00:00",
+    "completed_at": "2026-06-04T17:48:58+00:00"
+  },
+  "target_surfaces": [
+    "telegram_dm",
+    "telegram_group",
+    "telegram_topic"
+  ],
+  "judge_types": {
+    "structured_assertions": [
+      "ingress evidence trace",
+      "memory row owner fields",
+      "privacy policy mode",
+      "connector delivery/no-delivery behavior"
+    ],
+    "deterministic_replay_assertions": [
+      "held-out Chinese ambiguity replay",
+      "group settlement continuity across restart and interleaved turns"
+    ],
+    "rubric_based_judgments": []
+  },
+  "blocking_failure_classes": [
+    "wrong speaker attribution",
+    "wrong addressee selection",
+    "privacy leak",
+    "lost thread continuity",
+    "replay inconsistency"
+  ],
+  "review_questions": [
+    "what was written to memory",
+    "who owned it",
+    "who could hear it",
+    "why it was recalled",
+    "why it was or was not said aloud"
+  ],
+  "artifacts": {
+    "held_out_fixture": {
+      "path": "E:\\workspace\\segments\\tests\\fixtures\\m18_held_out_group_chat.json",
+      "exists": true,
+      "size_bytes": 1539,
+      "modified_at": "2026-06-04T11:42:44+00:00"
+    },
+    "report": {
+      "path": "E:\\workspace\\segments\\reports\\group_memory_alpha_acceptance_report.json",
+      "exists": true,
+      "size_bytes": 13537,
+      "modified_at": "2026-06-04T17:48:58+00:00"
+    },
+    "summary": {
+      "path": "E:\\workspace\\segments\\reports\\group_memory_alpha_acceptance_summary.md",
+      "exists": true,
+      "size_bytes": 537,
+      "modified_at": "2026-06-04T17:48:58+00:00"
+    }
+  },
+  "path_boundary": "Telegram-first Path B memory-dynamics group-chat alpha only"
+}

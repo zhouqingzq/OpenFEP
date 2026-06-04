@@ -127,6 +127,46 @@ class GroupAbstractLLM(FakeJSONLLM):
         return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
 
 
+class GroupDmOnlyFactLLM(FakeJSONLLM):
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        if "璇佹嵁瑁佸垽" in system_prompt:
+            return {
+                "epistemic_stance": "known_with_caveat",
+                "relevant_evidence_ids": ["mem_dm_only"],
+                "topics": ["personal_preference"],
+                "sensitivity_class": "personal_soft",
+                "redaction_targets": ["sushi"],
+                "allowed_reply_actions": ["direct_share", "abstract_share", "truthful_refusal", "deflect", "deny_knowledge"],
+                "audience_risk": "cross-user leak",
+                "expected_social_gain": "low",
+                "judge_summary": "DM-only detail should not be promoted as a group-visible fact",
+            }
+        if "鎬濊€冧笌鍥炲妯″潡" in system_prompt:
+            return {
+                "thought_type": "short",
+                "llm_thinking_result": {
+                    "user_intent_read": "asking for Alice's DM-only preference in group",
+                    "state_or_memory_used": ["mem_dm_only"],
+                    "response_choice": "tries to answer directly",
+                    "uncertainty": "",
+                    "debug_summary": "dm-only direct share attempt",
+                },
+                "reply": "Alice privately told me she only wants sushi tonight.",
+                "reply_action": "answer",
+                "disclosure_action": "direct_share",
+                "new_expectations": [],
+                "memory_writes": [],
+                "self_cognition_patch": {"apply": False},
+                "open_item_writes": [],
+                "habit_updates": [],
+                "memory_dynamics_note": "",
+            }
+        m12_hit = _maybe_m12_extractor_response(system_prompt)
+        if m12_hit is not None:
+            return m12_hit
+        return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+
 def _runtime(tmp_path: Path, *, llm: object | None = None) -> MVPDialogueRuntime:
     return MVPDialogueRuntime(
         store=MVPStateStore(tmp_path / "persona"),
@@ -143,6 +183,7 @@ def test_m18_4_memory_rows_stamp_source_audience_scope(tmp_path: Path) -> None:
         speaker_name="Alice",
         turn_index=0,
         now=9000,
+        ingress_evidence_band="structured_partial",
         group_turn_envelope={
             "speaker_participant_id": "alice",
             "visible_participant_ids": ["alice", "bob", "hutao"],
@@ -161,6 +202,9 @@ def test_m18_4_memory_rows_stamp_source_audience_scope(tmp_path: Path) -> None:
     assert latest["source_participant_id"] == "alice"
     assert latest["source_audience_participant_ids"] == ["alice", "bob", "hutao"]
     assert latest["source_audience_scope"] == "small_group"
+    assert latest["session_id"] == "persona"
+    assert latest["turn_index"] == 0
+    assert latest["ingress_evidence_band"] == "structured_partial"
 
 
 def test_m18_5_scenario_b_ambiguous_addressee_clarification(tmp_path: Path) -> None:
@@ -498,6 +542,47 @@ def test_m18_4_soft_boundary_cross_user_recall_is_abstracted(tmp_path: Path) -> 
     assert result.action == "abstract_share"
     assert result.diagnostics["group_privacy_policy"]["selected_disclosure_mode"] == "unattributed_abstraction"
     assert result.diagnostics["group_privacy_policy"]["policy_reason_codes"] == ["soft_boundary_new_audience"]
+
+
+def test_m18_4_dm_only_fact_is_not_reused_as_group_visible_fact(tmp_path: Path) -> None:
+    runtime = _runtime(tmp_path, llm=GroupDmOnlyFactLLM())
+    state = runtime.store.load()
+    state["long_term_memory"] = [
+        {
+            "id": "mem_dm_only",
+            "kind": "episode",
+            "content": "Alice 私下跟我说她今晚只想吃寿司。",
+            "keywords": ["Alice", "寿司", "今晚"],
+            "salience": 0.82,
+            "confidence": 0.88,
+            "source_user_id": "alice",
+            "source_display_name": "Alice",
+            "source_participant_id": "alice",
+            "source_audience_participant_ids": ["alice", "hutao"],
+            "source_audience_scope": "small_group",
+            "shareability": "default_social",
+            "created_at": 260,
+        }
+    ]
+    runtime.store.save(state)
+
+    result = runtime.run_turn(
+        "Alice 今晚到底想吃什么？",
+        speaker_name="Bob",
+        turn_index=1,
+        now=9470,
+        group_turn_envelope={
+            "speaker_participant_id": "bob",
+            "visible_participant_ids": ["alice", "bob", "hutao"],
+            "addressed_participant_ids": ["hutao"],
+            "mentioned_participant_ids": ["alice"],
+        },
+    )
+
+    assert "寿司" not in result.reply
+    recalled = next(item for item in result.diagnostics["retrieved_memories"] if item["id"] == "mem_dm_only")
+    assert recalled["group_privacy_policy"]["selected_disclosure_mode"] == "attributed_summary"
+    assert recalled["group_privacy_policy"]["policy_reason_codes"] == ["cross_group_summary_only"]
 
 
 def test_m18_6_held_out_group_replay_fixture(tmp_path: Path) -> None:

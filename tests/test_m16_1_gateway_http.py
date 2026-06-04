@@ -22,7 +22,11 @@ def test_post_input_appends_event_without_inline_run_turn(tmp_path: Path) -> Non
         with TestClient(app) as client:
             resp = client.post(
                 "/v1/personas/p/sessions/s/input",
-                json={"text": "hello gateway", "correlation_id": "corr_http"},
+                json={
+                    "text": "hello gateway",
+                    "correlation_id": "corr_http",
+                    "ingress_evidence_band": "structured_partial",
+                },
                 headers=M16_DEV_HEADERS,
             )
     assert resp.status_code == 202
@@ -32,6 +36,7 @@ def test_post_input_appends_event_without_inline_run_turn(tmp_path: Path) -> Non
     events = bridge.event_store.query_events(event_types={"ClientInputCommittedEvent"})
     assert len(events) == 1
     assert events[0]["payload"]["text"] == "hello gateway"
+    assert events[0]["payload"]["ingress_evidence_band"] == "structured_partial"
 
 
 def test_runner_survives_gateway_restart_with_durable_events(tmp_path: Path) -> None:

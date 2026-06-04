@@ -91,9 +91,11 @@ def test_client_input_maps_to_client_input_committed_event() -> None:
         text="你好",
         correlation_id="corr_in",
         now=NOW,
+        ingress_evidence_band="structured_partial",
     )
     assert event["event_type"] == "ClientInputCommittedEvent"
     assert event["status"] == "pending"
+    assert event["payload"]["ingress_evidence_band"] == "structured_partial"
     assert event["payload"]["text"] == "你好"
     assert validate_perception_event(event) == []
     assert len(event["payload"]["text"]) <= MAX_INPUT_TEXT_CHARS

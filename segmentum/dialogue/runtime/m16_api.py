@@ -66,6 +66,7 @@ class ClientInputBody(BaseModel):
     correlation_id: str = Field(max_length=MAX_CORRELATION_ID_CHARS)
     speaker_name: str = Field(default="", max_length=64)
     group_turn_envelope: GroupTurnEnvelopeBody | None = None
+    ingress_evidence_band: str = Field(default="", max_length=32)
 
 
 class RunnerControlBody(BaseModel):
@@ -210,6 +211,7 @@ def create_app(gateway: M16Gateway | None = None) -> FastAPI:
             "llm": llm_configuration_status_with_source(handle.bridge.runtime.llm),
             "delivery_surface": {
                 "ws_subscribed": handle.hub.delivery_state().ws_subscribed,
+                "external_delivery_active": handle.hub.delivery_state().external_delivery_active,
                 "delivery_surface_ready_at": handle.hub.delivery_state().delivery_surface_ready_at,
             },
         }
@@ -227,6 +229,7 @@ def create_app(gateway: M16Gateway | None = None) -> FastAPI:
                 if body.group_turn_envelope is not None
                 else None
             ),
+            ingress_evidence_band=body.ingress_evidence_band,
         )
         _append_gateway_audit(
             handle.bridge,
@@ -365,12 +368,14 @@ def create_app(gateway: M16Gateway | None = None) -> FastAPI:
                     text = str(payload.get("text", "") or "")[:MAX_INPUT_TEXT_CHARS]
                     speaker_name = str(payload.get("speaker_name", "") or "")[:64]
                     group_turn_envelope = payload.get("group_turn_envelope")
+                    ingress_evidence_band = str(payload.get("ingress_evidence_band", "") or "")[:32]
                     event_id = handle.bridge.append_client_input(
                         text=text,
                         correlation_id=msg_correlation,
                         source="m16_ws",
                         speaker_name=speaker_name,
                         group_turn_envelope=group_turn_envelope if isinstance(group_turn_envelope, dict) else None,
+                        ingress_evidence_band=ingress_evidence_band,
                     )
                     _append_gateway_audit(
                         handle.bridge,

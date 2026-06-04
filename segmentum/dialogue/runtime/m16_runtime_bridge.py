@@ -13,6 +13,7 @@ from segmentum.dialogue.runtime.m16_protocol import (
     ACTUATION_EVENT_AUDIT_MAP,
     ENGINEERING_PROXY_LABEL,
     bounded_group_turn_envelope,
+    bounded_ingress_evidence_band,
     build_client_input_committed_event,
 )
 from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore, llm_configuration_status_with_source, _mapping
@@ -83,6 +84,7 @@ class M16SessionBridge:
         source: str = "m16_gateway",
         speaker_name: str = "",
         group_turn_envelope: Mapping[str, Any] | None = None,
+        ingress_evidence_band: str = "",
     ) -> str:
         row = build_client_input_committed_event(
             persona_id=self.persona_id,
@@ -93,6 +95,7 @@ class M16SessionBridge:
             now=_now(self.clock),
             speaker_name=speaker_name,
             group_turn_envelope=group_turn_envelope,
+            ingress_evidence_band=ingress_evidence_band,
         )
         return self.event_store.append_event(
             "ClientInputCommittedEvent",
@@ -164,6 +167,7 @@ class M16SessionBridge:
         turn_index: int | None = None,
         speaker_name: str = "",
         group_turn_envelope: Mapping[str, Any] | None = None,
+        ingress_evidence_band: str = "",
         turn_progress: Any | None = None,
     ) -> Any:
         idx = int(turn_index if turn_index is not None else self.next_user_turn_index())
@@ -172,6 +176,7 @@ class M16SessionBridge:
             turn_index=idx,
             speaker_name=speaker_name or "default_user",
             group_turn_envelope=bounded_group_turn_envelope(group_turn_envelope),
+            ingress_evidence_band=bounded_ingress_evidence_band(ingress_evidence_band),
             bus_messages=[{"type": "M16UserInputEvent", "source": "m16_runner", "turn_index": idx}],
             now=_now(self.clock),
             turn_progress=turn_progress,
@@ -304,6 +309,7 @@ class M16SessionBridge:
                             "reply_to_turn_id": row.get("reply_to_turn_id"),
                             "addressed_participant_ids": row.get("addressed_participant_ids"),
                             "mentioned_participant_ids": row.get("mentioned_participant_ids"),
+                            "ingress_evidence_band": row.get("ingress_evidence_band"),
                         }
                     )
                 elif isinstance(row, dict) and row.get("event") == "turn":
@@ -319,6 +325,7 @@ class M16SessionBridge:
                                 "reply_to_turn_id": row.get("reply_to_turn_id"),
                                 "addressed_participant_ids": row.get("addressed_participant_ids"),
                                 "mentioned_participant_ids": row.get("mentioned_participant_ids"),
+                                "ingress_evidence_band": row.get("ingress_evidence_band"),
                             }
                         )
                     if str(row.get("reply", "") or "").strip():

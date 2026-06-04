@@ -86,3 +86,11 @@ def test_delivery_surface_ready_ttl_blocks_stale_drain(tmp_path: Path) -> None:
     allowed, code = hub.outbox_drain_allowed(now=clk())
     assert not allowed
     assert code == "delivery_surface_not_ready"
+
+
+def test_external_delivery_surface_ready_allows_drain_without_ws(tmp_path: Path) -> None:
+    _, hub, _runner, clk = build_stack(tmp_path)
+    hub.mark_external_delivery_surface_ready()
+    allowed, code = hub.outbox_drain_allowed(now=clk())
+    assert allowed
+    assert code == ""

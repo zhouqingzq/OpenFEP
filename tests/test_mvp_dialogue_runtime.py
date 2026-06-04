@@ -323,20 +323,6 @@ class ScriptedM17LLM(FakeJSONLLM):
         self.proposal_calls = 0
 
     def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
-        if "M17 settlement assessor" in system_prompt:
-            return {
-                "prediction_judgments": [
-                    {
-                        "prediction_id": "pred:p1",
-                        "status": self.outcome,
-                        "settlement_confidence": 0.82,
-                        "evidence_quote_ids": ["q_current"],
-                        "evidence_refs": [],
-                        "evidence_span": "scripted settlement evidence",
-                        "reason_codes": ["scripted_test"],
-                    }
-                ]
-            }
         if "M11 user-model extractor" in system_prompt:
             self.proposal_calls += 1
             if self.proposal_calls == 1:
@@ -369,9 +355,23 @@ class ScriptedM17LLM(FakeJSONLLM):
                 "prediction_proposals": [],
                 "hypothesis_activations": [],
                 "contradiction_detections": [],
-                "calibration_need_band": "low",
+                "calibration_need_band": "med",
                 "memory_value_band": "low",
-                "surprise_explanation": "",
+                "surprise_explanation": "follow the locked prediction settlement path",
+            }
+        if "M17 settlement assessor" in system_prompt:
+            return {
+                "prediction_judgments": [
+                    {
+                        "prediction_id": "pred:p1",
+                        "status": self.outcome,
+                        "settlement_confidence": 0.82,
+                        "evidence_quote_ids": ["q_current"],
+                        "evidence_refs": [],
+                        "evidence_span": "scripted settlement evidence",
+                        "reason_codes": ["scripted_test"],
+                    }
+                ]
             }
         return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
 
@@ -1467,6 +1467,108 @@ class HabitFeedbackLLM(FakeJSONLLM):
         return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
 
 
+class GroupPostReplyObserverLLM(FakeJSONLLM):
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        if "鎬濊€冧笌鍥炲妯″潡" in system_prompt:
+            return {
+                "thought_type": "short",
+                "llm_thinking_result": {
+                    "user_intent_read": "The user wants the group reply to stay plain and concise.",
+                    "state_or_memory_used": [],
+                    "response_choice": "Acknowledge the style feedback plainly.",
+                    "uncertainty": "",
+                    "debug_summary": "Include a debug payload so reply validation changes and the post-reply observer runs.",
+                },
+                "reply": 'Plain and concise works for me. {"user_intent_read": "debug", "conscious_plan": {}}',
+                "reply_action": "answer",
+                "disclosure_action": "none",
+                "new_expectations": [],
+                "memory_writes": [],
+                "self_cognition_patch": {"apply": False},
+                "open_item_writes": [],
+                "habit_updates": [],
+                "memory_dynamics_note": "",
+            }
+        if "鍥炲鍚庡彂瑙傚療妯″潡" in system_prompt:
+            self.calls.append({"system": system_prompt, "user": user_prompt})
+            return {
+                "needs_followup": False,
+                "followup_type": "none",
+                "confidence": 0.0,
+                "reason": "The style feedback should be remembered even without an extra bubble.",
+                "followup_text": "",
+                "memory_updates": [
+                    {
+                        "kind": "conversation_habit",
+                        "content": "When Alice gives group style feedback, keep ordinary replies plain and concise.",
+                        "confidence": 0.88,
+                        "evidence": "I prefer the group reply to stay plain and concise.",
+                        "reason": "group_style_feedback",
+                    },
+                    {
+                        "kind": "episode",
+                        "content": "Alice asked Hu Tao to keep this group-thread reply plain and concise.",
+                        "confidence": 0.84,
+                        "evidence": "I prefer the group reply to stay plain and concise.",
+                        "reason": "group_style_feedback",
+                        "keywords": ["group", "concise", "style"],
+                    },
+                ],
+            }
+        return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+
+class StructuredGroupPostReplyObserverLLM(FakeJSONLLM):
+    def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
+        if '"reply_action"' in user_prompt and '"memory_writes"' in user_prompt and "系统文件:" in user_prompt:
+            return {
+                "thought_type": "short",
+                "llm_thinking_result": {
+                    "user_intent_read": "The user wants the group reply to stay plain and concise.",
+                    "state_or_memory_used": [],
+                    "response_choice": "Acknowledge the style feedback plainly.",
+                    "uncertainty": "",
+                    "debug_summary": "Include a debug payload so reply validation changes and the post-reply observer runs.",
+                },
+                "reply": 'Plain and concise works for me. {"user_intent_read": "debug", "conscious_plan": {}}',
+                "reply_action": "answer",
+                "disclosure_action": "none",
+                "new_expectations": [],
+                "memory_writes": [],
+                "self_cognition_patch": {"apply": False},
+                "open_item_writes": [],
+                "habit_updates": [],
+                "memory_dynamics_note": "",
+            }
+        if '"memory_updates"' in user_prompt and '"followup_text"' in user_prompt:
+            self.calls.append({"system": system_prompt, "user": user_prompt})
+            return {
+                "needs_followup": False,
+                "followup_type": "none",
+                "confidence": 0.0,
+                "reason": "The style feedback should be remembered even without an extra bubble.",
+                "followup_text": "",
+                "memory_updates": [
+                    {
+                        "kind": "conversation_habit",
+                        "content": "When Alice gives group style feedback, keep ordinary replies plain and concise.",
+                        "confidence": 0.88,
+                        "evidence": "I prefer the group reply to stay plain and concise.",
+                        "reason": "group_style_feedback",
+                    },
+                    {
+                        "kind": "episode",
+                        "content": "Alice asked Hu Tao to keep this group-thread reply plain and concise.",
+                        "confidence": 0.84,
+                        "evidence": "I prefer the group reply to stay plain and concise.",
+                        "reason": "group_style_feedback",
+                        "keywords": ["group", "concise", "style"],
+                    },
+                ],
+            }
+        return super().complete_json(system_prompt=system_prompt, user_prompt=user_prompt)
+
+
 def test_negative_expression_feedback_writes_abstract_relationship_value_memory(tmp_path: Path) -> None:
     runtime = MVPDialogueRuntime(
         store=MVPStateStore(tmp_path / "persona"),
@@ -1485,6 +1587,94 @@ def test_negative_expression_feedback_writes_abstract_relationship_value_memory(
     assert "低表演" in rows[0]["summary"] or "low-performance" in rows[0]["summary"]
     assert "嘿嘿" not in rows[0]["summary"]
     assert "嘿嘿" not in rows[0]["prediction_constraint"]
+
+
+def test_group_thinking_habit_updates_carry_traceable_owner_fields(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=HabitFeedbackLLM(),
+        persona_name="hutao",
+    )
+
+    runtime.run_turn(
+        "\u522b\u963f\u561b\u4e86\u3002",
+        speaker_name="Alice",
+        turn_index=4,
+        now=6720,
+        ingress_evidence_band="structured_full",
+        group_turn_envelope={
+            "speaker_participant_id": "alice",
+            "visible_participant_ids": ["alice", "bob", "hutao"],
+            "addressed_participant_ids": ["hutao"],
+        },
+    )
+
+    saved = runtime.store.load()
+    habit_row = next(
+        item
+        for item in saved["habit_traits"]["learned_conversation_habits"]
+        if isinstance(item, dict) and item.get("source") == "thinking_prompt"
+    )
+    relationship_rows = [
+        row
+        for rows in saved["relationship_value_memories"]["by_user"].values()
+        if isinstance(rows, list)
+        for row in rows
+        if row.get("source") == "thinking_habit_feedback"
+    ]
+
+    assert relationship_rows
+    for row in (habit_row, relationship_rows[0]):
+        assert row["source_participant_id"] == "alice"
+        assert row["source_audience_participant_ids"] == ["alice", "bob", "hutao"]
+        assert row["source_audience_scope"] == "small_group"
+        assert row["session_id"] == "persona"
+        assert row["turn_index"] == 4
+        assert row["ingress_evidence_band"] == "structured_full"
+
+
+def test_group_pacing_feedback_habit_carries_traceable_owner_fields(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=FakeJSONLLM(),
+        persona_name="hutao",
+    )
+
+    runtime.run_turn(
+        "\u4f60\u53ef\u4ee5\u5206\u5f00\u51e0\u6761\u8bf4\u3002",
+        speaker_name="Alice",
+        turn_index=5,
+        now=6740,
+        ingress_evidence_band="structured_partial",
+        group_turn_envelope={
+            "speaker_participant_id": "alice",
+            "visible_participant_ids": ["alice", "bob", "hutao"],
+            "addressed_participant_ids": ["hutao"],
+        },
+    )
+
+    saved = runtime.store.load()
+    habit_row = next(
+        item
+        for item in saved["habit_traits"]["learned_conversation_habits"]
+        if isinstance(item, dict) and item.get("source") == "pacing_feedback"
+    )
+    relationship_rows = [
+        row
+        for rows in saved["relationship_value_memories"]["by_user"].values()
+        if isinstance(rows, list)
+        for row in rows
+        if row.get("source") == "pacing_feedback"
+    ]
+
+    assert relationship_rows
+    for row in (habit_row, relationship_rows[0]):
+        assert row["source_participant_id"] == "alice"
+        assert row["source_audience_participant_ids"] == ["alice", "bob", "hutao"]
+        assert row["source_audience_scope"] == "small_group"
+        assert row["session_id"] == "persona"
+        assert row["turn_index"] == 5
+        assert row["ingress_evidence_band"] == "structured_partial"
 
 
 def test_chat_response_carries_followup_replies_to_transcript(tmp_path: Path) -> None:
@@ -1724,6 +1914,38 @@ def test_mvp_runtime_group_participants_alternate_without_collapsing(tmp_path: P
     ]
     assert turn_rows[-2]["source_participant_id"] == "alice"
     assert turn_rows[-1]["source_participant_id"] == "bob"
+
+
+def test_mvp_runtime_persists_ingress_evidence_band_in_turn_diagnostics(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=FakeJSONLLM(),
+        persona_name="test persona",
+    )
+
+    result = runtime.run_turn(
+        "hello from telegram",
+        speaker_name="Alice",
+        turn_index=0,
+        now=7880,
+        group_turn_envelope={
+            "speaker_participant_id": "telegram:tg_main:user:123",
+            "visible_participant_ids": ["telegram:tg_main:user:123", "telegram:tg_main:assistant:777000"],
+            "addressed_participant_ids": ["telegram:tg_main:assistant:777000"],
+        },
+        ingress_evidence_band="structured_full",
+        bus_messages=[],
+    )
+
+    assert result.diagnostics["ingress_evidence_band"] == "structured_full"
+    saved = runtime.store.load()
+    assert saved["temporal_state"]["last_share_trace"]["ingress_evidence_band"] == "structured_full"
+    turn_rows = [
+        json.loads(line)
+        for line in (runtime.store.root / "conversation_log.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert turn_rows[-1]["ingress_evidence_band"] == "structured_full"
 
 
 def test_group_reply_policy_prefers_explicit_reply_to_over_third_party_target_drift(tmp_path: Path) -> None:
@@ -3321,3 +3543,151 @@ def test_mvp_m12_identity_extractor_runs_before_conscious_when_enabled(tmp_path:
     m12_idx = next(i for i, s in enumerate(systems) if "identity-continuity extractor" in s)
     con_idx = next(i for i, s in enumerate(systems) if "意识主循环" in s)
     assert m12_idx < con_idx
+
+
+def test_group_long_term_memory_write_carries_traceable_owner_fields(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=FakeJSONLLM(),
+        persona_name="娴嬭瘯浜烘牸",
+    )
+
+    runtime.run_turn(
+        "请记住这是群里一起讨论的 Python 方案。",
+        speaker_name="Alice",
+        turn_index=3,
+        now=9100,
+        ingress_evidence_band="structured_full",
+        group_turn_envelope={
+            "speaker_participant_id": "alice",
+            "visible_participant_ids": ["alice", "bob", "hutao"],
+            "addressed_participant_ids": ["hutao"],
+        },
+    )
+
+    saved = runtime.store.load()
+    long_rows = saved["long_term_memory"]
+    assert long_rows
+    latest = long_rows[-1]
+    assert latest["source_participant_id"] == "alice"
+    assert latest["source_audience_participant_ids"] == ["alice", "bob", "hutao"]
+    assert latest["source_audience_scope"] == "small_group"
+    assert latest["session_id"] == "persona"
+    assert latest["turn_index"] == 3
+    assert latest["ingress_evidence_band"] == "structured_full"
+
+
+def test_group_post_reply_memory_updates_carry_traceable_owner_fields(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=StructuredGroupPostReplyObserverLLM(),
+        persona_name="hutao",
+    )
+
+    result = runtime.run_turn(
+        "I prefer the group reply to stay plain and concise.",
+        speaker_name="Alice",
+        turn_index=7,
+        now=9150,
+        ingress_evidence_band="structured_partial",
+        group_turn_envelope={
+            "speaker_participant_id": "alice",
+            "visible_participant_ids": ["alice", "bob", "hutao"],
+            "addressed_participant_ids": ["hutao"],
+        },
+    )
+
+    saved = runtime.store.load()
+    learned = saved["habit_traits"]["learned_conversation_habits"]
+    habit_row = next(
+        item
+        for item in learned
+        if isinstance(item, dict)
+        and item.get("source") == "post_reply_observer"
+        and "plain and concise" in str(item.get("content", ""))
+    )
+    stm_row = next(
+        item
+        for item in saved["short_term_memory"]
+        if item.get("source") == "post_reply_observer"
+        and "group-thread reply plain and concise" in str(item.get("content", ""))
+    )
+    relationship_rows = [
+        row
+        for rows in saved["relationship_value_memories"]["by_user"].values()
+        if isinstance(rows, list)
+        for row in rows
+        if row.get("source") == "post_reply_observer"
+    ]
+
+    assert result.diagnostics["post_reply_observer"]["trigger_reason"] == "reply_validation_changed"
+    assert len(result.diagnostics["post_reply_memory_updates_applied"]) == 2
+    assert relationship_rows
+    for row in (habit_row, stm_row, relationship_rows[0]):
+        assert row["source_participant_id"] == "alice"
+        assert row["source_audience_participant_ids"] == ["alice", "bob", "hutao"]
+        assert row["source_audience_scope"] == "small_group"
+        assert row["session_id"] == "persona"
+        assert row["turn_index"] == 7
+        assert row["ingress_evidence_band"] == "structured_partial"
+
+
+def test_group_m17_settlement_stays_on_origin_speaker_across_other_group_turns(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=ScriptedM17LLM(
+            prediction_type="preference_prediction",
+            predicted_value_summary="alice will prefer shorter replies",
+            outcome="confirmed",
+        ),
+        persona_name="hutao",
+    )
+
+    runtime.run_turn(
+        "I prefer short replies when we review code.",
+        speaker_name="Alice",
+        turn_index=0,
+        now=9300,
+        group_turn_envelope={
+            "speaker_participant_id": "alice",
+            "visible_participant_ids": ["alice", "bob", "hutao"],
+            "addressed_participant_ids": ["hutao"],
+        },
+    )
+    runtime.run_turn(
+        "I want detailed replies for my own tasks.",
+        speaker_name="Bob",
+        turn_index=1,
+        now=9360,
+        group_turn_envelope={
+            "speaker_participant_id": "bob",
+            "visible_participant_ids": ["alice", "bob", "hutao"],
+            "addressed_participant_ids": ["hutao"],
+        },
+    )
+
+    restarted = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=runtime.llm,
+        persona_name="hutao",
+    )
+    result = restarted.run_turn(
+        "Yes, keep it short.",
+        speaker_name="Alice",
+        turn_index=2,
+        now=9420,
+        group_turn_envelope={
+            "speaker_participant_id": "alice",
+            "visible_participant_ids": ["alice", "bob", "hutao"],
+            "addressed_participant_ids": ["hutao"],
+        },
+    )
+
+    saved = restarted.store.load()
+    alice_calibration = saved["m11_user_models"]["alice"]["prediction_calibration"]["by_type"]["preference_prediction"]
+    bob_calibration = saved["m11_user_models"]["bob"]["prediction_calibration"]["by_type"]
+    bus_types = {row.get("type") for row in result.diagnostics["bus_messages"]}
+
+    assert "PredictionSettlementAddendum" in bus_types
+    assert alice_calibration["sample_count"] == 1
+    assert "preference_prediction" not in bob_calibration
