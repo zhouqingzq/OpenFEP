@@ -39,6 +39,7 @@ const SERVER_KINDS = new Set([
   "Subscribed",
   "SessionSnapshot",
   "UserMessageAccepted",
+  "TurnCompleted",
   "AssistantMessageCommitted",
   "ProactiveMessageCommitted",
   "AuditEvent",
@@ -51,6 +52,7 @@ const ACTUATION_SERVER_KINDS = new Set([
   "AssistantMessageCommitted",
   "ProactiveMessageCommitted",
   "UserMessageAccepted",
+  "TurnCompleted",
   "AuditEvent",
   "RunnerSuppression",
 ]);

@@ -131,6 +131,31 @@ describe("websocket stream", () => {
     validateOutboundClientMessage(input);
     await stream.disconnect();
   });
+
+  it("test_ws_stream_emits_turn_completed", async () => {
+    const client = createTestClient(mockFetch({}));
+    const stream = client.connectStream({ autoReconnect: false });
+    const completed: unknown[] = [];
+    stream.on("turnCompleted", (msg) => completed.push(msg.payload));
+    await stream.connect();
+    const ws = MockWebSocket.instances[0];
+    ws.simulateMessage(baseMessage("Subscribed"));
+    ws.simulateMessage(
+      baseMessage("TurnCompleted", {
+        event_id: "evt_1",
+        turn_index: 3,
+        action: "no_reply",
+        visible_reply_emitted: false,
+      }),
+    );
+    expect(completed).toHaveLength(1);
+    expect(completed[0]).toMatchObject({
+      event_id: "evt_1",
+      action: "no_reply",
+      visible_reply_emitted: false,
+    });
+    await stream.disconnect();
+  });
 });
 
 describe("validation", () => {

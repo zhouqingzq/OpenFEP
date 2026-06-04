@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -71,3 +73,25 @@ def test_m18_acceptance_report_fails_when_fixture_or_scenarios_fail() -> None:
             assert report["readiness_checklist"]["end_to_end_group_scenarios"]["passed"] is False
         finally:
             m18_audit.M18_HELD_OUT_FIXTURE = original_fixture
+
+
+def test_m18_suite_execution_record_clears_pytest_addopts(monkeypatch) -> None:
+    captured: list[list[str]] = []
+
+    def _fake_run(command, **kwargs):
+        captured.append(list(command))
+        return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+    monkeypatch.setattr(m18_audit.subprocess, "run", _fake_run)
+    record = m18_audit._suite_execution_record(
+        label="m18-scenarios",
+        nodeids=("tests/test_m18_group_chat_acceptance.py",),
+        execute=True,
+    )
+
+    assert record["passed"] is True
+    assert captured
+    assert captured[0][0] == sys.executable
+    assert captured[0][1:5] == ["-m", "pytest", "-o", "addopts="]
+    assert captured[0][4] == "addopts="
+    assert captured[0][-1] == "tests/test_m18_group_chat_acceptance.py"

@@ -182,6 +182,12 @@ export class ConsciousnessRepl {
       const payload = msg.payload as unknown as SnapshotResponse;
       this.applySnapshot({ ...payload, schema_version: payload.schema_version ?? "m16.0" }, { fromResync: false });
     });
+    stream.on("turnCompleted", (msg) => {
+      const payload = (msg.payload ?? {}) as Record<string, unknown>;
+      if (payload.visible_reply_emitted === false) {
+        this.stopThinkingIndicator();
+      }
+    });
     stream.on("assistantMessage", (msg) => void this.handleActuation(msg));
     stream.on("proactiveMessage", (msg) => void this.handleActuation(msg));
     stream.on("suppression", (msg) => {

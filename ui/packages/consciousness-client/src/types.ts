@@ -15,6 +15,7 @@ export const WS_SERVER_KINDS = [
   "Subscribed",
   "SessionSnapshot",
   "UserMessageAccepted",
+  "TurnCompleted",
   "AssistantMessageCommitted",
   "ProactiveMessageCommitted",
   "AuditEvent",
@@ -78,6 +79,13 @@ export interface AssistantMessagePayload {
   text?: string;
   turn_index?: number;
   delivery_id?: string;
+}
+
+export interface TurnCompletedPayload {
+  event_id?: string;
+  turn_index?: number;
+  action?: string;
+  visible_reply_emitted?: boolean;
 }
 
 export interface ProactiveMessagePayload {
@@ -206,6 +214,7 @@ export type StreamEventMap = {
   subscribed: [WsServerMessage];
   sessionSnapshot: [WsServerMessage];
   userMessageAccepted: [WsServerMessage];
+  turnCompleted: [WsServerMessage];
   assistantMessage: [WsServerMessage];
   proactiveMessage: [WsServerMessage];
   auditEvent: [WsServerMessage];

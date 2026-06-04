@@ -180,6 +180,9 @@ export class ConsciousnessStream {
       case "UserMessageAccepted":
         this.emit("userMessageAccepted", message);
         break;
+      case "TurnCompleted":
+        this.emit("turnCompleted", message);
+        break;
       case "AssistantMessageCommitted":
         this.emit("assistantMessage", message);
         break;

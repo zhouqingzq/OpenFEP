@@ -25,6 +25,7 @@
         "Subscribed",
         "SessionSnapshot",
         "UserMessageAccepted",
+        "TurnCompleted",
         "AssistantMessageCommitted",
         "ProactiveMessageCommitted",
         "AuditEvent",

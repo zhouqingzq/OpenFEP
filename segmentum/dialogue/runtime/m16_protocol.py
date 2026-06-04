@@ -40,6 +40,7 @@ WS_SERVER_MESSAGE_KINDS = frozenset(
         "Subscribed",
         "SessionSnapshot",
         "UserMessageAccepted",
+        "TurnCompleted",
         "AssistantMessageCommitted",
         "ProactiveMessageCommitted",
         "AuditEvent",

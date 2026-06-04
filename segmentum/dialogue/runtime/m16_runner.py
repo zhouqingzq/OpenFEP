@@ -315,27 +315,37 @@ class ConsciousnessRunner:
         self.bridge.mark_event_processed(event_id, now=now)
         delivery_id = f"assistant:{event_id}"
         reply = str(getattr(result, "reply", "") or "").strip()
+        action = str(getattr(result, "action", "") or "").strip() or "answer"
         if not reply:
-            error_msg = self.hub.build_and_publish(
-                kind="Error",
+            accepted = self.hub.build_and_publish(
+                kind="UserMessageAccepted",
+                payload={"event_id": event_id, "turn_index": turn_index},
+                now=now,
+            )
+            completed = self.hub.build_and_publish(
+                kind="TurnCompleted",
                 payload={
-                    "code": "empty_reply",
-                    "message": "empty_reply",
-                    "detail": "run_turn returned no visible reply",
+                    "event_id": event_id,
+                    "turn_index": turn_index,
+                    "action": action,
+                    "visible_reply_emitted": False,
                 },
                 now=now,
             )
             self.bridge.append_runner_audit(
-                typ="ConsciousnessRunnerTurnFailedEvent",
+                typ="ConsciousnessRunnerTurnCompletedEvent",
                 correlation_id=correlation_id,
                 now=now,
                 event_id=event_id,
-                error="empty_reply",
+                action=action,
+                visible_reply_emitted=False,
             )
             return {
                 "event_id": event_id,
-                "error": "empty_reply",
-                "actuation_messages": [error_msg],
+                "turn_index": turn_index,
+                "reply": "",
+                "action": action,
+                "actuation_messages": actuation_messages + [accepted, completed],
             }
         if self.bridge.record_actuation(
             delivery_id=delivery_id,
@@ -358,7 +368,17 @@ class ConsciousnessRunner:
                 },
                 now=now,
             )
-            actuation_messages.extend([accepted, committed])
+            completed = self.hub.build_and_publish(
+                kind="TurnCompleted",
+                payload={
+                    "event_id": event_id,
+                    "turn_index": turn_index,
+                    "action": action,
+                    "visible_reply_emitted": True,
+                },
+                now=now,
+            )
+            actuation_messages.extend([accepted, committed, completed])
             self.bridge.append_runner_audit(
                 typ="GatewayActuationPublishedEvent",
                 correlation_id=correlation_id,
@@ -369,6 +389,7 @@ class ConsciousnessRunner:
             "event_id": event_id,
             "turn_index": turn_index,
             "reply": reply,
+            "action": action,
             "actuation_messages": actuation_messages,
         }
 

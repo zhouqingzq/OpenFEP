@@ -40,6 +40,7 @@ const ACTUATION_SERVER_KINDS = new Set([
   "AssistantMessageCommitted",
   "ProactiveMessageCommitted",
   "UserMessageAccepted",
+  "TurnCompleted",
   "AuditEvent",
   "RunnerSuppression",
 ]);

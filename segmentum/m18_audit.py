@@ -65,7 +65,7 @@ def _suite_execution_record(*, label: str, nodeids: tuple[str, ...], execute: bo
             "started_at": None,
             "completed_at": None,
         }
-    command = [sys.executable, "-m", "pytest", "-o", 'addopts=""', *nodeids]
+    command = [sys.executable, "-m", "pytest", "-o", "addopts=", *nodeids]
     started_at = _now_iso()
     try:
         completed = subprocess.run(

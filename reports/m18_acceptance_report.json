@@ -1,11 +1,11 @@
 {
   "milestone_id": "M18",
   "schema_version": "m18_audit_v1",
-  "generated_at": "2026-06-04T11:50:33+00:00",
-  "status": "FAIL",
+  "generated_at": "2026-06-04T12:28:42+00:00",
+  "status": "PASS",
   "readiness_checklist": {
     "speaker_separation": {
-      "passed": false,
+      "passed": true,
       "evidence": [
         "tests/test_mvp_dialogue_runtime.py::test_chat_request_group_turn_envelope_reaches_mvp_runtime",
         "tests/test_mvp_dialogue_runtime.py::test_mvp_runtime_group_participants_alternate_without_collapsing",
@@ -13,7 +13,7 @@
       ]
     },
     "addressing_and_target_resolution": {
-      "passed": false,
+      "passed": true,
       "evidence": [
         "tests/test_m18_group_chat_acceptance.py::test_m18_5_scenario_b_ambiguous_addressee_clarification",
         "tests/test_m18_group_chat_acceptance.py::test_m18_5_reply_to_named_third_party_when_assistant_is_asked_about_them",
@@ -24,7 +24,7 @@
       ]
     },
     "group_transcript_ownership": {
-      "passed": false,
+      "passed": true,
       "evidence": [
         "tests/test_m16_1_gateway_ws.py::test_bridge_snapshot_preserves_group_turn_metadata",
         "tests/test_m16_1_gateway_ws.py::test_bridge_snapshot_loads_legacy_turn_row_without_claiming_native_group_ownership",
@@ -32,7 +32,7 @@
       ]
     },
     "group_memory_and_privacy_boundaries": {
-      "passed": false,
+      "passed": true,
       "evidence": [
         "tests/test_m18_group_chat_acceptance.py::test_m18_4_scenario_c_cross_user_memory_privacy_boundary",
         "tests/test_m18_group_chat_acceptance.py::test_m18_4_group_common_memory_allows_bounded_cross_user_reuse",
@@ -40,21 +40,21 @@
       ]
     },
     "multi_party_reply_selection": {
-      "passed": false,
+      "passed": true,
       "evidence": [
         "tests/test_m18_group_chat_acceptance.py::test_m18_5_reply_to_whole_group_when_assistant_and_human_are_joint_addressees",
         "tests/test_m18_group_chat_acceptance.py::test_m18_5_intentional_no_reply_for_human_side_thread"
       ]
     },
     "cross_turn_social_continuity": {
-      "passed": false,
+      "passed": true,
       "evidence": [
         "tests/test_m18_group_chat_acceptance.py::test_m18_5_scenario_a_turn_taking_correction_continuity_with_restart",
         "tests/test_m18_group_chat_acceptance.py::test_m18_5_defer_side_thread_when_prior_pending_answer_is_still_active"
       ]
     },
     "end_to_end_group_scenarios": {
-      "passed": false,
+      "passed": true,
       "evidence": [
         "tests/test_m18_group_chat_acceptance.py",
         "E:\\workspace\\segments\\tests\\fixtures\\m18_held_out_group_chat.json"
@@ -64,36 +64,35 @@
   "scenario_execution": {
     "label": "m18-scenarios",
     "executed": true,
-    "passed": false,
-    "returncode": null,
+    "passed": true,
+    "returncode": 0,
     "command": [
       "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
       "-m",
       "pytest",
       "-o",
-      "addopts=\"\"",
+      "addopts=",
       "tests/test_m18_group_chat_acceptance.py"
     ],
     "nodeids": [
       "tests/test_m18_group_chat_acceptance.py"
     ],
-    "stdout": "============================= test session starts =============================\nplatform win32 -- Python 3.11.7, pytest-9.0.2, pluggy-1.6.0\nrootdir: E:\\workspace\\segments\nconfigfile: pyproject.toml\nplugins: anyio-4.13.0\ncollected 1589 items\n\ntests\\test_action_registry.py .....                                      [  0%]\ntests\\test_action_schema.py ..                                           [  0%]\ntests\\test_api_ground_truth_export.py ..                                 [  0%]\ntests\\test_baseline_regressions.py ..........F                           [  1%]\ntests\\test_benchmark_cli.py ....                                         [  1%]\ntests\\test_confidence_external_bundle.py .                               [  1%]\ntests\\test_counterfactual.py ..............                              [  2%]\ntests\\test_counterfactual_artifact.py FF                                 [  2%]\ntests\\test_defense_strategy.py ...........                               [  3%]\ntests\\test_determinism.py .                                              [  3%]\ntests\\test_episode_parameterized.py .                                    [  3%]\ntests\\test_error_attribution.py .                                        [  3%]\ntests\\test_igt_external_bundle.py .                                      [  3%]\ntests\\test_lint_no_subjective_language.py ..                             [  3%]\ntests\\test_m11_acceptance_artifact.py ..                                 [  3%]\ntests\\test_m11_social_sharing.py ......                                  [  4%]\ntests\\test_m11_user_model.py ...................................         [  6%]\ntests\\test_m12_1_user_personality.py ..............                      [  7%]\ntests\\test_m12_2_acceptance_artifact.py .                                [  7%]\ntests\\test_m12_2_reciprocal_role.py .................................... [  9%]\n.                                                                        [  9%]\ntests\\test_m12_user_continuity.py ..............                         [ 10%]\ntests\\test_m13_0_behavioral_pull.py ...........................          [ 12%]\ntests\\test_m13_1_boredom_exploration.py .................                [ 13%]\ntests\\test_m13_2_affective_reward_proxy.py ...........................   [ 14%]\ntests\\test_m13_3_ui_initiative.py .......................                [ 16%]\ntests\\test_m13_4_idle_tick.py ..................                         [ 17%]\ntests\\test_m13_5_idle_cognitive_tick.py ....                             [ 17%]\ntests\\test_m13_6_memory_efe.py .......................................   [ 20%]\ntests\\test_m14_0_conscious_idle_reflector.py ...............             [ 21%]\ntests\\test_m14_1_background_self_continuity.py ........................  [ 22%]\ntests\\test_m14_2_event_bus.py ......                                     [ 23%]\ntests\\test_m14_2_gaps.py ............                                    [ 23%]\ntests\\test_m14_2_observability_summary.py ..                             [ 23%]\ntests\\test_m14_2_scheduled_outreach.py ...........                       [ 24%]\ntests\\test_m14_2_self_loop_daemon.py ............                        [ 25%]\ntests\\test_m14_3_proactive_alignment.py ............................     [ 27%]\ntests\\test_m14_4_streamlit_implicit_idle.py ................             [ 28%]\ntests\\test_m14_6_alignment_and_diagnose.py .....                         [ 28%]\ntests\\test_m14_7_memory_gate_decay_recall.py ..........                  [ 29%]\ntests\\test_m15_0_episode_ledger.py .........                             [ 29%]\ntests\\test_m15_1_consolidation.py ................                       [ 30%]\ntests\\test_m15_2_meta_control.py ................                        [ 31%]\ntests\\test_m15_3_cleanup_control.py .............                        [ 32%]\ntests\\test_m15_meta_control.py .                                         [ 32%]\ntests\\test_m16_0_protocol.py ................                            [ 33%]\ntests\\test_m16_1_delivery_surface.py ....                                [ 33%]\ntests\\test_m16_1_gateway_http.py ...                                     [ 34%]\ntests\\test_m16_1_gateway_ws.py .....                                     [ 34%]\ntests\\test_m16_1_runner_loop.py ....F......                              [ 35%]\ntests\\test_m16_4_streamlit_legacy_gate.py .......                        [ 35%]\ntests\\test_m16_api_default_llm.py .....                                  [ 35%]\ntests\\test_m16_turn_progress.py ...                                      [ 35%]\ntests\\test_m16_ws_hub_thread_publish.py .                                [ 36%]\ntests\\test_m17_10_goal_priors_and_adaptive_compute.py ..........         [ 36%]\ntests\\test_m17_11_field_validation.py .............                      [ 37%]\ntests\\test_m17_12_path_b_field_bridge.py ...                             [ 37%]\ntests\\test_m17_4_bundle_policy.py ......                                 [ 38%]\ntests\\test_m17_5_fe_surrogate.py ...                                     [ 38%]\ntests\\test_m17_6_memory_credit.py .....                                  [ 38%]\ntests\\test_m17_7_surprise_gated_reconsolidation.py .......               [ 39%]\ntests\\test_m17_8_path_first_memory_substrate.py .........                [ 39%]\ntests\\test_m17_9_local_memory_field.py ..........                        [ 40%]\ntests\\test_m17_replay.py ...                                             [ 40%]\ntests\\test_m18_acceptance_artifact.py ..                                 [ 40%]\ntests\\test_m18_group_chat_acceptance.py ............                     [ 41%]\ntests\\test_m1_acceptance.py .                                            [ 41%]\ntests\\test_m210_longitudinal_stability.py .F",
+    "stdout": "============================= test session starts =============================\nplatform win32 -- Python 3.11.7, pytest-9.0.2, pluggy-1.6.0\nrootdir: E:\\workspace\\segments\nconfigfile: pyproject.toml\nplugins: anyio-4.13.0\ncollected 12 items\n\ntests\\test_m18_group_chat_acceptance.py ............                     [100%]\n\n============================= 12 passed in 2.38s ==============================",
     "stderr": "",
-    "started_at": "2026-06-04T11:50:33+00:00",
-    "completed_at": "2026-06-04T11:53:33+00:00",
-    "timeout_seconds": 180
+    "started_at": "2026-06-04T12:28:42+00:00",
+    "completed_at": "2026-06-04T12:28:46+00:00"
   },
   "regression_execution": {
     "label": "m18-regressions",
     "executed": true,
-    "passed": false,
-    "returncode": null,
+    "passed": true,
+    "returncode": 0,
     "command": [
       "C:\\Users\\zq\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
       "-m",
       "pytest",
       "-o",
-      "addopts=\"\"",
+      "addopts=",
       "tests/test_m16_1_gateway_ws.py::test_bridge_snapshot_preserves_group_turn_metadata",
       "tests/test_m16_1_gateway_ws.py::test_bridge_snapshot_loads_legacy_turn_row_without_claiming_native_group_ownership",
       "tests/test_m16_1_gateway_ws.py::test_ws_client_input_appends_event_without_inline_turn",
@@ -113,11 +112,10 @@
       "tests/test_mvp_dialogue_runtime.py::test_group_reply_policy_prefers_explicit_reply_to_over_third_party_target_drift",
       "tests/test_mvp_dialogue_runtime.py::test_entity_binding_pronoun_inheritance_survives_group_turn_binding"
     ],
-    "stdout": "============================= test session starts =============================\nplatform win32 -- Python 3.11.7, pytest-9.0.2, pluggy-1.6.0\nrootdir: E:\\workspace\\segments\nconfigfile: pyproject.toml\nplugins: anyio-4.13.0\ncollected 1589 items\n\ntests\\test_action_registry.py .....                                      [  0%]\ntests\\test_action_schema.py ..                                           [  0%]\ntests\\test_api_ground_truth_export.py ..                                 [  0%]\ntests\\test_baseline_regressions.py ..........F                           [  1%]\ntests\\test_benchmark_cli.py ....                                         [  1%]\ntests\\test_confidence_external_bundle.py .                               [  1%]\ntests\\test_counterfactual.py ..............                              [  2%]\ntests\\test_counterfactual_artifact.py FF                                 [  2%]\ntests\\test_defense_strategy.py ...........                               [  3%]\ntests\\test_determinism.py .                                              [  3%]\ntests\\test_episode_parameterized.py .                                    [  3%]\ntests\\test_error_attribution.py .                                        [  3%]\ntests\\test_igt_external_bundle.py .                                      [  3%]\ntests\\test_lint_no_subjective_language.py ..                             [  3%]\ntests\\test_m11_acceptance_artifact.py ..                                 [  3%]\ntests\\test_m11_social_sharing.py ......                                  [  4%]\ntests\\test_m11_user_model.py ...................................         [  6%]\ntests\\test_m12_1_user_personality.py ..............                      [  7%]\ntests\\test_m12_2_acceptance_artifact.py .                                [  7%]\ntests\\test_m12_2_reciprocal_role.py .................................... [  9%]\n.                                                                        [  9%]\ntests\\test_m12_user_continuity.py ..............                         [ 10%]\ntests\\test_m13_0_behavioral_pull.py ...........................          [ 12%]\ntests\\test_m13_1_boredom_exploration.py .................                [ 13%]\ntests\\test_m13_2_affective_reward_proxy.py ...........................   [ 14%]\ntests\\test_m13_3_ui_initiative.py .......................                [ 16%]\ntests\\test_m13_4_idle_tick.py ..................                         [ 17%]\ntests\\test_m13_5_idle_cognitive_tick.py ....                             [ 17%]\ntests\\test_m13_6_memory_efe.py .......................................   [ 20%]\ntests\\test_m14_0_conscious_idle_reflector.py ...............             [ 21%]\ntests\\test_m14_1_background_self_continuity.py ........................  [ 22%]\ntests\\test_m14_2_event_bus.py ......                                     [ 23%]\ntests\\test_m14_2_gaps.py ............                                    [ 23%]\ntests\\test_m14_2_observability_summary.py ..                             [ 23%]\ntests\\test_m14_2_scheduled_outreach.py ...........                       [ 24%]\ntests\\test_m14_2_self_loop_daemon.py ............                        [ 25%]\ntests\\test_m14_3_proactive_alignment.py ............................     [ 27%]\ntests\\test_m14_4_streamlit_implicit_idle.py ................             [ 28%]\ntests\\test_m14_6_alignment_and_diagnose.py .....                         [ 28%]\ntests\\test_m14_7_memory_gate_decay_recall.py ..........                  [ 29%]\ntests\\test_m15_0_episode_ledger.py .........                             [ 29%]\ntests\\test_m15_1_consolidation.py ................                       [ 30%]\ntests\\test_m15_2_meta_control.py ................                        [ 31%]\ntests\\test_m15_3_cleanup_control.py .............                        [ 32%]\ntests\\test_m15_meta_control.py .                                         [ 32%]\ntests\\test_m16_0_protocol.py ................                            [ 33%]\ntests\\test_m16_1_delivery_surface.py ....                                [ 33%]\ntests\\test_m16_1_gateway_http.py ...                                     [ 34%]\ntests\\test_m16_1_gateway_ws.py .....                                     [ 34%]\ntests\\test_m16_1_runner_loop.py ....F......                              [ 35%]\ntests\\test_m16_4_streamlit_legacy_gate.py .......                        [ 35%]\ntests\\test_m16_api_default_llm.py .....                                  [ 35%]\ntests\\test_m16_turn_progress.py ...                                      [ 35%]\ntests\\test_m16_ws_hub_thread_publish.py .                                [ 36%]\ntests\\test_m17_10_goal_priors_and_adaptive_compute.py ..........         [ 36%]\ntests\\test_m17_11_field_validation.py .............                      [ 37%]\ntests\\test_m17_12_path_b_field_bridge.py ...                             [ 37%]\ntests\\test_m17_4_bundle_policy.py ......                                 [ 38%]\ntests\\test_m17_5_fe_surrogate.py ...                                     [ 38%]\ntests\\test_m17_6_memory_credit.py .....                                  [ 38%]\ntests\\test_m17_7_surprise_gated_reconsolidation.py .......               [ 39%]\ntests\\test_m17_8_path_first_memory_substrate.py .........                [ 39%]\ntests\\test_m17_9_local_memory_field.py ..........                        [ 40%]\ntests\\test_m17_replay.py ...                                             [ 40%]\ntests\\test_m18_acceptance_artifact.py ..                                 [ 40%]\ntests\\test_m18_group_chat_acceptance.py ............                     [ 41%]\ntests\\test_m1_acceptance.py .                                            [ 41%]\ntests\\test_m210_longitudinal_stability.py .F",
+    "stdout": "============================= test session starts =============================\nplatform win32 -- Python 3.11.7, pytest-9.0.2, pluggy-1.6.0\nrootdir: E:\\workspace\\segments\nconfigfile: pyproject.toml\nplugins: anyio-4.13.0\ncollected 8 items\n\ntests\\test_m16_1_gateway_ws.py ...                                       [ 37%]\ntests\\test_mvp_dialogue_runtime.py .....                                 [100%]\n\n============================== 8 passed in 2.75s ==============================",
     "stderr": "",
-    "started_at": "2026-06-04T11:53:33+00:00",
-    "completed_at": "2026-06-04T11:56:33+00:00",
-    "timeout_seconds": 180
+    "started_at": "2026-06-04T12:28:46+00:00",
+    "completed_at": "2026-06-04T12:28:51+00:00"
   },
   "judge_types": {
     "structured_assertions": [
@@ -158,14 +156,14 @@
     "report": {
       "path": "E:\\workspace\\segments\\reports\\m18_acceptance_report.json",
       "exists": true,
-      "size_bytes": 19266,
-      "modified_at": "2026-06-04T11:56:33+00:00"
+      "size_bytes": 8513,
+      "modified_at": "2026-06-04T12:28:51+00:00"
     },
     "summary": {
       "path": "E:\\workspace\\segments\\reports\\m18_acceptance_summary.md",
       "exists": true,
       "size_bytes": 464,
-      "modified_at": "2026-06-04T11:56:33+00:00"
+      "modified_at": "2026-06-04T12:28:51+00:00"
     }
   },
   "path_boundary": "Path B only; no Path A or Streamlit legacy readiness claim"

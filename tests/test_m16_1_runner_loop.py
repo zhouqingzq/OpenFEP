@@ -69,7 +69,7 @@ def test_crash_after_event_claim_replays_on_restart(tmp_path: Path) -> None:
     event_id = bridge.append_client_input(text="replay me", correlation_id="corr_replay")
     claimed = bridge.claim_events(limit=1)
     assert claimed and claimed[0]["event_id"] == event_id
-    clk.advance(120)
+    clk.advance(runner.claim_lease_seconds + 1)
     step = runner.run_once_for_tests(now=clk())
     assert bridge.is_event_processed(event_id)
     assert any(msg.get("kind") == "AssistantMessageCommitted" for msg in step.actuation_messages)
@@ -146,3 +146,29 @@ def test_runner_status_hides_stale_error_when_healthy(tmp_path: Path) -> None:
     row = runner.status().to_dict()
     assert row["running"] is True
     assert row["last_error"] == ""
+
+
+def test_runner_treats_group_no_reply_as_completed_without_error(tmp_path: Path) -> None:
+    bridge, hub, runner, clk = build_stack(tmp_path, llm=FakeJSONLLM())
+    event_id = bridge.append_client_input(
+        text="Bob 你先说。",
+        correlation_id="corr_group_silence",
+        speaker_name="Alice",
+        group_turn_envelope={
+            "speaker_participant_id": "alice",
+            "visible_participant_ids": ["alice", "bob", "hutao"],
+            "addressed_participant_ids": ["bob"],
+        },
+    )
+
+    step = runner.run_once_for_tests(now=clk())
+    kinds = [msg.get("kind") for msg in step.actuation_messages]
+    completed = next(msg for msg in step.actuation_messages if msg.get("kind") == "TurnCompleted")
+
+    assert bridge.is_event_processed(event_id)
+    assert "Error" not in kinds
+    assert "AssistantMessageCommitted" not in kinds
+    assert kinds.count("UserMessageAccepted") == 1
+    assert completed["payload"]["action"] == "no_reply"
+    assert completed["payload"]["visible_reply_emitted"] is False
+    assert any(row.get("action") == "no_reply" for row in step.processed if isinstance(row, dict))

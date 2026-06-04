@@ -74,6 +74,15 @@ def test_ws_schema_roundtrip_subscribe_and_snapshot() -> None:
     )
     assert validate_ws_server_message(snapshot) == []
 
+    completed = build_ws_server_message(
+        kind="TurnCompleted",
+        persona_id="胡桃",
+        session_id="sess_a",
+        payload={"event_id": "evt_1", "turn_index": 1, "action": "no_reply", "visible_reply_emitted": False},
+        now=NOW,
+    )
+    assert validate_ws_server_message(completed) == []
+
 
 def test_client_input_maps_to_client_input_committed_event() -> None:
     event = build_client_input_committed_event(
