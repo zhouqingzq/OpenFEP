@@ -8,6 +8,7 @@ from segmentum.dialogue.runtime.mvp_loop import (
     MVPTurnResult,
     MVPStateStore,
     OpenRouterJSONClient,
+    _build_group_turn_binding,
     analyze_materials_into_personas,
     build_memory_dynamics_guidance,
     build_conscious_loop_prompt,
@@ -1536,6 +1537,47 @@ def test_chat_request_speaker_name_reaches_mvp_runtime(tmp_path: Path) -> None:
     assert stub.kwargs["speaker_name"] == "Alice"
 
 
+def test_chat_request_group_turn_envelope_reaches_mvp_runtime(tmp_path: Path) -> None:
+    from segmentum.agent import SegmentAgent
+    from segmentum.dialogue.runtime.chat import ChatInterface, ChatRequest
+
+    class RuntimeStub:
+        def __init__(self) -> None:
+            self.kwargs = {}
+
+        def run_turn(self, *args, **kwargs):
+            self.kwargs = dict(kwargs)
+            return MVPTurnResult(
+                reply="ok",
+                action="answer",
+                diagnostics={"mvp_runtime": True},
+                followup_replies=[],
+            )
+
+    stub = RuntimeStub()
+    chat = ChatInterface(use_llm=False, mvp_root=tmp_path / "mvp")
+    chat.set_agent(SegmentAgent(), persona_name="测试人格")
+    chat._mvp_runtime = stub
+
+    chat.send(
+        ChatRequest(
+            user_text="hello",
+            speaker_name="Alice",
+            group_turn_envelope={
+                "speaker_participant_id": "alice",
+                "addressed_participant_ids": ["hutao"],
+                "reply_to_turn_id": "turn_001",
+            },
+        )
+    )
+
+    assert stub.kwargs["group_turn_envelope"] == {
+        "speaker_participant_id": "alice",
+        "addressed_participant_ids": ["hutao"],
+        "reply_to_turn_id": "turn_001",
+    }
+
+
 class M11SpeakerFakeLLM(FakeJSONLLM):
     def complete_json(self, *, system_prompt: str, user_prompt: str) -> dict[str, object]:
         if "M11 user-model extractor" in system_prompt:
@@ -1588,6 +1630,131 @@ def test_mvp_runtime_m11_keeps_distinct_user_models_by_speaker_name(tmp_path: Pa
     assert "Alice" in alice_summary
     assert "Bob" in bob_summary
     assert models["Alice"] != models["Bob"]
+
+
+def test_mvp_runtime_persists_group_turn_binding_and_turn_log(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=FakeJSONLLM(),
+        persona_name="测试人格",
+    )
+
+    result = runtime.run_turn(
+        "Bob 刚才问我了。",
+        speaker_name="Alice",
+        turn_index=0,
+        now=7700,
+        group_turn_envelope={
+            "speaker_participant_id": "alice",
+            "visible_participant_ids": ["alice", "bob", "hutao"],
+            "addressed_participant_ids": ["hutao"],
+            "mentioned_participant_ids": ["bob"],
+            "reply_to_turn_id": "turn_001",
+            "quoted_turn_ids": ["turn_prev_bob"],
+            "explicit_mentions": ["Bob"],
+        },
+    )
+
+    assert result.diagnostics["group_turn_binding"]["current_speaker_participant_id"] == "alice"
+    assert result.diagnostics["group_turn_binding"]["reply_to_turn_id"] == "turn_001"
+    assert result.diagnostics["group_turn_binding"]["addressed_participant_ids"] == ["hutao"]
+    saved = runtime.store.load()
+    group_state = saved["temporal_state"]["group_chat_state"]
+    assert group_state["active_participant_ids"] == ["alice", "bob", "hutao"]
+    assert group_state["participant_registry"]["alice"]["display_name"] == "Alice"
+    assert group_state["participant_registry"]["alice"]["ownership_evidence"] == "explicit"
+    assert group_state["participant_registry"]["bob"]["participant_id"] == "bob"
+    restarted = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=FakeJSONLLM(),
+        persona_name="测试人格",
+    )
+    restarted_state = restarted.store.load()
+    assert restarted_state["temporal_state"]["group_chat_state"]["participant_registry"]["alice"]["display_name"] == "Alice"
+    turn_rows = [
+        json.loads(line)
+        for line in (runtime.store.root / "conversation_log.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    turn_row = turn_rows[-1]
+    assert turn_row["event"] == "turn"
+    assert turn_row["speaker_participant_id"] == "alice"
+    assert turn_row["reply_to_turn_id"] == "turn_001"
+    assert turn_row["addressed_participant_ids"] == ["hutao"]
+
+
+def test_mvp_runtime_group_participants_alternate_without_collapsing(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=FakeJSONLLM(),
+        persona_name="test persona",
+    )
+
+    runtime.run_turn(
+        "first group turn",
+        speaker_name="Alice",
+        turn_index=0,
+        now=7800,
+        group_turn_envelope={
+            "speaker_participant_id": "alice",
+            "visible_participant_ids": ["alice", "bob", "hutao"],
+            "addressed_participant_ids": ["hutao"],
+        },
+    )
+    runtime.run_turn(
+        "second group turn",
+        speaker_name="Bob",
+        turn_index=1,
+        now=7860,
+        group_turn_envelope={
+            "speaker_participant_id": "bob",
+            "visible_participant_ids": ["alice", "bob", "hutao"],
+            "addressed_participant_ids": ["hutao"],
+        },
+    )
+
+    saved = runtime.store.load()
+    registry = saved["temporal_state"]["group_chat_state"]["participant_registry"]
+    assert registry["alice"]["display_name"] == "Alice"
+    assert registry["bob"]["display_name"] == "Bob"
+    turn_rows = [
+        row
+        for row in saved["short_term_memory"]
+        if row.get("kind") == "dialogue_turn"
+    ]
+    assert turn_rows[-2]["source_participant_id"] == "alice"
+    assert turn_rows[-1]["source_participant_id"] == "bob"
+
+
+def test_group_reply_policy_prefers_explicit_reply_to_over_third_party_target_drift(tmp_path: Path) -> None:
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=FakeJSONLLM(),
+        persona_name="test persona",
+    )
+
+    result = runtime.run_turn(
+        "please follow up on that and mention Carol too",
+        speaker_name="Alice",
+        turn_index=0,
+        now=7890,
+        group_turn_envelope={
+            "speaker_participant_id": "alice",
+            "visible_participant_ids": ["alice", "carol", "hutao"],
+            "addressed_participant_ids": ["hutao"],
+            "mentioned_participant_ids": ["carol"],
+            "reply_to_turn_id": "turn_alice_001",
+            "quoted_turn_ids": ["turn_alice_001"],
+            "explicit_mentions": ["Carol"],
+        },
+    )
+
+    assert result.diagnostics["group_reply_policy"]["action"] == "reply_to_current_speaker"
+    assert "explicit_reply_to" in result.diagnostics["group_reply_policy"]["reason_codes"]
+    assert "carol" in [
+        str(item).casefold()
+        for item in result.diagnostics["group_turn_binding"]["candidate_targets"]
+    ]
 
 
 def test_mvp_runtime_audits_snapshot_echo_m11_output_as_invalid(tmp_path: Path) -> None:
@@ -2689,6 +2856,64 @@ def test_entity_binding_after_m12_pre_pass_does_not_promote_aliases_observed_wit
         m12_turn_result=turn.to_dict(),
     )
     assert "AliasR" not in binding["current_interlocutor"]["aliases"]
+
+
+def test_entity_binding_pronoun_inheritance_survives_group_turn_binding() -> None:
+    state = {
+        "m11_user_models": {},
+        "short_term_memory": [
+            {
+                "id": "mem_bob",
+                "kind": "dialogue_turn",
+                "content": "Bob said he would be late.",
+                "source_display_name": "Bob",
+                "source_user_id": "bob",
+            }
+        ],
+        "temporal_state": {
+            "last_share_trace": {
+                "target_person": "Bob",
+            }
+        },
+    }
+
+    entity_binding = build_entity_binding_context(
+        state=state,
+        user_text="他后来又说什么了？",
+        display_name="Alice",
+        user_id="alice",
+        temporal_input={
+            "previous_turn_summary": {
+                "user_text": "刚才已经解释过了。",
+            }
+        },
+    )
+
+    assert entity_binding["target_person"] == "Bob"
+    assert entity_binding["target_reason"] == "pronoun_inherited_previous_target"
+    assert entity_binding["pronoun_bindings"]
+
+    group_binding = _build_group_turn_binding(
+        display_name="Alice",
+        user_id="alice",
+        group_turn_envelope={
+            "speaker_participant_id": "alice",
+            "visible_participant_ids": ["alice", "bob", "hutao"],
+            "addressed_participant_ids": ["hutao"],
+            "mentioned_participant_ids": ["bob"],
+            "reply_to_turn_id": "turn_bob_001",
+            "quoted_turn_ids": ["turn_bob_001"],
+        },
+        entity_binding=entity_binding,
+    )
+
+    assert group_binding["addressed_participant_ids"] == ["hutao"]
+    assert group_binding["mentioned_participant_ids"] == ["bob"]
+    assert group_binding["pronoun_bindings"]
+    assert "bob" in [
+        str(item).casefold()
+        for item in group_binding["candidate_targets"]
+    ]
 
 
 def test_topic_query_uses_generic_topic_context_not_finance_special_case() -> None:

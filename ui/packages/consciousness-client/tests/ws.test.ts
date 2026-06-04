@@ -99,6 +99,38 @@ describe("websocket stream", () => {
     validateOutboundClientMessage(input);
     await stream.disconnect();
   });
+
+  it("test_ws_client_input_serializes_group_turn_envelope", async () => {
+    const client = createTestClient(mockFetch({}));
+    const stream = client.connectStream({ autoReconnect: false });
+    await stream.connect();
+    const ws = MockWebSocket.instances[0];
+    ws.simulateMessage(baseMessage("Subscribed"));
+    await stream.sendClientInput("hello", {
+      speaker_name: "Alice",
+      group_turn_envelope: {
+        speaker_participant_id: "alice",
+        addressed_participant_ids: ["hutao"],
+        reply_to_turn_id: "turn_001",
+      },
+    });
+    const input = JSON.parse(ws.sent.at(-1) ?? "{}") as {
+      kind: string;
+      payload: {
+        text: string;
+        speaker_name?: string;
+        group_turn_envelope?: Record<string, unknown>;
+      };
+    };
+    expect(input.kind).toBe("ClientInput");
+    expect(input.payload.group_turn_envelope).toMatchObject({
+      speaker_participant_id: "alice",
+      addressed_participant_ids: ["hutao"],
+      reply_to_turn_id: "turn_001",
+    });
+    validateOutboundClientMessage(input);
+    await stream.disconnect();
+  });
 });
 
 describe("validation", () => {

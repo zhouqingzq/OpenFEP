@@ -153,6 +153,54 @@ CLOSED_ACTUATION_SUPPRESSION_REASON_CODES = frozenset(
 LOCALHOST_HOSTS = frozenset({"127.0.0.1", "::1", "localhost"})
 
 
+def _bounded_string_list(
+    raw: Any,
+    *,
+    limit: int,
+    item_max_chars: int,
+) -> list[str]:
+    if not isinstance(raw, list):
+        return []
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in raw:
+        text = str(item or "").strip()[:item_max_chars]
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        out.append(text)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def bounded_group_turn_envelope(raw: Mapping[str, Any] | None) -> dict[str, Any]:
+    envelope = dict(raw or {})
+    payload: dict[str, Any] = {}
+    speaker_participant_id = str(envelope.get("speaker_participant_id", "") or "").strip()[:64]
+    if speaker_participant_id:
+        payload["speaker_participant_id"] = speaker_participant_id
+    reply_to_turn_id = str(envelope.get("reply_to_turn_id", "") or "").strip()[:120]
+    if reply_to_turn_id:
+        payload["reply_to_turn_id"] = reply_to_turn_id
+    visible = _bounded_string_list(envelope.get("visible_participant_ids"), limit=8, item_max_chars=64)
+    if visible:
+        payload["visible_participant_ids"] = visible
+    addressed = _bounded_string_list(envelope.get("addressed_participant_ids"), limit=8, item_max_chars=64)
+    if addressed:
+        payload["addressed_participant_ids"] = addressed
+    mentioned = _bounded_string_list(envelope.get("mentioned_participant_ids"), limit=8, item_max_chars=64)
+    if mentioned:
+        payload["mentioned_participant_ids"] = mentioned
+    quoted = _bounded_string_list(envelope.get("quoted_turn_ids"), limit=8, item_max_chars=120)
+    if quoted:
+        payload["quoted_turn_ids"] = quoted
+    explicit = _bounded_string_list(envelope.get("explicit_mentions"), limit=8, item_max_chars=64)
+    if explicit:
+        payload["explicit_mentions"] = explicit
+    return payload
+
+
 def schemas_root() -> Path:
     return Path(__file__).resolve().parents[3] / "schemas" / "m16"
 
@@ -327,6 +375,7 @@ def build_client_input_committed_event(
     now: int | None = None,
     event_id: str | None = None,
     speaker_name: str = "",
+    group_turn_envelope: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     bounded_text = str(text or "")[:MAX_INPUT_TEXT_CHARS]
     payload: dict[str, Any] = {
@@ -336,6 +385,9 @@ def build_client_input_committed_event(
     bounded_speaker = str(speaker_name or "").strip()[:64]
     if bounded_speaker:
         payload["speaker_name"] = bounded_speaker
+    bounded_envelope = bounded_group_turn_envelope(group_turn_envelope)
+    if bounded_envelope:
+        payload["group_turn_envelope"] = bounded_envelope
     event = {
         "event_id": event_id or _new_id("m16evt"),
         "event_type": "ClientInputCommittedEvent",

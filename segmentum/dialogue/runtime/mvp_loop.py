@@ -424,6 +424,52 @@ def _mapping(value: Any) -> dict[str, Any]:
     return dict(value) if isinstance(value, Mapping) else {}
 
 
+def _bounded_string_list(
+    value: Any,
+    *,
+    limit: int = 8,
+    item_max_chars: int = 64,
+) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in value:
+        text = str(item or "").strip()[:item_max_chars]
+        if not text:
+            continue
+        lowered = text.casefold()
+        if lowered in seen:
+            continue
+        seen.add(lowered)
+        out.append(text)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _unique_bounded_strings(
+    values: list[str],
+    *,
+    limit: int = 8,
+    item_max_chars: int = 64,
+) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+    for raw in values:
+        text = str(raw or "").strip()[:item_max_chars]
+        if not text:
+            continue
+        lowered = text.casefold()
+        if lowered in seen:
+            continue
+        seen.add(lowered)
+        out.append(text)
+        if len(out) >= limit:
+            break
+    return out
+
+
 def _safe_user_id(speaker_name: str) -> str:
     name = str(speaker_name or "").strip() or "default_user"
     safe = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in name)
@@ -436,6 +482,538 @@ def _bounded_float(value: Any, *, default: float = 0.5) -> float:
     except (TypeError, ValueError):
         numeric = default
     return max(0.0, min(1.0, numeric))
+
+
+def _bounded_group_turn_envelope(raw: Mapping[str, Any] | None) -> dict[str, Any]:
+    envelope = _mapping(raw)
+    payload: dict[str, Any] = {}
+    speaker_participant_id = str(envelope.get("speaker_participant_id", "") or "").strip()[:64]
+    if speaker_participant_id:
+        payload["speaker_participant_id"] = speaker_participant_id
+    reply_to_turn_id = str(envelope.get("reply_to_turn_id", "") or "").strip()[:120]
+    if reply_to_turn_id:
+        payload["reply_to_turn_id"] = reply_to_turn_id
+    visible = _bounded_string_list(envelope.get("visible_participant_ids"), limit=8, item_max_chars=64)
+    if visible:
+        payload["visible_participant_ids"] = visible
+    addressed = _bounded_string_list(envelope.get("addressed_participant_ids"), limit=8, item_max_chars=64)
+    if addressed:
+        payload["addressed_participant_ids"] = addressed
+    mentioned = _bounded_string_list(envelope.get("mentioned_participant_ids"), limit=8, item_max_chars=64)
+    if mentioned:
+        payload["mentioned_participant_ids"] = mentioned
+    quoted = _bounded_string_list(envelope.get("quoted_turn_ids"), limit=8, item_max_chars=120)
+    if quoted:
+        payload["quoted_turn_ids"] = quoted
+    explicit = _bounded_string_list(envelope.get("explicit_mentions"), limit=8, item_max_chars=64)
+    if explicit:
+        payload["explicit_mentions"] = explicit
+    return payload
+
+
+def _build_group_turn_binding(
+    *,
+    display_name: str,
+    user_id: str,
+    group_turn_envelope: Mapping[str, Any] | None,
+    entity_binding: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    envelope = _bounded_group_turn_envelope(group_turn_envelope)
+    speaker_participant_id = str(envelope.get("speaker_participant_id", "") or "").strip() or user_id
+    addressed = _bounded_string_list(envelope.get("addressed_participant_ids"), limit=8, item_max_chars=64)
+    mentioned = _bounded_string_list(envelope.get("mentioned_participant_ids"), limit=8, item_max_chars=64)
+    explicit_mentions = _bounded_string_list(envelope.get("explicit_mentions"), limit=8, item_max_chars=64)
+    quoted_turn_ids = _bounded_string_list(envelope.get("quoted_turn_ids"), limit=8, item_max_chars=120)
+    visible = _unique_bounded_strings(
+        [
+            speaker_participant_id,
+            *_bounded_string_list(envelope.get("visible_participant_ids"), limit=8, item_max_chars=64),
+            *addressed,
+            *mentioned,
+        ],
+        limit=8,
+        item_max_chars=64,
+    )
+    target_person_hint = str(_mapping(entity_binding).get("target_person", "") or "").strip()
+    candidate_targets = _unique_bounded_strings(
+        [*addressed, *mentioned, *explicit_mentions, target_person_hint],
+        limit=6,
+        item_max_chars=64,
+    )
+    ambiguity_band = "low"
+    if len(candidate_targets) > 1 and not addressed and not str(envelope.get("reply_to_turn_id", "") or "").strip():
+        ambiguity_band = "high"
+    elif len(candidate_targets) > 1 or (mentioned and not addressed):
+        ambiguity_band = "medium"
+    elif not candidate_targets and not str(envelope.get("reply_to_turn_id", "") or "").strip():
+        ambiguity_band = "unknown"
+    conflict_flags = _string_list(_mapping(entity_binding).get("conflicts"), limit=8)
+    if str(_mapping(entity_binding).get("binding_confidence", "") or "").strip() == "ambiguous":
+        conflict_flags = _unique_bounded_strings([*conflict_flags, "entity_binding_ambiguous"], limit=8, item_max_chars=64)
+    return {
+        "current_speaker_participant_id": speaker_participant_id,
+        "current_speaker_display_name": display_name,
+        "ownership_evidence": "explicit" if envelope.get("speaker_participant_id") else "derived_from_speaker_name",
+        "visible_participant_ids": visible,
+        "addressed_participant_ids": addressed,
+        "mentioned_participant_ids": mentioned,
+        "reply_to_turn_id": str(envelope.get("reply_to_turn_id", "") or "").strip()[:120],
+        "quoted_turn_ids": quoted_turn_ids,
+        "explicit_mentions": explicit_mentions,
+        "candidate_targets": candidate_targets,
+        "target_person_hint": target_person_hint,
+        "pronoun_bindings": _mapping(_mapping(entity_binding).get("pronoun_bindings")),
+        "ambiguity_band": ambiguity_band,
+        "conflict_flags": conflict_flags,
+    }
+
+
+def _build_group_chat_state(
+    state: Mapping[str, Any],
+    *,
+    now: int,
+    turn_index: int,
+    display_name: str,
+    user_id: str,
+    group_turn_envelope: Mapping[str, Any] | None,
+    group_turn_binding: Mapping[str, Any] | None,
+    thread_policy_state: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    previous_temporal = _mapping(state.get("temporal_state"))
+    previous = _mapping(previous_temporal.get("group_chat_state"))
+    participant_registry = {
+        str(key): _mapping(value)
+        for key, value in _mapping(previous.get("participant_registry")).items()
+    }
+    envelope = _bounded_group_turn_envelope(group_turn_envelope)
+    binding = _mapping(group_turn_binding)
+    speaker_participant_id = str(binding.get("current_speaker_participant_id", "") or "").strip() or user_id
+    if speaker_participant_id:
+        participant_registry[speaker_participant_id] = {
+            **participant_registry.get(speaker_participant_id, {}),
+            "participant_id": speaker_participant_id,
+            "display_name": display_name,
+            "source_user_id": user_id,
+            "last_seen_turn_index": turn_index,
+            "last_seen_at": now,
+            "ownership_evidence": str(binding.get("ownership_evidence", "") or "derived_from_speaker_name"),
+            "mentionable_names": _unique_bounded_strings([display_name], limit=4, item_max_chars=64),
+        }
+    visible = _bounded_string_list(binding.get("visible_participant_ids"), limit=8, item_max_chars=64)
+    addressed = _bounded_string_list(binding.get("addressed_participant_ids"), limit=8, item_max_chars=64)
+    mentioned = _bounded_string_list(binding.get("mentioned_participant_ids"), limit=8, item_max_chars=64)
+    for participant_id in _unique_bounded_strings([*visible, *addressed, *mentioned], limit=8, item_max_chars=64):
+        if participant_id == speaker_participant_id:
+            continue
+        participant_registry[participant_id] = {
+            **participant_registry.get(participant_id, {}),
+            "participant_id": participant_id,
+            "display_name": str(_mapping(participant_registry.get(participant_id, {})).get("display_name", "") or participant_id),
+            "source_user_id": str(_mapping(participant_registry.get(participant_id, {})).get("source_user_id", "") or participant_id),
+            "last_visible_turn_index": turn_index,
+            "last_visible_at": now,
+        }
+    return {
+        "participant_registry": participant_registry,
+        "active_participant_ids": visible,
+        "last_group_turn_envelope": envelope,
+        "last_group_turn_binding": binding,
+        "thread_policy_state": dict(thread_policy_state or _mapping(previous.get("thread_policy_state"))),
+        "last_group_turn_turn_index": turn_index,
+    }
+
+
+def _assistant_participant_id_candidates(persona_name: str = "") -> set[str]:
+    raw = str(persona_name or "").strip()
+    candidates = {"assistant"}
+    safe = _safe_user_id(raw)
+    if safe:
+        candidates.add(safe)
+    if raw:
+        candidates.add(raw)
+        candidates.add(raw.casefold())
+    return {item for item in candidates if item}
+
+
+def _participant_id_matches(raw: str, candidates: set[str]) -> bool:
+    value = str(raw or "").strip()
+    if not value:
+        return False
+    lowered = value.casefold()
+    return any(lowered == str(candidate).strip().casefold() for candidate in candidates if str(candidate).strip())
+
+
+def _group_audience_scope_label(participant_ids: list[str]) -> str:
+    count = len(_unique_bounded_strings(participant_ids, limit=8, item_max_chars=64))
+    if count <= 0:
+        return "unknown"
+    if count == 1:
+        return "self_only"
+    if count <= 4:
+        return "small_group"
+    return "whole_group"
+
+
+def _group_audience_relation(source_ids: list[str], current_ids: list[str]) -> str:
+    source = {item.casefold() for item in _unique_bounded_strings(source_ids, limit=8, item_max_chars=64)}
+    current = {item.casefold() for item in _unique_bounded_strings(current_ids, limit=8, item_max_chars=64)}
+    if not source:
+        return "unknown_origin_audience"
+    if not current:
+        return "unknown_current_audience"
+    if source == current:
+        return "same_audience"
+    if current.issubset(source):
+        return "subset_of_origin"
+    if source.issubset(current):
+        return "superset_of_origin"
+    return "different_audience"
+
+
+def _group_memory_policy_for_card(
+    card: Mapping[str, Any],
+    *,
+    current_audience_participant_ids: list[str],
+    current_speaker_participant_id: str,
+) -> dict[str, Any]:
+    source_participant_id = str(
+        card.get("source_participant_id")
+        or card.get("source_user_id")
+        or ""
+    ).strip()
+    source_audience_ids = _bounded_string_list(
+        card.get("source_audience_participant_ids"),
+        limit=8,
+        item_max_chars=64,
+    )
+    shareability_class = str(card.get("shareability", "") or "default_social").strip() or "default_social"
+    source_scope = str(card.get("source_audience_scope", "") or "").strip() or _group_audience_scope_label(source_audience_ids)
+    current_scope = _group_audience_scope_label(current_audience_participant_ids)
+    audience_relation = _group_audience_relation(source_audience_ids, current_audience_participant_ids)
+    reasons: list[str] = []
+
+    if len(_unique_bounded_strings(current_audience_participant_ids, limit=8, item_max_chars=64)) <= 1:
+        selected_mode = "direct_quote"
+        reasons.append("no_group_audience_context")
+        selected_action = "direct_share"
+        return {
+            "source_participant_id": source_participant_id,
+            "source_audience_participant_ids": source_audience_ids,
+            "source_audience_scope": source_scope,
+            "current_audience_participant_ids": [],
+            "current_audience_scope": current_scope,
+            "audience_relation": audience_relation,
+            "shareability_class": shareability_class,
+            "selected_disclosure_mode": selected_mode,
+            "selected_disclosure_action": selected_action,
+            "allow_direct_disclosure": True,
+            "allow_abstract_sharing": True,
+            "policy_reason": ",".join(reasons[:4]),
+            "policy_reason_codes": reasons[:4],
+        }
+
+    same_source_participant = bool(
+        source_participant_id
+        and current_speaker_participant_id
+        and source_participant_id.casefold() == current_speaker_participant_id.casefold()
+    )
+    if same_source_participant:
+        selected_mode = "direct_quote"
+        reasons.append("same_source_participant")
+    elif shareability_class == "restricted_explicit":
+        selected_mode = "refusal"
+        reasons.append("explicit_secret_cross_user")
+    elif shareability_class == "restricted_implicit":
+        if audience_relation in {"same_audience", "subset_of_origin"}:
+            selected_mode = "attributed_summary"
+            reasons.append("soft_boundary_same_or_subset_audience")
+        else:
+            selected_mode = "unattributed_abstraction"
+            reasons.append("soft_boundary_new_audience")
+    elif audience_relation in {"same_audience", "subset_of_origin"}:
+        selected_mode = "direct_quote"
+        reasons.append("group_common_or_subset_reuse")
+    elif audience_relation == "unknown_origin_audience":
+        selected_mode = "attributed_summary"
+        reasons.append("unknown_origin_audience_default_summary")
+    else:
+        selected_mode = "attributed_summary"
+        reasons.append("cross_group_summary_only")
+
+    selected_action = (
+        "direct_share"
+        if selected_mode == "direct_quote"
+        else "truthful_refusal"
+        if selected_mode == "refusal"
+        else "abstract_share"
+    )
+    return {
+        "source_participant_id": source_participant_id,
+        "source_audience_participant_ids": source_audience_ids,
+        "source_audience_scope": source_scope,
+        "current_audience_participant_ids": _unique_bounded_strings(
+            current_audience_participant_ids,
+            limit=8,
+            item_max_chars=64,
+        ),
+        "current_audience_scope": current_scope,
+        "audience_relation": audience_relation,
+        "shareability_class": shareability_class,
+        "selected_disclosure_mode": selected_mode,
+        "selected_disclosure_action": selected_action,
+        "allow_direct_disclosure": bool(selected_mode == "direct_quote"),
+        "allow_abstract_sharing": bool(selected_mode in {"direct_quote", "attributed_summary", "unattributed_abstraction"}),
+        "policy_reason": ",".join(reasons[:4]),
+        "policy_reason_codes": reasons[:4],
+    }
+
+
+def _resolve_group_privacy_policy(
+    *,
+    evidence_judgment: Mapping[str, Any] | None,
+    lexical_candidates: list[Mapping[str, Any]] | None,
+    group_turn_binding: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    binding = _mapping(group_turn_binding)
+    current_audience_ids = _bounded_string_list(
+        binding.get("visible_participant_ids"),
+        limit=8,
+        item_max_chars=64,
+    ) or _bounded_string_list(
+        [binding.get("current_speaker_participant_id")],
+        limit=1,
+        item_max_chars=64,
+    )
+    current_speaker_participant_id = str(binding.get("current_speaker_participant_id", "") or "").strip()
+    candidates = [
+        dict(item)
+        for item in (lexical_candidates or [])
+        if isinstance(item, Mapping)
+    ]
+    relevant_ids = {
+        str(item).strip()
+        for item in _string_list(_mapping(evidence_judgment).get("relevant_evidence_ids"), limit=8)
+        if str(item).strip()
+    }
+    relevant_cards = [
+        card for card in candidates
+        if not relevant_ids or str(card.get("id", "")).strip() in relevant_ids
+    ]
+    if not relevant_cards:
+        return {
+            "current_audience_participant_ids": current_audience_ids,
+            "current_audience_scope": _group_audience_scope_label(current_audience_ids),
+            "selected_disclosure_mode": "direct_quote",
+            "selected_disclosure_action": "direct_share",
+            "allow_direct_disclosure": True,
+            "allow_abstract_sharing": True,
+            "policy_reason": "no_relevant_group_memory",
+            "policy_reason_codes": ["no_relevant_group_memory"],
+            "applied_cards": [],
+            "redaction_targets": [],
+        }
+
+    severity_rank = {
+        "direct_quote": 0,
+        "attributed_summary": 1,
+        "unattributed_abstraction": 2,
+        "refusal": 3,
+    }
+    card_policies = [
+        _group_memory_policy_for_card(
+            card,
+            current_audience_participant_ids=current_audience_ids,
+            current_speaker_participant_id=current_speaker_participant_id,
+        )
+        for card in relevant_cards
+    ]
+    selected = max(
+        card_policies,
+        key=lambda item: severity_rank.get(str(item.get("selected_disclosure_mode", "")), 0),
+    )
+    redaction_targets = _unique_bounded_strings(
+        [
+            target
+            for card in relevant_cards
+            for target in _string_list(card.get("redaction_targets"), limit=8)
+        ],
+        limit=16,
+        item_max_chars=80,
+    )
+    return {
+        **selected,
+        "applied_cards": [
+            {
+                "memory_id": str(card.get("id", "")).strip(),
+                "source_participant_id": str(policy.get("source_participant_id", "")).strip(),
+                "selected_disclosure_mode": str(policy.get("selected_disclosure_mode", "")).strip(),
+                "policy_reason": str(policy.get("policy_reason", "")).strip(),
+            }
+            for card, policy in zip(relevant_cards, card_policies)
+        ][:6],
+        "redaction_targets": redaction_targets,
+    }
+
+
+def _decide_group_reply_policy(
+    *,
+    group_turn_binding: Mapping[str, Any] | None,
+    previous_group_chat_state: Mapping[str, Any] | None,
+    persona_name: str = "",
+) -> dict[str, Any]:
+    binding = _mapping(group_turn_binding)
+    previous = _mapping(previous_group_chat_state)
+    previous_thread = _mapping(previous.get("thread_policy_state"))
+    assistant_ids = _assistant_participant_id_candidates(persona_name)
+    visible = _bounded_string_list(binding.get("visible_participant_ids"), limit=8, item_max_chars=64)
+    addressed = _bounded_string_list(binding.get("addressed_participant_ids"), limit=8, item_max_chars=64)
+    mentioned = _bounded_string_list(binding.get("mentioned_participant_ids"), limit=8, item_max_chars=64)
+    candidates = _bounded_string_list(binding.get("candidate_targets"), limit=6, item_max_chars=64)
+    ambiguity_band = str(binding.get("ambiguity_band", "") or "unknown").strip() or "unknown"
+    reply_to_turn_id = str(binding.get("reply_to_turn_id", "") or "").strip()[:120]
+    current_speaker_participant_id = str(binding.get("current_speaker_participant_id", "") or "").strip()
+    assistant_addressed = any(_participant_id_matches(item, assistant_ids) for item in addressed)
+    non_assistant_addressed = [
+        item for item in addressed
+        if not _participant_id_matches(item, assistant_ids)
+    ]
+    third_party_targets = [
+        item for item in candidates
+        if item
+        and not _participant_id_matches(item, assistant_ids)
+        and str(item).strip().casefold() != str(current_speaker_participant_id or "").strip().casefold()
+    ]
+    pending_answer_participant_id = str(previous_thread.get("pending_answer_participant_id", "") or "").strip()
+    reasons: list[str] = []
+    target_participant_id = current_speaker_participant_id
+    action = "reply_to_current_speaker"
+
+    if reply_to_turn_id:
+        action = "reply_to_current_speaker"
+        reasons.append("explicit_reply_to")
+    elif pending_answer_participant_id and assistant_addressed and third_party_targets and pending_answer_participant_id not in third_party_targets:
+        action = "defer_side_thread"
+        target_participant_id = third_party_targets[0]
+        reasons.append("unresolved_assistant_obligation")
+        reasons.append("named_side_thread_deferred")
+    elif assistant_addressed and third_party_targets and not non_assistant_addressed:
+        action = "reply_to_named_third_party"
+        target_participant_id = third_party_targets[0]
+        reasons.append("assistant_addressed_named_third_party")
+    elif assistant_addressed and len(addressed) > 1:
+        action = "reply_to_whole_group"
+        reasons.append("assistant_and_multiple_addressees")
+    elif assistant_addressed:
+        action = "reply_to_current_speaker"
+        reasons.append("assistant_explicitly_addressed")
+    elif bool(previous_thread.get("pending_wait_for_mention")) and not assistant_addressed:
+        action = "no_reply"
+        reasons.append("carry_forward_wait_for_mention")
+    elif ambiguity_band == "high" and len(candidates) > 1:
+        action = "clarify_addressee"
+        reasons.append("high_target_ambiguity")
+        target_participant_id = ""
+    elif non_assistant_addressed and not assistant_addressed:
+        action = "no_reply"
+        reasons.append("human_side_thread_only")
+        target_participant_id = non_assistant_addressed[0]
+    elif len(visible) > 2 and not assistant_addressed and not reply_to_turn_id and not mentioned:
+        action = "no_reply"
+        reasons.append("group_turn_without_assistant_address")
+        target_participant_id = ""
+    elif len(addressed) > 1:
+        action = "reply_to_whole_group"
+        reasons.append("whole_group_addressing")
+        target_participant_id = ""
+    else:
+        action = "reply_to_current_speaker"
+        reasons.append("current_speaker_default")
+
+    return {
+        "action": action,
+        "target_participant_id": target_participant_id,
+        "reply_to_turn_id": reply_to_turn_id,
+        "ambiguity_band": ambiguity_band,
+        "reason_codes": reasons[:4],
+        "assistant_addressed": assistant_addressed,
+        "visible_participant_ids": visible,
+        "addressed_participant_ids": addressed,
+        "mentioned_participant_ids": mentioned,
+        "candidate_targets": candidates,
+        "third_party_targets": third_party_targets,
+        "intentional_silence": bool(action == "no_reply"),
+        "requires_clarification": bool(action == "clarify_addressee"),
+        "pending_answer_participant_id": pending_answer_participant_id,
+    }
+
+
+def _build_group_thread_policy_state(
+    *,
+    previous_group_chat_state: Mapping[str, Any] | None,
+    group_turn_binding: Mapping[str, Any] | None,
+    group_reply_policy: Mapping[str, Any] | None,
+    now: int,
+    turn_index: int,
+) -> dict[str, Any]:
+    previous = _mapping(previous_group_chat_state)
+    previous_thread = _mapping(previous.get("thread_policy_state"))
+    binding = _mapping(group_turn_binding)
+    policy = _mapping(group_reply_policy)
+    last_referenced = _unique_bounded_strings(
+        [
+            *_bounded_string_list(binding.get("addressed_participant_ids"), limit=8, item_max_chars=64),
+            *_bounded_string_list(binding.get("mentioned_participant_ids"), limit=8, item_max_chars=64),
+            *_bounded_string_list(binding.get("candidate_targets"), limit=8, item_max_chars=64),
+        ],
+        limit=8,
+        item_max_chars=64,
+    )
+    return {
+        "last_policy_action": str(policy.get("action", "") or previous_thread.get("last_policy_action", "")).strip(),
+        "last_policy_reason_codes": _string_list(policy.get("reason_codes"), limit=8),
+        "last_target_participant_id": str(policy.get("target_participant_id", "") or "").strip(),
+        "last_reply_to_turn_id": str(policy.get("reply_to_turn_id", "") or "").strip()[:120],
+        "pending_clarification": bool(policy.get("requires_clarification")),
+        "pending_wait_for_mention": bool(policy.get("intentional_silence")),
+        "pending_answer_participant_id": (
+            str(previous_thread.get("pending_answer_participant_id", "") or "").strip()
+            if str(policy.get("action", "") or "").strip() == "defer_side_thread"
+            else str(policy.get("target_participant_id", "") or "").strip()
+            if str(policy.get("action", "") or "").strip() in {"reply_to_current_speaker", "reply_to_named_third_party"}
+            else str(previous_thread.get("pending_answer_participant_id", "") or "").strip()
+            if bool(policy.get("intentional_silence"))
+            else ""
+        ),
+        "deferred_side_thread_participant_id": (
+            str(policy.get("target_participant_id", "") or "").strip()
+            if str(policy.get("action", "") or "").strip() == "defer_side_thread"
+            else ""
+        ),
+        "active_main_thread_participant_id": (
+            str(previous_thread.get("pending_answer_participant_id", "") or "").strip()
+            if str(policy.get("action", "") or "").strip() == "defer_side_thread"
+            else str(policy.get("target_participant_id", "") or "").strip()
+            if str(policy.get("action", "") or "").strip() in {"reply_to_current_speaker", "reply_to_named_third_party"}
+            else ""
+        ),
+        "last_referenced_participant_ids": last_referenced,
+        "last_conflict_flags": _string_list(binding.get("conflict_flags"), limit=8),
+        "updated_at": now,
+        "updated_turn_index": turn_index,
+    }
+
+
+def _group_clarify_reply_text() -> str:
+    return "我先确认一下，你现在是在叫我接这个话题，还是在跟他们其中某个人继续说？"
+
+
+def _group_privacy_reply_text(selected_mode: str) -> str:
+    mode = str(selected_mode or "").strip()
+    if mode == "refusal":
+        return "这个我不适合在当前这个群里直接展开。"
+    if mode in {"attributed_summary", "unattributed_abstraction"}:
+        return "我只记得有相关情况，但不适合在这里讲细节。"
+    return ""
 
 
 def _detect_explicit_secrecy(text: str) -> tuple[bool, str]:
@@ -2586,6 +3164,7 @@ def lexical_recall_short_term_candidates(
     recall_query: Mapping[str, Any] | None = None,
     current_user_id: str = "",
     entity_binding: Mapping[str, Any] | None = None,
+    group_turn_binding: Mapping[str, Any] | None = None,
     limit: int = 8,
 ) -> list[dict[str, Any]]:
     interaction_candidates = _interaction_presence_candidates(
@@ -2608,6 +3187,16 @@ def lexical_recall_short_term_candidates(
     rows = state.get("short_term_memory", [])
     if not isinstance(rows, list):
         return []
+    current_audience_ids = _bounded_string_list(
+        _mapping(group_turn_binding).get("visible_participant_ids"),
+        limit=8,
+        item_max_chars=64,
+    )
+    current_speaker_participant_id = str(
+        _mapping(group_turn_binding).get("current_speaker_participant_id", "")
+        or current_user_id
+        or ""
+    ).strip()
     scored: list[tuple[float, dict[str, Any]]] = []
     for item in rows:
         if not isinstance(item, Mapping):
@@ -2643,6 +3232,17 @@ def lexical_recall_short_term_candidates(
         card["matched_terms"] = matched[:8]
         card["audience_user_id"] = current_user_id
         card["is_cross_user"] = bool(cross_user)
+        if current_audience_ids:
+            card["current_audience_participant_ids"] = current_audience_ids
+            card["current_audience_scope"] = _group_audience_scope_label(current_audience_ids)
+            policy = _group_memory_policy_for_card(
+                card,
+                current_audience_participant_ids=current_audience_ids,
+                current_speaker_participant_id=current_speaker_participant_id,
+            )
+            card["group_privacy_policy"] = policy
+            card["selected_disclosure_mode"] = policy["selected_disclosure_mode"]
+            card["shareability_class"] = policy["shareability_class"]
         if cross_user and card.get("shareability") == "restricted_implicit":
             card["epistemic_stance"] = "known_with_caveat"
         scored.append((score, card))
@@ -2889,6 +3489,13 @@ def _evidence_card(
         "redaction_targets": _redaction_targets_for_text(_memory_fact_text(item), topics),
         "source_user_id": str(item.get("source_user_id", "")).strip(),
         "source_display_name": str(item.get("source_display_name", "")).strip(),
+        "source_participant_id": str(item.get("source_participant_id", item.get("source_user_id", ""))).strip(),
+        "source_audience_participant_ids": _bounded_string_list(
+            item.get("source_audience_participant_ids"),
+            limit=8,
+            item_max_chars=64,
+        ),
+        "source_audience_scope": str(item.get("source_audience_scope", "")).strip(),
         "audience_user_id": "",
         "is_cross_user": False,
         "epistemic_stance": "known_from_recall",
@@ -2918,6 +3525,7 @@ def retrieve_memories_for_guidance(
     *,
     limit: int = 8,
     now: int = 0,
+    group_turn_binding: Mapping[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     query = _mapping(recall_query)
     expectation_ids = {item.casefold() for item in _string_list(query.get("expectation_ids"), limit=16)}
@@ -2950,6 +3558,16 @@ def retrieve_memories_for_guidance(
     expected_reaction = str(query.get("expected_audience_reaction", "neutral")).strip() or "neutral"
     expectation_status = str(query.get("sharing_expectation_status", "unverified")).strip() or "unverified"
     regret_bias = _bounded_float(query.get("sharing_regret_bias"), default=0.0)
+    current_audience_ids = _bounded_string_list(
+        _mapping(group_turn_binding).get("visible_participant_ids"),
+        limit=8,
+        item_max_chars=64,
+    )
+    current_speaker_participant_id = str(
+        _mapping(group_turn_binding).get("current_speaker_participant_id", "")
+        or current_user_id
+        or ""
+    ).strip()
 
     scored: list[tuple[float, dict[str, Any]]] = []
     for source, item in _memory_pools(state):
@@ -3050,6 +3668,17 @@ def retrieve_memories_for_guidance(
         )
         card["audience_user_id"] = current_user_id
         card["is_cross_user"] = bool(cross_user)
+        if current_audience_ids:
+            card["current_audience_participant_ids"] = current_audience_ids
+            card["current_audience_scope"] = _group_audience_scope_label(current_audience_ids)
+            policy = _group_memory_policy_for_card(
+                card,
+                current_audience_participant_ids=current_audience_ids,
+                current_speaker_participant_id=current_speaker_participant_id,
+            )
+            card["group_privacy_policy"] = policy
+            card["selected_disclosure_mode"] = policy["selected_disclosure_mode"]
+            card["shareability_class"] = policy["shareability_class"]
         card["_m14_7_recall_score"] = recall_score
         card["_m17_item_support"] = recall_score
         card["_m17_factor_breakdown"] = recall.to_dict()
@@ -3084,6 +3713,17 @@ def retrieve_memories_for_guidance(
             )
             card["audience_user_id"] = current_user_id
             card["is_cross_user"] = bool(cross_user)
+            if current_audience_ids:
+                card["current_audience_participant_ids"] = current_audience_ids
+                card["current_audience_scope"] = _group_audience_scope_label(current_audience_ids)
+                policy = _group_memory_policy_for_card(
+                    card,
+                    current_audience_participant_ids=current_audience_ids,
+                    current_speaker_participant_id=current_speaker_participant_id,
+                )
+                card["group_privacy_policy"] = policy
+                card["selected_disclosure_mode"] = policy["selected_disclosure_mode"]
+                card["shareability_class"] = policy["shareability_class"]
             card["_m14_7_recall_score"] = item.get("_m14_7_recall_score", 0.0)
             if cross_user and card.get("shareability") == "restricted_implicit":
                 card["epistemic_stance"] = "known_with_caveat"
@@ -3103,6 +3743,7 @@ def build_memory_dynamics_guidance(
     *,
     user_id: str = "",
     speaker_name: str = "",
+    group_turn_binding: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     del bus_messages
     expectation_results = [
@@ -3185,6 +3826,11 @@ def build_memory_dynamics_guidance(
         else "neutral"
     )
     expectation_status = str(conscious_plan.get("sharing_expectation_status", "unverified")).strip() or "unverified"
+    current_audience_ids = _bounded_string_list(
+        _mapping(group_turn_binding).get("visible_participant_ids"),
+        limit=8,
+        item_max_chars=64,
+    )
     sharing_decision = decide_social_sharing(
         SocialSharingCandidate(
             memory_id=f"turn:{now}",
@@ -3272,6 +3918,8 @@ def build_memory_dynamics_guidance(
             "source_priority": ["pending_expectations", "short_term_memory", "long_term_memory", "open_items"],
             "current_user_id": user_id,
             "current_speaker_name": speaker_name,
+            "current_audience_participant_ids": current_audience_ids,
+            "current_audience_scope": _group_audience_scope_label(current_audience_ids),
             "allow_direct_disclosure": allow_direct_disclosure,
             "allow_abstract_sharing": allow_abstract_sharing,
             "sharing_intent": sharing_intent,
@@ -3310,6 +3958,8 @@ def build_memory_dynamics_guidance(
                 "explanation_strategy": sharing_decision.explanation_strategy,
                 "decision_reasons": list(sharing_decision.reasons),
                 "soft_boundary_detected": bool(shareability == "restricted_implicit"),
+                "current_audience_participant_ids": current_audience_ids,
+                "current_audience_scope": _group_audience_scope_label(current_audience_ids),
             },
             "reply_contract": {
                 **_mapping(pacing.get("reply_contract")),
@@ -3317,6 +3967,8 @@ def build_memory_dynamics_guidance(
                 "allow_abstract_sharing": allow_abstract_sharing,
                 "explicit_secrecy_detected": explicit_secret,
                 "soft_boundary_detected": bool(shareability == "restricted_implicit"),
+                "current_audience_participant_ids": current_audience_ids,
+                "current_audience_scope": _group_audience_scope_label(current_audience_ids),
             },
             "policy": "Use these as reply tendencies, not as visible emotional reward/punishment.",
         },
@@ -3654,6 +4306,7 @@ def _update_temporal_state(
     reply: str,
     temporal_input: Mapping[str, Any],
     share_trace: Mapping[str, Any] | None = None,
+    group_chat_state: Mapping[str, Any] | None = None,
     proactive_turn: bool = False,
 ) -> None:
     previous = _mapping(state.get("temporal_state"))
@@ -3664,6 +4317,7 @@ def _update_temporal_state(
     else:
         last_assistant_turn_at = now
     state["temporal_state"] = {
+        **previous,
         "last_turn_at": now,
         "last_user_turn_at": last_user_turn_at,
         "last_assistant_turn_at": last_assistant_turn_at,
@@ -3673,6 +4327,7 @@ def _update_temporal_state(
         "last_elapsed_seconds": temporal_input.get("elapsed_since_previous_turn_seconds"),
         "last_time_gap_label": temporal_input.get("time_gap_label", "first_turn"),
         "last_share_trace": dict(share_trace or {}),
+        "group_chat_state": dict(group_chat_state or _mapping(previous.get("group_chat_state"))),
     }
 
 
@@ -3684,9 +4339,17 @@ def _stamp_memory_policy(
     shareability: str,
     restriction_reason: str = "",
     confidence: float = 0.8,
+    source_participant_id: str = "",
+    source_audience_participant_ids: list[str] | None = None,
 ) -> dict[str, Any]:
     row["source_user_id"] = str(user_id or "").strip()
     row["source_display_name"] = str(display_name or "").strip()
+    if str(source_participant_id or "").strip():
+        row["source_participant_id"] = str(source_participant_id).strip()[:64]
+    audience_ids = _bounded_string_list(source_audience_participant_ids or [], limit=8, item_max_chars=64)
+    if audience_ids:
+        row["source_audience_participant_ids"] = audience_ids
+        row["source_audience_scope"] = _group_audience_scope_label(audience_ids)
     row["shareability"] = shareability
     if restriction_reason:
         row["restriction_reason"] = restriction_reason
@@ -5075,6 +5738,7 @@ class MVPDialogueRuntime:
         *,
         turn_index: int = 0,
         speaker_name: str = "",
+        group_turn_envelope: Mapping[str, Any] | None = None,
         bus_messages: list[Mapping[str, Any]] | None = None,
         now: int | None = None,
         proactive_context: Mapping[str, Any] | None = None,
@@ -5085,8 +5749,11 @@ class MVPDialogueRuntime:
         episode_ledger = self._episode_ledger()
         episode_components_before = aggregate_fe_components(state)
         memory_gate_audit_start = self._memory_gate_audit_len(state)
+        bounded_group_turn = _bounded_group_turn_envelope(group_turn_envelope)
+        previous_group_chat_state = _mapping(_mapping(state.get("temporal_state")).get("group_chat_state"))
         display_name = str(speaker_name or "").strip() or "default_user"
-        user_id = _safe_user_id(display_name)
+        participant_key = str(bounded_group_turn.get("speaker_participant_id", "") or "").strip()
+        user_id = _safe_user_id(participant_key or display_name)
         proactive_turn = isinstance(proactive_context, Mapping) and bool(proactive_context)
         prior_last_user_text = str(_mapping(state.get("temporal_state")).get("last_user_text", "") or "")
         proactive_surrogate_text = str(user_text or "") if proactive_turn else ""
@@ -5147,6 +5814,13 @@ class MVPDialogueRuntime:
                 "turn_index": turn_index,
                 "speaker_name": display_name,
                 "user_id": user_id,
+                "speaker_participant_id": participant_key or user_id,
+                "visible_participant_ids": _bounded_string_list(bounded_group_turn.get("visible_participant_ids"), limit=8, item_max_chars=64),
+                "addressed_participant_ids": _bounded_string_list(bounded_group_turn.get("addressed_participant_ids"), limit=8, item_max_chars=64),
+                "mentioned_participant_ids": _bounded_string_list(bounded_group_turn.get("mentioned_participant_ids"), limit=8, item_max_chars=64),
+                "reply_to_turn_id": str(bounded_group_turn.get("reply_to_turn_id", "") or "").strip()[:120],
+                "quoted_turn_ids": _bounded_string_list(bounded_group_turn.get("quoted_turn_ids"), limit=8, item_max_chars=120),
+                "explicit_mentions": _bounded_string_list(bounded_group_turn.get("explicit_mentions"), limit=8, item_max_chars=64),
                 "text": user_text,
                 "at": now,
             })
@@ -5301,10 +5975,31 @@ class MVPDialogueRuntime:
                 m12_turn_result=m12_pre_result,
             )
             _merge_m12_into_entity_binding(entity_binding, m12_pre_result)
+        group_turn_binding = _build_group_turn_binding(
+            display_name=display_name,
+            user_id=user_id,
+            group_turn_envelope=bounded_group_turn,
+            entity_binding=entity_binding,
+        )
+        group_reply_policy = _decide_group_reply_policy(
+            group_turn_binding=group_turn_binding,
+            previous_group_chat_state=previous_group_chat_state,
+            persona_name=self.persona_name,
+        )
         bus.append({
             "type": "EntityBindingEvent",
             "turn_index": turn_index,
             "binding": entity_binding,
+        })
+        bus.append({
+            "type": "GroupTurnBindingEvent",
+            "turn_index": turn_index,
+            "binding": group_turn_binding,
+        })
+        bus.append({
+            "type": "GroupReplyPolicyEvent",
+            "turn_index": turn_index,
+            "policy": group_reply_policy,
         })
 
         if assessable_pending_rows and str(user_text or "").strip() and not proactive_turn:
@@ -5411,6 +6106,7 @@ class MVPDialogueRuntime:
             now,
             user_id=user_id,
             speaker_name=display_name,
+            group_turn_binding=group_turn_binding,
         )
         recall_query = _mapping(memory_dynamics.get("recall_query"))
         if entity_binding.get("target_person"):
@@ -5457,6 +6153,7 @@ class MVPDialogueRuntime:
             recall_query=recall_query,
             current_user_id=user_id,
             entity_binding=entity_binding,
+            group_turn_binding=group_turn_binding,
         )
         evidence_judgment: dict[str, Any] = {}
         if latency_mode == "fast_chat":
@@ -5491,11 +6188,56 @@ class MVPDialogueRuntime:
                     "judge_summary": "evidence judge failed; candidates are passed as uncertain recall",
                 }
         _apply_evidence_judgment_contract(memory_dynamics, evidence_judgment)
+        group_privacy_policy = _resolve_group_privacy_policy(
+            evidence_judgment=evidence_judgment,
+            lexical_candidates=lexical_candidates,
+            group_turn_binding=group_turn_binding,
+        )
+        group_mode = str(group_privacy_policy.get("selected_disclosure_mode", "") or "direct_quote").strip()
+        if group_mode == "refusal":
+            evidence_judgment["allowed_reply_actions"] = ["truthful_refusal", "deflect", "clarify"]
+        elif group_mode in {"attributed_summary", "unattributed_abstraction"}:
+            evidence_judgment["allowed_reply_actions"] = ["abstract_share", "truthful_refusal", "deflect", "clarify"]
+        control = _mapping(memory_dynamics.get("control_guidance"))
+        sharing_policy = _mapping(control.get("sharing_policy"))
+        sharing_policy["group_privacy_policy"] = dict(group_privacy_policy)
+        sharing_policy["allow_direct_disclosure"] = bool(
+            sharing_policy.get("allow_direct_disclosure", True)
+            and group_privacy_policy.get("allow_direct_disclosure", True)
+        )
+        sharing_policy["allow_abstract_sharing"] = bool(
+            sharing_policy.get("allow_abstract_sharing", True)
+            and group_privacy_policy.get("allow_abstract_sharing", True)
+        )
+        control["sharing_policy"] = sharing_policy
+        reply_contract = _mapping(control.get("reply_contract"))
+        redaction_targets = _unique_bounded_strings(
+            [
+                *_string_list(reply_contract.get("redaction_targets"), limit=12),
+                *_string_list(group_privacy_policy.get("redaction_targets"), limit=12),
+            ],
+            limit=16,
+            item_max_chars=80,
+        )
+        if redaction_targets:
+            reply_contract["redaction_targets"] = redaction_targets
+        reply_contract["allowed_reply_actions"] = _string_list(
+            evidence_judgment.get("allowed_reply_actions"),
+            limit=8,
+        )
+        reply_contract["selected_disclosure_action"] = str(
+            group_privacy_policy.get("selected_disclosure_action", reply_contract.get("selected_disclosure_action", "none"))
+            or "none"
+        )
+        reply_contract["group_privacy_policy"] = dict(group_privacy_policy)
+        control["reply_contract"] = reply_contract
+        memory_dynamics["control_guidance"] = control
         _report_progress("evidence_judge")
         retrieved_ranked = retrieve_memories_for_guidance(
             state,
             recall_query,
             now=now,
+            group_turn_binding=group_turn_binding,
         )
         if lexical_candidates:
             existing_ids = {str(item.get("id", "")) for item in retrieved_ranked if item.get("id")}
@@ -6067,6 +6809,7 @@ class MVPDialogueRuntime:
             display_name=display_name,
             explicit_secrecy=bool(_mapping(_mapping(memory_dynamics.get("control_guidance")).get("sharing_policy")).get("explicit_secrecy_detected")),
             memory_dynamics=memory_dynamics,
+            group_turn_binding=group_turn_binding,
         )
         memory_candidates_applied = self._apply_memory_write_candidates(
             state,
@@ -6085,6 +6828,7 @@ class MVPDialogueRuntime:
                 if bool(_mapping(_mapping(memory_dynamics.get("control_guidance")).get("sharing_policy")).get("explicit_secrecy_detected"))
                 else ""
             ),
+            group_turn_binding=group_turn_binding,
         )
         habit_updates_applied = _apply_habit_updates(
             state,
@@ -6108,7 +6852,11 @@ class MVPDialogueRuntime:
             thinking["reply_action"] = enforced_reply_action
             thinking["path_b_field_enforcement_actions"] = list(path_b_field_enforcement_actions)
         reply_contract["identity_anchored_action"] = identity_anchored_action
-        reply_contract["selected_disclosure_action"] = str(thinking.get("disclosure_action", "none") or "none")
+        forced_disclosure_action = str(reply_contract.get("selected_disclosure_action", "") or "").strip()
+        if forced_disclosure_action in {"truthful_refusal", "abstract_share"}:
+            reply_contract["selected_disclosure_action"] = forced_disclosure_action
+        else:
+            reply_contract["selected_disclosure_action"] = str(thinking.get("disclosure_action", "none") or "none")
         reply, reply_validation = validate_visible_reply(raw_reply, reply_contract)
         if path_b_field_enforcement_actions:
             reply_validation = dict(reply_validation)
@@ -6117,10 +6865,46 @@ class MVPDialogueRuntime:
                 *list(reply_validation.get("actions", [])),
                 *path_b_field_enforcement_actions,
             ]
-        action = normalize_recorded_reply_action(
+        recorded_action = normalize_recorded_reply_action(
             enforced_reply_action if path_b_field_enforcement_actions else str(thinking.get("reply_action") or "answer"),
             allowed=set(m13_evaluation.candidate_actions),
         )
+        action = recorded_action
+        group_policy_actions: list[str] = []
+        group_mode = str(group_privacy_policy.get("selected_disclosure_mode", "") or "direct_quote").strip()
+        if group_mode == "refusal":
+            reply = _group_privacy_reply_text(group_mode)
+            action = "truthful_refusal"
+            group_policy_actions.append("group_privacy_forced_refusal_reply")
+        elif group_mode in {"attributed_summary", "unattributed_abstraction"} and (
+            forced_disclosure_action in {"truthful_refusal", "abstract_share"}
+            or str(thinking.get("disclosure_action", "none") or "none") == "direct_share"
+        ):
+            fallback = _group_privacy_reply_text(group_mode)
+            if fallback:
+                reply = fallback
+                action = "abstract_share"
+                group_policy_actions.append("group_privacy_forced_abstract_reply")
+        if str(group_reply_policy.get("action", "") or "") == "clarify_addressee":
+            reply = _group_clarify_reply_text()
+            action = "clarify"
+            group_policy_actions.append("group_reply_policy_forced_clarify")
+        elif str(group_reply_policy.get("action", "") or "") == "defer_side_thread":
+            reply = ""
+            action = "defer_side_thread"
+            group_policy_actions.append("group_reply_policy_forced_defer_side_thread")
+        elif str(group_reply_policy.get("action", "") or "") == "no_reply":
+            reply = ""
+            action = "no_reply"
+            group_policy_actions.append("group_reply_policy_forced_no_reply")
+        if group_policy_actions:
+            reply_validation = dict(reply_validation)
+            reply_validation["changed"] = True
+            reply_validation["actions"] = [
+                *list(reply_validation.get("actions", [])),
+                *group_policy_actions,
+            ]
+        m13_selected_action = action if action in set(m13_evaluation.candidate_actions) else recorded_action
         temporal_assessment = conscious.get("temporal_assessment")
         if not isinstance(temporal_assessment, Mapping):
             temporal_assessment = {}
@@ -6132,6 +6916,9 @@ class MVPDialogueRuntime:
             memory_dynamics=memory_dynamics,
             reply_validation=reply_validation,
         )
+        if action in {"no_reply", "defer_side_thread"}:
+            should_observe = False
+            observer_reason = "group_policy_silence"
         if latency_mode == "fast_chat" and should_observe:
             _mark_llm_skipped("post_reply_observer", "latency_fast_path")
             should_observe = False
@@ -6191,7 +6978,7 @@ class MVPDialogueRuntime:
             user_id=user_id,
             turn_id=turn_key,
             turn_index=turn_index,
-            selected_action=action,
+            selected_action=m13_selected_action,
             reply_validation=reply_validation,
             post_reply_observer=post_reply_observer,
             conscious_plan=conscious,
@@ -6207,13 +6994,13 @@ class MVPDialogueRuntime:
         )
         m13_reward_evaluator = M13RewardEvaluator()
         selected_pull = _bounded_float(
-            m13_evaluation.scores_by_action.get(action, {}).get("behavioral_pull", 0.0)
+            m13_evaluation.scores_by_action.get(m13_selected_action, {}).get("behavioral_pull", 0.0)
         )
         m13_reward_evaluation = m13_reward_evaluator.evaluate(
             turn_id=turn_key,
             turn_index=turn_index,
             user_id=user_id,
-            action=action,
+            action=m13_selected_action,
             topic_fingerprint=m13_evaluation.topic_fingerprint,
             m13_state=m13_state,
             conscious_plan=conscious,
@@ -6235,7 +7022,7 @@ class MVPDialogueRuntime:
             m13_state,
             evaluation=m13_reward_evaluation,
             user_id=user_id,
-            action=action,
+            action=m13_selected_action,
             topic_fingerprint=m13_evaluation.topic_fingerprint,
             turn_index=turn_index,
             reply_summary=reply[:160],
@@ -6264,6 +7051,23 @@ class MVPDialogueRuntime:
         visible_reply = "\n".join([reply, *followup_replies])
         sharing_policy = _mapping(control_guidance.get("sharing_policy"))
         temporal_user_text = prior_last_user_text if proactive_turn else user_text
+        thread_policy_state = _build_group_thread_policy_state(
+            previous_group_chat_state=previous_group_chat_state,
+            group_turn_binding=group_turn_binding,
+            group_reply_policy=group_reply_policy,
+            now=now,
+            turn_index=turn_index,
+        )
+        group_chat_state = _build_group_chat_state(
+            state,
+            now=now,
+            turn_index=turn_index,
+            display_name=display_name,
+            user_id=user_id,
+            group_turn_envelope=bounded_group_turn,
+            group_turn_binding=group_turn_binding,
+            thread_policy_state=thread_policy_state,
+        )
         _update_temporal_state(
             state,
             now=now,
@@ -6271,10 +7075,12 @@ class MVPDialogueRuntime:
             user_text=temporal_user_text,
             reply=visible_reply,
             temporal_input=temporal_input,
+            group_chat_state=group_chat_state,
             proactive_turn=proactive_turn,
             share_trace={
                 "user_id": user_id,
                 "speaker_name": display_name,
+                "speaker_participant_id": group_turn_binding.get("current_speaker_participant_id", ""),
                 "allow_direct_disclosure": bool(sharing_policy.get("allow_direct_disclosure", True)),
                 "allow_abstract_sharing": bool(sharing_policy.get("allow_abstract_sharing", True)),
                 "net_free_energy_reduction": _bounded_float(sharing_policy.get("net_free_energy_reduction"), default=0.0),
@@ -6298,6 +7104,11 @@ class MVPDialogueRuntime:
                     for item in retrieved[:4]
                     if item.get("source_display_name")
                 ],
+                "visible_participant_ids": group_turn_binding.get("visible_participant_ids", []),
+                "addressed_participant_ids": group_turn_binding.get("addressed_participant_ids", []),
+                "mentioned_participant_ids": group_turn_binding.get("mentioned_participant_ids", []),
+                "reply_to_turn_id": group_turn_binding.get("reply_to_turn_id", ""),
+                "group_reply_policy_action": group_reply_policy.get("action", ""),
             },
         )
         episode_components_after = aggregate_fe_components(
@@ -6455,6 +7266,11 @@ class MVPDialogueRuntime:
                 "user_id": user_id,
                 "aliases": _mapping(entity_binding.get("current_interlocutor")).get("aliases", []),
             },
+            "group_turn_envelope": bounded_group_turn,
+            "group_turn_binding": group_turn_binding,
+            "group_reply_policy": group_reply_policy,
+            "group_privacy_policy": group_privacy_policy,
+            "group_chat_state": group_chat_state,
             "entity_binding": entity_binding,
             "alias_updates_applied": alias_updates_applied,
             "memory_candidates_applied": memory_candidates_applied,
@@ -6537,6 +7353,17 @@ class MVPDialogueRuntime:
                     "event": "turn",
                     "at": now,
                     "turn_index": turn_index,
+                    "speaker_name": display_name,
+                    "speaker_participant_id": group_turn_binding.get("current_speaker_participant_id", ""),
+                    "participant_ids": group_turn_binding.get("visible_participant_ids", []),
+                    "addressed_participant_ids": group_turn_binding.get("addressed_participant_ids", []),
+                    "mentioned_participant_ids": group_turn_binding.get("mentioned_participant_ids", []),
+                    "reply_to_turn_id": group_turn_binding.get("reply_to_turn_id", ""),
+                    "quoted_turn_ids": group_turn_binding.get("quoted_turn_ids", []),
+                    "explicit_mentions": group_turn_binding.get("explicit_mentions", []),
+                    "group_turn_binding": group_turn_binding,
+                    "group_reply_policy": group_reply_policy,
+                    "group_privacy_policy": group_privacy_policy,
                     "user_text": user_text,
                     "reply": reply,
                     "followup_replies": followup_replies,
@@ -8714,10 +9541,21 @@ class MVPDialogueRuntime:
         display_name: str = "",
         default_shareability: str = "default_social",
         restriction_reason: str = "",
+        group_turn_binding: Mapping[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         if not isinstance(candidates, list):
             return []
         applied: list[dict[str, Any]] = []
+        source_participant_id = str(
+            _mapping(group_turn_binding).get("current_speaker_participant_id", "")
+            or user_id
+            or ""
+        ).strip()
+        source_audience_participant_ids = _bounded_string_list(
+            _mapping(group_turn_binding).get("visible_participant_ids"),
+            limit=8,
+            item_max_chars=64,
+        )
         for candidate in candidates:
             if not isinstance(candidate, Mapping):
                 continue
@@ -8786,6 +9624,8 @@ class MVPDialogueRuntime:
                     existing=str(candidate.get("restriction_reason", restriction_reason) or restriction_reason),
                 ),
                 confidence=confidence,
+                source_participant_id=source_participant_id,
+                source_audience_participant_ids=source_audience_participant_ids,
             )
             if store_target == "long_term":
                 state.setdefault("long_term_memory", []).append(row)
@@ -9210,9 +10050,20 @@ class MVPDialogueRuntime:
         display_name: str = "",
         explicit_secrecy: bool = False,
         memory_dynamics: Mapping[str, Any] | None = None,
+        group_turn_binding: Mapping[str, Any] | None = None,
     ) -> None:
         short = state.setdefault("short_term_memory", [])
         turn_memory_committed = False
+        source_participant_id = str(
+            _mapping(group_turn_binding).get("current_speaker_participant_id", "")
+            or user_id
+            or ""
+        ).strip()
+        source_audience_participant_ids = _bounded_string_list(
+            _mapping(group_turn_binding).get("visible_participant_ids"),
+            limit=8,
+            item_max_chars=64,
+        )
         if isinstance(short, list):
             assistant_reply = str(thinking.get("reply", "")).strip()
             turn_memory_id = f"stm_turn_{now}"
@@ -9271,6 +10122,8 @@ class MVPDialogueRuntime:
                         explicit_secret=explicit_secrecy,
                     ),
                     confidence=0.85,
+                    source_participant_id=source_participant_id,
+                    source_audience_participant_ids=source_audience_participant_ids,
                 )
                 short.append(row)
                 state["short_term_memory"] = short[-24:]
@@ -9340,6 +10193,8 @@ class MVPDialogueRuntime:
                     existing=str(write.get("restriction_reason", "")).strip(),
                 ),
                 confidence=_bounded_float(write.get("confidence"), default=0.75),
+                source_participant_id=source_participant_id,
+                source_audience_participant_ids=source_audience_participant_ids,
             )
             if store_target == "long_term":
                 state.setdefault("long_term_memory", []).append(row)

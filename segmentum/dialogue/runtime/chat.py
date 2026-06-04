@@ -38,6 +38,7 @@ _logger = logging.getLogger(__name__)
 class ChatRequest:
     user_text: str
     speaker_name: str = ""
+    group_turn_envelope: dict[str, object] | None = None
     override_traits: dict[str, float] | None = None
     override_precisions: dict[str, float] | None = None
 
@@ -496,7 +497,21 @@ class ChatInterface:
             if not text:
                 continue
             role = "interlocutor" if message.get("role") == "user" else "agent"
-            transcript.append(TranscriptUtterance(role=role, text=text))
+            row: TranscriptUtterance = TranscriptUtterance(role=role, text=text)
+            for key in (
+                "speaker_name",
+                "speaker_participant_id",
+                "reply_to_turn_id",
+                "participant_ids",
+                "addressed_participant_ids",
+                "mentioned_participant_ids",
+                "quoted_turn_ids",
+                "explicit_mentions",
+            ):
+                value = message.get(key)
+                if value not in (None, "", []):
+                    row[key] = value  # type: ignore[literal-required]
+            transcript.append(row)
         self._transcript = transcript
 
     def get_conscious_markdown(self) -> str:
@@ -1624,6 +1639,7 @@ class ChatInterface:
                 request.user_text,
                 turn_index=self._turn_index,
                 speaker_name=request.speaker_name,
+                group_turn_envelope=request.group_turn_envelope,
                 bus_messages=[
                     {
                         "type": "ObservationEvent",
@@ -1661,9 +1677,28 @@ class ChatInterface:
         self._last_action = action
         self._last_obs_channels = dict(obs_channels)
         self._last_outcome = "neutral"
-        self._transcript.append(
-            TranscriptUtterance(role="interlocutor", text=request.user_text)
+        user_row: TranscriptUtterance = TranscriptUtterance(
+            role="interlocutor",
+            text=request.user_text,
+            speaker_name=request.speaker_name or "default_user",
         )
+        if isinstance(request.group_turn_envelope, dict):
+            envelope = dict(request.group_turn_envelope)
+            for key in (
+                "speaker_participant_id",
+                "reply_to_turn_id",
+                "participant_ids",
+                "visible_participant_ids",
+                "addressed_participant_ids",
+                "mentioned_participant_ids",
+                "quoted_turn_ids",
+                "explicit_mentions",
+            ):
+                value = envelope.get(key)
+                if value not in (None, "", []):
+                    target_key = "participant_ids" if key == "visible_participant_ids" else key
+                    user_row[target_key] = value  # type: ignore[literal-required]
+        self._transcript.append(user_row)
         self._transcript.append(TranscriptUtterance(role="agent", text=safe_text))
         for followup in safe_followups:
             self._transcript.append(TranscriptUtterance(role="agent", text=followup))

@@ -1,0 +1,44 @@
+[
+  {
+    "assertion_kind": "structured_assertion",
+    "text": "Can you reply to that one?",
+    "speaker_name": "Carol",
+    "group_turn_envelope": {
+      "speaker_participant_id": "carol",
+      "visible_participant_ids": ["carol", "dave", "hutao"],
+      "mentioned_participant_ids": ["carol", "dave"],
+      "explicit_mentions": ["Carol", "Dave"]
+    },
+    "expected_group_reply_action": "clarify_addressee",
+    "expected_visible_action": "clarify"
+  },
+  {
+    "assertion_kind": "structured_assertion",
+    "text": "Please tell Dave first.",
+    "speaker_name": "Carol",
+    "group_turn_envelope": {
+      "speaker_participant_id": "carol",
+      "visible_participant_ids": ["carol", "dave", "hutao"],
+      "addressed_participant_ids": ["hutao"],
+      "mentioned_participant_ids": ["dave"],
+      "explicit_mentions": ["Dave"]
+    },
+    "expected_group_reply_action": "reply_to_named_third_party",
+    "expected_visible_action": "self_disclose"
+  },
+  {
+    "assertion_kind": "deterministic_replay_assertion",
+    "restart_before": true,
+    "text": "Leave Dave's thread for a second and pick up Erin's topic.",
+    "speaker_name": "Carol",
+    "group_turn_envelope": {
+      "speaker_participant_id": "carol",
+      "visible_participant_ids": ["carol", "dave", "erin", "hutao"],
+      "addressed_participant_ids": ["hutao"],
+      "mentioned_participant_ids": ["erin"],
+      "explicit_mentions": ["Erin"]
+    },
+    "expected_group_reply_action": "defer_side_thread",
+    "expected_visible_action": "defer_side_thread"
+  }
+]

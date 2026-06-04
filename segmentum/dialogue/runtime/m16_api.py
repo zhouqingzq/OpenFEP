@@ -51,10 +51,21 @@ class CreateSessionBody(BaseModel):
     session_id: str = Field(default="", max_length=120)
 
 
+class GroupTurnEnvelopeBody(BaseModel):
+    speaker_participant_id: str = Field(default="", max_length=64)
+    visible_participant_ids: list[str] = Field(default_factory=list, max_length=8)
+    addressed_participant_ids: list[str] = Field(default_factory=list, max_length=8)
+    mentioned_participant_ids: list[str] = Field(default_factory=list, max_length=8)
+    reply_to_turn_id: str = Field(default="", max_length=120)
+    quoted_turn_ids: list[str] = Field(default_factory=list, max_length=8)
+    explicit_mentions: list[str] = Field(default_factory=list, max_length=8)
+
+
 class ClientInputBody(BaseModel):
     text: str = Field(max_length=MAX_INPUT_TEXT_CHARS)
     correlation_id: str = Field(max_length=MAX_CORRELATION_ID_CHARS)
     speaker_name: str = Field(default="", max_length=64)
+    group_turn_envelope: GroupTurnEnvelopeBody | None = None
 
 
 class RunnerControlBody(BaseModel):
@@ -211,6 +222,11 @@ def create_app(gateway: M16Gateway | None = None) -> FastAPI:
             text=body.text,
             correlation_id=body.correlation_id,
             speaker_name=body.speaker_name,
+            group_turn_envelope=(
+                body.group_turn_envelope.model_dump(exclude_none=True)
+                if body.group_turn_envelope is not None
+                else None
+            ),
         )
         _append_gateway_audit(
             handle.bridge,
@@ -348,11 +364,13 @@ def create_app(gateway: M16Gateway | None = None) -> FastAPI:
                 elif kind == "ClientInput":
                     text = str(payload.get("text", "") or "")[:MAX_INPUT_TEXT_CHARS]
                     speaker_name = str(payload.get("speaker_name", "") or "")[:64]
+                    group_turn_envelope = payload.get("group_turn_envelope")
                     event_id = handle.bridge.append_client_input(
                         text=text,
                         correlation_id=msg_correlation,
                         source="m16_ws",
                         speaker_name=speaker_name,
+                        group_turn_envelope=group_turn_envelope if isinstance(group_turn_envelope, dict) else None,
                     )
                     _append_gateway_audit(
                         handle.bridge,

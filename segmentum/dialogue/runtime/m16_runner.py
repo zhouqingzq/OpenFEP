@@ -259,6 +259,7 @@ class ConsciousnessRunner:
         payload = _mapping(event.get("payload"))
         text = str(payload.get("text", "") or "")
         speaker_name = str(payload.get("speaker_name", "") or "").strip()
+        group_turn_envelope = _mapping(payload.get("group_turn_envelope"))
         turn_index = self.bridge.next_user_turn_index()
         actuation_messages: list[dict[str, Any]] = []
         from segmentum.dialogue.runtime.m16_turn_progress import TurnProgressReporter, build_turn_progress_payload
@@ -284,6 +285,7 @@ class ConsciousnessRunner:
                     text,
                     turn_index=turn_index,
                     speaker_name=speaker_name,
+                    group_turn_envelope=group_turn_envelope,
                     turn_progress=progress,
                 )
         except Exception as exc:

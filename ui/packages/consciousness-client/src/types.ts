@@ -50,6 +50,21 @@ export interface ChatTailRow {
   text?: string;
   turn_index?: number;
   at?: number;
+  speaker_name?: string;
+  speaker_participant_id?: string;
+  reply_to_turn_id?: string;
+  addressed_participant_ids?: string[];
+  mentioned_participant_ids?: string[];
+}
+
+export interface GroupTurnEnvelope {
+  speaker_participant_id?: string;
+  visible_participant_ids?: string[];
+  addressed_participant_ids?: string[];
+  mentioned_participant_ids?: string[];
+  reply_to_turn_id?: string;
+  quoted_turn_ids?: string[];
+  explicit_mentions?: string[];
 }
 
 export interface SessionSnapshotPayload {
@@ -82,6 +97,7 @@ export interface DeliveryAckPayload {
 export interface ClientInputPayload {
   text: string;
   speaker_name?: string;
+  group_turn_envelope?: GroupTurnEnvelope;
 }
 
 export interface SubscribePayload {
@@ -109,6 +125,7 @@ export interface PostInputRequest {
   text: string;
   correlation_id: string;
   speaker_name?: string;
+  group_turn_envelope?: GroupTurnEnvelope;
 }
 
 export interface PostInputResponse {

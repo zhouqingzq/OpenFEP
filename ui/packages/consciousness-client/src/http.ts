@@ -139,7 +139,7 @@ export class ConsciousnessHttpClient {
 
   async postInput(
     text: string,
-    metadata?: Partial<Pick<PostInputRequest, "correlation_id" | "speaker_name">>,
+    metadata?: Partial<Pick<PostInputRequest, "correlation_id" | "speaker_name" | "group_turn_envelope">>,
   ): Promise<PostInputResponse> {
     const url = `${sessionBase(this.config)}/input`;
     const payload: PostInputRequest = {
@@ -149,6 +149,9 @@ export class ConsciousnessHttpClient {
     const speakerName = String(metadata?.speaker_name ?? "").trim();
     if (speakerName) {
       payload.speaker_name = speakerName.slice(0, 64);
+    }
+    if (metadata?.group_turn_envelope && typeof metadata.group_turn_envelope === "object") {
+      payload.group_turn_envelope = metadata.group_turn_envelope;
     }
     const response = await this.fetch(url, {
       method: "POST",

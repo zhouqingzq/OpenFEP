@@ -12,6 +12,7 @@ from segmentum.dialogue.runtime.m14_2_event_bus import EnvironmentEventStore
 from segmentum.dialogue.runtime.m16_protocol import (
     ACTUATION_EVENT_AUDIT_MAP,
     ENGINEERING_PROXY_LABEL,
+    bounded_group_turn_envelope,
     build_client_input_committed_event,
 )
 from segmentum.dialogue.runtime.mvp_loop import MVPDialogueRuntime, MVPStateStore, llm_configuration_status_with_source, _mapping
@@ -81,6 +82,7 @@ class M16SessionBridge:
         correlation_id: str,
         source: str = "m16_gateway",
         speaker_name: str = "",
+        group_turn_envelope: Mapping[str, Any] | None = None,
     ) -> str:
         row = build_client_input_committed_event(
             persona_id=self.persona_id,
@@ -90,6 +92,7 @@ class M16SessionBridge:
             source=source,
             now=_now(self.clock),
             speaker_name=speaker_name,
+            group_turn_envelope=group_turn_envelope,
         )
         return self.event_store.append_event(
             "ClientInputCommittedEvent",
@@ -160,6 +163,7 @@ class M16SessionBridge:
         *,
         turn_index: int | None = None,
         speaker_name: str = "",
+        group_turn_envelope: Mapping[str, Any] | None = None,
         turn_progress: Any | None = None,
     ) -> Any:
         idx = int(turn_index if turn_index is not None else self.next_user_turn_index())
@@ -167,6 +171,7 @@ class M16SessionBridge:
             text,
             turn_index=idx,
             speaker_name=speaker_name or "default_user",
+            group_turn_envelope=bounded_group_turn_envelope(group_turn_envelope),
             bus_messages=[{"type": "M16UserInputEvent", "source": "m16_runner", "turn_index": idx}],
             now=_now(self.clock),
             turn_progress=turn_progress,
@@ -294,8 +299,42 @@ class M16SessionBridge:
                             "text": str(row.get("text", row.get("reply", "")) or "")[:500],
                             "turn_index": row.get("turn_index"),
                             "at": row.get("at"),
+                            "speaker_name": row.get("speaker_name"),
+                            "speaker_participant_id": row.get("speaker_participant_id"),
+                            "reply_to_turn_id": row.get("reply_to_turn_id"),
+                            "addressed_participant_ids": row.get("addressed_participant_ids"),
+                            "mentioned_participant_ids": row.get("mentioned_participant_ids"),
                         }
                     )
+                elif isinstance(row, dict) and row.get("event") == "turn":
+                    if str(row.get("user_text", "") or "").strip():
+                        chat_tail.append(
+                            {
+                                "event": "user_message",
+                                "text": str(row.get("user_text", "") or "")[:500],
+                                "turn_index": row.get("turn_index"),
+                                "at": row.get("at"),
+                                "speaker_name": row.get("speaker_name"),
+                                "speaker_participant_id": row.get("speaker_participant_id"),
+                                "reply_to_turn_id": row.get("reply_to_turn_id"),
+                                "addressed_participant_ids": row.get("addressed_participant_ids"),
+                                "mentioned_participant_ids": row.get("mentioned_participant_ids"),
+                            }
+                        )
+                    if str(row.get("reply", "") or "").strip():
+                        chat_tail.append(
+                            {
+                                "event": "assistant_message",
+                                "text": str(row.get("reply", "") or "")[:500],
+                                "turn_index": row.get("turn_index"),
+                                "at": row.get("at"),
+                                "speaker_name": "assistant",
+                                "speaker_participant_id": "assistant",
+                                "reply_to_turn_id": row.get("reply_to_turn_id"),
+                                "addressed_participant_ids": row.get("addressed_participant_ids"),
+                                "mentioned_participant_ids": row.get("mentioned_participant_ids"),
+                            }
+                        )
         return {
             "persona_id": self.persona_id,
             "session_id": self.session_id,
