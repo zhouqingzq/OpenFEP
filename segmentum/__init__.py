@@ -1,5 +1,14 @@
 """Project Segmentum: predictive-coding survival primitives and daemon loop."""
 
+import sys
+
+if sys.version_info < (3, 11):
+    raise RuntimeError(
+        "Segmentum requires Python 3.11+; the current interpreter is "
+        f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}. "
+        "Please create a Python 3.11 or 3.12 environment and reinstall the project."
+    )
+
 from .daemon import HeartbeatDaemon, run_daemon
 from .io_bus import (
     ActionBus,
