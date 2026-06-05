@@ -659,6 +659,15 @@ class M13DriveEvaluator:
                         max(0.0, min(1.0, scores[action]["behavioral_pull"] + bonus)),
                         6,
                     )
+        self_repair_biases = _mapping(_mapping(memory_dynamics.get("control_guidance")).get("self_repair_action_biases"))
+        for action, delta in self_repair_biases.items():
+            if action not in scores:
+                continue
+            scores[action]["m19_self_repair_bias"] = round(_bounded_float(abs(delta), default=0.0), 6)
+            scores[action]["behavioral_pull"] = round(
+                max(0.0, min(1.0, scores[action]["behavioral_pull"] + float(delta))),
+                6,
+            )
 
         ranked = sorted(
             candidates,

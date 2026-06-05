@@ -129,6 +129,12 @@ class SelfCognitionPatchOwner:
       cognition.setdefault("patch_history", [])
       if not isinstance(cognition.get("patch_history"), list):
           cognition["patch_history"] = []
+      cognition.setdefault("calibrated_tendencies", [])
+      if not isinstance(cognition.get("calibrated_tendencies"), list):
+          cognition["calibrated_tendencies"] = []
+      cognition.setdefault("repair_priors", [])
+      if not isinstance(cognition.get("repair_priors"), list):
+          cognition["repair_priors"] = []
 
       old = str(cognition.get("current_self_view", cognition.get("summary", "")) or "").strip()
       cognition["current_self_view"] = (old + "\n" + delta).strip() if old else delta
@@ -138,6 +144,38 @@ class SelfCognitionPatchOwner:
           cognition["identity_tensions"].extend(_string_list(proposal.get("new_identity_tensions"), limit=6))
       if isinstance(cognition["known_limits"], list):
           cognition["known_limits"].extend(_string_list(proposal.get("new_known_limits"), limit=6))
+      if isinstance(cognition["calibrated_tendencies"], list):
+          for row in proposal.get("calibrated_tendencies", []) or []:
+              if not isinstance(row, Mapping):
+                  continue
+              row_id = str(row.get("id", "") or "").strip()
+              if not row_id:
+                  continue
+              updated = False
+              for index, existing in enumerate(cognition["calibrated_tendencies"]):
+                  if isinstance(existing, Mapping) and str(existing.get("id", "") or "") == row_id:
+                      cognition["calibrated_tendencies"][index] = dict(row)
+                      updated = True
+                      break
+              if not updated:
+                  cognition["calibrated_tendencies"].append(dict(row))
+          cognition["calibrated_tendencies"] = cognition["calibrated_tendencies"][-20:]
+      if isinstance(cognition["repair_priors"], list):
+          for row in proposal.get("repair_priors", []) or []:
+              if not isinstance(row, Mapping):
+                  continue
+              row_id = str(row.get("id", "") or "").strip()
+              if not row_id:
+                  continue
+              updated = False
+              for index, existing in enumerate(cognition["repair_priors"]):
+                  if isinstance(existing, Mapping) and str(existing.get("id", "") or "") == row_id:
+                      cognition["repair_priors"][index] = dict(row)
+                      updated = True
+                      break
+              if not updated:
+                  cognition["repair_priors"].append(dict(row))
+          cognition["repair_priors"] = cognition["repair_priors"][-20:]
 
       history_row = {
           "patch_id": _new_id("sc_patch"),

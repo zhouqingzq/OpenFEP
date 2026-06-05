@@ -544,6 +544,7 @@ def sanitize_drive_guidance_for_prompt(guidance: Mapping[str, Any]) -> dict[str,
 
 def prompt_safe_control_guidance_for_thinking(control: Mapping[str, Any]) -> dict[str, Any]:
     result = dict(_mapping(control))
+    result.pop("self_repair_action_biases", None)
     drive = _mapping(result.get("drive_guidance"))
     if drive:
         result["drive_guidance"] = sanitize_drive_guidance_for_prompt(drive)

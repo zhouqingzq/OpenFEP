@@ -16,6 +16,10 @@ from segmentum.dialogue.runtime.m13_reward import (
     normalize_affective_reward_proxy_state,
 )
 from segmentum.dialogue.runtime.m14_3_proactive_alignment import build_traceable_proactive_intent, is_traceable_open_item
+from segmentum.dialogue.runtime.m19_self_expectation import (
+    normalize_self_expectation_review_proposals,
+    prompt_safe_self_expectation_summary,
+)
 
 M14_ENGINEERING_PROXY_LABEL = "mvp_local_conscious_idle_reflector"
 IDLE_INTROSPECTION_MARKER = "M14 空闲内省意识主循环"
@@ -26,7 +30,9 @@ MAX_IDLE_CONTEXT_OPEN_ITEMS = 5
 MAX_IDLE_CONTEXT_MEMORIES = 5
 MAX_IDLE_CONTEXT_EXPECTATIONS = 5
 
-_REFLECTION_KINDS = frozenset({"open_item", "user_model", "self_consistency", "habit_calibration", "none"})
+_REFLECTION_KINDS = frozenset(
+    {"open_item", "user_model", "self_consistency", "habit_calibration", "self_expectation_calibration", "none"}
+)
 _OUTREACH_REASONS = frozenset(
     {
         "user_active",
@@ -234,6 +240,7 @@ def build_idle_context(
             "social_prediction_error": round(_bounded_float(memory_efe.get("social_prediction_error")), 4),
             "epistemic_prediction_error": round(_bounded_float(memory_efe.get("epistemic_prediction_error")), 4),
         },
+        "self_expectation_state": prompt_safe_self_expectation_summary(state),
         "structural_signals": sig,
         "engineering_proxy_label": M14_ENGINEERING_PROXY_LABEL,
     }
@@ -343,6 +350,9 @@ def normalize_conscious_idle_plan(raw: Any) -> dict[str, Any]:
     plan = {
         "mode": "idle_introspection",
         "reflection_focus": focus,
+        "self_expectation_review_proposals": normalize_self_expectation_review_proposals(
+            raw.get("self_expectation_review_proposals")
+        ),
         "self_cognition_patch_proposal": patch,
         "memory_consolidation_proposals": memory_props,
         "open_item_proposals": open_props,
@@ -360,6 +370,7 @@ def empty_conscious_idle_plan() -> dict[str, Any]:
     return {
         "mode": "idle_introspection",
         "reflection_focus": None,
+        "self_expectation_review_proposals": [],
         "self_cognition_patch_proposal": {
             "apply": False,
             "summary_delta": "",
@@ -550,7 +561,17 @@ engineering_proxy_label: {M14_ENGINEERING_PROXY_LABEL}
 请输出 JSON（字段名与类型必须匹配）:
 {{
   "mode": "idle_introspection",
-  "reflection_focus": {{"topic": "", "evidence_refs": [], "reflection_kind": "open_item|user_model|self_consistency|habit_calibration|none"}} ,
+  "reflection_focus": {{"topic": "", "evidence_refs": [], "reflection_kind": "open_item|user_model|self_consistency|habit_calibration|self_expectation_calibration|none"}} ,
+  "self_expectation_review_proposals": [
+    {{
+      "source_expectation_id": "self_exp_...",
+      "target_context": "short_casual_reply|group_privacy_boundary|user_requests_directness|high_stakes_clarification|initiative_after_silence|repair_after_prior_tension",
+      "review_status": "still_active|stale|unsupported|reinforced",
+      "evidence_refs": [],
+      "reason_codes": [],
+      "engineering_proxy_label": "{M14_ENGINEERING_PROXY_LABEL}"
+    }}
+  ],
   "self_cognition_patch_proposal": {{
     "apply": false,
     "summary_delta": "",

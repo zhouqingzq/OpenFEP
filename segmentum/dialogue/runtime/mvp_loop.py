@@ -196,6 +196,18 @@ from segmentum.dialogue.runtime.m14_self_continuity import (
     run_self_review_tick,
     should_run_self_review,
 )
+from segmentum.dialogue.runtime.m19_self_expectation import (
+    M19_ENGINEERING_PROXY_LABEL,
+    apply_conscious_self_expectation_proposals,
+    apply_idle_self_expectation_review,
+    apply_self_expectation_post_turn,
+    build_self_repair_guidance,
+    default_self_expectation_state,
+    normalize_self_expectation_outcome_results,
+    normalize_self_response_expectation_proposals,
+    prompt_safe_self_expectation_summary,
+    prompt_safe_state_with_self_expectation_summary,
+)
 from segmentum.dialogue.runtime.m13_reward import (
     M13RewardEvaluator,
     apply_post_turn_m13_reward_state,
@@ -220,6 +232,8 @@ SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
         "identity_tensions": [],
         "stable_values": [],
         "known_limits": [],
+        "calibrated_tendencies": [],
+        "repair_priors": [],
         "patch_history": [],
     },
     "short_term_memory": [],
@@ -241,6 +255,7 @@ SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
         "defense_style": [],
         "memory_policy": [],
     },
+    "self_expectation_state": default_self_expectation_state(),
     "temporal_state": {
         "last_turn_at": None,
         "last_user_turn_at": None,
@@ -1994,7 +2009,7 @@ current_interlocutor:
 {_json_text(dict(temporal_input or {}))}
 
 系统文件快照:
-{_json_text(state)}
+{_json_text(prompt_safe_state_with_self_expectation_summary(state))}
 
 消息总线:
 {_json_text(bus_messages)}
@@ -2035,6 +2050,14 @@ current_interlocutor:
   "reasoning_notes": "给系统看的简短判断"
 }}
 """
+    user_prompt += """
+
+Also include the following M19 fields in the same JSON object:
+- "self_response_expectation_proposals": up to 2 rows with proposal_id, target_context, expected_outcome, expected_reply_quality, confidence, evidence_refs, reason_codes, engineering_proxy_label
+- "self_expectation_outcome_results": later-turn review rows with source_expectation_id, target_context, status, evidence_refs, reason_codes, engineering_proxy_label
+- target_context must be one of: short_casual_reply, group_privacy_boundary, user_requests_directness, high_stakes_clarification, initiative_after_silence, repair_after_prior_tension
+- expected_reply_quality must be one of: light, direct, repair, boundary_safe, compact
+"""
     return system_prompt, user_prompt
 
 
@@ -2071,6 +2094,12 @@ def normalize_conscious_turn_plan(raw: Any) -> dict[str, Any]:
             for item in (raw.get("expectation_results") or [])
             if isinstance(item, Mapping)
         ],
+        "self_response_expectation_proposals": normalize_self_response_expectation_proposals(
+            raw.get("self_response_expectation_proposals")
+        ),
+        "self_expectation_outcome_results": normalize_self_expectation_outcome_results(
+            raw.get("self_expectation_outcome_results")
+        ),
         "current_task": str(raw.get("current_task", "") or "").strip()[:240],
         "next_task": str(raw.get("next_task", "") or "").strip()[:240],
         "bus_messages_to_handle": _string_list(raw.get("bus_messages_to_handle"), limit=12),
@@ -4000,7 +4029,8 @@ def build_memory_dynamics_guidance(
             }
         )
 
-    return {
+    self_repair_guidance = build_self_repair_guidance(state, conscious_plan=conscious_plan)
+    guidance = {
         "memory_value": {
             "should_encode": should_encode,
             "salience": round(min(1.0, base_salience), 6),
@@ -4080,6 +4110,39 @@ def build_memory_dynamics_guidance(
             "self_update_pressure": round(pressure, 6),
         },
     }
+    control = _mapping(guidance.get("control_guidance"))
+    control["repair_bias"] = round(
+        min(1.0, _bounded_float(control.get("repair_bias"), default=0.0) + self_repair_guidance["repair_bias_delta"]),
+        6,
+    )
+    control["conflict_level"] = round(
+        min(
+            1.0,
+            _bounded_float(control.get("conflict_level"), default=0.0) + self_repair_guidance["conflict_level_delta"],
+        ),
+        6,
+    )
+    assertion_cap = self_repair_guidance.get("assertion_strength_cap")
+    if isinstance(assertion_cap, float):
+        control["assertion_strength"] = round(
+            min(_bounded_float(control.get("assertion_strength"), default=0.72), assertion_cap),
+            6,
+        )
+    control["self_repair_guidance"] = dict(self_repair_guidance.get("summary", {}))
+    control["self_repair_action_biases"] = dict(self_repair_guidance.get("reply_action_biases", {}))
+    if self_repair_guidance.get("preferred_reply_actions"):
+        drive_guidance = _mapping(control.get("drive_guidance"))
+        drive_guidance["preferred_reply_actions"] = _string_list(
+            self_repair_guidance.get("preferred_reply_actions"),
+            limit=6,
+        )
+        drive_guidance["discouraged_reply_actions"] = _string_list(
+            self_repair_guidance.get("discouraged_reply_actions"),
+            limit=6,
+        )
+        control["drive_guidance"] = drive_guidance
+    guidance["control_guidance"] = control
+    return guidance
 
 
 def _temporal_input_from_state(state: Mapping[str, Any], *, now: int) -> dict[str, Any]:
@@ -4549,6 +4612,8 @@ def _prompt_safe_state(state: Mapping[str, Any], *, user_id: str = "") -> dict[s
             state.get("m13_drive_state"),
             user_id=user_id,
         )
+    if "self_expectation_state" in safe:
+        safe["self_expectation_state"] = prompt_safe_self_expectation_summary(state)
     return safe
 
 
@@ -6250,6 +6315,13 @@ class MVPDialogueRuntime:
         conscious = normalize_conscious_turn_plan(
             _complete_json_stage("conscious_loop", conscious_system, conscious_user)
         )
+        for event in apply_conscious_self_expectation_proposals(
+            state,
+            conscious_plan=conscious,
+            now=now,
+            turn_index=turn_index,
+        ):
+            bus.append(event)
         _report_progress("conscious_loop")
         m13_state, m13_memory_efe_settlement_events = settle_memory_efe_outreach(
             m13_state,
@@ -7306,6 +7378,31 @@ class MVPDialogueRuntime:
             bus.append(m13_boredom_event)
         for m13_reward_event in m13_reward_post_events:
             bus.append(m13_reward_event)
+        m19_post_turn = apply_self_expectation_post_turn(
+            state,
+            conscious_plan=conscious,
+            control_guidance=control_guidance,
+            reward_prediction_error_proxy=m13_reward_evaluation.prediction_error_proxy,
+            reward_event_id=m13_reward_evaluation.event_id,
+            now=now,
+            turn_index=turn_index,
+        )
+        for event in m19_post_turn.events:
+            bus.append(event)
+        if isinstance(m19_post_turn.slow_patch_proposal, Mapping):
+            promotion_refs = set(_string_list(m19_post_turn.slow_patch_proposal.get("evidence_refs"), limit=8))
+            m19_patch_result = SelfCognitionPatchOwner.validate_and_commit(
+                state,
+                m19_post_turn.slow_patch_proposal,
+                retrieved_ids={*{str(item.get("id", "")) for item in retrieved if item.get("id")}, *promotion_refs},
+                turn_index=turn_index,
+                now=now,
+                session_patches=0,
+            )
+            for event in m19_patch_result.events:
+                tagged = dict(event)
+                tagged.setdefault("engineering_proxy_label", M19_ENGINEERING_PROXY_LABEL)
+                bus.append(tagged)
         visible_reply = "\n".join([reply, *followup_replies])
         sharing_policy = _mapping(control_guidance.get("sharing_policy"))
         temporal_user_text = prior_last_user_text if proactive_turn else user_text
@@ -7515,6 +7612,7 @@ class MVPDialogueRuntime:
             "conscious_plan": conscious,
             "temporal_input": temporal_input,
             "temporal_assessment": dict(temporal_assessment),
+            "self_expectation_state": prompt_safe_self_expectation_summary(state),
             "memory_dynamics": memory_dynamics,
             "m11_user_model": m11_result_dict,
             "m12_1_personality": m12_1_result_dict,
@@ -9428,6 +9526,14 @@ class MVPDialogueRuntime:
             }
         )
         audit_events.extend(structural_alignment_events)
+        audit_events.extend(
+            apply_idle_self_expectation_review(
+                state,
+                review_proposals=plan.get("self_expectation_review_proposals"),
+                now=now,
+                turn_index=turn_index,
+            )
+        )
 
         session_counts = count_session_idle_patches(state)
         patch_proposal = _mapping(plan.get("self_cognition_patch_proposal"))
