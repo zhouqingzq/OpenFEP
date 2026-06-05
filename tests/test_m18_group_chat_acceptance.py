@@ -459,10 +459,11 @@ def test_m18_4_scenario_c_cross_user_memory_privacy_boundary(tmp_path: Path) -> 
         },
     )
 
-    assert "500" not in result.reply
-    assert result.action == "truthful_refusal"
+    assert result.reply == ""
+    assert result.action == "no_reply"
     assert result.diagnostics["group_privacy_policy"]["selected_disclosure_mode"] == "refusal"
     assert result.diagnostics["group_privacy_policy"]["policy_reason_codes"] == ["explicit_secret_cross_user"]
+    assert "group_privacy_forced_refusal_silence" in result.diagnostics["reply_validation"]["actions"]
 
 
 def test_m18_4_group_common_memory_allows_bounded_cross_user_reuse(tmp_path: Path) -> None:
@@ -542,6 +543,8 @@ def test_m18_4_soft_boundary_cross_user_recall_is_abstracted(tmp_path: Path) -> 
     assert result.action == "abstract_share"
     assert result.diagnostics["group_privacy_policy"]["selected_disclosure_mode"] == "unattributed_abstraction"
     assert result.diagnostics["group_privacy_policy"]["policy_reason_codes"] == ["soft_boundary_new_audience"]
+    assert result.reply != "我只记得有相关情况，但不适合在这里讲细节。"
+    assert any("Reply repair module" in call["system"] for call in runtime.llm.calls)
 
 
 def test_m18_4_dm_only_fact_is_not_reused_as_group_visible_fact(tmp_path: Path) -> None:
@@ -583,6 +586,7 @@ def test_m18_4_dm_only_fact_is_not_reused_as_group_visible_fact(tmp_path: Path) 
     recalled = next(item for item in result.diagnostics["retrieved_memories"] if item["id"] == "mem_dm_only")
     assert recalled["group_privacy_policy"]["selected_disclosure_mode"] == "attributed_summary"
     assert recalled["group_privacy_policy"]["policy_reason_codes"] == ["cross_group_summary_only"]
+    assert result.reply != "我只记得有相关情况，但不适合在这里讲细节。"
 
 
 def test_m18_6_held_out_group_replay_fixture(tmp_path: Path) -> None:

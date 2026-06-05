@@ -253,6 +253,26 @@ class FakeJSONLLM:
                 "reply_pacing_reason": "test fake conscious pacing",
                 "reasoning_notes": "需要检索相关偏好。",
             }
+        if "Reply repair module" in system_prompt:
+            if "target_reply_action:\nclarify" in user_prompt:
+                return {
+                    "reply": "我先确认一下，你现在是在叫我接这个话题，还是在跟他们中的某个人继续说？",
+                    "repair_strategy": "switch to a brief addressee clarification",
+                }
+            if "target_reply_action:\ntruthful_refusal" in user_prompt:
+                return {
+                    "reply": "这件事我不方便替别人展开，你要不要直接问他本人？",
+                    "repair_strategy": "turn direct disclosure into a brief refusal",
+                }
+            if "target_reply_action:\nabstract_share" in user_prompt:
+                return {
+                    "reply": "我只知道大概方向，但不适合替他讲具体细节。",
+                    "repair_strategy": "keep it abstract without exposing the hidden detail",
+                }
+            return {
+                "reply": "我换个更稳妥的说法。",
+                "repair_strategy": "rewrite the draft into a safer visible reply",
+            }
         if "回复后发观察模块" in system_prompt:
             return {
                 "needs_followup": False,

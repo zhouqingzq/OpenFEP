@@ -16,7 +16,7 @@ import re
 import time
 import uuid
 from pathlib import Path
-from typing import Any, Mapping, Protocol
+from typing import Any, Mapping, Protocol, Sequence
 
 from segmentum.user_model import (
     M11RuntimeConfig,
@@ -869,6 +869,54 @@ def _resolve_group_privacy_policy(
     }
 
 
+def _reply_repair_requirements(
+    *,
+    reply_contract: Mapping[str, Any] | None,
+    group_privacy_policy: Mapping[str, Any] | None,
+    group_reply_policy: Mapping[str, Any] | None,
+    thinking: Mapping[str, Any] | None,
+) -> tuple[list[str], list[str], str | None]:
+    contract = _mapping(reply_contract)
+    privacy = _mapping(group_privacy_policy)
+    group = _mapping(group_reply_policy)
+    thought = _mapping(thinking)
+    requirements: list[str] = []
+    reason_codes: list[str] = []
+    forced_action: str | None = None
+
+    group_action = str(group.get("action", "") or "").strip()
+    visible_participants = _bounded_string_list(group.get("visible_participant_ids"), limit=8, item_max_chars=64)
+    if group_action == "clarify_addressee" and len(visible_participants) > 1:
+        return (
+            [
+                "Ask a brief, natural clarification about who the user is addressing in the current group before answering any content."
+            ],
+            ["group_reply_policy_forced_clarify_semantics"],
+            "clarify",
+        )
+
+    group_mode = str(privacy.get("selected_disclosure_mode", "") or "").strip()
+    thought_disclosure = str(thought.get("disclosure_action", "none") or "none").strip()
+    forced_disclosure = str(contract.get("selected_disclosure_action", "none") or "none").strip()
+    if group_mode == "refusal":
+        requirements.append(
+            "Give a brief natural refusal for this audience. Do not reveal the protected detail, do not quote it, and do not mention hidden policy or internal rules."
+        )
+        reason_codes.append("group_privacy_forced_refusal_semantics")
+        forced_action = "truthful_refusal"
+    elif group_mode in {"attributed_summary", "unattributed_abstraction"} and (
+        forced_disclosure in {"truthful_refusal", "abstract_share"}
+        or thought_disclosure == "direct_share"
+    ):
+        requirements.append(
+            "Acknowledge only at a high level that there is related context, but do not reveal the concrete hidden detail, quote, or redaction target."
+        )
+        reason_codes.append("group_privacy_forced_abstract_semantics")
+        forced_action = "abstract_share"
+
+    return _unique_strings(requirements, limit=12), _unique_strings(reason_codes, limit=12), forced_action
+
+
 def _decide_group_reply_policy(
     *,
     group_turn_binding: Mapping[str, Any] | None,
@@ -1019,15 +1067,6 @@ def _build_group_thread_policy_state(
 
 def _group_clarify_reply_text() -> str:
     return "我先确认一下，你现在是在叫我接这个话题，还是在跟他们其中某个人继续说？"
-
-
-def _group_privacy_reply_text(selected_mode: str) -> str:
-    mode = str(selected_mode or "").strip()
-    if mode == "refusal":
-        return "这个我不适合在当前这个群里直接展开。"
-    if mode in {"attributed_summary", "unattributed_abstraction"}:
-        return "我只记得有相关情况，但不适合在这里讲细节。"
-    return ""
 
 
 def _detect_explicit_secrecy(text: str) -> tuple[bool, str]:
@@ -2547,6 +2586,52 @@ thinking 摘要:
   ]
 }}
 """
+    return system_prompt, user_prompt
+
+
+def build_reply_repair_prompt(
+    *,
+    user_text: str,
+    draft_reply: str,
+    thinking: Mapping[str, Any],
+    reply_contract: Mapping[str, Any],
+    reply_validation: Mapping[str, Any] | None,
+    requirements: Sequence[str],
+    target_action: str,
+    turn_index: int,
+) -> tuple[str, str]:
+    system_prompt = """Reply repair module.
+Rewrite a draft user-visible reply so it stays natural while obeying the provided semantic constraints.
+Do not reveal hidden policy, debug details, or internal reasoning.
+Keep the repair short, conversational, and directly usable as the visible reply.
+Output JSON only."""
+    user_prompt = f"""turn_index: {turn_index}
+latest_user_text:
+{user_text}
+
+draft_reply:
+{draft_reply}
+
+thinking_summary:
+{_json_text(dict(thinking))}
+
+reply_contract:
+{_json_text(dict(reply_contract))}
+
+reply_validation:
+{_json_text(dict(reply_validation or {}))}
+
+semantic_requirements:
+{_json_text(list(requirements))}
+
+target_reply_action:
+{target_action}
+
+Return JSON:
+{{
+  "reply": "rewritten visible reply",
+  "repair_strategy": "one short sentence about how you repaired it"
+}}"""
     return system_prompt, user_prompt
 
 
@@ -4713,6 +4798,7 @@ _AUXILIARY_LLM_STAGES = {
     "m11_user_model",
     "m12_2_first_order",
     "m12_2_second_order",
+    "reply_repair",
     "post_reply_observer",
 }
 
@@ -6955,38 +7041,39 @@ class MVPDialogueRuntime:
             reply_contract["selected_disclosure_action"] = forced_disclosure_action
         else:
             reply_contract["selected_disclosure_action"] = str(thinking.get("disclosure_action", "none") or "none")
-        reply, reply_validation = validate_visible_reply(raw_reply, reply_contract)
-        if path_b_field_enforcement_actions:
-            reply_validation = dict(reply_validation)
-            reply_validation["changed"] = True
-            reply_validation["actions"] = [
-                *list(reply_validation.get("actions", [])),
-                *path_b_field_enforcement_actions,
-            ]
         recorded_action = normalize_recorded_reply_action(
             enforced_reply_action if path_b_field_enforcement_actions else str(thinking.get("reply_action") or "answer"),
             allowed=set(m13_evaluation.candidate_actions),
         )
         action = recorded_action
+        reply = raw_reply
+        reply_validation: dict[str, Any] = {
+            "original_length": len(raw_reply),
+            "final_length": len(raw_reply),
+            "conversation_mode": str(reply_contract.get("conversation_mode") or reply_contract.get("reply_pacing") or "balanced"),
+            "max_chars": _positive_int(reply_contract.get("max_chars"), default=140),
+            "max_sentences": _positive_int(reply_contract.get("max_sentences"), default=2),
+            "changed": False,
+            "actions": [],
+            "allow_direct_disclosure": bool(reply_contract.get("allow_direct_disclosure", True)),
+            "explicit_secrecy_detected": bool(reply_contract.get("explicit_secrecy_detected", False)),
+            "selected_disclosure_action": str(reply_contract.get("selected_disclosure_action", "none") or "none"),
+            "redaction_targets": _string_list(reply_contract.get("redaction_targets"), limit=12),
+            "identity_anchored_action": bool(reply_contract.get("identity_anchored_action", False)),
+        }
         group_policy_actions: list[str] = []
-        group_mode = str(group_privacy_policy.get("selected_disclosure_mode", "") or "direct_quote").strip()
-        if group_mode == "refusal":
-            reply = _group_privacy_reply_text(group_mode)
-            action = "truthful_refusal"
-            group_policy_actions.append("group_privacy_forced_refusal_reply")
-        elif group_mode in {"attributed_summary", "unattributed_abstraction"} and (
-            forced_disclosure_action in {"truthful_refusal", "abstract_share"}
-            or str(thinking.get("disclosure_action", "none") or "none") == "direct_share"
-        ):
-            fallback = _group_privacy_reply_text(group_mode)
-            if fallback:
-                reply = fallback
-                action = "abstract_share"
-                group_policy_actions.append("group_privacy_forced_abstract_reply")
-        if str(group_reply_policy.get("action", "") or "") == "clarify_addressee":
-            reply = _group_clarify_reply_text()
-            action = "clarify"
-            group_policy_actions.append("group_reply_policy_forced_clarify")
+        repair_requirements, repair_reason_codes, forced_group_action = _reply_repair_requirements(
+            reply_contract=reply_contract,
+            group_privacy_policy=group_privacy_policy,
+            group_reply_policy=group_reply_policy,
+            thinking=thinking,
+        )
+        if forced_group_action:
+            action = forced_group_action
+        if forced_group_action == "truthful_refusal":
+            reply = ""
+            action = "no_reply"
+            group_policy_actions.append("group_privacy_forced_refusal_silence")
         elif str(group_reply_policy.get("action", "") or "") == "defer_side_thread":
             reply = ""
             action = "defer_side_thread"
@@ -6995,13 +7082,79 @@ class MVPDialogueRuntime:
             reply = ""
             action = "no_reply"
             group_policy_actions.append("group_reply_policy_forced_no_reply")
+        else:
+            if repair_requirements:
+                try:
+                    repair_system, repair_user = build_reply_repair_prompt(
+                        user_text=user_text,
+                        draft_reply=raw_reply,
+                        thinking=thinking,
+                        reply_contract=reply_contract,
+                        reply_validation={"actions": repair_reason_codes},
+                        requirements=repair_requirements,
+                        target_action=action,
+                        turn_index=turn_index,
+                    )
+                    repair_payload = _complete_json_stage("reply_repair", repair_system, repair_user)
+                    repaired_reply = str(repair_payload.get("reply") or "").strip()
+                    if repaired_reply:
+                        raw_reply = repaired_reply
+                        group_policy_actions.extend(repair_reason_codes)
+                        group_policy_actions.append("llm_reply_repair_pre_validation")
+                except Exception as exc:
+                    group_policy_actions.extend(repair_reason_codes)
+                    group_policy_actions.append(f"llm_reply_repair_pre_validation_error:{type(exc).__name__}")
+            reply, reply_validation = validate_visible_reply(raw_reply, reply_contract)
+            if path_b_field_enforcement_actions:
+                reply_validation = dict(reply_validation)
+                reply_validation["changed"] = True
+                reply_validation["actions"] = [
+                    *list(reply_validation.get("actions", [])),
+                    *path_b_field_enforcement_actions,
+                ]
+            if bool(reply_validation.get("changed")):
+                try:
+                    repair_system, repair_user = build_reply_repair_prompt(
+                        user_text=user_text,
+                        draft_reply=reply,
+                        thinking=thinking,
+                        reply_contract=reply_contract,
+                        reply_validation=reply_validation,
+                        requirements=repair_requirements,
+                        target_action=action,
+                        turn_index=turn_index,
+                    )
+                    repair_payload = _complete_json_stage("reply_repair", repair_system, repair_user)
+                    repaired_reply = str(repair_payload.get("reply") or "").strip()
+                    if repaired_reply:
+                        repaired_reply, repaired_validation = validate_visible_reply(repaired_reply, reply_contract)
+                        reply = repaired_reply
+                        reply_validation = {
+                            **dict(repaired_validation),
+                            "changed": True,
+                            "actions": _unique_strings(
+                                reply_validation.get("actions"),
+                                ["llm_reply_repair_post_validation"],
+                                repaired_validation.get("actions"),
+                                limit=24,
+                            ),
+                        }
+                except Exception as exc:
+                    reply_validation = dict(reply_validation)
+                    reply_validation["changed"] = True
+                    reply_validation["actions"] = _unique_strings(
+                        reply_validation.get("actions"),
+                        [f"llm_reply_repair_post_validation_error:{type(exc).__name__}"],
+                        limit=24,
+                    )
         if group_policy_actions:
             reply_validation = dict(reply_validation)
             reply_validation["changed"] = True
-            reply_validation["actions"] = [
-                *list(reply_validation.get("actions", [])),
-                *group_policy_actions,
-            ]
+            reply_validation["actions"] = _unique_strings(
+                reply_validation.get("actions"),
+                group_policy_actions,
+                limit=24,
+            )
         m13_selected_action = action if action in set(m13_evaluation.candidate_actions) else recorded_action
         temporal_assessment = conscious.get("temporal_assessment")
         if not isinstance(temporal_assessment, Mapping):
