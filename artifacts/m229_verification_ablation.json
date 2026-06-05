@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-05-02T17:07:50+00:00",
+  "generated_at": "2026-06-04T11:11:40+00:00",
   "mechanism": "verification_loop",
   "comparison": "with_verification_vs_ablation",
   "baseline": {
-    "scan_policy_score": 0.185633,
+    "scan_policy_score": 0.309273,
     "scan_verification_bias": 0.0,
     "workspace_focus": {},
     "memory_threshold_delta": 0.0,
@@ -15,7 +15,7 @@
     }
   },
   "full_mechanism": {
-    "scan_policy_score": 0.291697,
+    "scan_policy_score": 0.415337,
     "scan_verification_bias": 0.106064,
     "workspace_focus": {
       "danger": 0.3504

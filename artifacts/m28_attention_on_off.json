@@ -5,15 +5,15 @@
     "attention_off": {
       "enabled": false,
       "cycles": 80,
-      "mean_conditioned_prediction_error": 0.133007,
-      "mean_free_energy_before": 1.33885,
-      "survival_score": 0.711112,
+      "mean_conditioned_prediction_error": 0.111431,
+      "mean_free_energy_before": 0.969035,
+      "survival_score": 1.488457,
       "action_distribution": {
         "exploit_shelter": 0.0125,
-        "forage": 0.0375,
-        "hide": 0.0875,
-        "rest": 0.0875,
-        "scan": 0.75,
+        "forage": 0.1375,
+        "hide": 0.1,
+        "rest": 0.375,
+        "scan": 0.35,
         "seek_contact": 0.025
       },
       "selected_channel_statistics": {},
@@ -22,31 +22,31 @@
     "attention_on": {
       "enabled": true,
       "cycles": 80,
-      "mean_conditioned_prediction_error": 0.108295,
-      "mean_free_energy_before": 1.20833,
-      "survival_score": 0.631709,
+      "mean_conditioned_prediction_error": 0.089142,
+      "mean_free_energy_before": 0.859563,
+      "survival_score": 1.410069,
       "action_distribution": {
         "exploit_shelter": 0.0125,
-        "forage": 0.05,
-        "hide": 0.0875,
-        "rest": 0.05,
-        "scan": 0.7875,
-        "seek_contact": 0.0125
+        "forage": 0.125,
+        "hide": 0.075,
+        "rest": 0.325,
+        "scan": 0.4375,
+        "seek_contact": 0.025
       },
       "selected_channel_statistics": {
-        "novelty": 79,
-        "danger": 77,
-        "social": 4,
-        "temperature": 8,
-        "shelter": 10,
-        "food": 62
+        "novelty": 80,
+        "danger": 72,
+        "social": 15,
+        "temperature": 24,
+        "food": 40,
+        "shelter": 9
       },
       "salient_topk_hit_rate": 1.0
     }
   },
   "evaluation": {
-    "conditioned_prediction_error_improvement": 0.185795,
-    "survival_ratio": 0.88834,
+    "conditioned_prediction_error_improvement": 0.200025,
+    "survival_ratio": 0.947336,
     "topk_hit_rate": 1.0,
     "acceptance": {
       "topk_hit_rate_gte_0_80": true,

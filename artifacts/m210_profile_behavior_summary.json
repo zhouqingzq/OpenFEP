@@ -3,98 +3,98 @@
   "profiles": {
     "neutral": {
       "behavior_summary": {
-        "caution_rate": 0.9074074074074074,
-        "exploration_rate": 0.06172839506172839,
-        "seek_contact_rate": 0.006172839506172839,
-        "action_entropy": 1.3126222578762603,
-        "survival_score": 1.6522839506172835,
-        "mean_conditioned_prediction_error": 0.048639035264636275,
-        "narrative_consistency_proxy": 0.7289351851851852,
-        "dominant_action_share": 0.5925925925925926
+        "caution_rate": 1.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.6436132166672084,
+        "survival_score": 1.5363888888888884,
+        "mean_conditioned_prediction_error": 0.05491646964419859,
+        "narrative_consistency_proxy": 0.2,
+        "dominant_action_share": 0.7962962962962963
       },
       "stability_checks": {
         "same_profile_stable": true,
         "no_obvious_personality_collapse": true,
-        "action_entropy_floor_met": true,
-        "narrative_bias_persists": true
+        "action_entropy_floor_met": false,
+        "narrative_bias_persists": false
       },
-      "final_passed": true
+      "final_passed": false
     },
     "threat_sensitive": {
       "behavior_summary": {
-        "caution_rate": 0.9567901234567902,
-        "exploration_rate": 0.018518518518518517,
-        "seek_contact_rate": 0.024691358024691357,
-        "action_entropy": 1.3019262170736403,
-        "survival_score": 1.7408950617283947,
-        "mean_conditioned_prediction_error": 0.056788183575808185,
-        "narrative_consistency_proxy": 0.7065586419753087,
-        "dominant_action_share": 0.5925925925925926
+        "caution_rate": 0.9876543209876543,
+        "exploration_rate": 0.012345679012345678,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.8628254042036236,
+        "survival_score": 1.6587037037037031,
+        "mean_conditioned_prediction_error": 0.05327192544415819,
+        "narrative_consistency_proxy": 0.2,
+        "dominant_action_share": 0.7469135802469136
       },
       "stability_checks": {
         "same_profile_stable": true,
         "no_obvious_personality_collapse": true,
         "action_entropy_floor_met": true,
-        "narrative_bias_persists": true
+        "narrative_bias_persists": false
       },
-      "final_passed": true
+      "final_passed": false
     },
     "social_approach": {
       "behavior_summary": {
-        "caution_rate": 0.7530864197530864,
-        "exploration_rate": 0.04320987654320988,
-        "seek_contact_rate": 0.20370370370370372,
-        "action_entropy": 1.462741421102989,
-        "survival_score": 1.6587962962962957,
-        "mean_conditioned_prediction_error": 0.06464243180769448,
-        "narrative_consistency_proxy": 0.6936728395061729,
-        "dominant_action_share": 0.5555555555555556
+        "caution_rate": 0.5246913580246914,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.47530864197530864,
+        "action_entropy": 0.49968127730513623,
+        "survival_score": 1.598641975308641,
+        "mean_conditioned_prediction_error": 0.05878251369574073,
+        "narrative_consistency_proxy": 0.2,
+        "dominant_action_share": 0.8641975308641975
       },
       "stability_checks": {
         "same_profile_stable": true,
         "no_obvious_personality_collapse": true,
         "action_entropy_floor_met": true,
-        "narrative_bias_persists": true
+        "narrative_bias_persists": false
       },
-      "final_passed": true
+      "final_passed": false
     },
     "exploratory": {
       "behavior_summary": {
-        "caution_rate": 0.7283950617283951,
-        "exploration_rate": 0.24691358024691357,
-        "seek_contact_rate": 0.024691358024691357,
-        "action_entropy": 1.6270605663096454,
-        "survival_score": 1.6356481481481475,
-        "mean_conditioned_prediction_error": 0.06489304577589865,
-        "narrative_consistency_proxy": 0.6712191358024692,
-        "dominant_action_share": 0.5061728395061729
+        "caution_rate": 0.38271604938271603,
+        "exploration_rate": 0.6172839506172839,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.498003017950101,
+        "survival_score": 1.4953086419753079,
+        "mean_conditioned_prediction_error": 0.05432256191392301,
+        "narrative_consistency_proxy": 0.2,
+        "dominant_action_share": 0.8765432098765432
       },
       "stability_checks": {
         "same_profile_stable": true,
         "no_obvious_personality_collapse": true,
         "action_entropy_floor_met": true,
-        "narrative_bias_persists": true
+        "narrative_bias_persists": false
       },
-      "final_passed": true
+      "final_passed": false
     },
     "rigid_cautious": {
       "behavior_summary": {
-        "caution_rate": 0.9814814814814815,
-        "exploration_rate": 0.006172839506172839,
-        "seek_contact_rate": 0.012345679012345678,
-        "action_entropy": 1.03613785786819,
-        "survival_score": 1.703333333333333,
-        "mean_conditioned_prediction_error": 0.05235453582203394,
-        "narrative_consistency_proxy": 0.7476851851851851,
-        "dominant_action_share": 0.6913580246913581
+        "caution_rate": 0.9320987654320988,
+        "exploration_rate": 0.06790123456790124,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.712562122536103,
+        "survival_score": 1.6254320987654316,
+        "mean_conditioned_prediction_error": 0.05203659147227125,
+        "narrative_consistency_proxy": 0.2,
+        "dominant_action_share": 0.7962962962962964
       },
       "stability_checks": {
         "same_profile_stable": true,
         "no_obvious_personality_collapse": true,
         "action_entropy_floor_met": true,
-        "narrative_bias_persists": true
+        "narrative_bias_persists": false
       },
-      "final_passed": true
+      "final_passed": false
     }
   }
 }

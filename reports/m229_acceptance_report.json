@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.29",
   "status": "PASS",
-  "generated_at": "2026-05-02T17:07:50+00:00",
+  "generated_at": "2026-06-04T11:11:40+00:00",
   "seed_set": [
     229,
     431
@@ -37,7 +37,7 @@
           "equivalent": true,
           "signature_a": {
             "cycle": 2,
-            "last_choice": "rest",
+            "last_choice": "hide",
             "active_targets": 0,
             "archived_targets": 1,
             "evidence_events": 1,
@@ -59,7 +59,7 @@
           },
           "signature_b": {
             "cycle": 2,
-            "last_choice": "rest",
+            "last_choice": "hide",
             "active_targets": 0,
             "archived_targets": 1,
             "evidence_events": 1,
@@ -177,6 +177,7 @@
             "verify:pred:env:novelty"
           ],
           "deferred_targets": [],
+          "memory_credit_signals": [],
           "summary": "Verification outcomes observed: expired_unverified."
         },
         "trace_checks": {
@@ -203,8 +204,8 @@
   "residual_risks": [],
   "freshness": {
     "current_round": true,
-    "generated_at": "2026-05-02T17:07:50+00:00",
-    "codebase_version": "4160fd64b963957691263a53b58538cb1e188ea8",
+    "generated_at": "2026-06-04T11:11:40+00:00",
+    "codebase_version": "8cf9291a83391253bb35b782c8748b2defff1b68",
     "artifact_records": {
       "specification": {
         "path": "E:\\workspace\\segments\\reports\\m229_milestone_spec.md",
@@ -215,26 +216,26 @@
       "canonical_trace": {
         "path": "E:\\workspace\\segments\\artifacts\\m229_verification_trace.jsonl",
         "exists": true,
-        "size_bytes": 21733,
-        "modified_at": "2026-05-02T17:07:50+00:00"
+        "size_bytes": 23085,
+        "modified_at": "2026-06-04T11:11:40+00:00"
       },
       "ablation": {
         "path": "E:\\workspace\\segments\\artifacts\\m229_verification_ablation.json",
         "exists": true,
         "size_bytes": 1304,
-        "modified_at": "2026-05-02T17:07:50+00:00"
+        "modified_at": "2026-06-04T11:11:40+00:00"
       },
       "stress": {
         "path": "E:\\workspace\\segments\\artifacts\\m229_verification_stress.json",
         "exists": true,
-        "size_bytes": 6270,
-        "modified_at": "2026-05-02T17:07:50+00:00"
+        "size_bytes": 6488,
+        "modified_at": "2026-06-04T11:11:40+00:00"
       },
       "summary": {
         "path": "E:\\workspace\\segments\\reports\\m229_acceptance_summary.md",
         "exists": true,
         "size_bytes": 236,
-        "modified_at": "2026-05-02T17:07:50+00:00"
+        "modified_at": "2026-06-04T11:11:40+00:00"
       }
     }
   },

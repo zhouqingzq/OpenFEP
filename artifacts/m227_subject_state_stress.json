@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-02T17:07:32+00:00",
+  "generated_at": "2026-06-04T11:11:11+00:00",
   "seed": 342,
   "failure_injection": {
     "energy": 0.12,
@@ -271,9 +271,9 @@
     "post_restore_alive": true,
     "post_restore_subject_state": {
       "tick": 1,
-      "core_identity_summary": "I am a risk-seeking agent. Currently in a resource_recovery phase. My dominant strategy remains expected_free_energy. Caution bias remained stable because anti-collapse safeguard clipped multi-variable divergence. Survival value weighting remained stable because insufficient repeated evidence. Reconciliation: This tension has persisted across 1 chapter(s) and is active.",
-      "current_phase": "resource_recovery",
-      "current_self_narrative_phase": "resource_recovery",
+      "core_identity_summary": "I am a risk-seeking agent. Currently in a consolidation phase. My dominant strategy remains expected_free_energy. Caution bias remained stable because anti-collapse safeguard clipped multi-variable divergence. Survival value weighting remained stable because insufficient repeated evidence. Reconciliation: This tension has persisted across 1 chapter(s) and is active.",
+      "current_phase": "consolidation",
+      "current_self_narrative_phase": "consolidation",
       "active_commitments": [
         "Protect survival and integrity before opportunistic gain.",
         "When conditions are stable, reduce uncertainty through active exploration."
@@ -335,7 +335,7 @@
           "intensity": 1.0,
           "repair_target": "critical",
           "evidence": [
-            "memory_surprise=1005.057"
+            "memory_surprise=1005.080"
           ]
         },
         {
@@ -404,7 +404,7 @@
           "preferred_actions": [],
           "avoid_actions": [],
           "evidence": [
-            "memory_surprise=1005.057"
+            "memory_surprise=1005.080"
           ]
         },
         {
@@ -499,7 +499,7 @@
         "SURVIVAL",
         "protect continuity anchors"
       ],
-      "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: resource_recovery. 6 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00."
+      "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: consolidation. 6 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00."
     }
   }
 }

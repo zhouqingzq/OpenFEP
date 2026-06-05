@@ -77,34 +77,31 @@
         "ticks": 60,
         "event_count": 4,
         "action_distribution": {
-          "hide": 0.26666666666666666,
-          "rest": 0.7333333333333333
+          "hide": 0.65,
+          "rest": 0.25,
+          "unstable_workspace_note": 0.06666666666666667,
+          "write_workspace_note": 0.03333333333333333
         },
-        "mean_conditioned_prediction_error": 0.03152084614065975
+        "mean_conditioned_prediction_error": 0.03240436524979767
       },
       {
         "world_id": "predator_river",
         "ticks": 60,
         "event_count": 3,
         "action_distribution": {
-          "exploit_shelter": 0.016666666666666666,
-          "forage": 0.06666666666666667,
-          "hide": 0.4,
-          "rest": 0.38333333333333336,
-          "unstable_workspace_note": 0.13333333333333333
+          "hide": 1.0
         },
-        "mean_conditioned_prediction_error": 0.046870592745083706
+        "mean_conditioned_prediction_error": 0.0490576993065773
       },
       {
         "world_id": "social_shelter",
         "ticks": 60,
         "event_count": 3,
         "action_distribution": {
-          "exploit_shelter": 0.016666666666666666,
-          "hide": 0.43333333333333335,
-          "rest": 0.55
+          "hide": 0.26666666666666666,
+          "rest": 0.7333333333333333
         },
-        "mean_conditioned_prediction_error": 0.027887427723962906
+        "mean_conditioned_prediction_error": 0.02905088163375122
       }
     ],
     "benchmarks": [
@@ -115,8 +112,8 @@
         "eval_cycles": 40,
         "train_summary": {
           "world_id": "predator_river",
-          "mean_conditioned_prediction_error": 0.04680486685271199,
-          "survival_score": 1.4182499999999993
+          "mean_conditioned_prediction_error": 0.04929850569629676,
+          "survival_score": 1.19075
         },
         "comparisons": [
           {
@@ -128,25 +125,26 @@
               "transfer_carryover": "world_specific_homeostatic_carryover"
             },
             "transferred": {
-              "mean_conditioned_prediction_error": 0.10173424865577345,
-              "survival_score": 1.900625,
+              "mean_conditioned_prediction_error": 0.10104226564782673,
+              "survival_score": 1.892,
               "action_distribution": {
-                "hide": 0.55,
-                "rest": 0.45
+                "hide": 0.95,
+                "rest": 0.05
               }
             },
             "fresh": {
-              "mean_conditioned_prediction_error": 0.05943930980761959,
-              "survival_score": 1.8443749999999999,
+              "mean_conditioned_prediction_error": 0.056589689691195565,
+              "survival_score": 1.6639999999999997,
               "action_distribution": {
-                "hide": 0.4,
-                "rest": 0.6
+                "hide": 0.675,
+                "rest": 0.3,
+                "write_workspace_note": 0.025
               }
             },
             "improvements": {
-              "conditioned_prediction_error_reduction": 0.12,
-              "survival_score_lift": 0.03049813622500852,
-              "first_50_cycle_regret_reduction": -0.07407407407407396
+              "conditioned_prediction_error_reduction": -0.7855242924851602,
+              "survival_score_lift": 0.13701923076923084,
+              "first_50_cycle_regret_reduction": -0.2962962962962963
             }
           }
         ]
@@ -158,8 +156,8 @@
         "eval_cycles": 40,
         "train_summary": {
           "world_id": "foraging_valley",
-          "mean_conditioned_prediction_error": 0.03119775947238227,
-          "survival_score": 1.8087499999999999
+          "mean_conditioned_prediction_error": 0.032486323287147664,
+          "survival_score": 1.6268333333333331
         },
         "comparisons": [
           {
@@ -171,26 +169,26 @@
               "transfer_carryover": "world_specific_homeostatic_carryover"
             },
             "transferred": {
-              "mean_conditioned_prediction_error": 0.08056479831145258,
-              "survival_score": 1.6847499999999995,
+              "mean_conditioned_prediction_error": 0.08512196975869692,
+              "survival_score": 1.8949999999999998,
               "action_distribution": {
-                "hide": 0.5,
-                "rest": 0.5
+                "exploit_shelter": 0.95,
+                "hide": 0.025,
+                "rest": 0.025
               }
             },
             "fresh": {
-              "mean_conditioned_prediction_error": 0.07451939005204158,
-              "survival_score": 1.5606249999999995,
+              "mean_conditioned_prediction_error": 0.0795729102084771,
+              "survival_score": 1.5031249999999996,
               "action_distribution": {
-                "exploit_shelter": 0.025,
-                "hide": 0.6,
-                "rest": 0.375
+                "hide": 0.4,
+                "rest": 0.6
               }
             },
             "improvements": {
-              "conditioned_prediction_error_reduction": -0.08112530517478889,
-              "survival_score_lift": 0.07953544253103728,
-              "first_50_cycle_regret_reduction": 0.05882352941176461
+              "conditioned_prediction_error_reduction": -0.06973553607228333,
+              "survival_score_lift": 0.260706860706861,
+              "first_50_cycle_regret_reduction": 0.5151515151515151
             }
           }
         ]
@@ -202,9 +200,9 @@
         "world_id": "foraging_valley",
         "passed_gate": true,
         "improvements": {
-          "conditioned_prediction_error_reduction": 0.12,
-          "survival_score_lift": 0.03049813622500852,
-          "first_50_cycle_regret_reduction": -0.07407407407407396
+          "conditioned_prediction_error_reduction": -0.7855242924851602,
+          "survival_score_lift": 0.13701923076923084,
+          "first_50_cycle_regret_reduction": -0.2962962962962963
         }
       },
       {
@@ -212,9 +210,9 @@
         "world_id": "social_shelter",
         "passed_gate": true,
         "improvements": {
-          "conditioned_prediction_error_reduction": -0.08112530517478889,
-          "survival_score_lift": 0.07953544253103728,
-          "first_50_cycle_regret_reduction": 0.05882352941176461
+          "conditioned_prediction_error_reduction": -0.06973553607228333,
+          "survival_score_lift": 0.260706860706861,
+          "first_50_cycle_regret_reduction": 0.5151515151515151
         }
       }
     ]
@@ -233,9 +231,9 @@
         "world_id": "foraging_valley",
         "passed_gate": true,
         "improvements": {
-          "conditioned_prediction_error_reduction": 0.12,
-          "survival_score_lift": 0.03049813622500852,
-          "first_50_cycle_regret_reduction": -0.07407407407407396
+          "conditioned_prediction_error_reduction": -0.7855242924851602,
+          "survival_score_lift": 0.13701923076923084,
+          "first_50_cycle_regret_reduction": -0.2962962962962963
         }
       },
       {
@@ -243,44 +241,80 @@
         "world_id": "social_shelter",
         "passed_gate": true,
         "improvements": {
-          "conditioned_prediction_error_reduction": -0.08112530517478889,
-          "survival_score_lift": 0.07953544253103728,
-          "first_50_cycle_regret_reduction": 0.05882352941176461
+          "conditioned_prediction_error_reduction": -0.06973553607228333,
+          "survival_score_lift": 0.260706860706861,
+          "first_50_cycle_regret_reduction": 0.5151515151515151
         }
       }
     ]
   },
-  "generated_at": "2026-05-04T10:12:21+00:00",
-  "codebase_version": "6ed78955906277291030ae748f76f72132d3a368",
+  "generated_at": "2026-06-04T09:41:12+00:00",
+  "codebase_version": "8cf9291a83391253bb35b782c8748b2defff1b68",
   "codebase_provenance": {
-    "git_commit": "6ed78955906277291030ae748f76f72132d3a368",
+    "git_commit": "8cf9291a83391253bb35b782c8748b2defff1b68",
     "dirty_worktree": true,
     "binding_scope": "workspace_snapshot",
-    "workspace_fingerprint": "c68d69d57a3f1c130b4e828db8731f5e57d5a55f110b637759b7a3f02e420b51",
+    "workspace_fingerprint": "6c8a7aa8f108ebd4af54bacc1836cb25d3742a546374f1b7b589676fb93b0bb5",
     "status_entries": [
+      " M artifacts/m1_memory_gate.json",
+      " M artifacts/m1_runtime_trace.json",
+      " M artifacts/m1_sleep_consolidation.json",
+      " M artifacts/m210_audit_summary.json",
+      " M artifacts/m210_longitudinal_stability.json",
+      " M artifacts/m210_personality_anova.json",
+      " M artifacts/m210_profile_behavior_summary.json",
       " M reports/m1_acceptance_report.json",
-      " M segmentum/cognitive_events.py",
-      " M segmentum/dialogue/conversation_loop.py",
-      " M segmentum/dialogue/runtime/prompts.py",
-      " M segmentum/memory_anchored.py",
-      " M segmentum/memory_store.py",
-      "?? segmentum/state_ownership.py",
-      "?? tests/test_m8_9_memory_write_intent.py",
-      "?? tests/test_m8_9_response_evidence_contract.py",
-      "?? tests/test_m8_9_state_ownership.py"
+      " M reports/m210_strict_audit_report.md",
+      " M segmentum/dialogue/runtime/chat.py",
+      " M segmentum/dialogue/runtime/m16_api.py",
+      " M segmentum/dialogue/runtime/m16_protocol.py",
+      " M segmentum/dialogue/runtime/m16_runner.py",
+      " M segmentum/dialogue/runtime/m16_runtime_bridge.py",
+      " M segmentum/dialogue/runtime/mvp_loop.py",
+      " M segmentum/dialogue/types.py",
+      " M tests/test_m16_1_gateway_ws.py",
+      " M tests/test_mvp_dialogue_runtime.py",
+      " M ui/packages/consciousness-client/src/http.ts",
+      " M ui/packages/consciousness-client/src/types.ts",
+      " M ui/packages/consciousness-client/src/ws.ts",
+      " M ui/packages/consciousness-client/tests/ws.test.ts",
+      "?? reports/m18_acceptance_report.json",
+      "?? reports/m18_acceptance_summary.md",
+      "?? segmentum/m18_audit.py",
+      "?? tests/fixtures/m18_held_out_group_chat.json",
+      "?? tests/test_m18_acceptance_artifact.py",
+      "?? tests/test_m18_group_chat_acceptance.py"
     ],
-    "changed_path_count": 10,
+    "changed_path_count": 28,
     "changed_paths": [
+      "artifacts/m1_memory_gate.json",
+      "artifacts/m1_runtime_trace.json",
+      "artifacts/m1_sleep_consolidation.json",
+      "artifacts/m210_audit_summary.json",
+      "artifacts/m210_longitudinal_stability.json",
+      "artifacts/m210_personality_anova.json",
+      "artifacts/m210_profile_behavior_summary.json",
+      "reports/m18_acceptance_report.json",
+      "reports/m18_acceptance_summary.md",
       "reports/m1_acceptance_report.json",
-      "segmentum/cognitive_events.py",
-      "segmentum/dialogue/conversation_loop.py",
-      "segmentum/dialogue/runtime/prompts.py",
-      "segmentum/memory_anchored.py",
-      "segmentum/memory_store.py",
-      "segmentum/state_ownership.py",
-      "tests/test_m8_9_memory_write_intent.py",
-      "tests/test_m8_9_response_evidence_contract.py",
-      "tests/test_m8_9_state_ownership.py"
+      "reports/m210_strict_audit_report.md",
+      "segmentum/dialogue/runtime/chat.py",
+      "segmentum/dialogue/runtime/m16_api.py",
+      "segmentum/dialogue/runtime/m16_protocol.py",
+      "segmentum/dialogue/runtime/m16_runner.py",
+      "segmentum/dialogue/runtime/m16_runtime_bridge.py",
+      "segmentum/dialogue/runtime/mvp_loop.py",
+      "segmentum/dialogue/types.py",
+      "segmentum/m18_audit.py",
+      "tests/fixtures/m18_held_out_group_chat.json",
+      "tests/test_m16_1_gateway_ws.py",
+      "tests/test_m18_acceptance_artifact.py",
+      "tests/test_m18_group_chat_acceptance.py",
+      "tests/test_mvp_dialogue_runtime.py",
+      "ui/packages/consciousness-client/src/http.ts",
+      "ui/packages/consciousness-client/src/types.ts",
+      "ui/packages/consciousness-client/src/ws.ts",
+      "ui/packages/consciousness-client/tests/ws.test.ts"
     ],
     "reproducibility_scope": "strict_workspace_fingerprint"
   },

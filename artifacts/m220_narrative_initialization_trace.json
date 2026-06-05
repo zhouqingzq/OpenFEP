@@ -268,22 +268,18 @@
         "sleep_history_count": 1
       },
       "metrics": {
-        "caution_rate": 0.9166666666666666,
-        "exploration_rate": 0.041666666666666664,
-        "seek_contact_rate": 0.041666666666666664,
-        "mean_conditioned_prediction_error": 0.03198846863723265,
-        "survival_score": 1.488333333333333,
-        "danger_attention_rate": 0.4480629488443423,
-        "social_attention_rate": 0.013915425270834302,
-        "novelty_attention_rate": 0.24596474180763045,
-        "oracle_regret_rate": 0.4583333333333333
+        "caution_rate": 1.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "mean_conditioned_prediction_error": 0.033065644166174274,
+        "survival_score": 1.3581249999999998,
+        "danger_attention_rate": 0.42944470803826074,
+        "social_attention_rate": 0.016348173355889273,
+        "novelty_attention_rate": 0.24742030491306982,
+        "oracle_regret_rate": 0.0
       },
       "action_distribution": {
-        "exploit_shelter": 0.08333333333333333,
-        "forage": 0.041666666666666664,
-        "hide": 0.5416666666666666,
-        "rest": 0.2916666666666667,
-        "seek_contact": 0.041666666666666664
+        "hide": 1.0
       }
     },
     "ablated": {
@@ -331,20 +327,18 @@
         "sleep_history_count": 0
       },
       "metrics": {
-        "caution_rate": 0.9583333333333334,
-        "exploration_rate": 0.041666666666666664,
+        "caution_rate": 1.0,
+        "exploration_rate": 0.0,
         "seek_contact_rate": 0.0,
-        "mean_conditioned_prediction_error": 0.034784594158139705,
-        "survival_score": 1.4020833333333331,
-        "danger_attention_rate": 0.5099019200107223,
-        "social_attention_rate": 0.16360627734937214,
-        "novelty_attention_rate": 0.21088656619397061,
-        "oracle_regret_rate": 0.6666666666666666
+        "mean_conditioned_prediction_error": 0.03601539259566414,
+        "survival_score": 1.2214583333333333,
+        "danger_attention_rate": 0.4876500348428868,
+        "social_attention_rate": 0.13638543546441348,
+        "novelty_attention_rate": 0.21114318053180564,
+        "oracle_regret_rate": 0.0
       },
       "action_distribution": {
-        "forage": 0.041666666666666664,
-        "hide": 0.3333333333333333,
-        "rest": 0.625
+        "hide": 1.0
       }
     }
   },
@@ -615,20 +609,18 @@
         "sleep_history_count": 0
       },
       "metrics": {
-        "caution_rate": 0.8333333333333334,
-        "exploration_rate": 0.08333333333333333,
+        "caution_rate": 0.9166666666666666,
+        "exploration_rate": 0.0,
         "seek_contact_rate": 0.08333333333333333,
-        "mean_conditioned_prediction_error": 0.03719974865003543,
-        "survival_score": 1.4662499999999998,
-        "danger_attention_rate": 0.34168417532278417,
-        "social_attention_rate": 0.3345678897479258,
-        "novelty_attention_rate": 0.07626128291216616,
-        "oracle_regret_rate": 0.25
+        "mean_conditioned_prediction_error": 0.03198818431855424,
+        "survival_score": 1.54625,
+        "danger_attention_rate": 0.3180224748480829,
+        "social_attention_rate": 0.3469215062902981,
+        "novelty_attention_rate": 0.08288602030244754,
+        "oracle_regret_rate": 0.125
       },
       "action_distribution": {
-        "hide": 0.08333333333333333,
-        "rest": 0.75,
-        "scan": 0.08333333333333333,
+        "rest": 0.9166666666666666,
         "seek_contact": 0.08333333333333333
       }
     },
@@ -680,17 +672,15 @@
         "caution_rate": 1.0,
         "exploration_rate": 0.0,
         "seek_contact_rate": 0.0,
-        "mean_conditioned_prediction_error": 0.0352672305305189,
-        "survival_score": 1.5429166666666665,
-        "danger_attention_rate": 0.3420965163862998,
-        "social_attention_rate": 0.23307897192296534,
-        "novelty_attention_rate": 0.06313008662870656,
-        "oracle_regret_rate": 0.25
+        "mean_conditioned_prediction_error": 0.03959967384463633,
+        "survival_score": 1.3506249999999997,
+        "danger_attention_rate": 0.19751926085044522,
+        "social_attention_rate": 0.3389842463097825,
+        "novelty_attention_rate": 0.08023057564854667,
+        "oracle_regret_rate": 1.0
       },
       "action_distribution": {
-        "exploit_shelter": 0.041666666666666664,
-        "hide": 0.16666666666666666,
-        "rest": 0.7916666666666666
+        "hide": 1.0
       }
     }
   },
@@ -904,21 +894,18 @@
         "sleep_history_count": 1
       },
       "metrics": {
-        "caution_rate": 0.7916666666666666,
-        "exploration_rate": 0.16666666666666666,
-        "seek_contact_rate": 0.041666666666666664,
-        "mean_conditioned_prediction_error": 0.0328222065810514,
-        "survival_score": 1.6991666666666665,
-        "danger_attention_rate": 0.2590580636723873,
-        "social_attention_rate": 0.051684954334797265,
-        "novelty_attention_rate": 0.21610599593069404,
-        "oracle_regret_rate": 0.5833333333333334
+        "caution_rate": 1.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "mean_conditioned_prediction_error": 0.02388289178653823,
+        "survival_score": 1.8124999999999998,
+        "danger_attention_rate": 0.3401615929712974,
+        "social_attention_rate": 0.02602788048150665,
+        "novelty_attention_rate": 0.16686546339498926,
+        "oracle_regret_rate": 0.5416666666666666
       },
       "action_distribution": {
-        "hide": 0.16666666666666666,
-        "rest": 0.625,
-        "scan": 0.16666666666666666,
-        "seek_contact": 0.041666666666666664
+        "rest": 1.0
       }
     },
     "ablated": {
@@ -969,17 +956,15 @@
         "caution_rate": 1.0,
         "exploration_rate": 0.0,
         "seek_contact_rate": 0.0,
-        "mean_conditioned_prediction_error": 0.033042395270556586,
+        "mean_conditioned_prediction_error": 0.03735171682405697,
         "survival_score": 1.6029166666666665,
-        "danger_attention_rate": 0.15159931240372795,
-        "social_attention_rate": 0.014933120545700599,
-        "novelty_attention_rate": 0.3056285585586456,
-        "oracle_regret_rate": 0.875
+        "danger_attention_rate": 0.184602078640468,
+        "social_attention_rate": 0.018991221835488393,
+        "novelty_attention_rate": 0.2670585541788336,
+        "oracle_regret_rate": 1.0
       },
       "action_distribution": {
-        "exploit_shelter": 0.041666666666666664,
-        "hide": 0.5,
-        "rest": 0.4583333333333333
+        "hide": 1.0
       }
     }
   }

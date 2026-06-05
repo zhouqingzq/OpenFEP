@@ -3,10 +3,7 @@
   "ticks": 60,
   "event_count": 3,
   "action_distribution": {
-    "forage": 0.05,
-    "hide": 0.38333333333333336,
-    "rest": 0.5166666666666667,
-    "unstable_workspace_note": 0.05
+    "hide": 1.0
   },
-  "mean_conditioned_prediction_error": 0.05293741712879604
+  "mean_conditioned_prediction_error": 0.047563705253691135
 }

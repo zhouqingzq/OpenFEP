@@ -1,78 +1,78 @@
 {
   "threat_hardened": {
     "initialized_mean_metrics": {
-      "caution_rate": 0.9375,
-      "exploration_rate": 0.041666666666666664,
-      "seek_contact_rate": 0.020833333333333332,
-      "mean_conditioned_prediction_error": 0.03725396060522282,
-      "survival_score": 1.530208333333333,
-      "danger_attention_rate": 0.45950643360417187,
-      "social_attention_rate": 0.018847864631554405,
-      "novelty_attention_rate": 0.24875391522490906,
-      "oracle_regret_rate": 0.5
-    },
-    "ablated_mean_metrics": {
-      "caution_rate": 0.9583333333333334,
-      "exploration_rate": 0.041666666666666664,
+      "caution_rate": 1.0,
+      "exploration_rate": 0.0,
       "seek_contact_rate": 0.0,
-      "mean_conditioned_prediction_error": 0.03321688944900012,
-      "survival_score": 1.4014583333333333,
-      "danger_attention_rate": 0.5112588343734674,
-      "social_attention_rate": 0.11800411760387569,
-      "novelty_attention_rate": 0.24336521773696726,
-      "oracle_regret_rate": 0.7083333333333333
-    },
-    "causality_passed": true,
-    "ablation_passed": true
-  },
-  "social_trusting": {
-    "initialized_mean_metrics": {
-      "caution_rate": 0.7916666666666666,
-      "exploration_rate": 0.0625,
-      "seek_contact_rate": 0.14583333333333331,
-      "mean_conditioned_prediction_error": 0.031322899777073775,
-      "survival_score": 1.462708333333333,
-      "danger_attention_rate": 0.34395793460370705,
-      "social_attention_rate": 0.3184380273563444,
-      "novelty_attention_rate": 0.0768437526588035,
-      "oracle_regret_rate": 0.2916666666666667
-    },
-    "ablated_mean_metrics": {
-      "caution_rate": 0.9375,
-      "exploration_rate": 0.0625,
-      "seek_contact_rate": 0.0,
-      "mean_conditioned_prediction_error": 0.03114981066266511,
-      "survival_score": 1.5508333333333333,
-      "danger_attention_rate": 0.3288539632564677,
-      "social_attention_rate": 0.23793096099777536,
-      "novelty_attention_rate": 0.06968135191258296,
-      "oracle_regret_rate": 0.22916666666666669
-    },
-    "causality_passed": true,
-    "ablation_passed": true
-  },
-  "exploratory_adaptive": {
-    "initialized_mean_metrics": {
-      "caution_rate": 0.75,
-      "exploration_rate": 0.22916666666666669,
-      "seek_contact_rate": 0.020833333333333332,
-      "mean_conditioned_prediction_error": 0.026811548948282905,
-      "survival_score": 1.711458333333333,
-      "danger_attention_rate": 0.31398947885916373,
-      "social_attention_rate": 0.07751494500570531,
-      "novelty_attention_rate": 0.19378933325317582,
-      "oracle_regret_rate": 0.5
+      "mean_conditioned_prediction_error": 0.032977430869937596,
+      "survival_score": 1.3581249999999998,
+      "danger_attention_rate": 0.42384990212141616,
+      "social_attention_rate": 0.019767919142797526,
+      "novelty_attention_rate": 0.2506413925212968,
+      "oracle_regret_rate": 0.0
     },
     "ablated_mean_metrics": {
       "caution_rate": 1.0,
       "exploration_rate": 0.0,
       "seek_contact_rate": 0.0,
-      "mean_conditioned_prediction_error": 0.03148216409010451,
+      "mean_conditioned_prediction_error": 0.037093125572700315,
+      "survival_score": 1.2214583333333333,
+      "danger_attention_rate": 0.48534568782230025,
+      "social_attention_rate": 0.1714871676289519,
+      "novelty_attention_rate": 0.17535368496786702,
+      "oracle_regret_rate": 0.0
+    },
+    "causality_passed": false,
+    "ablation_passed": false
+  },
+  "social_trusting": {
+    "initialized_mean_metrics": {
+      "caution_rate": 0.9166666666666666,
+      "exploration_rate": 0.0,
+      "seek_contact_rate": 0.08333333333333333,
+      "mean_conditioned_prediction_error": 0.030607695418224327,
+      "survival_score": 1.54625,
+      "danger_attention_rate": 0.30773045629313867,
+      "social_attention_rate": 0.3275675518445474,
+      "novelty_attention_rate": 0.08452564459997544,
+      "oracle_regret_rate": 0.14583333333333331
+    },
+    "ablated_mean_metrics": {
+      "caution_rate": 1.0,
+      "exploration_rate": 0.0,
+      "seek_contact_rate": 0.0,
+      "mean_conditioned_prediction_error": 0.03525872855104682,
+      "survival_score": 1.3506249999999997,
+      "danger_attention_rate": 0.2197869819433513,
+      "social_attention_rate": 0.3197955445062294,
+      "novelty_attention_rate": 0.07566288041986696,
+      "oracle_regret_rate": 1.0
+    },
+    "causality_passed": false,
+    "ablation_passed": true
+  },
+  "exploratory_adaptive": {
+    "initialized_mean_metrics": {
+      "caution_rate": 1.0,
+      "exploration_rate": 0.0,
+      "seek_contact_rate": 0.0,
+      "mean_conditioned_prediction_error": 0.02207305703098155,
+      "survival_score": 1.8124999999999998,
+      "danger_attention_rate": 0.3488430455874019,
+      "social_attention_rate": 0.02405938958707919,
+      "novelty_attention_rate": 0.16492303545782316,
+      "oracle_regret_rate": 0.33333333333333337
+    },
+    "ablated_mean_metrics": {
+      "caution_rate": 1.0,
+      "exploration_rate": 0.0,
+      "seek_contact_rate": 0.0,
+      "mean_conditioned_prediction_error": 0.03553550091576105,
       "survival_score": 1.6029166666666665,
-      "danger_attention_rate": 0.2192885723023767,
-      "social_attention_rate": 0.010864143556243964,
-      "novelty_attention_rate": 0.2599700467879948,
-      "oracle_regret_rate": 0.7916666666666667
+      "danger_attention_rate": 0.2218131745324909,
+      "social_attention_rate": 0.013581302670631453,
+      "novelty_attention_rate": 0.2328085457374034,
+      "oracle_regret_rate": 1.0
     },
     "causality_passed": true,
     "ablation_passed": true

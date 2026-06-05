@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-02T17:07:50+00:00",
+  "generated_at": "2026-06-04T11:11:40+00:00",
   "failure_injection": {
     "type": "verification_timeout_after_snapshot_restore",
     "missing_channel": "novelty",
@@ -41,6 +41,7 @@
       "verify:pred:env:novelty"
     ],
     "deferred_targets": [],
+    "memory_credit_signals": [],
     "summary": "Verification outcomes observed: expired_unverified."
   },
   "ledger_state": {
@@ -106,43 +107,13 @@
         "priority": "medium"
       },
       {
-        "discrepancy_id": "disc:surprise_burden",
-        "label": "repeated surprise burden",
-        "source": "memory",
-        "discrepancy_type": "surprise_burden",
-        "created_tick": 1,
-        "last_seen_tick": 1,
-        "severity": 1.0,
-        "status": "active",
-        "recurrence_count": 1,
-        "target_channels": [
-          "novelty"
-        ],
-        "supporting_evidence": [
-          "memory_surprise=15.090"
-        ],
-        "acute": true,
-        "chronic": false,
-        "identity_relevant": true,
-        "subject_critical": false,
-        "repair_attempts": 0,
-        "archived_reason": "",
-        "linked_predictions": [],
-        "linked_schema_ids": [],
-        "linked_commitments": [],
-        "linked_goal": "",
-        "semantic_provenance": {},
-        "age": 0,
-        "priority": "critical"
-      },
-      {
         "discrepancy_id": "disc:maintenance_overload",
         "label": "unresolved maintenance discrepancy",
         "source": "maintenance",
         "discrepancy_type": "maintenance_overload",
         "created_tick": 1,
         "last_seen_tick": 1,
-        "severity": 0.469034,
+        "severity": 0.484107,
         "status": "active",
         "recurrence_count": 1,
         "target_channels": [
@@ -199,9 +170,43 @@
         "semantic_provenance": {},
         "age": 0,
         "priority": "medium"
+      },
+      {
+        "discrepancy_id": "disc:verify:pred:env:novelty",
+        "label": "verification contradicted environment_state",
+        "source": "prediction_error",
+        "discrepancy_type": "verification_falsification",
+        "created_tick": 1,
+        "last_seen_tick": 1,
+        "severity": 1.0,
+        "status": "active",
+        "recurrence_count": 1,
+        "target_channels": [
+          "novelty"
+        ],
+        "supporting_evidence": [
+          "prediction=pred:env:novelty",
+          "Observed novelty while verifying pred:env:novelty."
+        ],
+        "acute": true,
+        "chronic": false,
+        "identity_relevant": false,
+        "subject_critical": false,
+        "repair_attempts": 0,
+        "archived_reason": "",
+        "linked_predictions": [
+          "pred:env:novelty"
+        ],
+        "linked_schema_ids": [],
+        "linked_commitments": [],
+        "linked_goal": "SURVIVAL",
+        "semantic_provenance": {},
+        "age": 0,
+        "priority": "critical"
       }
     ],
     "prediction_statuses": [
+      "active",
       "active",
       "active"
     ]

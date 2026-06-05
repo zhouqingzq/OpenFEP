@@ -9,7 +9,7 @@
       "magnitude": 0.08,
       "duration": 1,
       "recovery_window": 12,
-      "recovery_tick": 15,
+      "recovery_tick": 13,
       "recovered": true,
       "result": "recovered"
     },
@@ -28,7 +28,7 @@
       "magnitude": 0.18,
       "duration": 1,
       "recovery_window": 12,
-      "recovery_tick": 21,
+      "recovery_tick": 22,
       "recovered": true,
       "result": "recovered"
     }
@@ -36,15 +36,15 @@
   "trace_excerpt": [
     {
       "cycle": 1,
-      "choice": "hide",
-      "free_energy_after": 0.762025,
+      "choice": "rest",
+      "free_energy_after": 0.436454,
       "alive": true,
       "body_state": {
-        "dopamine": 0.08639999999999999,
-        "energy": 0.81,
-        "fatigue": 0.30000000000000004,
-        "stress": 0.10999999999999999,
-        "temperature": 0.484
+        "dopamine": 0.14019231970530732,
+        "energy": 0.8300000000000001,
+        "fatigue": 0.18000000000000002,
+        "stress": 0.22,
+        "temperature": 0.48
       },
       "homeostasis": {
         "agenda": {
@@ -56,7 +56,7 @@
           "interrupt_action": null,
           "interrupt_reason": "",
           "memory_compaction_recommended": false,
-          "policy_shift_strength": 0.26538300000000004,
+          "policy_shift_strength": 0.292557,
           "protected_mode": false,
           "protected_mode_ticks_remaining": 0,
           "recommended_action": "hide",
@@ -96,25 +96,26 @@
     {
       "cycle": 2,
       "choice": "rest",
-      "free_energy_after": 0.476204,
+      "free_energy_after": 0.275225,
       "alive": true,
       "body_state": {
-        "dopamine": 0.07675436491633458,
-        "energy": 0.8400000000000001,
-        "fatigue": 0.28,
-        "stress": 0.07999999999999999,
-        "temperature": 0.484
+        "dopamine": 0.18747210673033832,
+        "energy": 0.8600000000000001,
+        "fatigue": 0.16,
+        "stress": 0.19,
+        "temperature": 0.48
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
+            "verify:pred:action:rest",
             "reconcile:conflict:continuity_anchor:continuity:1",
             "reconcile:conflict:continuity_anchor:continuity_instability:1",
             "reconcile:conflict:identity_action:identity_tension:1",
             "reconcile:conflict:self_expectation_falsification:none:1",
             "ledger_continuity_guard",
             "energy_recovery",
-            "continuity_guard",
+            "resource_guard",
             "reconciliation_review"
           ],
           "chronic_debt_pressure": 0.0,
@@ -125,7 +126,7 @@
           "policy_shift_strength": 1.0,
           "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
-          "recommended_action": "rest",
+          "recommended_action": "scan",
           "recovery_focus": [],
           "recovery_rebound_active": false,
           "recovery_rebound_ticks_remaining": 0,
@@ -164,26 +165,26 @@
     {
       "cycle": 3,
       "choice": "rest",
-      "free_energy_after": 0.284978,
+      "free_energy_after": 0.174087,
       "alive": true,
       "body_state": {
-        "dopamine": 0.05869344670024692,
-        "energy": 0.8700000000000001,
-        "fatigue": 0.26,
-        "stress": 0.04999999999999999,
-        "temperature": 0.484
+        "dopamine": 0.2019446148458579,
+        "energy": 0.8900000000000001,
+        "fatigue": 0.13999999999999999,
+        "stress": 0.16,
+        "temperature": 0.48
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
+            "reconcile:conflict:continuity_anchor:continuity:1",
+            "reconcile:conflict:continuity_anchor:continuity_instability:1",
             "reconcile:conflict:identity_action:identity_tension:1",
             "reconcile:conflict:self_expectation_falsification:none:1",
-            "reconcile:conflict:continuity_anchor:continuity:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
             "ledger_continuity_guard",
             "ledger_maintenance_repair",
             "energy_recovery",
-            "continuity_guard",
+            "resource_guard",
             "reconciliation_review"
           ],
           "chronic_debt_pressure": 0.0,
@@ -233,26 +234,26 @@
     {
       "cycle": 4,
       "choice": "rest",
-      "free_energy_after": 0.471136,
+      "free_energy_after": 0.396723,
       "alive": true,
       "body_state": {
-        "dopamine": 0.04225928162417778,
-        "energy": 0.9000000000000001,
-        "fatigue": 0.24000000000000002,
-        "stress": 0.01999999999999999,
-        "temperature": 0.484
+        "dopamine": 0.1454001226890177,
+        "energy": 0.9200000000000002,
+        "fatigue": 0.11999999999999997,
+        "stress": 0.13,
+        "temperature": 0.48
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
+            "reconcile:conflict:continuity_anchor:continuity_instability:1",
             "reconcile:conflict:identity_action:identity_tension:1",
-            "reconcile:conflict:self_expectation_falsification:none:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
             "reconcile:conflict:continuity_anchor:continuity:1",
+            "reconcile:conflict:self_expectation_falsification:none:1",
             "ledger_maintenance_repair",
             "ledger_continuity_guard",
             "energy_recovery",
-            "continuity_guard",
+            "thermal_rebalance",
             "reconciliation_review"
           ],
           "chronic_debt_pressure": 0.0,
@@ -302,27 +303,26 @@
     {
       "cycle": 5,
       "choice": "rest",
-      "free_energy_after": 0.471127,
+      "free_energy_after": 0.406584,
       "alive": true,
       "body_state": {
-        "dopamine": 0.05571717677891792,
-        "energy": 0.9300000000000002,
-        "fatigue": 0.22,
-        "stress": 0.0,
-        "temperature": 0.484
+        "dopamine": 0.10468808833609274,
+        "energy": 0.9500000000000002,
+        "fatigue": 0.09999999999999995,
+        "stress": 0.1,
+        "temperature": 0.48
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
+            "reconcile:conflict:continuity_anchor:continuity_instability:1",
             "reconcile:conflict:identity_action:identity_tension:1",
-            "reconcile:conflict:self_expectation_falsification:none:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
             "reconcile:conflict:continuity_anchor:continuity:1",
+            "reconcile:conflict:self_expectation_falsification:none:1",
             "ledger_maintenance_repair",
             "ledger_continuity_guard",
             "energy_recovery",
-            "resource_guard",
-            "continuity_guard",
+            "thermal_rebalance",
             "reconciliation_review"
           ],
           "chronic_debt_pressure": 0.0,
@@ -371,27 +371,27 @@
     },
     {
       "cycle": 6,
-      "choice": "scan",
-      "free_energy_after": 0.592922,
+      "choice": "rest",
+      "free_energy_after": 0.515381,
       "alive": true,
       "body_state": {
-        "dopamine": 0.0401163672808209,
-        "energy": 0.9300000000000002,
-        "fatigue": 0.35,
-        "stress": 0.02,
-        "temperature": 0.484
+        "dopamine": 0.07537542360198676,
+        "energy": 0.9800000000000002,
+        "fatigue": 0.07999999999999993,
+        "stress": 0.07,
+        "temperature": 0.48
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
+            "reconcile:conflict:continuity_anchor:continuity_instability:1",
             "reconcile:conflict:identity_action:identity_tension:1",
-            "reconcile:conflict:self_expectation_falsification:none:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
             "reconcile:conflict:continuity_anchor:continuity:1",
+            "reconcile:conflict:self_expectation_falsification:none:1",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
             "energy_recovery",
-            "resource_guard",
-            "continuity_guard",
+            "thermal_rebalance",
             "reconciliation_review"
           ],
           "chronic_debt_pressure": 0.0,
@@ -400,7 +400,7 @@
           "interrupt_reason": "",
           "memory_compaction_recommended": false,
           "policy_shift_strength": 1.0,
-          "protected_mode": false,
+          "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
           "recommended_action": "rest",
           "recovery_focus": [],
@@ -441,25 +441,26 @@
     {
       "cycle": 7,
       "choice": "rest",
-      "free_energy_after": 0.763656,
+      "free_energy_after": 0.634141,
       "alive": true,
       "body_state": {
-        "dopamine": 0.028883784442191047,
-        "energy": 0.9600000000000002,
-        "fatigue": 0.32999999999999996,
-        "stress": 0.0,
-        "temperature": 0.484
+        "dopamine": 0.05427030499343047,
+        "energy": 1.0,
+        "fatigue": 0.059999999999999915,
+        "stress": 0.04000000000000001,
+        "temperature": 0.48
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:self_expectation_falsification:action_consequence_mismatch:6",
-            "reconcile:conflict:self_expectation_falsification:none:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
+            "reconcile:conflict:continuity_anchor:continuity_instability:1",
+            "reconcile:conflict:identity_action:identity_tension:1",
             "reconcile:conflict:continuity_anchor:continuity:1",
+            "reconcile:conflict:self_expectation_falsification:none:1",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
-            "resource_guard",
-            "continuity_guard",
+            "thermal_rebalance",
+            "energy_recovery",
             "reconciliation_review"
           ],
           "chronic_debt_pressure": 0.0,
@@ -509,25 +510,26 @@
     {
       "cycle": 8,
       "choice": "rest",
-      "free_energy_after": 0.456347,
+      "free_energy_after": 0.558511,
       "alive": true,
       "body_state": {
-        "dopamine": 0.02416557544290975,
-        "energy": 0.9900000000000002,
-        "fatigue": 0.30999999999999994,
-        "stress": 0.0,
-        "temperature": 0.484
+        "dopamine": 0.039074619595269935,
+        "energy": 1.0,
+        "fatigue": 0.0399999999999999,
+        "stress": 0.010000000000000009,
+        "temperature": 0.48
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:self_expectation_falsification:none:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
+            "reconcile:conflict:continuity_anchor:continuity_instability:1",
+            "reconcile:conflict:identity_action:identity_tension:1",
             "reconcile:conflict:continuity_anchor:continuity:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan:7",
+            "reconcile:conflict:self_expectation_falsification:none:1",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
-            "resource_guard",
-            "continuity_guard",
+            "energy_recovery",
+            "thermal_rebalance",
             "reconciliation_review"
           ],
           "chronic_debt_pressure": 0.0,
@@ -577,26 +579,26 @@
     {
       "cycle": 9,
       "choice": "rest",
-      "free_energy_after": 0.25745,
+      "free_energy_after": 0.206914,
       "alive": true,
       "body_state": {
-        "dopamine": 0.06188476070045304,
+        "dopamine": 0.1043941706529689,
         "energy": 1.0,
-        "fatigue": 0.2899999999999999,
+        "fatigue": 0.019999999999999893,
         "stress": 0.0,
-        "temperature": 0.484
+        "temperature": 0.48
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:self_expectation_falsification:none:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan:7",
+            "reconcile:conflict:continuity_anchor:continuity_instability:1",
+            "reconcile:conflict:identity_action:identity_tension:1",
             "reconcile:conflict:continuity_anchor:continuity:1",
+            "reconcile:conflict:self_expectation_falsification:none:1",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
             "energy_recovery",
-            "resource_guard",
-            "continuity_guard",
+            "thermal_rebalance",
             "reconciliation_review"
           ],
           "chronic_debt_pressure": 0.0,
@@ -646,26 +648,26 @@
     {
       "cycle": 10,
       "choice": "rest",
-      "free_energy_after": 0.596921,
+      "free_energy_after": 0.485041,
       "alive": true,
       "body_state": {
-        "dopamine": 0.04455702770432619,
+        "dopamine": 0.0751638028701376,
         "energy": 1.0,
-        "fatigue": 0.2699999999999999,
+        "fatigue": 0.0,
         "stress": 0.0,
-        "temperature": 0.484
+        "temperature": 0.48
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:self_expectation_falsification:none:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan:7",
+            "reconcile:conflict:continuity_anchor:continuity_instability:1",
+            "reconcile:conflict:identity_action:identity_tension:1",
             "reconcile:conflict:continuity_anchor:continuity:1",
+            "reconcile:conflict:self_expectation_falsification:none:1",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
             "energy_recovery",
-            "resource_guard",
-            "continuity_guard",
+            "thermal_rebalance",
             "reconciliation_review"
           ],
           "chronic_debt_pressure": 0.0,
@@ -715,25 +717,25 @@
     {
       "cycle": 11,
       "choice": "rest",
-      "free_energy_after": 0.579262,
+      "free_energy_after": 0.535903,
       "alive": true,
       "body_state": {
-        "dopamine": 0.032081059947114854,
+        "dopamine": 0.054117938066499074,
         "energy": 1.0,
-        "fatigue": 0.24999999999999992,
+        "fatigue": 0.0,
         "stress": 0.0,
-        "temperature": 0.484
+        "temperature": 0.48
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:self_expectation_falsification:none:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan:7",
+            "reconcile:conflict:identity_action:identity_tension:1",
+            "reconcile:conflict:self_expectation_falsification:surprise_burden:10",
             "reconcile:conflict:continuity_anchor:continuity:1",
+            "reconcile:conflict:self_expectation_falsification:none:1",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
             "energy_recovery",
-            "resource_guard",
             "continuity_guard",
             "reconciliation_review"
           ],
@@ -783,26 +785,27 @@
     },
     {
       "cycle": 12,
-      "choice": "exploit_shelter",
-      "free_energy_after": 0.700418,
+      "choice": "rest",
+      "free_energy_after": 0.18153,
       "alive": true,
       "body_state": {
-        "dopamine": 0.023098363161922694,
-        "energy": 0.91,
-        "fatigue": 0.3599999999999999,
+        "dopamine": 0.19758886812338372,
+        "energy": 0.9500000000000001,
+        "fatigue": 0.0,
         "stress": 0.0,
-        "temperature": 0.44833803438247555
+        "temperature": 0.48
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
+            "reconcile:conflict:self_expectation_falsification:surprise_burden:10",
             "reconcile:conflict:self_expectation_falsification:none:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan:7",
             "reconcile:conflict:continuity_anchor:continuity:1",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest:11",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
+            "energy_recovery",
             "resource_guard",
-            "thermal_rebalance",
             "continuity_guard",
             "reconciliation_review"
           ],
@@ -852,25 +855,27 @@
     },
     {
       "cycle": 13,
-      "choice": "hide",
-      "free_energy_after": 0.479934,
+      "choice": "rest",
+      "free_energy_after": 0.40904,
       "alive": true,
       "body_state": {
-        "dopamine": 0.01663082147658434,
-        "energy": 0.92,
-        "fatigue": 0.4599999999999999,
+        "dopamine": 0.14226398504883628,
+        "energy": 0.9800000000000001,
+        "fatigue": 0.0,
         "stress": 0.0,
-        "temperature": 0.47766168458522956
+        "temperature": 0.48
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:continuity_anchor:ep-000001-hide:2",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan:7",
+            "reconcile:conflict:self_expectation_falsification:none:1",
             "reconcile:conflict:continuity_anchor:continuity:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan|ep-000011-rest:12",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest:11",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest|ep-000011-rest:12",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
-            "thermal_rebalance",
+            "energy_recovery",
+            "resource_guard",
             "continuity_guard",
             "reconciliation_review"
           ],
@@ -921,24 +926,25 @@
     {
       "cycle": 14,
       "choice": "hide",
-      "free_energy_after": 0.644297,
+      "free_energy_after": 0.86293,
       "alive": true,
       "body_state": {
-        "dopamine": 0.011974191463140724,
-        "energy": 0.93,
-        "fatigue": 0.5599999999999999,
+        "dopamine": 0.10243006923516211,
+        "energy": 0.9900000000000001,
+        "fatigue": 0.1,
         "stress": 0.0,
-        "temperature": 0.4998217139064545
+        "temperature": 0.5021600293212249
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan:7",
+            "reconcile:conflict:self_expectation_falsification:none:1",
             "reconcile:conflict:continuity_anchor:continuity:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan|ep-000011-rest:12",
-            "reconcile:conflict:continuity_anchor:ep-000006-scan|ep-000011-rest|ep-000012-exploit_shelter:13",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest|ep-000011-rest:12",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest:11",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
-            "thermal_rebalance",
+            "resource_guard",
             "continuity_guard",
             "reconciliation_review"
           ],
@@ -988,25 +994,27 @@
     },
     {
       "cycle": 15,
-      "choice": "hide",
-      "free_energy_after": 0.522201,
+      "choice": "exploit_shelter",
+      "free_energy_after": 0.942565,
       "alive": true,
       "body_state": {
-        "dopamine": 0.06990034548050827,
-        "energy": 1.0,
-        "fatigue": 0.2699999999999999,
+        "dopamine": 0.07374964984931671,
+        "energy": 0.9800000000000001,
+        "fatigue": 0.21,
         "stress": 0.0,
-        "temperature": 0.5264742778507927
+        "temperature": 0.5496583831002866
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan:7",
-            "reconcile:conflict:continuity_anchor:ep-000006-scan|ep-000011-rest|ep-000012-exploit_shelter:13",
+            "reconcile:conflict:self_expectation_falsification:none:1",
             "reconcile:conflict:continuity_anchor:continuity:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan|ep-000011-rest:12",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest|ep-000011-rest:12",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest:11",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
             "thermal_rebalance",
+            "resource_guard",
             "continuity_guard",
             "reconciliation_review"
           ],
@@ -1056,25 +1064,26 @@
     },
     {
       "cycle": 16,
-      "choice": "hide",
-      "free_energy_after": 0.480534,
+      "choice": "unstable_workspace_note",
+      "free_energy_after": 0.767818,
       "alive": true,
       "body_state": {
-        "dopamine": 0.050328248745965955,
+        "dopamine": 0.11209670263042196,
         "energy": 1.0,
-        "fatigue": 0.36999999999999994,
+        "fatigue": 0.0,
         "stress": 0.0,
-        "temperature": 0.5568554851149431
+        "temperature": 0.5347608681702006
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan:7",
-            "reconcile:conflict:continuity_anchor:ep-000006-scan|ep-000011-rest|ep-000012-exploit_shelter:13",
             "reconcile:conflict:continuity_anchor:continuity:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan|ep-000011-rest:12",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest|ep-000011-rest:12",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest:11",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest|ep-000011-rest|ep-000014-hide:15",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
-            "thermal_rebalance",
+            "resource_guard",
             "continuity_guard",
             "reconciliation_review"
           ],
@@ -1084,7 +1093,7 @@
           "interrupt_reason": "",
           "memory_compaction_recommended": false,
           "policy_shift_strength": 1.0,
-          "protected_mode": true,
+          "protected_mode": false,
           "protected_mode_ticks_remaining": 0,
           "recommended_action": "rest",
           "recovery_focus": [],
@@ -1124,25 +1133,26 @@
     },
     {
       "cycle": 17,
-      "choice": "hide",
-      "free_energy_after": 0.554429,
+      "choice": "unstable_workspace_note",
+      "free_energy_after": 0.413089,
       "alive": true,
       "body_state": {
-        "dopamine": 0.036236339097095484,
+        "dopamine": 0.20699936249779644,
         "energy": 1.0,
-        "fatigue": 0.47,
+        "fatigue": 0.08,
         "stress": 0.0,
-        "temperature": 0.5799428211042887
+        "temperature": 0.5347608681702006
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan:7",
-            "reconcile:conflict:continuity_anchor:ep-000006-scan|ep-000011-rest|ep-000012-exploit_shelter:13",
             "reconcile:conflict:continuity_anchor:continuity:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan|ep-000011-rest:12",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest|ep-000011-rest:12",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest:11",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest|ep-000011-rest|ep-000014-hide:15",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
-            "thermal_rebalance",
+            "resource_guard",
             "continuity_guard",
             "reconciliation_review"
           ],
@@ -1152,7 +1162,7 @@
           "interrupt_reason": "",
           "memory_compaction_recommended": false,
           "policy_shift_strength": 1.0,
-          "protected_mode": true,
+          "protected_mode": false,
           "protected_mode_ticks_remaining": 0,
           "recommended_action": "rest",
           "recovery_focus": [],
@@ -1192,25 +1202,26 @@
     },
     {
       "cycle": 18,
-      "choice": "scan",
-      "free_energy_after": 0.542074,
+      "choice": "unstable_workspace_note",
+      "free_energy_after": 0.560963,
       "alive": true,
       "body_state": {
-        "dopamine": 0.03760176912134264,
+        "dopamine": 0.14903954099841343,
         "energy": 1.0,
-        "fatigue": 0.6,
-        "stress": 0.02,
-        "temperature": 0.5799428211042887
+        "fatigue": 0.16,
+        "stress": 0.0,
+        "temperature": 0.5347608681702006
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:continuity_anchor:ep-000006-scan|ep-000011-rest|ep-000012-exploit_shelter:13",
-            "reconcile:conflict:continuity_anchor:continuity:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan|ep-000011-rest:12",
-            "reconcile:conflict:continuity_anchor:ep-000011-rest|ep-000012-exploit_shelter|ep-000016-hide:17",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest:11",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest|ep-000011-rest|ep-000014-hide:15",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest-merged|ep-000014-hide|ep-000015-exploit_shelter:17",
+            "reconcile:conflict:self_expectation_falsification:commitment-capability-rest|commitment-survival-priority:17",
+            "ledger_verify_threat",
             "ledger_continuity_guard",
-            "thermal_rebalance",
+            "resource_guard",
             "continuity_guard",
             "reconciliation_review"
           ],
@@ -1239,7 +1250,8 @@
             "short_term_sleep_pressure": 0.0
           },
           "suppressed_actions": [
-            "forage"
+            "forage",
+            "seek_contact"
           ],
           "telemetry_backoff_recommended": false
         },
@@ -1260,25 +1272,26 @@
     },
     {
       "cycle": 19,
-      "choice": "scan",
-      "free_energy_after": 0.531803,
+      "choice": "rest",
+      "free_energy_after": 0.538792,
       "alive": true,
       "body_state": {
-        "dopamine": 0.027073273767366696,
+        "dopamine": 0.10730846951885767,
         "energy": 1.0,
-        "fatigue": 0.73,
-        "stress": 0.04,
-        "temperature": 0.5799428211042887
+        "fatigue": 0.13999999999999999,
+        "stress": 0.0,
+        "temperature": 0.5347608681702006
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan|ep-000011-rest:12",
-            "reconcile:conflict:self_expectation_falsification:commitment-capability-rest|commitment-survival-priority:18",
-            "reconcile:conflict:continuity_anchor:ep-000011-rest|ep-000012-exploit_shelter|ep-000016-hide:17",
-            "reconcile:conflict:continuity_anchor:ep-000012-exploit_shelter|ep-000016-hide|ep-000017-hide:18",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest-merged|ep-000014-hide|ep-000015-exploit_shelter:17",
+            "reconcile:conflict:self_expectation_falsification:commitment-capability-rest|commitment-survival-priority:17",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest:11",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest|ep-000011-rest|ep-000014-hide:15",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
-            "thermal_rebalance",
+            "resource_guard",
             "continuity_guard",
             "reconciliation_review"
           ],
@@ -1288,7 +1301,7 @@
           "interrupt_reason": "",
           "memory_compaction_recommended": false,
           "policy_shift_strength": 1.0,
-          "protected_mode": false,
+          "protected_mode": true,
           "protected_mode_ticks_remaining": 0,
           "recommended_action": "rest",
           "recovery_focus": [],
@@ -1328,38 +1341,37 @@
     },
     {
       "cycle": 20,
-      "choice": "exploit_shelter",
-      "free_energy_after": 0.855523,
+      "choice": "rest",
+      "free_energy_after": 0.573845,
       "alive": true,
       "body_state": {
-        "dopamine": 0.01949275711250402,
+        "dopamine": 0.07726209805357752,
         "energy": 1.0,
-        "fatigue": 0.41,
-        "stress": 0.0,
-        "temperature": 0.5455554085764517
+        "fatigue": 0.11999999999999997,
+        "stress": 0.15,
+        "temperature": 0.5347608681702006
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:continuity_anchor:continuity:1",
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan|ep-000011-rest:12",
-            "reconcile:conflict:continuity_anchor:ep-000012-exploit_shelter|ep-000016-hide|ep-000017-hide:18",
-            "reconcile:conflict:continuity_anchor:ep-000011-rest|ep-000012-exploit_shelter|ep-000016-hide:17",
+            "reconcile:conflict:self_expectation_falsification:commitment-capability-rest|commitment-survival-priority:17",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest:11",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest|ep-000011-rest|ep-000014-hide:15",
+            "reconcile:conflict:continuity_anchor:ep-000014-hide|ep-000015-exploit_shelter|ep-000018-unstable_workspace_note:19",
+            "ledger_maintenance_repair",
             "ledger_continuity_guard",
-            "thermal_rebalance",
-            "fatigue_recovery",
-            "resource_guard",
+            "shelter_security",
             "continuity_guard",
             "reconciliation_review"
           ],
-          "chronic_debt_pressure": 0.0024,
+          "chronic_debt_pressure": 0.0,
           "cycle": 20,
-          "interrupt_action": "exploit_shelter",
-          "interrupt_reason": "protected mode resource guard",
+          "interrupt_action": null,
+          "interrupt_reason": "",
           "memory_compaction_recommended": false,
           "policy_shift_strength": 1.0,
           "protected_mode": true,
-          "protected_mode_ticks_remaining": 5,
+          "protected_mode_ticks_remaining": 0,
           "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
@@ -1367,75 +1379,68 @@
           "sleep_recommended": false,
           "state": {
             "acute_energy_debt": 0.0,
-            "acute_fatigue_debt": 0.03,
+            "acute_fatigue_debt": 0.0,
             "acute_stress_debt": 0.0,
             "acute_thermal_debt": 0.0,
             "chronic_energy_debt": 0.0,
-            "chronic_fatigue_debt": 0.0024,
+            "chronic_fatigue_debt": 0.0,
             "chronic_runtime_debt": 0.0,
             "chronic_stress_debt": 0.0,
-            "short_term_sleep_pressure": 0.024
+            "short_term_sleep_pressure": 0.0
           },
           "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
+            "forage"
           ],
           "telemetry_backoff_recommended": false
         },
         "effects": {
           "debt_reversal_applied": true,
           "energy_recovery_applied": true,
-          "guard_activated_tick": 20,
+          "guard_activated_tick": null,
           "memory_compaction_applied": false,
-          "protected_mode_duration": 5,
+          "protected_mode_duration": 0,
           "recovery_rebound_activated": false,
           "recovery_result": "success",
           "retired_episodes": 0,
-          "stress_recovery_applied": true,
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "stress_recovery_applied": false,
+          "suppressed_actions": [],
           "telemetry_backoff_applied": false
         }
       }
     },
     {
       "cycle": 21,
-      "choice": "exploit_shelter",
-      "free_energy_after": 0.616396,
+      "choice": "rest",
+      "free_energy_after": 0.375283,
       "alive": true,
       "body_state": {
-        "dopamine": 0.014034785121002893,
-        "energy": 0.987,
-        "fatigue": 0.52,
-        "stress": 0.0,
-        "temperature": 0.5280714780807747
+        "dopamine": 0.058779702228066624,
+        "energy": 1.0,
+        "fatigue": 0.09999999999999995,
+        "stress": 0.12,
+        "temperature": 0.5347608681702006
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:continuity_anchor:ep-000001-hide|ep-000006-scan|ep-000011-rest:12",
-            "reconcile:conflict:continuity_anchor:ep-000016-hide|ep-000017-hide|ep-000019-scan:20",
-            "reconcile:conflict:continuity_anchor:ep-000012-exploit_shelter|ep-000016-hide|ep-000017-hide:18",
-            "reconcile:conflict:continuity_anchor:ep-000011-rest|ep-000012-exploit_shelter|ep-000016-hide:17",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest:11",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest|ep-000011-rest|ep-000014-hide:15",
+            "reconcile:conflict:continuity_anchor:ep-000014-hide|ep-000015-exploit_shelter|ep-000018-unstable_workspace_note:19",
+            "reconcile:conflict:continuity_anchor:ep-000015-exploit_shelter|ep-000018-unstable_workspace_note|ep-000019-rest:20",
             "ledger_maintenance_repair",
             "ledger_continuity_guard",
-            "thermal_rebalance",
-            "resource_guard",
+            "shelter_security",
             "continuity_guard",
             "reconciliation_review"
           ],
           "chronic_debt_pressure": 0.0,
           "cycle": 21,
-          "interrupt_action": "exploit_shelter",
-          "interrupt_reason": "protected mode resource guard",
+          "interrupt_action": null,
+          "interrupt_reason": "",
           "memory_compaction_recommended": false,
           "policy_shift_strength": 1.0,
           "protected_mode": true,
-          "protected_mode_ticks_remaining": 4,
+          "protected_mode_ticks_remaining": 0,
           "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
@@ -1450,68 +1455,61 @@
             "chronic_fatigue_debt": 0.0,
             "chronic_runtime_debt": 0.0,
             "chronic_stress_debt": 0.0,
-            "short_term_sleep_pressure": 0.0204
+            "short_term_sleep_pressure": 0.0
           },
           "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
+            "forage"
           ],
           "telemetry_backoff_recommended": false
         },
         "effects": {
           "debt_reversal_applied": true,
           "energy_recovery_applied": true,
-          "guard_activated_tick": 20,
+          "guard_activated_tick": null,
           "memory_compaction_applied": false,
-          "protected_mode_duration": 4,
+          "protected_mode_duration": 0,
           "recovery_rebound_activated": false,
           "recovery_result": "success",
           "retired_episodes": 0,
           "stress_recovery_applied": false,
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_applied": false
         }
       }
     },
     {
       "cycle": 22,
-      "choice": "exploit_shelter",
-      "free_energy_after": 0.753723,
+      "choice": "rest",
+      "free_energy_after": 0.331508,
       "alive": true,
       "body_state": {
-        "dopamine": 0.010105045287122083,
-        "energy": 0.974,
-        "fatigue": 0.63,
-        "stress": 0.0,
-        "temperature": 0.5092206265845416
+        "dopamine": 0.09848335750140054,
+        "energy": 1.0,
+        "fatigue": 0.07999999999999993,
+        "stress": 0.09,
+        "temperature": 0.5347608681702006
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:continuity_anchor:ep-000016-hide|ep-000017-hide|ep-000019-scan:20",
-            "reconcile:conflict:continuity_anchor:ep-000012-exploit_shelter|ep-000016-hide|ep-000017-hide:18",
-            "reconcile:conflict:continuity_anchor:ep-000011-rest|ep-000012-exploit_shelter|ep-000016-hide:17",
-            "reconcile:conflict:continuity_anchor:ep-000014-hide-merged|ep-000018-scan-merged|ep-000020-exploit_shelter:21",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest|ep-000011-rest|ep-000014-hide:15",
+            "reconcile:conflict:continuity_anchor:ep-000014-hide|ep-000015-exploit_shelter|ep-000018-unstable_workspace_note:19",
+            "reconcile:conflict:continuity_anchor:ep-000015-exploit_shelter|ep-000018-unstable_workspace_note|ep-000019-rest:20",
+            "reconcile:conflict:continuity_anchor:ep-000018-unstable_workspace_note|ep-000019-rest|ep-000020-rest:21",
             "ledger_maintenance_repair",
             "ledger_continuity_guard",
-            "thermal_rebalance",
-            "resource_guard",
+            "shelter_security",
             "continuity_guard",
             "reconciliation_review"
           ],
           "chronic_debt_pressure": 0.0,
           "cycle": 22,
-          "interrupt_action": "exploit_shelter",
-          "interrupt_reason": "protected mode resource guard",
+          "interrupt_action": null,
+          "interrupt_reason": "",
           "memory_compaction_recommended": false,
           "policy_shift_strength": 1.0,
           "protected_mode": true,
-          "protected_mode_ticks_remaining": 3,
+          "protected_mode_ticks_remaining": 0,
           "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
@@ -1526,67 +1524,61 @@
             "chronic_fatigue_debt": 0.0,
             "chronic_runtime_debt": 0.0,
             "chronic_stress_debt": 0.0,
-            "short_term_sleep_pressure": 0.01734
+            "short_term_sleep_pressure": 0.0
           },
           "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
+            "forage"
           ],
           "telemetry_backoff_recommended": false
         },
         "effects": {
           "debt_reversal_applied": true,
           "energy_recovery_applied": true,
-          "guard_activated_tick": 20,
+          "guard_activated_tick": null,
           "memory_compaction_applied": false,
-          "protected_mode_duration": 3,
+          "protected_mode_duration": 0,
           "recovery_rebound_activated": false,
           "recovery_result": "success",
           "retired_episodes": 0,
           "stress_recovery_applied": false,
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_applied": false
         }
       }
     },
     {
       "cycle": 23,
-      "choice": "exploit_shelter",
-      "free_energy_after": 0.570429,
+      "choice": "rest",
+      "free_energy_after": 0.327761,
       "alive": true,
       "body_state": {
-        "dopamine": 0.0072756326067278995,
-        "energy": 0.961,
-        "fatigue": 0.74,
-        "stress": 0.0,
-        "temperature": 0.4740868720103333
+        "dopamine": 0.07090801740100838,
+        "energy": 1.0,
+        "fatigue": 0.059999999999999915,
+        "stress": 0.06,
+        "temperature": 0.5347608681702006
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:continuity_anchor:ep-000011-rest|ep-000012-exploit_shelter|ep-000016-hide:17",
-            "reconcile:conflict:continuity_anchor:ep-000014-hide-merged|ep-000018-scan-merged|ep-000020-exploit_shelter:21",
-            "reconcile:conflict:continuity_anchor:ep-000018-scan-merged|ep-000020-exploit_shelter|ep-000021-exploit_shelter:22",
-            "reconcile:conflict:self_expectation_falsification:commitment-capability-rest|commitment-capability-scan|commitment-survival-priority:22",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest:11",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest|ep-000011-rest|ep-000014-hide:15",
+            "reconcile:conflict:continuity_anchor:ep-000014-hide|ep-000015-exploit_shelter|ep-000018-unstable_workspace_note:19",
+            "reconcile:conflict:continuity_anchor:ep-000015-exploit_shelter|ep-000018-unstable_workspace_note|ep-000019-rest:20",
             "ledger_maintenance_repair",
             "ledger_continuity_guard",
-            "resource_guard",
+            "shelter_security",
             "continuity_guard",
             "reconciliation_review"
           ],
           "chronic_debt_pressure": 0.0,
           "cycle": 23,
-          "interrupt_action": "exploit_shelter",
-          "interrupt_reason": "protected mode resource guard",
+          "interrupt_action": null,
+          "interrupt_reason": "",
           "memory_compaction_recommended": false,
           "policy_shift_strength": 1.0,
           "protected_mode": true,
-          "protected_mode_ticks_remaining": 2,
+          "protected_mode_ticks_remaining": 0,
           "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
@@ -1601,68 +1593,61 @@
             "chronic_fatigue_debt": 0.0,
             "chronic_runtime_debt": 0.0,
             "chronic_stress_debt": 0.0,
-            "short_term_sleep_pressure": 0.014739
+            "short_term_sleep_pressure": 0.0
           },
           "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
+            "forage"
           ],
           "telemetry_backoff_recommended": false
         },
         "effects": {
           "debt_reversal_applied": true,
           "energy_recovery_applied": true,
-          "guard_activated_tick": 20,
+          "guard_activated_tick": null,
           "memory_compaction_applied": false,
-          "protected_mode_duration": 2,
+          "protected_mode_duration": 0,
           "recovery_rebound_activated": false,
           "recovery_result": "success",
           "retired_episodes": 0,
           "stress_recovery_applied": false,
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "suppressed_actions": [],
           "telemetry_backoff_applied": false
         }
       }
     },
     {
       "cycle": 24,
-      "choice": "exploit_shelter",
-      "free_energy_after": 0.6706,
+      "choice": "rest",
+      "free_energy_after": 0.322398,
       "alive": true,
       "body_state": {
-        "dopamine": 0.005238455476844087,
+        "dopamine": 0.05290642502936799,
         "energy": 1.0,
-        "fatigue": 0.42,
-        "stress": 0.0,
-        "temperature": 0.4499453688110066
+        "fatigue": 0.0399999999999999,
+        "stress": 0.03,
+        "temperature": 0.5347608681702006
       },
       "homeostasis": {
         "agenda": {
           "active_tasks": [
-            "reconcile:conflict:continuity_anchor:ep-000014-hide-merged|ep-000018-scan-merged|ep-000020-exploit_shelter:21",
-            "reconcile:conflict:continuity_anchor:ep-000018-scan-merged|ep-000020-exploit_shelter|ep-000021-exploit_shelter:22",
-            "reconcile:conflict:self_expectation_falsification:commitment-capability-rest|commitment-capability-scan|commitment-survival-priority:22",
-            "reconcile:conflict:continuity_anchor:ep-000020-exploit_shelter|ep-000021-exploit_shelter|ep-000022-exploit_shelter:23",
+            "reconcile:conflict:continuity_anchor:ep-000009-rest|ep-000011-rest|ep-000014-hide:15",
+            "reconcile:conflict:continuity_anchor:ep-000014-hide|ep-000015-exploit_shelter|ep-000018-unstable_workspace_note:19",
+            "reconcile:conflict:continuity_anchor:ep-000015-exploit_shelter|ep-000018-unstable_workspace_note|ep-000019-rest:20",
+            "reconcile:conflict:continuity_anchor:ep-000019-rest|ep-000020-rest|ep-000022-rest:23",
             "ledger_maintenance_repair",
             "ledger_continuity_guard",
-            "fatigue_recovery",
-            "resource_guard",
+            "shelter_security",
             "continuity_guard",
             "reconciliation_review"
           ],
-          "chronic_debt_pressure": 0.0032,
+          "chronic_debt_pressure": 0.0,
           "cycle": 24,
-          "interrupt_action": "exploit_shelter",
-          "interrupt_reason": "protected mode resource guard",
+          "interrupt_action": null,
+          "interrupt_reason": "",
           "memory_compaction_recommended": false,
           "policy_shift_strength": 1.0,
           "protected_mode": true,
-          "protected_mode_ticks_remaining": 5,
+          "protected_mode_ticks_remaining": 0,
           "recommended_action": "rest",
           "recovery_focus": [],
           "recovery_rebound_active": false,
@@ -1670,37 +1655,31 @@
           "sleep_recommended": false,
           "state": {
             "acute_energy_debt": 0.0,
-            "acute_fatigue_debt": 0.04,
+            "acute_fatigue_debt": 0.0,
             "acute_stress_debt": 0.0,
             "acute_thermal_debt": 0.0,
             "chronic_energy_debt": 0.0,
-            "chronic_fatigue_debt": 0.0032,
+            "chronic_fatigue_debt": 0.0,
             "chronic_runtime_debt": 0.0,
             "chronic_stress_debt": 0.0,
-            "short_term_sleep_pressure": 0.032
+            "short_term_sleep_pressure": 0.0
           },
           "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
+            "forage"
           ],
           "telemetry_backoff_recommended": false
         },
         "effects": {
           "debt_reversal_applied": true,
           "energy_recovery_applied": true,
-          "guard_activated_tick": 24,
+          "guard_activated_tick": null,
           "memory_compaction_applied": false,
-          "protected_mode_duration": 5,
+          "protected_mode_duration": 0,
           "recovery_rebound_activated": false,
           "recovery_result": "success",
           "retired_episodes": 0,
-          "stress_recovery_applied": true,
-          "suppressed_actions": [
-            "forage",
-            "scan",
-            "seek_contact"
-          ],
+          "stress_recovery_applied": false,
+          "suppressed_actions": [],
           "telemetry_backoff_applied": false
         }
       }

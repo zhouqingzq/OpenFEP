@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-05-02T17:07:51+00:00",
+  "generated_at": "2026-06-04T11:11:41+00:00",
   "mechanism": "slow_variable_learning",
   "comparison": "with_sleep_consolidated_slow_learning_vs_ablation",
   "baseline": {
-    "hide_policy_score": 1.043269,
-    "forage_policy_score": -155.447695,
+    "hide_policy_score": 1.069262,
+    "forage_policy_score": -155.37233,
     "memory_threshold_delta": -0.0172,
     "continuity_score": 1.0,
     "continuity_fragile": false,
@@ -12,8 +12,8 @@
     "refresh_created_targets": true
   },
   "full_mechanism": {
-    "hide_policy_score": -0.183207,
-    "forage_policy_score": -155.516538,
+    "hide_policy_score": -0.157674,
+    "forage_policy_score": -155.440964,
     "memory_threshold_delta": -0.025,
     "continuity_score": 0.5668,
     "continuity_fragile": false,

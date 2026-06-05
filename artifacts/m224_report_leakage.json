@@ -1,8 +1,8 @@
 {
   "milestone_id": "M2.24",
   "schema_version": "m224_v2",
-  "generated_at": "2026-05-02T16:34:14+00:00",
-  "codebase_version": "4160fd64b963957691263a53b58538cb1e188ea8",
+  "generated_at": "2026-06-04T10:08:49+00:00",
+  "codebase_version": "8cf9291a83391253bb35b782c8748b2defff1b68",
   "seed_set": [
     224,
     243,
@@ -1011,7 +1011,7 @@
       {
         "cycle": 1,
         "choice": "hide",
-        "workspace_bias": 0.046743,
+        "workspace_bias": 0.066968,
         "workspace_broadcast_channels": [
           "novelty",
           "danger"
@@ -1023,7 +1023,7 @@
           "shelter"
         ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, danger. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: continuity-fragile, long-horizon-conflict. Priorities: repeated surprise burden, goal:survival. Unresolved tensions: repeated surprise burden, identity tension. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+          "text": "Consciously accessible now: novelty, danger. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. 4 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
           "channels": [
             "novelty",
             "danger"
@@ -1037,7 +1037,7 @@
           ],
           "leakage_free": true,
           "subject_state": {
-            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: continuity-fragile, long-horizon-conflict. Priorities: repeated surprise burden, goal:survival. Unresolved tensions: repeated surprise burden, identity tension. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 5 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: long-horizon-conflict. Priorities: goal:survival, identity tension. Unresolved tensions: identity tension, self inconsistency. Current style: balanced adaptive. Current narrative phase: forming. 4 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
             "dominant_goal": "SURVIVAL",
             "current_phase": "forming",
             "active_commitments": [],
@@ -1054,20 +1054,10 @@
               "narrative_ambiguity_active": false,
               "active_inquiry": false,
               "inquiry_deferred": false,
-              "continuity_fragile": true,
+              "continuity_fragile": false,
               "long_horizon_conflict": true
             },
             "priority_stack": [
-              {
-                "label": "repeated surprise burden",
-                "weight": 1.0,
-                "priority_type": "surprise_burden",
-                "preferred_actions": [],
-                "avoid_actions": [],
-                "evidence": [
-                  "memory_surprise=15.102"
-                ]
-              },
               {
                 "label": "goal:survival",
                 "weight": 0.7,
@@ -1108,6 +1098,16 @@
                   "none",
                   "none"
                 ]
+              },
+              {
+                "label": "unresolved self inconsistency",
+                "weight": 0.5,
+                "priority_type": "identity_tension",
+                "preferred_actions": [],
+                "avoid_actions": [],
+                "evidence": [
+                  "none"
+                ]
               }
             ],
             "slow_biases": {
@@ -1140,15 +1140,6 @@
             ],
             "unresolved_tensions": [
               {
-                "label": "repeated surprise burden",
-                "tension_type": "surprise_burden",
-                "intensity": 1.0,
-                "repair_target": "critical",
-                "evidence": [
-                  "memory_surprise=15.102"
-                ]
-              },
-              {
                 "label": "identity tension",
                 "tension_type": "identity",
                 "intensity": 0.5,
@@ -1173,6 +1164,15 @@
                 "evidence": [
                   "none"
                 ]
+              },
+              {
+                "label": "continuity fragility",
+                "tension_type": "continuity",
+                "intensity": 0.4332,
+                "repair_target": "protect continuity anchors",
+                "evidence": [
+                  "continuity_score_drop"
+                ]
               }
             ],
             "narrative_uncertainties": [],
@@ -1192,9 +1192,7 @@
               "retained_uncertainty_burden": 0.0
             },
             "continuity_score": 0.5668,
-            "continuity_anchors": [
-              "ep-000001-hide"
-            ]
+            "continuity_anchors": []
           },
           "verification": {
             "summary": "I am not actively verifying any prediction right now.",
@@ -1316,7 +1314,7 @@
           "matched_aliases": {}
         },
         "workspace_maintenance_priority": {
-          "priority_gain": 0.279224,
+          "priority_gain": 0.303544,
           "active_tasks": [
             "resource_guard"
           ],
@@ -1325,8 +1323,8 @@
       },
       {
         "cycle": 2,
-        "choice": "rest",
-        "workspace_bias": 0.0,
+        "choice": "hide",
+        "workspace_bias": -0.051314,
         "workspace_broadcast_channels": [
           "novelty",
           "social"
@@ -1334,17 +1332,19 @@
         "workspace_suppressed_channels": [
           "conflict",
           "continuity",
-          "food",
           "energy",
           "fatigue",
+          "free_energy",
           "stress",
           "temperature",
           "danger",
+          "maintenance",
+          "food",
           "shelter",
           "danger"
         ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, social. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+          "text": "Consciously accessible now: novelty, social. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000002-hide. Current narrative phase: forming. 6 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
           "channels": [
             "novelty",
             "social"
@@ -1353,18 +1353,20 @@
           "suppressed_channels": [
             "conflict",
             "continuity",
-            "food",
             "energy",
             "fatigue",
+            "free_energy",
             "stress",
             "temperature",
             "danger",
+            "maintenance",
+            "food",
             "shelter",
             "danger"
           ],
           "leakage_free": true,
           "subject_state": {
-            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000002-hide. Current narrative phase: forming. 6 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
             "dominant_goal": "SURVIVAL",
             "current_phase": "forming",
             "active_commitments": [],
@@ -1392,9 +1394,9 @@
                 "preferred_actions": [],
                 "avoid_actions": [],
                 "evidence": [
+                  "verify:pred:action:hide",
                   "reconcile:conflict:continuity_anchor:continuity:1",
-                  "reconcile:conflict:continuity_anchor:continuity_instability:1",
-                  "reconcile:conflict:identity_action:identity_tension:1"
+                  "reconcile:conflict:continuity_anchor:continuity_instability:1"
                 ]
               },
               {
@@ -1414,7 +1416,7 @@
                 "preferred_actions": [],
                 "avoid_actions": [],
                 "evidence": [
-                  "memory_surprise=15.102"
+                  "memory_surprise=1005.073"
                 ]
               },
               {
@@ -1425,7 +1427,7 @@
                 "avoid_actions": [],
                 "evidence": [
                   "resource_guard",
-                  "reconcile:conflict:continuity_anchor:continuity:1"
+                  "verify:pred:action:hide"
                 ]
               }
             ],
@@ -1463,11 +1465,11 @@
                 "label": "maintenance pressure",
                 "tension_type": "maintenance",
                 "intensity": 1.0,
-                "repair_target": "rest",
+                "repair_target": "scan",
                 "evidence": [
+                  "verify:pred:action:hide",
                   "reconcile:conflict:continuity_anchor:continuity:1",
-                  "reconcile:conflict:continuity_anchor:continuity_instability:1",
-                  "reconcile:conflict:identity_action:identity_tension:1"
+                  "reconcile:conflict:continuity_anchor:continuity_instability:1"
                 ]
               },
               {
@@ -1476,7 +1478,7 @@
                 "intensity": 1.0,
                 "repair_target": "critical",
                 "evidence": [
-                  "memory_surprise=15.102"
+                  "memory_surprise=1005.073"
                 ]
               },
               {
@@ -1486,16 +1488,16 @@
                 "repair_target": "SURVIVAL",
                 "evidence": [
                   "resource_guard",
-                  "reconcile:conflict:continuity_anchor:continuity:1"
+                  "verify:pred:action:hide"
                 ]
               },
               {
-                "label": "unresolved self inconsistency",
-                "tension_type": "identity_tension",
-                "intensity": 0.55,
-                "repair_target": "SURVIVAL",
+                "label": "continuity-relevant tension",
+                "tension_type": "continuity_instability",
+                "intensity": 0.5032,
+                "repair_target": "high",
                 "evidence": [
-                  "none"
+                  "continuity_score_drop"
                 ]
               }
             ],
@@ -1515,9 +1517,9 @@
               "environment_ambiguity_burden": 0.0,
               "retained_uncertainty_burden": 0.0
             },
-            "continuity_score": 0.7468,
+            "continuity_score": 0.5468,
             "continuity_anchors": [
-              "ep-000001-hide"
+              "ep-000002-hide"
             ]
           },
           "verification": {
@@ -1526,13 +1528,107 @@
             "unresolved_reason": "",
             "prioritized_target": null,
             "active_targets": [],
-            "recent_outcomes": [],
-            "recent_evidence": [],
+            "recent_outcomes": [
+              {
+                "target_id": "verify:pred:action:hide",
+                "prediction_id": "pred:action:hide",
+                "created_tick": 2,
+                "priority_score": 0.337582,
+                "selected_reason": "it is still unresolved",
+                "plan": {
+                  "prediction_id": "pred:action:hide",
+                  "selected_reason": "it is still unresolved",
+                  "evidence_sought": [
+                    "observe:energy",
+                    "observe:fatigue",
+                    "observe:free_energy",
+                    "observe:stress",
+                    "observe:temperature"
+                  ],
+                  "support_criteria": [
+                    "energy stays within 0.17",
+                    "stress stays within 0.17",
+                    "fatigue stays within 0.17",
+                    "temperature stays within 0.17",
+                    "free_energy stays within 0.17"
+                  ],
+                  "falsification_criteria": [
+                    "energy diverges by >= 0.31",
+                    "stress diverges by >= 0.31",
+                    "fatigue diverges by >= 0.31",
+                    "temperature diverges by >= 0.31",
+                    "free_energy diverges by >= 0.31"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 2,
+                  "expires_tick": 3,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "energy",
+                    "fatigue",
+                    "free_energy",
+                    "stress",
+                    "temperature"
+                  ],
+                  "linked_experiment_plan_id": ""
+                },
+                "status": "resolved",
+                "outcome": "inconclusive",
+                "outcome_tick": 2,
+                "evidence_ids": [
+                  "obs:verify:pred:action:hide:2:validation_observation"
+                ],
+                "last_evidence_tick": 2,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "linked_commitments": [],
+                "linked_identity_anchors": [],
+                "target_channels": [
+                  "energy",
+                  "fatigue",
+                  "free_energy",
+                  "stress",
+                  "temperature"
+                ],
+                "prediction_type": "action_consequence",
+                "verification_bias": 0.09051,
+                "linked_experiment_plan_id": ""
+              }
+            ],
+            "recent_evidence": [
+              {
+                "evidence_id": "obs:verify:pred:action:hide:2:validation_observation",
+                "tick": 2,
+                "target_id": "verify:pred:action:hide",
+                "prediction_id": "pred:action:hide",
+                "source": "validation_observation",
+                "summary": "Observed temperature while verifying pred:action:hide.",
+                "observed_state": {
+                  "temperature": 0.3561303894210133
+                },
+                "compared_channels": [
+                  "temperature"
+                ],
+                "missing_channels": [
+                  "energy",
+                  "stress",
+                  "fatigue",
+                  "free_energy"
+                ],
+                "support_score": 0.577396,
+                "contradiction_score": 0.422604,
+                "metadata": {
+                  "avg_error": 0.130939
+                }
+              }
+            ],
             "recent_falsifications": [],
             "counts": {
               "active_targets": 0,
-              "archived_targets": 0,
-              "evidence_events": 0
+              "archived_targets": 1,
+              "evidence_events": 1
             }
           },
           "narrative_experiment": {
@@ -1605,12 +1701,12 @@
                 },
                 {
                   "tick": 2,
-                  "action": "rest",
+                  "action": "hide",
                   "known_task": false,
-                  "compute_spend": 0.18,
+                  "compute_spend": 0.24,
                   "uncertainty_load": 0.46188,
                   "compression_pressure": 0.0,
-                  "process_pull": 0.8
+                  "process_pull": 0.546816
                 }
               ],
               "style_history": [
@@ -1635,8 +1731,8 @@
               "label": "balanced_adaptive",
               "continuity": 1.0,
               "known_task_compute": 0.0,
-              "unknown_task_compute": 0.21,
-              "selective_gap": 0.21,
+              "unknown_task_compute": 0.24,
+              "selective_gap": 0.24,
               "style_surface": {
                 "compute_conservatism": 0.5,
                 "process_attraction_decay": 0.475,
@@ -1656,7 +1752,6 @@
         "workspace_maintenance_priority": {
           "priority_gain": 0.35,
           "active_tasks": [
-            "continuity_guard",
             "reconciliation_review"
           ],
           "recommended_action": "rest"
@@ -1664,50 +1759,52 @@
       },
       {
         "cycle": 3,
-        "choice": "rest",
-        "workspace_bias": -0.024148,
+        "choice": "seek_contact",
+        "workspace_bias": 0.0,
         "workspace_broadcast_channels": [
-          "novelty",
-          "food"
+          "shelter",
+          "temperature"
         ],
         "workspace_suppressed_channels": [
           "maintenance",
+          "novelty",
           "stress",
           "danger",
           "conflict",
           "continuity",
+          "food",
           "social",
-          "temperature",
-          "shelter",
+          "novelty",
           "social"
         ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, food. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+          "text": "Consciously accessible now: shelter, temperature. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000002-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
           "channels": [
-            "novelty",
-            "food"
+            "shelter",
+            "temperature"
           ],
           "carry_over_channels": [],
           "suppressed_channels": [
             "maintenance",
+            "novelty",
             "stress",
             "danger",
             "conflict",
             "continuity",
+            "food",
             "social",
-            "temperature",
-            "shelter",
+            "novelty",
             "social"
           ],
           "leakage_free": true,
           "subject_state": {
-            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000002-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
             "dominant_goal": "SURVIVAL",
             "current_phase": "forming",
             "active_commitments": [],
             "dominant_workspace_contents": [
-              "novelty",
-              "food"
+              "shelter",
+              "temperature"
             ],
             "active_social_focus": [],
             "status_flags": {
@@ -1729,9 +1826,9 @@
                 "preferred_actions": [],
                 "avoid_actions": [],
                 "evidence": [
-                  "reconcile:conflict:identity_action:identity_tension:1",
-                  "reconcile:conflict:self_expectation_falsification:none:1",
-                  "reconcile:conflict:continuity_anchor:continuity:1"
+                  "reconcile:conflict:continuity_anchor:continuity:1",
+                  "reconcile:conflict:continuity_anchor:continuity_instability:1",
+                  "reconcile:conflict:identity_action:identity_tension:1"
                 ]
               },
               {
@@ -1751,7 +1848,7 @@
                 "preferred_actions": [],
                 "avoid_actions": [],
                 "evidence": [
-                  "memory_surprise=15.102"
+                  "memory_surprise=1005.073"
                 ]
               },
               {
@@ -1780,7 +1877,7 @@
               "identity_rigidity": 0.58,
               "plasticity": 0.42,
               "continuity_resilience": 0.66,
-              "compute_conservatism": 0.5,
+              "compute_conservatism": 0.485,
               "process_attraction_decay": 0.45,
               "compression_preference": 0.5,
               "uncertainty_tolerance": 0.48
@@ -1803,9 +1900,9 @@
                 "intensity": 1.0,
                 "repair_target": "rest",
                 "evidence": [
-                  "reconcile:conflict:identity_action:identity_tension:1",
-                  "reconcile:conflict:self_expectation_falsification:none:1",
-                  "reconcile:conflict:continuity_anchor:continuity:1"
+                  "reconcile:conflict:continuity_anchor:continuity:1",
+                  "reconcile:conflict:continuity_anchor:continuity_instability:1",
+                  "reconcile:conflict:identity_action:identity_tension:1"
                 ]
               },
               {
@@ -1814,7 +1911,7 @@
                 "intensity": 1.0,
                 "repair_target": "critical",
                 "evidence": [
-                  "memory_surprise=15.102"
+                  "memory_surprise=1005.073"
                 ]
               },
               {
@@ -1829,11 +1926,11 @@
               {
                 "label": "continuity-relevant tension",
                 "tension_type": "continuity_instability",
-                "intensity": 0.6632,
+                "intensity": 0.6832,
                 "repair_target": "critical",
                 "evidence": [
                   "continuity_score_drop",
-                  "ep-000001-hide"
+                  "ep-000002-hide"
                 ]
               }
             ],
@@ -1855,7 +1952,7 @@
             },
             "continuity_score": 0.680133,
             "continuity_anchors": [
-              "ep-000001-hide"
+              "ep-000002-hide"
             ]
           },
           "verification": {
@@ -1864,13 +1961,107 @@
             "unresolved_reason": "",
             "prioritized_target": null,
             "active_targets": [],
-            "recent_outcomes": [],
-            "recent_evidence": [],
+            "recent_outcomes": [
+              {
+                "target_id": "verify:pred:action:hide",
+                "prediction_id": "pred:action:hide",
+                "created_tick": 2,
+                "priority_score": 0.337582,
+                "selected_reason": "it is still unresolved",
+                "plan": {
+                  "prediction_id": "pred:action:hide",
+                  "selected_reason": "it is still unresolved",
+                  "evidence_sought": [
+                    "observe:energy",
+                    "observe:fatigue",
+                    "observe:free_energy",
+                    "observe:stress",
+                    "observe:temperature"
+                  ],
+                  "support_criteria": [
+                    "energy stays within 0.17",
+                    "stress stays within 0.17",
+                    "fatigue stays within 0.17",
+                    "temperature stays within 0.17",
+                    "free_energy stays within 0.17"
+                  ],
+                  "falsification_criteria": [
+                    "energy diverges by >= 0.31",
+                    "stress diverges by >= 0.31",
+                    "fatigue diverges by >= 0.31",
+                    "temperature diverges by >= 0.31",
+                    "free_energy diverges by >= 0.31"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 2,
+                  "expires_tick": 3,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "energy",
+                    "fatigue",
+                    "free_energy",
+                    "stress",
+                    "temperature"
+                  ],
+                  "linked_experiment_plan_id": ""
+                },
+                "status": "resolved",
+                "outcome": "inconclusive",
+                "outcome_tick": 2,
+                "evidence_ids": [
+                  "obs:verify:pred:action:hide:2:validation_observation"
+                ],
+                "last_evidence_tick": 2,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "linked_commitments": [],
+                "linked_identity_anchors": [],
+                "target_channels": [
+                  "energy",
+                  "fatigue",
+                  "free_energy",
+                  "stress",
+                  "temperature"
+                ],
+                "prediction_type": "action_consequence",
+                "verification_bias": 0.09051,
+                "linked_experiment_plan_id": ""
+              }
+            ],
+            "recent_evidence": [
+              {
+                "evidence_id": "obs:verify:pred:action:hide:2:validation_observation",
+                "tick": 2,
+                "target_id": "verify:pred:action:hide",
+                "prediction_id": "pred:action:hide",
+                "source": "validation_observation",
+                "summary": "Observed temperature while verifying pred:action:hide.",
+                "observed_state": {
+                  "temperature": 0.3561303894210133
+                },
+                "compared_channels": [
+                  "temperature"
+                ],
+                "missing_channels": [
+                  "energy",
+                  "stress",
+                  "fatigue",
+                  "free_energy"
+                ],
+                "support_score": 0.577396,
+                "contradiction_score": 0.422604,
+                "metadata": {
+                  "avg_error": 0.130939
+                }
+              }
+            ],
             "recent_falsifications": [],
             "counts": {
               "active_targets": 0,
-              "archived_targets": 0,
-              "evidence_events": 0
+              "archived_targets": 1,
+              "evidence_events": 1
             }
           },
           "narrative_experiment": {
@@ -1926,7 +2117,7 @@
                 "continuity_resilience": 0.66
               },
               "style": {
-                "compute_conservatism": 0.5,
+                "compute_conservatism": 0.485,
                 "process_attraction_decay": 0.45,
                 "compression_preference": 0.5,
                 "uncertainty_tolerance": 0.48
@@ -1943,19 +2134,19 @@
                 },
                 {
                   "tick": 2,
-                  "action": "rest",
+                  "action": "hide",
                   "known_task": false,
-                  "compute_spend": 0.18,
+                  "compute_spend": 0.24,
                   "uncertainty_load": 0.46188,
                   "compression_pressure": 0.0,
-                  "process_pull": 0.8
+                  "process_pull": 0.546816
                 },
                 {
                   "tick": 3,
-                  "action": "rest",
+                  "action": "seek_contact",
                   "known_task": false,
-                  "compute_spend": 0.18,
-                  "uncertainty_load": 0.420785,
+                  "compute_spend": 0.62,
+                  "uncertainty_load": 0.370785,
                   "compression_pressure": 0.0,
                   "process_pull": 0.8
                 }
@@ -1987,10 +2178,10 @@
               "label": "balanced_adaptive",
               "continuity": 1.0,
               "known_task_compute": 0.0,
-              "unknown_task_compute": 0.2,
-              "selective_gap": 0.2,
+              "unknown_task_compute": 0.366667,
+              "selective_gap": 0.366667,
               "style_surface": {
-                "compute_conservatism": 0.5,
+                "compute_conservatism": 0.485,
                 "process_attraction_decay": 0.45,
                 "compression_preference": 0.5,
                 "uncertainty_tolerance": 0.48
@@ -2009,57 +2200,60 @@
         "workspace_maintenance_priority": {
           "priority_gain": 0.35,
           "active_tasks": [
-            "energy_recovery",
+            "thermal_rebalance",
+            "shelter_security",
             "continuity_guard",
             "reconciliation_review"
           ],
-          "recommended_action": "forage"
+          "recommended_action": "exploit_shelter"
         }
       },
       {
         "cycle": 4,
-        "choice": "rest",
-        "workspace_bias": -0.024897,
+        "choice": "seek_contact",
+        "workspace_bias": 0.193988,
         "workspace_broadcast_channels": [
-          "novelty",
-          "food"
+          "social",
+          "shelter"
         ],
         "workspace_suppressed_channels": [
           "maintenance",
           "stress",
+          "novelty",
           "conflict",
           "continuity",
           "danger",
-          "social",
-          "shelter",
+          "temperature",
+          "food",
           "temperature"
         ],
         "conscious_report": {
-          "text": "Consciously accessible now: novelty, food. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
+          "text": "Consciously accessible now: social, shelter. Subject state: My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000002-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00. Verification: I am not actively verifying any prediction right now. Experiment design: No bounded experiment plan was generated because no decision-relevant narrative competition is active.",
           "channels": [
-            "novelty",
-            "food"
+            "social",
+            "shelter"
           ],
           "carry_over_channels": [],
           "suppressed_channels": [
             "maintenance",
             "stress",
+            "novelty",
             "conflict",
             "continuity",
             "danger",
-            "social",
-            "shelter",
+            "temperature",
+            "food",
             "temperature"
           ],
           "leakage_free": true,
           "subject_state": {
-            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000001-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
+            "summary": "My current subject state is forming-dominant. Primary goal: SURVIVAL. Flags: overloaded, continuity-fragile, long-horizon-conflict. Priorities: maintenance pressure, need:maintenance. Unresolved tensions: maintenance pressure, repeated surprise burden. Current style: balanced adaptive. Anchors held: ep-000002-hide. Current narrative phase: forming. 7 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00.",
             "dominant_goal": "SURVIVAL",
             "current_phase": "forming",
             "active_commitments": [],
             "dominant_workspace_contents": [
-              "novelty",
-              "food"
+              "social",
+              "shelter"
             ],
             "active_social_focus": [],
             "status_flags": {
@@ -2083,7 +2277,7 @@
                 "evidence": [
                   "reconcile:conflict:identity_action:identity_tension:1",
                   "reconcile:conflict:self_expectation_falsification:none:1",
-                  "reconcile:conflict:continuity_anchor:ep-000001-hide:2"
+                  "reconcile:conflict:continuity_anchor:continuity:1"
                 ]
               },
               {
@@ -2103,7 +2297,7 @@
                 "preferred_actions": [],
                 "avoid_actions": [],
                 "evidence": [
-                  "memory_surprise=15.102"
+                  "memory_surprise=1005.073"
                 ]
               },
               {
@@ -2132,14 +2326,15 @@
               "identity_rigidity": 0.58,
               "plasticity": 0.42,
               "continuity_resilience": 0.66,
-              "compute_conservatism": 0.525,
-              "process_attraction_decay": 0.465,
+              "compute_conservatism": 0.47,
+              "process_attraction_decay": 0.425,
               "compression_preference": 0.5,
               "uncertainty_tolerance": 0.48
             },
             "cognitive_style_label": "balanced_adaptive",
             "cognitive_style_evidence": [
-              "style remains balanced across compute, compression, and uncertainty"
+              "style remains balanced across compute, compression, and uncertainty",
+              "process attraction decayed slowly"
             ],
             "cognitive_style_continuity": 1.0,
             "cognitive_style_history": [
@@ -2157,7 +2352,7 @@
                 "evidence": [
                   "reconcile:conflict:identity_action:identity_tension:1",
                   "reconcile:conflict:self_expectation_falsification:none:1",
-                  "reconcile:conflict:continuity_anchor:ep-000001-hide:2"
+                  "reconcile:conflict:continuity_anchor:continuity:1"
                 ]
               },
               {
@@ -2166,7 +2361,7 @@
                 "intensity": 1.0,
                 "repair_target": "critical",
                 "evidence": [
-                  "memory_surprise=15.102"
+                  "memory_surprise=1005.073"
                 ]
               },
               {
@@ -2181,11 +2376,11 @@
               {
                 "label": "continuity-relevant tension",
                 "tension_type": "continuity_instability",
-                "intensity": 0.8132,
+                "intensity": 0.8332,
                 "repair_target": "critical",
                 "evidence": [
                   "continuity_score_drop",
-                  "ep-000001-hide"
+                  "ep-000002-hide"
                 ]
               }
             ],
@@ -2205,9 +2400,9 @@
               "environment_ambiguity_burden": 0.0,
               "retained_uncertainty_burden": 0.0
             },
-            "continuity_score": 0.6468,
+            "continuity_score": 0.7468,
             "continuity_anchors": [
-              "ep-000001-hide"
+              "ep-000002-hide"
             ]
           },
           "verification": {
@@ -2216,13 +2411,107 @@
             "unresolved_reason": "",
             "prioritized_target": null,
             "active_targets": [],
-            "recent_outcomes": [],
-            "recent_evidence": [],
+            "recent_outcomes": [
+              {
+                "target_id": "verify:pred:action:hide",
+                "prediction_id": "pred:action:hide",
+                "created_tick": 2,
+                "priority_score": 0.337582,
+                "selected_reason": "it is still unresolved",
+                "plan": {
+                  "prediction_id": "pred:action:hide",
+                  "selected_reason": "it is still unresolved",
+                  "evidence_sought": [
+                    "observe:energy",
+                    "observe:fatigue",
+                    "observe:free_energy",
+                    "observe:stress",
+                    "observe:temperature"
+                  ],
+                  "support_criteria": [
+                    "energy stays within 0.17",
+                    "stress stays within 0.17",
+                    "fatigue stays within 0.17",
+                    "temperature stays within 0.17",
+                    "free_energy stays within 0.17"
+                  ],
+                  "falsification_criteria": [
+                    "energy diverges by >= 0.31",
+                    "stress diverges by >= 0.31",
+                    "fatigue diverges by >= 0.31",
+                    "temperature diverges by >= 0.31",
+                    "free_energy diverges by >= 0.31"
+                  ],
+                  "expected_horizon": 1,
+                  "created_tick": 2,
+                  "expires_tick": 3,
+                  "status": "active",
+                  "linked_action": "scan",
+                  "attention_channels": [
+                    "energy",
+                    "fatigue",
+                    "free_energy",
+                    "stress",
+                    "temperature"
+                  ],
+                  "linked_experiment_plan_id": ""
+                },
+                "status": "resolved",
+                "outcome": "inconclusive",
+                "outcome_tick": 2,
+                "evidence_ids": [
+                  "obs:verify:pred:action:hide:2:validation_observation"
+                ],
+                "last_evidence_tick": 2,
+                "attempts": 0,
+                "missed_evidence_count": 0,
+                "linked_discrepancy_id": "",
+                "linked_commitments": [],
+                "linked_identity_anchors": [],
+                "target_channels": [
+                  "energy",
+                  "fatigue",
+                  "free_energy",
+                  "stress",
+                  "temperature"
+                ],
+                "prediction_type": "action_consequence",
+                "verification_bias": 0.09051,
+                "linked_experiment_plan_id": ""
+              }
+            ],
+            "recent_evidence": [
+              {
+                "evidence_id": "obs:verify:pred:action:hide:2:validation_observation",
+                "tick": 2,
+                "target_id": "verify:pred:action:hide",
+                "prediction_id": "pred:action:hide",
+                "source": "validation_observation",
+                "summary": "Observed temperature while verifying pred:action:hide.",
+                "observed_state": {
+                  "temperature": 0.3561303894210133
+                },
+                "compared_channels": [
+                  "temperature"
+                ],
+                "missing_channels": [
+                  "energy",
+                  "stress",
+                  "fatigue",
+                  "free_energy"
+                ],
+                "support_score": 0.577396,
+                "contradiction_score": 0.422604,
+                "metadata": {
+                  "avg_error": 0.130939
+                }
+              }
+            ],
             "recent_falsifications": [],
             "counts": {
               "active_targets": 0,
-              "archived_targets": 0,
-              "evidence_events": 0
+              "archived_targets": 1,
+              "evidence_events": 1
             }
           },
           "narrative_experiment": {
@@ -2278,8 +2567,8 @@
                 "continuity_resilience": 0.66
               },
               "style": {
-                "compute_conservatism": 0.525,
-                "process_attraction_decay": 0.465,
+                "compute_conservatism": 0.47,
+                "process_attraction_decay": 0.425,
                 "compression_preference": 0.5,
                 "uncertainty_tolerance": 0.48
               },
@@ -2295,28 +2584,28 @@
                 },
                 {
                   "tick": 2,
-                  "action": "rest",
+                  "action": "hide",
                   "known_task": false,
-                  "compute_spend": 0.18,
+                  "compute_spend": 0.24,
                   "uncertainty_load": 0.46188,
                   "compression_pressure": 0.0,
-                  "process_pull": 0.8
+                  "process_pull": 0.546816
                 },
                 {
                   "tick": 3,
-                  "action": "rest",
+                  "action": "seek_contact",
                   "known_task": false,
-                  "compute_spend": 0.18,
-                  "uncertainty_load": 0.420785,
+                  "compute_spend": 0.62,
+                  "uncertainty_load": 0.370785,
                   "compression_pressure": 0.0,
                   "process_pull": 0.8
                 },
                 {
                   "tick": 4,
-                  "action": "rest",
-                  "known_task": true,
-                  "compute_spend": 0.18,
-                  "uncertainty_load": 0.449016,
+                  "action": "seek_contact",
+                  "known_task": false,
+                  "compute_spend": 0.62,
+                  "uncertainty_load": 0.439016,
                   "compression_pressure": 0.0,
                   "process_pull": 0.8
                 }
@@ -2352,17 +2641,18 @@
             "style_snapshot": {
               "label": "balanced_adaptive",
               "continuity": 1.0,
-              "known_task_compute": 0.18,
-              "unknown_task_compute": 0.2,
-              "selective_gap": 0.02,
+              "known_task_compute": 0.0,
+              "unknown_task_compute": 0.43,
+              "selective_gap": 0.43,
               "style_surface": {
-                "compute_conservatism": 0.525,
-                "process_attraction_decay": 0.465,
+                "compute_conservatism": 0.47,
+                "process_attraction_decay": 0.425,
                 "compression_preference": 0.5,
                 "uncertainty_tolerance": 0.48
               },
               "evidence": [
-                "style remains balanced across compute, compression, and uncertainty"
+                "style remains balanced across compute, compression, and uncertainty",
+                "process attraction decayed slowly"
               ]
             }
           }
@@ -2374,11 +2664,11 @@
         "workspace_maintenance_priority": {
           "priority_gain": 0.35,
           "active_tasks": [
-            "energy_recovery",
+            "shelter_security",
             "continuity_guard",
             "reconciliation_review"
           ],
-          "recommended_action": "forage"
+          "recommended_action": "exploit_shelter"
         }
       }
     ]

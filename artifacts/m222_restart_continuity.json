@@ -10,12 +10,13 @@
       "personality_similarity": 1.0,
       "narrative_prior_similarity": 1.0,
       "narrative_version_before": 12,
-      "narrative_version_after": 28
+      "narrative_version_after": 26
     },
     "commitments_persistence": {
       "before": [],
       "after": [
         "commitment-survival-priority",
+        "commitment-exploration-drive",
         "commitment-capability-rest"
       ],
       "commitment_precision": 0.0,
@@ -28,45 +29,39 @@
       "avoidance_similarity": 1.0,
       "preference_similarity": 1.0,
       "anchor_restore_score": 1.0,
-      "action_distribution_similarity": 0.791667,
+      "action_distribution_similarity": 0.666667,
       "anchor_distribution_similarity": 0.5,
       "top_action_similarity": 0.0,
-      "rebind_consistency": 0.0,
+      "rebind_consistency": 0.75,
       "maintenance_anchor_similarity": 1.0,
       "restart_divergence": 0.0
     },
     "long_term_memory_integrity": {
-      "before_episode_count": 8,
-      "after_episode_count": 8,
-      "preserved_count": 8,
+      "before_episode_count": 6,
+      "after_episode_count": 6,
+      "preserved_count": 6,
       "overall_memory_integrity": 1.0,
       "protected_memory_integrity": 1.0,
       "critical_memory_integrity": 1.0,
       "protected_before": [
-        "ep-000001-hide",
-        "ep-000002-rest",
-        "ep-000006-scan",
-        "ep-000011-rest",
-        "ep-000012-exploit_shelter"
+        "ep-000003-rest",
+        "ep-000005-rest",
+        "ep-000009-rest",
+        "ep-000011-rest"
       ],
       "protected_after": [
-        "ep-000001-hide",
-        "ep-000002-rest",
-        "ep-000006-scan",
-        "ep-000011-rest",
-        "ep-000012-exploit_shelter"
+        "ep-000003-rest",
+        "ep-000005-rest",
+        "ep-000009-rest",
+        "ep-000011-rest"
       ],
       "critical_before": [
-        "ep-000001-hide",
-        "ep-000006-scan",
-        "ep-000011-rest",
-        "ep-000012-exploit_shelter"
+        "ep-000009-rest",
+        "ep-000011-rest"
       ],
       "critical_after": [
-        "ep-000001-hide",
-        "ep-000006-scan",
-        "ep-000011-rest",
-        "ep-000012-exploit_shelter"
+        "ep-000009-rest",
+        "ep-000011-rest"
       ]
     },
     "maintenance_agenda_continuity": {
@@ -112,7 +107,7 @@
         "protected_mode_ticks_remaining": 0,
         "recovery_rebound_active": false,
         "recovery_rebound_ticks_remaining": 0,
-        "policy_shift_strength": 0.0,
+        "policy_shift_strength": 0.1512,
         "suppressed_actions": [],
         "recovery_focus": [],
         "chronic_debt_pressure": 0.0,
@@ -130,8 +125,8 @@
       }
     },
     "action_diversity_continuity": {
-      "pre_entropy": 1.207519,
-      "post_entropy": 1.595079,
+      "pre_entropy": 0.0,
+      "post_entropy": 1.351227,
       "pre_window_cycles": 12,
       "post_window_cycles": 12
     }

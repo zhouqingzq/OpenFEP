@@ -1,7 +1,7 @@
 {
   "milestone_id": "M2.27",
   "status": "PASS",
-  "generated_at": "2026-05-02T17:07:41+00:00",
+  "generated_at": "2026-06-04T11:11:25+00:00",
   "seed_set": [
     227,
     342
@@ -47,10 +47,7 @@
             "current_phase": "forming",
             "dominant_goal": "SURVIVAL",
             "continuity_score": 0.6968,
-            "continuity_anchors": [
-              "ep-000006-rest",
-              "ep-000001-hide"
-            ],
+            "continuity_anchors": [],
             "status_flags": {
               "threatened": false,
               "repairing": false,
@@ -59,26 +56,23 @@
               "narrative_ambiguity_active": false,
               "active_inquiry": false,
               "inquiry_deferred": false,
-              "continuity_fragile": true,
+              "continuity_fragile": false,
               "long_horizon_conflict": true
             },
             "priority_labels": [
               "continuity-relevant tension",
               "maintenance pressure",
               "need:maintenance",
-              "repeated surprise burden"
+              "unresolved maintenance discrepancy"
             ],
-            "last_choice": "scan"
+            "last_choice": "rest"
           },
           "signature_b": {
             "cycle": 8,
             "current_phase": "forming",
             "dominant_goal": "SURVIVAL",
             "continuity_score": 0.6968,
-            "continuity_anchors": [
-              "ep-000006-rest",
-              "ep-000001-hide"
-            ],
+            "continuity_anchors": [],
             "status_flags": {
               "threatened": false,
               "repairing": false,
@@ -87,16 +81,16 @@
               "narrative_ambiguity_active": false,
               "active_inquiry": false,
               "inquiry_deferred": false,
-              "continuity_fragile": true,
+              "continuity_fragile": false,
               "long_horizon_conflict": true
             },
             "priority_labels": [
               "continuity-relevant tension",
               "maintenance pressure",
               "need:maintenance",
-              "repeated surprise burden"
+              "unresolved maintenance discrepancy"
             ],
-            "last_choice": "scan"
+            "last_choice": "rest"
           }
         },
         {
@@ -104,57 +98,67 @@
           "equivalent": true,
           "signature_a": {
             "cycle": 8,
-            "current_phase": "forming",
-            "dominant_goal": "SURVIVAL",
-            "continuity_score": 0.6468,
+            "current_phase": "goal_realignment",
+            "dominant_goal": "INTEGRITY",
+            "continuity_score": 0.788775,
             "continuity_anchors": [
-              "ep-000006-scan"
+              "ep-000007-exploit_shelter",
+              "ep-000004-exploit_shelter",
+              "ep-000003-hide",
+              "ep-000001-rest",
+              "commitment-survival-priority",
+              "commitment-capability-scan"
             ],
             "status_flags": {
-              "threatened": false,
+              "threatened": true,
               "repairing": false,
               "overloaded": true,
               "socially_destabilized": false,
               "narrative_ambiguity_active": false,
               "active_inquiry": false,
               "inquiry_deferred": false,
-              "continuity_fragile": true,
+              "continuity_fragile": false,
               "long_horizon_conflict": true
             },
             "priority_labels": [
-              "continuity-relevant tension",
               "maintenance pressure",
               "need:maintenance",
-              "repeated surprise burden"
+              "unresolved maintenance discrepancy",
+              "unresolved self inconsistency"
             ],
-            "last_choice": "rest"
+            "last_choice": "exploit_shelter"
           },
           "signature_b": {
             "cycle": 8,
-            "current_phase": "forming",
-            "dominant_goal": "SURVIVAL",
-            "continuity_score": 0.6468,
+            "current_phase": "goal_realignment",
+            "dominant_goal": "INTEGRITY",
+            "continuity_score": 0.788775,
             "continuity_anchors": [
-              "ep-000006-scan"
+              "ep-000007-exploit_shelter",
+              "ep-000004-exploit_shelter",
+              "ep-000003-hide",
+              "ep-000001-rest",
+              "commitment-survival-priority",
+              "commitment-capability-scan"
             ],
             "status_flags": {
-              "threatened": false,
+              "threatened": true,
               "repairing": false,
               "overloaded": true,
               "socially_destabilized": false,
               "narrative_ambiguity_active": false,
               "active_inquiry": false,
               "inquiry_deferred": false,
-              "continuity_fragile": true,
+              "continuity_fragile": false,
               "long_horizon_conflict": true
             },
             "priority_labels": [
-              "continuity-relevant tension",
               "maintenance pressure",
               "need:maintenance",
-              "repeated surprise burden"
+              "unresolved maintenance discrepancy",
+              "unresolved self inconsistency"
             ],
-            "last_choice": "rest"
+            "last_choice": "exploit_shelter"
           }
         }
       ]
@@ -206,9 +210,9 @@
         "post_restore_alive": true,
         "post_restore_subject_state": {
           "tick": 1,
-          "core_identity_summary": "I am a risk-seeking agent. Currently in a resource_recovery phase. My dominant strategy remains expected_free_energy. Caution bias remained stable because anti-collapse safeguard clipped multi-variable divergence. Survival value weighting remained stable because insufficient repeated evidence. Reconciliation: This tension has persisted across 1 chapter(s) and is active.",
-          "current_phase": "resource_recovery",
-          "current_self_narrative_phase": "resource_recovery",
+          "core_identity_summary": "I am a risk-seeking agent. Currently in a consolidation phase. My dominant strategy remains expected_free_energy. Caution bias remained stable because anti-collapse safeguard clipped multi-variable divergence. Survival value weighting remained stable because insufficient repeated evidence. Reconciliation: This tension has persisted across 1 chapter(s) and is active.",
+          "current_phase": "consolidation",
+          "current_self_narrative_phase": "consolidation",
           "active_commitments": [
             "Protect survival and integrity before opportunistic gain.",
             "When conditions are stable, reduce uncertainty through active exploration."
@@ -270,7 +274,7 @@
               "intensity": 1.0,
               "repair_target": "critical",
               "evidence": [
-                "memory_surprise=1005.057"
+                "memory_surprise=1005.080"
               ]
             },
             {
@@ -339,7 +343,7 @@
               "preferred_actions": [],
               "avoid_actions": [],
               "evidence": [
-                "memory_surprise=1005.057"
+                "memory_surprise=1005.080"
               ]
             },
             {
@@ -434,7 +438,7 @@
             "SURVIVAL",
             "protect continuity anchors"
           ],
-          "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: resource_recovery. 6 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00."
+          "same_subject_basis": "I remain the same subject through active commitments. Anchors held: ep-000001-rest, commitment-survival-priority, commitment-exploration-drive. Current narrative phase: consolidation. 6 long-horizon conflict thread(s) still shape continuity. Style remains balanced adaptive with continuity 1.00."
         }
       }
     },
@@ -445,19 +449,18 @@
         "anchors_recovered_after_pressure": true,
         "continuity_not_collapsed_to_zero": true,
         "phase_changes_bounded": true,
-        "min_continuity_score": 0.504332,
-        "max_continuity_score": 0.78154,
-        "final_continuity_score": 0.594117,
+        "min_continuity_score": 0.379007,
+        "max_continuity_score": 0.767475,
+        "final_continuity_score": 0.719083,
         "max_anchor_count": 12,
-        "final_anchor_count": 12,
-        "non_empty_anchor_cycles": 72,
-        "threatened_cycles": 17,
-        "fragile_cycles": 71,
+        "final_anchor_count": 10,
+        "non_empty_anchor_cycles": 62,
+        "threatened_cycles": 41,
+        "fragile_cycles": 62,
         "distinct_phases": [
           "consolidation",
           "forming",
-          "goal_realignment",
-          "resource_recovery"
+          "goal_realignment"
         ],
         "bounded_distinct_phases": [
           "forming",
@@ -467,20 +470,18 @@
           "cycle": 72,
           "current_phase": "consolidation",
           "dominant_goal": "INTEGRITY",
-          "continuity_score": 0.594117,
+          "continuity_score": 0.719083,
           "continuity_anchors": [
-            "ep-000071-exploit_shelter",
-            "ep-000055-rest-merged",
-            "ep-000051-exploit_shelter-merged",
-            "ep-000039-hide",
-            "ep-000011-hide-merged",
-            "ep-000009-scan",
-            "ep-000003-rest-merged",
-            "ep-000001-hide",
+            "ep-000072-exploit_shelter",
+            "ep-000062-exploit_shelter-merged",
+            "ep-000053-hide-merged",
+            "ep-000037-rest-merged",
+            "ep-000012-hide",
+            "ep-000011-rest",
             "commitment-survival-priority",
             "commitment-exploration-drive",
-            "commitment-capability-rest",
-            "commitment-capability-hide"
+            "commitment-capability-exploit_shelter",
+            "commitment-capability-rest"
           ],
           "status_flags": {
             "threatened": true,
@@ -497,7 +498,7 @@
             "continuity-relevant tension",
             "maintenance pressure",
             "need:maintenance",
-            "unresolved maintenance discrepancy"
+            "repeated surprise burden"
           ],
           "last_choice": "exploit_shelter"
         }
@@ -517,8 +518,8 @@
   "residual_risks": [],
   "freshness": {
     "current_round": true,
-    "generated_at": "2026-05-02T17:07:41+00:00",
-    "codebase_version": "4160fd64b963957691263a53b58538cb1e188ea8",
+    "generated_at": "2026-06-04T11:11:25+00:00",
+    "codebase_version": "8cf9291a83391253bb35b782c8748b2defff1b68",
     "artifact_records": {
       "specification": {
         "path": "E:\\workspace\\segments\\reports\\m227_milestone_spec.md",
@@ -529,32 +530,32 @@
       "canonical_trace": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_trace.jsonl",
         "exists": true,
-        "size_bytes": 86113,
-        "modified_at": "2026-05-02T17:07:32+00:00"
+        "size_bytes": 89812,
+        "modified_at": "2026-06-04T11:11:11+00:00"
       },
       "ablation": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_ablation.json",
         "exists": true,
         "size_bytes": 1674,
-        "modified_at": "2026-05-02T17:07:32+00:00"
+        "modified_at": "2026-06-04T11:11:11+00:00"
       },
       "stress": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_stress.json",
         "exists": true,
-        "size_bytes": 15049,
-        "modified_at": "2026-05-02T17:07:32+00:00"
+        "size_bytes": 15033,
+        "modified_at": "2026-06-04T11:11:11+00:00"
       },
       "soak": {
         "path": "E:\\workspace\\segments\\artifacts\\m227_subject_state_soak.json",
         "exists": true,
-        "size_bytes": 18497,
-        "modified_at": "2026-05-02T17:07:41+00:00"
+        "size_bytes": 17709,
+        "modified_at": "2026-06-04T11:11:25+00:00"
       },
       "summary": {
         "path": "E:\\workspace\\segments\\reports\\m227_acceptance_summary.md",
         "exists": true,
         "size_bytes": 215,
-        "modified_at": "2026-04-28T13:06:44+00:00"
+        "modified_at": "2026-05-02T17:07:41+00:00"
       }
     }
   },

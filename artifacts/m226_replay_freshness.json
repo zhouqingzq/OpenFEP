@@ -1,8 +1,8 @@
 {
   "milestone_id": "M2.26",
   "schema_version": "m226_v1",
-  "generated_at": "2026-05-02T17:07:27+00:00",
-  "codebase_version": "4160fd64b963957691263a53b58538cb1e188ea8",
+  "generated_at": "2026-06-04T11:11:05+00:00",
+  "codebase_version": "8cf9291a83391253bb35b782c8748b2defff1b68",
   "seed_set": [
     226,
     245,

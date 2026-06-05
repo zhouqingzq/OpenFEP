@@ -8,9 +8,9 @@
   "attention_enabled": null,
   "profile": "multi_profile_protocol",
   "metrics": {
-    "significant_metric_count": 4,
-    "effect_metric_count": 7,
-    "stability_profiles_passing": 5
+    "significant_metric_count": 5,
+    "effect_metric_count": 6,
+    "stability_profiles_passing": 0
   },
   "summary": {
     "validation_protocol": {
@@ -26,7 +26,8 @@
         "caution_rate",
         "exploration_rate",
         "seek_contact_rate",
-        "mean_conditioned_prediction_error"
+        "action_entropy",
+        "survival_score"
       ],
       "effect_metrics": [
         "caution_rate",
@@ -34,85 +35,79 @@
         "seek_contact_rate",
         "action_entropy",
         "survival_score",
-        "mean_conditioned_prediction_error",
-        "narrative_consistency_proxy"
+        "mean_conditioned_prediction_error"
       ],
       "passed": true
     },
     "stability_acceptance": {
       "required_profiles": 5,
-      "profiles_passing": 5,
-      "passed_profiles": [
-        "neutral",
-        "threat_sensitive",
-        "social_approach",
-        "exploratory",
-        "rigid_cautious"
-      ],
-      "passed": true
+      "profiles_passing": 0,
+      "passed_profiles": [],
+      "passed": false
     },
     "profile_summaries": {
       "neutral": {
-        "caution_rate": 0.9074074074074074,
-        "exploration_rate": 0.06172839506172839,
-        "seek_contact_rate": 0.006172839506172839,
-        "action_entropy": 1.3126222578762603,
-        "survival_score": 1.6522839506172835,
-        "mean_conditioned_prediction_error": 0.048639035264636275,
-        "narrative_consistency_proxy": 0.7289351851851852,
-        "dominant_action_share": 0.5925925925925926
+        "caution_rate": 1.0,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.6436132166672084,
+        "survival_score": 1.5363888888888884,
+        "mean_conditioned_prediction_error": 0.05491646964419859,
+        "narrative_consistency_proxy": 0.2,
+        "dominant_action_share": 0.7962962962962963
       },
       "threat_sensitive": {
-        "caution_rate": 0.9567901234567902,
-        "exploration_rate": 0.018518518518518517,
-        "seek_contact_rate": 0.024691358024691357,
-        "action_entropy": 1.3019262170736403,
-        "survival_score": 1.7408950617283947,
-        "mean_conditioned_prediction_error": 0.056788183575808185,
-        "narrative_consistency_proxy": 0.7065586419753087,
-        "dominant_action_share": 0.5925925925925926
+        "caution_rate": 0.9876543209876543,
+        "exploration_rate": 0.012345679012345678,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.8628254042036236,
+        "survival_score": 1.6587037037037031,
+        "mean_conditioned_prediction_error": 0.05327192544415819,
+        "narrative_consistency_proxy": 0.2,
+        "dominant_action_share": 0.7469135802469136
       },
       "social_approach": {
-        "caution_rate": 0.7530864197530864,
-        "exploration_rate": 0.04320987654320988,
-        "seek_contact_rate": 0.20370370370370372,
-        "action_entropy": 1.462741421102989,
-        "survival_score": 1.6587962962962957,
-        "mean_conditioned_prediction_error": 0.06464243180769448,
-        "narrative_consistency_proxy": 0.6936728395061729,
-        "dominant_action_share": 0.5555555555555556
+        "caution_rate": 0.5246913580246914,
+        "exploration_rate": 0.0,
+        "seek_contact_rate": 0.47530864197530864,
+        "action_entropy": 0.49968127730513623,
+        "survival_score": 1.598641975308641,
+        "mean_conditioned_prediction_error": 0.05878251369574073,
+        "narrative_consistency_proxy": 0.2,
+        "dominant_action_share": 0.8641975308641975
       },
       "exploratory": {
-        "caution_rate": 0.7283950617283951,
-        "exploration_rate": 0.24691358024691357,
-        "seek_contact_rate": 0.024691358024691357,
-        "action_entropy": 1.6270605663096454,
-        "survival_score": 1.6356481481481475,
-        "mean_conditioned_prediction_error": 0.06489304577589865,
-        "narrative_consistency_proxy": 0.6712191358024692,
-        "dominant_action_share": 0.5061728395061729
+        "caution_rate": 0.38271604938271603,
+        "exploration_rate": 0.6172839506172839,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.498003017950101,
+        "survival_score": 1.4953086419753079,
+        "mean_conditioned_prediction_error": 0.05432256191392301,
+        "narrative_consistency_proxy": 0.2,
+        "dominant_action_share": 0.8765432098765432
       },
       "rigid_cautious": {
-        "caution_rate": 0.9814814814814815,
-        "exploration_rate": 0.006172839506172839,
-        "seek_contact_rate": 0.012345679012345678,
-        "action_entropy": 1.03613785786819,
-        "survival_score": 1.703333333333333,
-        "mean_conditioned_prediction_error": 0.05235453582203394,
-        "narrative_consistency_proxy": 0.7476851851851851,
-        "dominant_action_share": 0.6913580246913581
+        "caution_rate": 0.9320987654320988,
+        "exploration_rate": 0.06790123456790124,
+        "seek_contact_rate": 0.0,
+        "action_entropy": 0.712562122536103,
+        "survival_score": 1.6254320987654316,
+        "mean_conditioned_prediction_error": 0.05203659147227125,
+        "narrative_consistency_proxy": 0.2,
+        "dominant_action_share": 0.7962962962962964
       }
     }
   },
   "acceptance": {
     "validation_passed": true,
-    "stability_passed": true,
-    "passed": true,
+    "stability_passed": false,
+    "passed": false,
     "significant_metrics": [
       "caution_rate",
       "exploration_rate",
       "seek_contact_rate",
-      "mean_conditioned_prediction_error"
+      "action_entropy",
+      "survival_score"
     ],
     "effect_metrics": [
       "caution_rate",
@@ -120,48 +115,77 @@
       "seek_contact_rate",
       "action_entropy",
       "survival_score",
-      "mean_conditioned_prediction_error",
-      "narrative_consistency_proxy"
+      "mean_conditioned_prediction_error"
     ],
-    "passed_profiles": [
-      "neutral",
-      "threat_sensitive",
-      "social_approach",
-      "exploratory",
-      "rigid_cautious"
-    ]
+    "passed_profiles": []
   },
-  "generated_at": "2026-05-04T10:14:14+00:00",
-  "codebase_version": "6ed78955906277291030ae748f76f72132d3a368",
+  "generated_at": "2026-06-04T09:43:41+00:00",
+  "codebase_version": "8cf9291a83391253bb35b782c8748b2defff1b68",
   "codebase_provenance": {
-    "git_commit": "6ed78955906277291030ae748f76f72132d3a368",
+    "git_commit": "8cf9291a83391253bb35b782c8748b2defff1b68",
     "dirty_worktree": true,
     "binding_scope": "workspace_snapshot",
-    "workspace_fingerprint": "c68d69d57a3f1c130b4e828db8731f5e57d5a55f110b637759b7a3f02e420b51",
+    "workspace_fingerprint": "fbaa98776ccbc83f92e5905c785933b81de3576e74c1a4907fee503a6bdde157",
     "status_entries": [
+      " M artifacts/m1_memory_gate.json",
+      " M artifacts/m1_runtime_trace.json",
+      " M artifacts/m1_sleep_consolidation.json",
+      " M artifacts/m210_audit_summary.json",
+      " M artifacts/m210_longitudinal_stability.json",
+      " M artifacts/m210_personality_anova.json",
+      " M artifacts/m210_profile_behavior_summary.json",
       " M reports/m1_acceptance_report.json",
-      " M segmentum/cognitive_events.py",
-      " M segmentum/dialogue/conversation_loop.py",
-      " M segmentum/dialogue/runtime/prompts.py",
-      " M segmentum/memory_anchored.py",
-      " M segmentum/memory_store.py",
-      "?? segmentum/state_ownership.py",
-      "?? tests/test_m8_9_memory_write_intent.py",
-      "?? tests/test_m8_9_response_evidence_contract.py",
-      "?? tests/test_m8_9_state_ownership.py"
+      " M reports/m210_strict_audit_report.md",
+      " M segmentum/dialogue/runtime/chat.py",
+      " M segmentum/dialogue/runtime/m16_api.py",
+      " M segmentum/dialogue/runtime/m16_protocol.py",
+      " M segmentum/dialogue/runtime/m16_runner.py",
+      " M segmentum/dialogue/runtime/m16_runtime_bridge.py",
+      " M segmentum/dialogue/runtime/mvp_loop.py",
+      " M segmentum/dialogue/types.py",
+      " M tests/test_m16_1_gateway_ws.py",
+      " M tests/test_mvp_dialogue_runtime.py",
+      " M ui/packages/consciousness-client/src/http.ts",
+      " M ui/packages/consciousness-client/src/types.ts",
+      " M ui/packages/consciousness-client/src/ws.ts",
+      " M ui/packages/consciousness-client/tests/ws.test.ts",
+      "?? reports/m18_acceptance_report.json",
+      "?? reports/m18_acceptance_summary.md",
+      "?? segmentum/m18_audit.py",
+      "?? tests/fixtures/m18_held_out_group_chat.json",
+      "?? tests/test_m18_acceptance_artifact.py",
+      "?? tests/test_m18_group_chat_acceptance.py"
     ],
-    "changed_path_count": 10,
+    "changed_path_count": 28,
     "changed_paths": [
+      "artifacts/m1_memory_gate.json",
+      "artifacts/m1_runtime_trace.json",
+      "artifacts/m1_sleep_consolidation.json",
+      "artifacts/m210_audit_summary.json",
+      "artifacts/m210_longitudinal_stability.json",
+      "artifacts/m210_personality_anova.json",
+      "artifacts/m210_profile_behavior_summary.json",
+      "reports/m18_acceptance_report.json",
+      "reports/m18_acceptance_summary.md",
       "reports/m1_acceptance_report.json",
-      "segmentum/cognitive_events.py",
-      "segmentum/dialogue/conversation_loop.py",
-      "segmentum/dialogue/runtime/prompts.py",
-      "segmentum/memory_anchored.py",
-      "segmentum/memory_store.py",
-      "segmentum/state_ownership.py",
-      "tests/test_m8_9_memory_write_intent.py",
-      "tests/test_m8_9_response_evidence_contract.py",
-      "tests/test_m8_9_state_ownership.py"
+      "reports/m210_strict_audit_report.md",
+      "segmentum/dialogue/runtime/chat.py",
+      "segmentum/dialogue/runtime/m16_api.py",
+      "segmentum/dialogue/runtime/m16_protocol.py",
+      "segmentum/dialogue/runtime/m16_runner.py",
+      "segmentum/dialogue/runtime/m16_runtime_bridge.py",
+      "segmentum/dialogue/runtime/mvp_loop.py",
+      "segmentum/dialogue/types.py",
+      "segmentum/m18_audit.py",
+      "tests/fixtures/m18_held_out_group_chat.json",
+      "tests/test_m16_1_gateway_ws.py",
+      "tests/test_m18_acceptance_artifact.py",
+      "tests/test_m18_group_chat_acceptance.py",
+      "tests/test_mvp_dialogue_runtime.py",
+      "ui/packages/consciousness-client/src/http.ts",
+      "ui/packages/consciousness-client/src/types.ts",
+      "ui/packages/consciousness-client/src/ws.ts",
+      "ui/packages/consciousness-client/tests/ws.test.ts"
     ],
     "reproducibility_scope": "strict_workspace_fingerprint"
   }

@@ -1,6 +1,6 @@
 {
   "milestone_id": "Pre-M3",
-  "status": "PASS",
+  "status": "BLOCKED",
   "seed_set": [
     17,
     23,
@@ -50,13 +50,13 @@
         "name": "attention",
         "artifact": "artifacts/pre_m3_attention_summary.json",
         "passed": true,
-        "generated_at": "2026-05-04T10:12:12+00:00"
+        "generated_at": "2026-06-04T09:41:02+00:00"
       },
       {
         "name": "transfer",
         "artifact": "artifacts/pre_m3_transfer_summary.json",
         "passed": true,
-        "generated_at": "2026-05-04T10:12:21+00:00",
+        "generated_at": "2026-06-04T09:41:12+00:00",
         "seed_set": [
           42,
           43,
@@ -71,8 +71,8 @@
       {
         "name": "personality",
         "artifact": "artifacts/pre_m3_personality_summary.json",
-        "passed": true,
-        "generated_at": "2026-05-04T10:14:14+00:00"
+        "passed": false,
+        "generated_at": "2026-06-04T09:43:41+00:00"
       }
     ],
     "historical_regressions": [
@@ -107,7 +107,7 @@
     "multi_environment_established": true,
     "transfer_benchmark_established": true,
     "transfer_seed_protocol_canonical": true,
-    "personality_narrative_evidence_established": true,
+    "personality_narrative_evidence_established": false,
     "long_run_soak_regression_passed": true,
     "snapshot_compatibility_passed": true,
     "runtime_lifecycle_revalidated": true,
@@ -158,41 +158,77 @@
     }
   },
   "codebase_provenance": {
-    "git_commit": "6ed78955906277291030ae748f76f72132d3a368",
+    "git_commit": "8cf9291a83391253bb35b782c8748b2defff1b68",
     "dirty_worktree": true,
     "binding_scope": "workspace_snapshot",
-    "workspace_fingerprint": "c68d69d57a3f1c130b4e828db8731f5e57d5a55f110b637759b7a3f02e420b51",
+    "workspace_fingerprint": "fbaa98776ccbc83f92e5905c785933b81de3576e74c1a4907fee503a6bdde157",
     "status_entries": [
+      " M artifacts/m1_memory_gate.json",
+      " M artifacts/m1_runtime_trace.json",
+      " M artifacts/m1_sleep_consolidation.json",
+      " M artifacts/m210_audit_summary.json",
+      " M artifacts/m210_longitudinal_stability.json",
+      " M artifacts/m210_personality_anova.json",
+      " M artifacts/m210_profile_behavior_summary.json",
       " M reports/m1_acceptance_report.json",
-      " M segmentum/cognitive_events.py",
-      " M segmentum/dialogue/conversation_loop.py",
-      " M segmentum/dialogue/runtime/prompts.py",
-      " M segmentum/memory_anchored.py",
-      " M segmentum/memory_store.py",
-      "?? segmentum/state_ownership.py",
-      "?? tests/test_m8_9_memory_write_intent.py",
-      "?? tests/test_m8_9_response_evidence_contract.py",
-      "?? tests/test_m8_9_state_ownership.py"
+      " M reports/m210_strict_audit_report.md",
+      " M segmentum/dialogue/runtime/chat.py",
+      " M segmentum/dialogue/runtime/m16_api.py",
+      " M segmentum/dialogue/runtime/m16_protocol.py",
+      " M segmentum/dialogue/runtime/m16_runner.py",
+      " M segmentum/dialogue/runtime/m16_runtime_bridge.py",
+      " M segmentum/dialogue/runtime/mvp_loop.py",
+      " M segmentum/dialogue/types.py",
+      " M tests/test_m16_1_gateway_ws.py",
+      " M tests/test_mvp_dialogue_runtime.py",
+      " M ui/packages/consciousness-client/src/http.ts",
+      " M ui/packages/consciousness-client/src/types.ts",
+      " M ui/packages/consciousness-client/src/ws.ts",
+      " M ui/packages/consciousness-client/tests/ws.test.ts",
+      "?? reports/m18_acceptance_report.json",
+      "?? reports/m18_acceptance_summary.md",
+      "?? segmentum/m18_audit.py",
+      "?? tests/fixtures/m18_held_out_group_chat.json",
+      "?? tests/test_m18_acceptance_artifact.py",
+      "?? tests/test_m18_group_chat_acceptance.py"
     ],
-    "changed_path_count": 10,
+    "changed_path_count": 28,
     "changed_paths": [
+      "artifacts/m1_memory_gate.json",
+      "artifacts/m1_runtime_trace.json",
+      "artifacts/m1_sleep_consolidation.json",
+      "artifacts/m210_audit_summary.json",
+      "artifacts/m210_longitudinal_stability.json",
+      "artifacts/m210_personality_anova.json",
+      "artifacts/m210_profile_behavior_summary.json",
+      "reports/m18_acceptance_report.json",
+      "reports/m18_acceptance_summary.md",
       "reports/m1_acceptance_report.json",
-      "segmentum/cognitive_events.py",
-      "segmentum/dialogue/conversation_loop.py",
-      "segmentum/dialogue/runtime/prompts.py",
-      "segmentum/memory_anchored.py",
-      "segmentum/memory_store.py",
-      "segmentum/state_ownership.py",
-      "tests/test_m8_9_memory_write_intent.py",
-      "tests/test_m8_9_response_evidence_contract.py",
-      "tests/test_m8_9_state_ownership.py"
+      "reports/m210_strict_audit_report.md",
+      "segmentum/dialogue/runtime/chat.py",
+      "segmentum/dialogue/runtime/m16_api.py",
+      "segmentum/dialogue/runtime/m16_protocol.py",
+      "segmentum/dialogue/runtime/m16_runner.py",
+      "segmentum/dialogue/runtime/m16_runtime_bridge.py",
+      "segmentum/dialogue/runtime/mvp_loop.py",
+      "segmentum/dialogue/types.py",
+      "segmentum/m18_audit.py",
+      "tests/fixtures/m18_held_out_group_chat.json",
+      "tests/test_m16_1_gateway_ws.py",
+      "tests/test_m18_acceptance_artifact.py",
+      "tests/test_m18_group_chat_acceptance.py",
+      "tests/test_mvp_dialogue_runtime.py",
+      "ui/packages/consciousness-client/src/http.ts",
+      "ui/packages/consciousness-client/src/types.ts",
+      "ui/packages/consciousness-client/src/ws.ts",
+      "ui/packages/consciousness-client/tests/ws.test.ts"
     ],
     "reproducibility_scope": "strict_workspace_fingerprint"
   },
   "recommendation": {
-    "status": "READY_FOR_M3",
-    "passed": true,
-    "rationale": "All Pre-M3 gates are satisfied with current-round evidence.",
+    "status": "NOT_READY_FOR_M3",
+    "passed": false,
+    "rationale": "Pre-M3 evidence is incomplete for M3 admission; blocking findings remain open.",
     "blocking_gaps": []
   },
   "schema_version": "pre_m3_v1",
@@ -206,7 +242,7 @@
   "metrics": {
     "attention_passed": true,
     "transfer_passed": true,
-    "personality_passed": true,
+    "personality_passed": false,
     "soak_passed": true,
     "snapshot_passed": true
   },
@@ -285,48 +321,34 @@
       "summary": {
         "cycles_completed": 256,
         "survival_ticks": 256,
-        "sleep_count": 47,
+        "sleep_count": 25,
         "internal_update_count": 0,
         "memory_retrieval_count": 255,
         "telemetry_error_count": 0,
         "persistence_error_count": 0,
         "memory_hit_rate": 0.99609375,
-        "avg_free_energy_before": 0.3091681103144635,
-        "avg_free_energy_after": 0.32322458991728115,
-        "avg_free_energy_drop": 0.023771258180271662,
+        "avg_free_energy_before": 0.20812470742937467,
+        "avg_free_energy_after": 0.2178721102317227,
+        "avg_free_energy_drop": 0.020997924031302635,
         "min_energy": 0.81,
         "max_stress": 0.10999999999999999,
         "action_counts": {
-          "append_workspace_note": 36,
-          "delete_workspace_note": 1,
-          "exploit_shelter": 44,
-          "fetch_remote_status": 3,
-          "hide": 81,
-          "rest": 74,
-          "scan": 9,
-          "seek_contact": 1,
-          "unstable_workspace_note": 5,
-          "write_workspace_note": 2
+          "exploit_shelter": 16,
+          "hide": 52,
+          "rest": 188
         },
         "action_distribution": {
-          "append_workspace_note": 0.140625,
-          "delete_workspace_note": 0.00390625,
-          "exploit_shelter": 0.171875,
-          "fetch_remote_status": 0.01171875,
-          "hide": 0.31640625,
-          "rest": 0.2890625,
-          "scan": 0.03515625,
-          "seek_contact": 0.00390625,
-          "unstable_workspace_note": 0.01953125,
-          "write_workspace_note": 0.0078125
+          "exploit_shelter": 0.0625,
+          "hide": 0.203125,
+          "rest": 0.734375
         },
-        "action_switch_count": 88,
-        "unique_actions": 10,
-        "action_entropy": 2.3505720955010068,
-        "dominant_action": "hide",
-        "dominant_action_share": 0.31640625,
-        "max_action_streak": 14,
-        "last_choice": "exploit_shelter",
+        "action_switch_count": 77,
+        "unique_actions": 3,
+        "action_entropy": 1.0441969943018257,
+        "dominant_action": "rest",
+        "dominant_action_share": 0.734375,
+        "max_action_streak": 10,
+        "last_choice": "hide",
         "termination_reason": "cycles_exhausted"
       },
       "checks": {
@@ -531,7 +553,7 @@
       "multi_environment_established": true,
       "transfer_benchmark_established": true,
       "transfer_seed_protocol_canonical": true,
-      "personality_narrative_evidence_established": true,
+      "personality_narrative_evidence_established": false,
       "long_run_soak_regression_passed": true,
       "snapshot_compatibility_passed": true,
       "runtime_lifecycle_revalidated": true,
@@ -539,23 +561,23 @@
     }
   },
   "acceptance": {
-    "passed": true,
+    "passed": false,
     "gate_results": {
       "attention_main_loop_established": true,
       "multi_environment_established": true,
       "transfer_benchmark_established": true,
       "transfer_seed_protocol_canonical": true,
-      "personality_narrative_evidence_established": true,
+      "personality_narrative_evidence_established": false,
       "long_run_soak_regression_passed": true,
       "snapshot_compatibility_passed": true,
       "runtime_lifecycle_revalidated": true,
       "runtime_family_coverage_revalidated": true
     }
   },
-  "generated_at": "2026-05-04T10:15:33+00:00",
-  "codebase_version": "6ed78955906277291030ae748f76f72132d3a368",
+  "generated_at": "2026-06-04T09:44:45+00:00",
+  "codebase_version": "8cf9291a83391253bb35b782c8748b2defff1b68",
   "final_recommendation": {
-    "status": "READY_FOR_M3",
-    "passed": true
+    "status": "NOT_READY_FOR_M3",
+    "passed": false
   }
 }
