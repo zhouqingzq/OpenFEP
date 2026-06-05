@@ -6,7 +6,16 @@ import copy
 from dataclasses import dataclass, field
 from typing import Any, Mapping
 
-from segmentum.dialogue.runtime.m13_drive import _bounded_float, _mapping, _new_id, _string_list
+from segmentum.dialogue.runtime.m13_drive import (
+    _bounded_float,
+    _evict_patterns,
+    _mapping,
+    _new_id,
+    _string_list,
+    _traction_key,
+    _upsert_pattern,
+    normalize_m13_drive_state,
+)
 
 M19_ENGINEERING_PROXY_LABEL = "mvp_local_self_expectation"
 
@@ -56,6 +65,11 @@ _TARGET_CONTEXT_TO_INTERVENTION = {
     "initiative_after_silence": "delay_initiative_until_structural_silence_threshold",
     "repair_after_prior_tension": "prefer_repair_before_new_assertion",
 }
+INDIRECT_MISMATCH_REPAIR_BIAS = 0.35
+INDIRECT_MISMATCH_CONFLICT_LEVEL = 0.40
+INDIRECT_MISMATCH_PREDICTION_ERROR = 0.42
+INDIRECT_EXPECTATION_LOOKBACK_TURNS = 2
+
 _INTERVENTION_TO_ACTION_BIASES = {
     "prefer_short_casual_surface_form": {"answer": 0.05, "clarify": 0.03, "ask_question": -0.02},
     "prefer_semantic_only_group_boundary_repair": {
@@ -78,6 +92,7 @@ _INTERVENTION_TO_ACTION_BIASES = {
 class SelfExpectationPostTurnResult:
     events: list[dict[str, Any]] = field(default_factory=list)
     slow_patch_proposal: dict[str, Any] | None = None
+    traction_proposals: list[dict[str, Any]] = field(default_factory=list)
 
 
 def default_self_expectation_state() -> dict[str, Any]:
@@ -170,6 +185,21 @@ def prompt_safe_self_expectation_summary(state_or_self_expectation: Mapping[str,
             }
             for item in normalized.get("repair_expectations", [])[:4]
             if str(item.get("status", "") or "pending") in {"pending", "active", "uncertain"}
+        ],
+        "active_repair_priors": [
+            {
+                "id": str(item.get("id", ""))[:120],
+                "target_context": str(item.get("target_context", ""))[:80],
+                "preferred_intervention": str(item.get("preferred_intervention", ""))[:120],
+                "status": str(item.get("status", ""))[:32],
+            }
+            for item in (
+                _mapping(state_or_self_expectation).get("self_cognition", {}).get("repair_priors", [])
+                if isinstance(state_or_self_expectation, Mapping)
+                else []
+            )[:3]
+            if isinstance(item, Mapping)
+            and str(item.get("status", "") or "active") in {"active", "downgraded"}
         ],
         "last_prediction_error_proxy": round(
             _bounded_float(normalized.get("last_prediction_error_proxy"), default=0.0),
@@ -325,34 +355,173 @@ def apply_conscious_self_expectation_proposals(
     return events
 
 
-def _current_target_contexts(conscious_plan: Mapping[str, Any]) -> set[str]:
+def _structural_match_for_context(
+    target_context: str,
+    conscious_plan: Mapping[str, Any],
+    *,
+    group_turn_binding: Mapping[str, Any] | None = None,
+) -> bool:
+    pacing = str(conscious_plan.get("reply_pacing_hint", "") or "").strip()
+    temporal = _mapping(conscious_plan.get("temporal_assessment"))
+    gap = str(temporal.get("time_gap_label", "") or "").strip()
+    binding = _mapping(group_turn_binding)
+    audience = binding.get("audience_participant_ids") or binding.get("participant_ids") or []
+    multi_party = isinstance(audience, list) and len(audience) > 1
+    if target_context == "short_casual_reply":
+        return pacing == "casual_fast" or bool(conscious_plan.get("prefers_compact_reply"))
+    if target_context == "group_privacy_boundary":
+        return multi_party
+    if target_context == "high_stakes_clarification":
+        return pacing == "serious_thinking"
+    if target_context == "user_requests_directness":
+        return pacing in {"balanced", "serious_thinking"}
+    if target_context == "initiative_after_silence":
+        return gap in {"medium_gap", "long_gap"}
+    if target_context == "repair_after_prior_tension":
+        return gap in {"short_gap", "medium_gap", "long_gap"}
+    return False
+
+
+def infer_matching_target_contexts(
+    conscious_plan: Mapping[str, Any],
+    *,
+    self_state: Mapping[str, Any] | None = None,
+    group_turn_binding: Mapping[str, Any] | None = None,
+) -> set[str]:
+    contexts: set[str] = set()
+    for item in normalize_self_response_expectation_proposals(
+        conscious_plan.get("self_response_expectation_proposals")
+    ):
+        contexts.add(str(item.get("target_context", "") or "").strip())
+    for item in normalize_self_expectation_outcome_results(
+        conscious_plan.get("self_expectation_outcome_results")
+    ):
+        contexts.add(str(item.get("target_context", "") or "").strip())
+    if str(conscious_plan.get("reply_pacing_hint", "") or "").strip() == "casual_fast" or bool(
+        conscious_plan.get("prefers_compact_reply")
+    ):
+        contexts.add("short_casual_reply")
+    if str(conscious_plan.get("reply_pacing_hint", "") or "").strip() == "serious_thinking":
+        contexts.add("high_stakes_clarification")
+    binding = _mapping(group_turn_binding)
+    audience = binding.get("audience_participant_ids") or binding.get("participant_ids") or []
+    if isinstance(audience, list) and len(audience) > 1:
+        contexts.add("group_privacy_boundary")
+    normalized_self = normalize_self_expectation_state(self_state)
+    for repair in normalized_self.get("repair_expectations", []):
+        if not isinstance(repair, Mapping):
+            continue
+        if str(repair.get("status", "") or "pending") not in {"pending", "active", "uncertain"}:
+            continue
+        ctx = str(repair.get("target_context", "") or "").strip()
+        if ctx in ALLOWED_TARGET_CONTEXTS and _structural_match_for_context(
+            ctx,
+            conscious_plan,
+            group_turn_binding=group_turn_binding,
+        ):
+            contexts.add(ctx)
+    return {ctx for ctx in contexts if ctx in ALLOWED_TARGET_CONTEXTS}
+
+
+def collect_m19_audit_evidence_ids(state: Mapping[str, Any]) -> set[str]:
+    ids: set[str] = set()
+    self_state = normalize_self_expectation_state(_mapping(state).get("self_expectation_state"))
+    for bucket in (
+        "expectations_tail",
+        "mismatches_tail",
+        "repair_expectations",
+        "settlements_tail",
+        "traction_proposals_tail",
+    ):
+        for row in self_state.get(bucket, []) or []:
+            if not isinstance(row, Mapping):
+                continue
+            for key in (
+                "expectation_id",
+                "mismatch_id",
+                "proposal_id",
+                "settlement_id",
+                "proposal_id",
+                "source_expectation_id",
+            ):
+                value = str(row.get(key, "") or "").strip()
+                if value:
+                    ids.add(value)
+    cognition = _mapping(state.get("self_cognition"))
+    for row in cognition.get("calibrated_tendencies", []) or []:
+        if isinstance(row, Mapping) and str(row.get("id", "") or "").strip():
+            ids.add(str(row.get("id", "")).strip())
+    for row in cognition.get("repair_priors", []) or []:
+        if isinstance(row, Mapping) and str(row.get("id", "") or "").strip():
+            ids.add(str(row.get("id", "")).strip())
+    return ids
+
+
+def intervention_primary_action(intervention: str) -> str:
+    biases = _INTERVENTION_TO_ACTION_BIASES.get(intervention, {})
+    if not biases:
+        return "clarify"
+    return max(biases.items(), key=lambda item: item[1])[0]
+
+
+def _repair_action_biases(intervention: str, *, scale: float = 1.0) -> dict[str, float]:
     return {
-        str(item.get("target_context", "") or "").strip()
-        for item in normalize_self_response_expectation_proposals(
-            conscious_plan.get("self_response_expectation_proposals")
-        )
-        if str(item.get("target_context", "") or "").strip()
+        action: round(delta * scale, 6)
+        for action, delta in _INTERVENTION_TO_ACTION_BIASES.get(intervention, {}).items()
     }
 
 
-def _repair_action_biases(intervention: str) -> dict[str, float]:
-    return dict(_INTERVENTION_TO_ACTION_BIASES.get(intervention, {}))
+def _apply_intervention_to_guidance(
+    *,
+    intervention: str,
+    weight: float,
+    repair_bias_delta: float,
+    conflict_delta: float,
+    assertion_cap: float | None,
+    action_biases: dict[str, float],
+    preferred: list[str],
+    discouraged: list[str],
+) -> tuple[float, float, float | None]:
+    repair_bias_delta = max(repair_bias_delta, min(0.22, (0.08 + weight * 0.14)))
+    conflict_delta = max(conflict_delta, min(0.15, (0.05 + weight * 0.10)))
+    if intervention == "reduce_assertion_strength_before_clarify":
+        assertion_cap = 0.52 if assertion_cap is None else min(assertion_cap, 0.52)
+    for action, delta in _repair_action_biases(intervention, scale=weight).items():
+        action_biases[action] = round(action_biases.get(action, 0.0) + delta, 6)
+        if delta > 0:
+            preferred.append(action)
+        elif delta < 0:
+            discouraged.append(action)
+    return repair_bias_delta, conflict_delta, assertion_cap
 
 
 def build_self_repair_guidance(
     state: Mapping[str, Any],
     *,
     conscious_plan: Mapping[str, Any],
+    group_turn_binding: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     self_state = normalize_self_expectation_state(_mapping(state).get("self_expectation_state"))
-    current_contexts = _current_target_contexts(conscious_plan)
+    cognition = _mapping(state.get("self_cognition"))
+    current_contexts = infer_matching_target_contexts(
+        conscious_plan,
+        self_state=self_state,
+        group_turn_binding=group_turn_binding,
+    )
     matched_rows = [
         row
         for row in self_state.get("repair_expectations", [])
         if str(row.get("status", "") or "pending") in {"pending", "active", "uncertain"}
         and str(row.get("target_context", "") or "") in current_contexts
     ]
-    if not matched_rows:
+    matched_priors = [
+        row
+        for row in cognition.get("repair_priors", []) or []
+        if isinstance(row, Mapping)
+        and str(row.get("status", "") or "active") in {"active", "downgraded"}
+        and str(row.get("target_context", "") or "") in current_contexts
+    ]
+    if not matched_rows and not matched_priors:
         return {
             "repair_bias_delta": 0.0,
             "conflict_level_delta": 0.0,
@@ -371,18 +540,17 @@ def build_self_repair_guidance(
     summary_rows: list[dict[str, Any]] = []
     for row in matched_rows[:2]:
         priority = _bounded_float(row.get("priority"), default=0.5)
-        reduction_target = _bounded_float(row.get("prediction_error_reduction_target"), default=0.2)
         intervention = str(row.get("intervention", "") or "")
-        repair_bias_delta = max(repair_bias_delta, min(0.22, 0.10 + priority * 0.18))
-        conflict_delta = max(conflict_delta, min(0.15, 0.06 + reduction_target * 0.14))
-        if intervention == "reduce_assertion_strength_before_clarify":
-            assertion_cap = 0.52 if assertion_cap is None else min(assertion_cap, 0.52)
-        for action, delta in _repair_action_biases(intervention).items():
-            action_biases[action] = round(action_biases.get(action, 0.0) + delta, 6)
-            if delta > 0:
-                preferred.append(action)
-            elif delta < 0:
-                discouraged.append(action)
+        repair_bias_delta, conflict_delta, assertion_cap = _apply_intervention_to_guidance(
+            intervention=intervention,
+            weight=0.55 + priority * 0.35,
+            repair_bias_delta=repair_bias_delta,
+            conflict_delta=conflict_delta,
+            assertion_cap=assertion_cap,
+            action_biases=action_biases,
+            preferred=preferred,
+            discouraged=discouraged,
+        )
         summary_rows.append(
             {
                 "expectation_id": str(row.get("expectation_id", ""))[:120],
@@ -390,6 +558,30 @@ def build_self_repair_guidance(
                 "intervention": intervention[:120],
                 "status": str(row.get("status", ""))[:32],
                 "verify_on": str(row.get("verify_on", ""))[:40],
+                "source": "repair_expectation",
+            }
+        )
+    for prior in matched_priors[:2]:
+        intervention = str(prior.get("preferred_intervention", "") or "")
+        confidence = _bounded_float(prior.get("confidence"), default=0.55)
+        repair_bias_delta, conflict_delta, assertion_cap = _apply_intervention_to_guidance(
+            intervention=intervention,
+            weight=0.35 + confidence * 0.25,
+            repair_bias_delta=repair_bias_delta,
+            conflict_delta=conflict_delta,
+            assertion_cap=assertion_cap,
+            action_biases=action_biases,
+            preferred=preferred,
+            discouraged=discouraged,
+        )
+        summary_rows.append(
+            {
+                "expectation_id": str(prior.get("id", ""))[:120],
+                "target_context": str(prior.get("target_context", ""))[:80],
+                "intervention": intervention[:120],
+                "status": str(prior.get("status", ""))[:32],
+                "verify_on": "slow_repair_prior",
+                "source": "repair_prior",
             }
         )
     return {
@@ -556,21 +748,142 @@ def _maybe_create_repair_expectation(
     return row
 
 
+def build_shadow_validation(
+    repair: Mapping[str, Any],
+    *,
+    prediction_error_before: float,
+    prediction_error_after: float,
+    control_guidance: Mapping[str, Any],
+) -> dict[str, Any]:
+    intervention = str(repair.get("intervention", "") or "").strip()
+    control = _mapping(control_guidance)
+    repair_bias = _bounded_float(control.get("repair_bias"), default=0.0)
+    estimated_delta = round(prediction_error_before - prediction_error_after, 6)
+    active_biases = _repair_action_biases(intervention)
+    discouraged_actions = [action for action, delta in active_biases.items() if delta < 0]
+    alternative_intervention = ""
+    for candidate, biases in _INTERVENTION_TO_ACTION_BIASES.items():
+        if candidate == intervention:
+            continue
+        if discouraged_actions and any(biases.get(action, 0.0) > 0 for action in discouraged_actions):
+            alternative_intervention = candidate
+            break
+    return {
+        "shadow_id": _new_id("self_shadow"),
+        "expectation_id": str(repair.get("expectation_id", "") or "")[:120],
+        "intervention": intervention[:120],
+        "alternative_intervention": alternative_intervention[:120],
+        "preferred_action": intervention_primary_action(intervention),
+        "estimated_prediction_error_delta": estimated_delta,
+        "repair_bias_at_eval": round(repair_bias, 6),
+        "active_intervention_fits": bool(estimated_delta > 0.02 and repair_bias >= 0.12),
+        "advisory_only": True,
+        "engineering_proxy_label": M19_ENGINEERING_PROXY_LABEL,
+    }
+
+
 def _settlement_status_from_outcome(
     *,
     outcome_status: str | None,
     prediction_after: float,
     reduction_target: float,
 ) -> str:
-    if outcome_status == "violated":
+    status = str(outcome_status or "").strip()
+    if status == "violated":
         return "violated"
-    if outcome_status == "uncertain":
+    if status == "uncertain":
         return "uncertain"
-    if outcome_status == "confirmed":
-        return "confirmed"
-    if prediction_after <= reduction_target:
+    if status == "confirmed":
         return "confirmed"
     return "uncertain"
+
+
+def _has_primary_indirect_signal(
+    *,
+    control_guidance: Mapping[str, Any],
+    reward_prediction_error_proxy: float,
+) -> bool:
+    control = _mapping(control_guidance)
+    repair_bias = _bounded_float(control.get("repair_bias"), default=0.0)
+    conflict_level = _bounded_float(control.get("conflict_level"), default=0.0)
+    prediction_error = _bounded_float(abs(reward_prediction_error_proxy), default=0.0)
+    return (
+        repair_bias >= INDIRECT_MISMATCH_REPAIR_BIAS
+        or conflict_level >= INDIRECT_MISMATCH_CONFLICT_LEVEL
+        or prediction_error >= INDIRECT_MISMATCH_PREDICTION_ERROR
+    )
+
+
+def _record_mismatch_row(
+    *,
+    source_expectation_id: str,
+    target_context: str,
+    status: str,
+    severity: float,
+    confidence: float,
+    prediction_after: float,
+    evidence_refs: list[str],
+    reason_codes: list[str],
+    now: int,
+    turn_index: int,
+    mismatches_tail: list[dict[str, Any]],
+    mismatch_memory_fast: list[dict[str, Any]],
+) -> dict[str, Any]:
+    mismatch_type = _TARGET_CONTEXT_TO_MISMATCH_TYPE.get(target_context, "persona_drift")
+    mismatch_key = _make_recurrence_key(target_context, mismatch_type)
+    mismatch = {
+        "mismatch_id": _new_id("self_mismatch"),
+        "source_expectation_id": source_expectation_id,
+        "target_context": target_context,
+        "mismatch_type": mismatch_type,
+        "mismatch_summary": f"{target_context} drifted away from the expected reply shape."[:200],
+        "severity": round(min(1.0, severity), 6),
+        "confidence": round(confidence, 6),
+        "prediction_error_proxy": prediction_after,
+        "recurrence_key": mismatch_key,
+        "turn_index": turn_index,
+        "at": now,
+        "evidence_refs": evidence_refs[:8],
+        "reason_codes": reason_codes[:8],
+        "engineering_proxy_label": M19_ENGINEERING_PROXY_LABEL,
+    }
+    mismatches_tail[:] = _append_tail(mismatches_tail, mismatch, limit=MAX_MISMATCHES_TAIL)
+    fast_row = _lookup_fast_mismatch(mismatch_memory_fast, mismatch_key=mismatch_key)
+    if fast_row is None:
+        fast_row = {
+            "mismatch_key": mismatch_key,
+            "mismatch_type": mismatch_type,
+            "target_context": target_context,
+            "support_count": 0,
+            "weighted_support": 0.0,
+            "recent_support": 0.0,
+            "last_prediction_error_proxy": 0.0,
+            "last_seen_at": now,
+            "last_seen_turn": turn_index,
+            "evidence_refs_tail": [],
+            "status": "cooling",
+        }
+        mismatch_memory_fast.append(fast_row)
+    fast_row["support_count"] = int(fast_row.get("support_count", 0) or 0) + 1
+    increment = round(
+        mismatch["severity"] * mismatch["confidence"] + prediction_after * 0.30 + (0.10 if status == "violated" else 0.04),
+        6,
+    )
+    fast_row["weighted_support"] = round(
+        min(4.0, _bounded_float(fast_row.get("weighted_support"), default=0.0) + increment),
+        6,
+    )
+    fast_row["recent_support"] = round(min(2.0, _bounded_float(fast_row.get("recent_support"), default=0.0) + 0.45), 6)
+    fast_row["last_prediction_error_proxy"] = prediction_after
+    fast_row["last_seen_at"] = now
+    fast_row["last_seen_turn"] = turn_index
+    fast_row["evidence_refs_tail"] = _string_list(
+        [*fast_row.get("evidence_refs_tail", []), *mismatch["evidence_refs"]],
+        limit=8,
+    )
+    if int(fast_row.get("support_count", 0) or 0) >= 2 and _bounded_float(fast_row.get("weighted_support"), default=0.0) >= 0.95:
+        fast_row["status"] = "active"
+    return mismatch
 
 
 def _repair_expectation_by_context(
@@ -750,15 +1063,19 @@ def apply_self_expectation_post_turn(
     reward_event_id: str,
     now: int,
     turn_index: int,
+    group_turn_binding: Mapping[str, Any] | None = None,
 ) -> SelfExpectationPostTurnResult:
     result = SelfExpectationPostTurnResult()
     self_state = ensure_self_expectation_state(state)
     previous_prediction_error = _bounded_float(self_state.get("last_prediction_error_proxy"), default=0.0)
     _apply_mismatch_decay(self_state, turn_index=turn_index)
-    expectations = [dict(item) for item in self_state.get("expectations_tail", []) if isinstance(item, Mapping)]
     mismatches_tail = [dict(item) for item in self_state.get("mismatches_tail", []) if isinstance(item, Mapping)]
     mismatch_memory_fast = [dict(item) for item in self_state.get("mismatch_memory_fast", []) if isinstance(item, Mapping)]
-    current_contexts = _current_target_contexts(conscious_plan)
+    current_contexts = infer_matching_target_contexts(
+        conscious_plan,
+        self_state=self_state,
+        group_turn_binding=group_turn_binding,
+    )
     control = _mapping(control_guidance)
     conflict_level = _bounded_float(control.get("conflict_level"), default=0.0)
     repair_bias = _bounded_float(control.get("repair_bias"), default=0.0)
@@ -767,6 +1084,7 @@ def apply_self_expectation_post_turn(
         conscious_plan.get("self_expectation_outcome_results")
     )
     outcome_by_context: dict[str, dict[str, Any]] = {}
+    outcome_source_ids: set[str] = set()
     mismatches_this_turn: list[dict[str, Any]] = []
     for outcome in outcome_results:
         source_expectation_id = str(outcome.get("source_expectation_id", "") or "")
@@ -775,6 +1093,7 @@ def apply_self_expectation_post_turn(
         if not expectation:
             continue
         outcome_by_context[target_context] = outcome
+        outcome_source_ids.add(source_expectation_id)
         status = str(outcome.get("status", "") or "")
         mismatch_type = _TARGET_CONTEXT_TO_MISMATCH_TYPE.get(target_context, "persona_drift")
         mismatch_key = _make_recurrence_key(target_context, mismatch_type)
@@ -806,59 +1125,23 @@ def apply_self_expectation_post_turn(
             min(1.0, 0.28 + conflict_level * 0.28 + repair_bias * 0.24 + prediction_after * 0.20),
             6,
         )
-        mismatch = {
-            "mismatch_id": _new_id("self_mismatch"),
-            "source_expectation_id": source_expectation_id,
-            "target_context": target_context,
-            "mismatch_type": mismatch_type,
-            "mismatch_summary": f"{target_context} drifted away from the expected reply shape."[:200],
-            "severity": severity,
-            "confidence": round(0.70 if status == "violated" else 0.56, 6),
-            "prediction_error_proxy": prediction_after,
-            "recurrence_key": mismatch_key,
-            "turn_index": turn_index,
-            "at": now,
-            "evidence_refs": list(dict.fromkeys([*outcome.get("evidence_refs", []), source_expectation_id, reward_event_id]))[:8],
-            "reason_codes": list(dict.fromkeys([*outcome.get("reason_codes", []), status]))[:8],
-            "engineering_proxy_label": M19_ENGINEERING_PROXY_LABEL,
-        }
-        mismatches_tail = _append_tail(mismatches_tail, mismatch, limit=MAX_MISMATCHES_TAIL)
+        mismatch = _record_mismatch_row(
+            source_expectation_id=source_expectation_id,
+            target_context=target_context,
+            status=status,
+            severity=severity,
+            confidence=round(0.70 if status == "violated" else 0.56, 6),
+            prediction_after=prediction_after,
+            evidence_refs=list(
+                dict.fromkeys([*outcome.get("evidence_refs", []), source_expectation_id, reward_event_id])
+            )[:8],
+            reason_codes=list(dict.fromkeys([*outcome.get("reason_codes", []), status]))[:8],
+            now=now,
+            turn_index=turn_index,
+            mismatches_tail=mismatches_tail,
+            mismatch_memory_fast=mismatch_memory_fast,
+        )
         mismatches_this_turn.append(mismatch)
-        fast_row = _lookup_fast_mismatch(mismatch_memory_fast, mismatch_key=mismatch_key)
-        if fast_row is None:
-            fast_row = {
-                "mismatch_key": mismatch_key,
-                "mismatch_type": mismatch_type,
-                "target_context": target_context,
-                "support_count": 0,
-                "weighted_support": 0.0,
-                "recent_support": 0.0,
-                "last_prediction_error_proxy": 0.0,
-                "last_seen_at": now,
-                "last_seen_turn": turn_index,
-                "evidence_refs_tail": [],
-                "status": "cooling",
-            }
-            mismatch_memory_fast.append(fast_row)
-        fast_row["support_count"] = int(fast_row.get("support_count", 0) or 0) + 1
-        increment = round(
-            mismatch["severity"] * mismatch["confidence"] + prediction_after * 0.30 + (0.10 if status == "violated" else 0.04),
-            6,
-        )
-        fast_row["weighted_support"] = round(
-            min(4.0, _bounded_float(fast_row.get("weighted_support"), default=0.0) + increment),
-            6,
-        )
-        fast_row["recent_support"] = round(min(2.0, _bounded_float(fast_row.get("recent_support"), default=0.0) + 0.45), 6)
-        fast_row["last_prediction_error_proxy"] = prediction_after
-        fast_row["last_seen_at"] = now
-        fast_row["last_seen_turn"] = turn_index
-        fast_row["evidence_refs_tail"] = _string_list(
-            [*fast_row.get("evidence_refs_tail", []), *mismatch["evidence_refs"]],
-            limit=8,
-        )
-        if int(fast_row.get("support_count", 0) or 0) >= 2 and _bounded_float(fast_row.get("weighted_support"), default=0.0) >= 0.95:
-            fast_row["status"] = "active"
         result.events.append(
             {
                 "type": "SelfExpectationMismatchObservedEvent",
@@ -867,6 +1150,70 @@ def apply_self_expectation_post_turn(
                 **mismatch,
             }
         )
+
+    if _has_primary_indirect_signal(
+        control_guidance=control,
+        reward_prediction_error_proxy=reward_prediction_error_proxy,
+    ):
+        for expectation in reversed(list(self_state.get("expectations_tail", []))):
+            if not isinstance(expectation, Mapping):
+                continue
+            source_expectation_id = str(expectation.get("expectation_id", "") or "").strip()
+            if not source_expectation_id or source_expectation_id in outcome_source_ids:
+                continue
+            if str(expectation.get("status", "") or "active") != "active":
+                continue
+            if turn_index - int(expectation.get("turn_index", turn_index) or turn_index) > INDIRECT_EXPECTATION_LOOKBACK_TURNS:
+                continue
+            target_context = str(expectation.get("target_context", "") or "").strip()
+            if target_context not in ALLOWED_TARGET_CONTEXTS:
+                continue
+            mismatch_key = _make_recurrence_key(
+                target_context,
+                _TARGET_CONTEXT_TO_MISMATCH_TYPE.get(target_context, "persona_drift"),
+            )
+            if any(str(item.get("recurrence_key", "") or "") == mismatch_key for item in mismatches_this_turn):
+                continue
+            prediction_after = _prediction_error_after(
+                reward_prediction_error=reward_prediction_error_proxy,
+                outcome_status="violated",
+                reduction_target=max(0.15, previous_prediction_error or 0.18),
+            )
+            mismatch = _record_mismatch_row(
+                source_expectation_id=source_expectation_id,
+                target_context=target_context,
+                status="uncertain",
+                severity=round(
+                    min(1.0, 0.22 + conflict_level * 0.24 + repair_bias * 0.22 + prediction_after * 0.18),
+                    6,
+                ),
+                confidence=0.58,
+                prediction_after=prediction_after,
+                evidence_refs=list(
+                    dict.fromkeys(
+                        [
+                            source_expectation_id,
+                            reward_event_id,
+                            f"turn:{turn_index}:indirect_control",
+                        ]
+                    )
+                )[:8],
+                reason_codes=["indirect_control_guidance", "prediction_error_proxy"],
+                now=now,
+                turn_index=turn_index,
+                mismatches_tail=mismatches_tail,
+                mismatch_memory_fast=mismatch_memory_fast,
+            )
+            mismatches_this_turn.append(mismatch)
+            result.events.append(
+                {
+                    "type": "SelfExpectationMismatchObservedEvent",
+                    "turn_index": turn_index,
+                    "at": now,
+                    "indirect_observation": True,
+                    **mismatch,
+                }
+            )
 
     for repair in [item for item in self_state.get("repair_expectations", []) if isinstance(item, dict)]:
         if int(repair.get("created_turn_index", turn_index) or turn_index) + int(repair.get("opportunity_window", 4) or 4) < turn_index:
@@ -903,6 +1250,11 @@ def apply_self_expectation_post_turn(
             continue
         outcome = outcome_by_context.get(target_context)
         for repair in repairs:
+            if int(repair.get("last_settlement_turn_index", -1) or -1) == turn_index:
+                continue
+            max_opportunities = int(repair.get("expires_after_opportunities", 2) or 2)
+            if int(repair.get("opportunities_seen", 0) or 0) >= max_opportunities:
+                continue
             repair["opportunities_seen"] = int(repair.get("opportunities_seen", 0) or 0) + 1
             prediction_after = _prediction_error_after(
                 reward_prediction_error=reward_prediction_error_proxy,
@@ -919,6 +1271,12 @@ def apply_self_expectation_post_turn(
                 default=0.2,
             )
             delta = round(before - prediction_after, 6)
+            shadow_validation = build_shadow_validation(
+                repair,
+                prediction_error_before=before,
+                prediction_error_after=prediction_after,
+                control_guidance=control,
+            )
             settlement = {
                 "settlement_id": _new_id("self_settlement"),
                 "expectation_id": str(repair.get("expectation_id", "") or "")[:120],
@@ -938,6 +1296,7 @@ def apply_self_expectation_post_turn(
                     if settlement_status == "violated"
                     else []
                 ),
+                "shadow_validation": shadow_validation,
                 "confidence": round(0.76 if settlement_status == "confirmed" else 0.66 if settlement_status == "violated" else 0.55, 6),
                 "at": now,
                 "turn_index": turn_index,
@@ -946,6 +1305,7 @@ def apply_self_expectation_post_turn(
                         *repair.get("evidence_refs", []),
                         *(_mapping(outcome).get("evidence_refs", []) if outcome else []),
                         reward_event_id,
+                        shadow_validation.get("shadow_id"),
                     ],
                     limit=8,
                 ),
@@ -953,11 +1313,22 @@ def apply_self_expectation_post_turn(
                     [
                         *(outcome.get("reason_codes", []) if outcome else []),
                         settlement_status,
+                        "shadow_validation_advisory",
                     ],
                     limit=8,
                 ),
                 "engineering_proxy_label": M19_ENGINEERING_PROXY_LABEL,
             }
+            if settlement_status == "uncertain" and shadow_validation.get("active_intervention_fits"):
+                settlement["confidence"] = round(min(0.68, _bounded_float(settlement["confidence"], default=0.55) + 0.06), 6)
+            result.events.append(
+                {
+                    "type": "SelfRepairShadowValidationEvent",
+                    "turn_index": turn_index,
+                    "at": now,
+                    **shadow_validation,
+                }
+            )
             settlements_tail = [dict(item) for item in self_state.get("settlements_tail", []) if isinstance(item, Mapping)]
             self_state["settlements_tail"] = _append_tail(settlements_tail, settlement, limit=MAX_SETTLEMENTS_TAIL)
             repair["settlement_ids"] = _string_list(
@@ -971,6 +1342,7 @@ def apply_self_expectation_post_turn(
                 repair["status"] = "violated"
             elif settlement_status == "uncertain":
                 repair["status"] = "uncertain"
+            repair["last_settlement_turn_index"] = turn_index
             fast_row = _lookup_fast_mismatch(
                 mismatch_memory_fast,
                 mismatch_key=str(repair.get("source_mismatch_key", "") or ""),
@@ -1009,6 +1381,7 @@ def apply_self_expectation_post_turn(
                 limit=MAX_TRACTION_PROPOSALS,
             )
             result.events.append({"type": "SelfRepairTractionProposalEvent", **traction_proposal})
+            result.traction_proposals.append(dict(traction_proposal))
 
     self_state["mismatches_tail"] = mismatches_tail[-MAX_MISMATCHES_TAIL:]
     self_state["mismatch_memory_fast"] = mismatch_memory_fast[-MAX_MISMATCH_MEMORY:]
@@ -1053,6 +1426,98 @@ def apply_self_expectation_post_turn(
         )
     state["self_expectation_state"] = self_state
     return result
+
+
+def apply_m19_traction_proposals_to_m13(
+    m13_state: dict[str, Any],
+    proposals: list[Mapping[str, Any]],
+    *,
+    user_id: str,
+    topic_fingerprint: str,
+    turn_index: int,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    state = normalize_m13_drive_state(m13_state)
+    events: list[dict[str, Any]] = []
+    if not proposals:
+        return state, events
+    patterns = [dict(row) for row in state.get("path_patterns_by_action", []) if isinstance(row, Mapping)]
+    for proposal in proposals:
+        if not isinstance(proposal, Mapping):
+            continue
+        status = str(proposal.get("status", "") or "").strip()
+        if status not in {"confirmed", "violated"}:
+            continue
+        intervention = str(proposal.get("intervention", "") or "").strip()
+        primary_action = intervention_primary_action(intervention)
+        proposal_id = str(proposal.get("proposal_id", "") or _new_id("m19_traction"))[:120]
+        traction_delta = _bounded_float(proposal.get("traction_delta"), default=0.05)
+        if status == "violated":
+            traction_delta = -abs(traction_delta)
+        pattern = _upsert_pattern(
+            patterns,
+            action=primary_action,
+            user_id=user_id,
+            topic_fingerprint=topic_fingerprint,
+            turn_index=turn_index,
+            evidence_id=proposal_id,
+        )
+        previous_hp = _bounded_float(pattern.get("habit_precision"), default=0.0)
+        pattern["habit_precision"] = round(
+            max(0.0, min(1.0, previous_hp + traction_delta)),
+            6,
+        )
+        if status == "violated":
+            alt_delta = _bounded_float(proposal.get("alternative_pull_delta"), default=0.06)
+            biases = _INTERVENTION_TO_ACTION_BIASES.get(intervention, {})
+            alt_actions = [action for action, delta in biases.items() if delta < 0]
+            for alt_action in alt_actions[:1]:
+                alt_pattern = _upsert_pattern(
+                    patterns,
+                    action=alt_action,
+                    user_id=user_id,
+                    topic_fingerprint=topic_fingerprint,
+                    turn_index=turn_index,
+                    evidence_id=proposal_id,
+                )
+                alt_hp = _bounded_float(alt_pattern.get("habit_precision"), default=0.0)
+                alt_pattern["habit_precision"] = round(min(1.0, alt_hp + alt_delta), 6)
+        traction = _mapping(state.get("traction_by_action"))
+        traction[_traction_key(primary_action, user_id)] = round(
+            _bounded_float(pattern.get("habit_precision"), default=0.0),
+            6,
+        )
+        state["traction_by_action"] = traction
+        events.append(
+            {
+                "type": "M13DrivePatchProposal",
+                "patch_id": proposal_id,
+                "target": "m13_drive_state",
+                "operation": "increment" if status == "confirmed" else "adjust",
+                "field_path": f"path_patterns_by_action/{primary_action}/{user_id}",
+                "previous_summary": f"habit={previous_hp:.3f}",
+                "new_summary": f"habit={pattern['habit_precision']:.3f}",
+                "source_event_id": proposal_id,
+                "reason": f"m19_self_repair_{status}",
+                "confidence": 0.72 if status == "confirmed" else 0.66,
+                "ttl": 8,
+                "engineering_proxy_label": M19_ENGINEERING_PROXY_LABEL,
+            }
+        )
+        events.append(
+            {
+                "type": "M13DrivePatchCommit",
+                "commit_id": _new_id("m13_commit"),
+                "patch_id": proposal_id,
+                "accepted": True,
+                "owner": "M19SelfExpectationAdapter",
+                "reason": f"m19_self_repair_{status}",
+                "committed_summary": f"m19 traction {status} for {primary_action}",
+                "engineering_proxy_label": M19_ENGINEERING_PROXY_LABEL,
+            }
+        )
+    _evict_patterns(patterns)
+    state["path_patterns_by_action"] = patterns
+    return state, events
 
 
 def apply_idle_self_expectation_review(

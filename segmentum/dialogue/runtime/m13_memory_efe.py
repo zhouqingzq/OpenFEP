@@ -151,6 +151,12 @@ def _content_summary(row: Mapping[str, Any]) -> str:
 def _evidence_refs(row: Mapping[str, Any], *, source_kind: str = "") -> list[str]:
     if source_kind == "scheduled_outreach":
         return explicit_scheduled_anchor_refs(row, limit=8)
+    if source_kind == "self_repair_expectation":
+        refs = strict_evidence_refs(row, limit=8)
+        mismatch_key = str(row.get("source_mismatch_key", "") or "").strip()
+        if mismatch_key:
+            refs.append(mismatch_key)
+        return list(dict.fromkeys(refs))[:8]
     return strict_evidence_refs(row, limit=8)
 
 
@@ -579,9 +585,16 @@ def _make_expectation(
     ):
         eligible = False
         ineligibility_reason = "generic_low_resolution_expectation"
-    elif source_kind in {"pending_expectation", "memory_dynamics_expectation", "open_item"} and eligible and not is_strictly_traceable(row):
+    elif (
+        source_kind in {"pending_expectation", "memory_dynamics_expectation", "open_item"}
+        and eligible
+        and not is_strictly_traceable(row)
+    ):
         eligible = False
         ineligibility_reason = "not_traceable_or_testable"
+    elif source_kind == "self_repair_expectation" and eligible and not _evidence_refs(row, source_kind=source_kind):
+        eligible = False
+        ineligibility_reason = "self_repair_missing_traceability"
     relationship_weight = _clamp(0.75 + 0.25 * _relationship_precision(state), 0.75, 1.0)
     recall_keys = _string_list(row.get("recall_keys"), limit=8)
     precision, precision_approx = _precision_components(
@@ -593,7 +606,12 @@ def _make_expectation(
     )
     elapsed = max(0, now - due_at) if due_at > 0 else 0
     required = 1.0 if (evidence_refs or bound_ids) and status in _UNRESOLVED_STATUSES | {"due"} else 0.0
-    if not expectation_id or (not evidence_refs and not bound_ids and not due_at and source_kind != "open_item"):
+    if not expectation_id or (
+        not evidence_refs
+        and not bound_ids
+        and not due_at
+        and source_kind not in {"open_item", "self_repair_expectation"}
+    ):
         eligible = False
         ineligibility_reason = ineligibility_reason or "not_traceable_or_testable"
     if phase == "idle" and status in {"confirmed", "settled"}:
@@ -773,6 +791,50 @@ def _normalize_open_item(
     )
 
 
+def _normalize_self_repair_expectation(
+    row: Mapping[str, Any],
+    *,
+    state: Mapping[str, Any],
+    now: int,
+    phase: str,
+) -> NormalizedExpectation:
+    status = str(row.get("status", "pending") or "pending").strip().lower()
+    evidence_refs = _evidence_refs(row, source_kind="self_repair_expectation")
+    if status in {"confirmed", "expired", "superseded"}:
+        eligible = False
+        reason = "self_repair_already_settled"
+    elif status not in {"pending", "active", "uncertain"}:
+        eligible = False
+        reason = "self_repair_inactive_status"
+    else:
+        eligible = bool(str(row.get("expectation_id", "") or "").strip()) and bool(evidence_refs)
+        reason = "" if eligible else "self_repair_missing_traceability"
+    created_at = _epoch(row.get("created_at"))
+    due_at = created_at if created_at > 0 else now
+    window_turns = max(1, int(row.get("opportunity_window", 4) or 4))
+    expected_window = max(NEXT_USER_TURN_EXPECTED_WINDOW_SECONDS, window_turns * 300)
+    target_context = str(row.get("target_context", "") or "").strip()
+    intervention = str(row.get("intervention", "") or "").strip()
+    return _make_expectation(
+        {
+            **dict(row),
+            "content": f"self repair for {target_context} via {intervention}".strip(),
+            "status": status if status in {"violated", "uncertain"} else "uncertain",
+            "recall_keys": [target_context, intervention],
+            "boundary_cost_hint": "soft",
+            "confidence": _bounded_float(row.get("priority"), default=0.55),
+        },
+        state=state,
+        now=now,
+        phase=phase,
+        source_kind="self_repair_expectation",
+        due_at=due_at,
+        expected_window_seconds=expected_window,
+        eligible=eligible,
+        ineligibility_reason=reason,
+    )
+
+
 def _normalize_scheduled_intent(
     row: Mapping[str, Any],
     *,
@@ -865,6 +927,10 @@ def normalize_expectations_for_efe(
     for row in sig.get("scheduled_intents", []) or []:
         if isinstance(row, Mapping):
             add(_normalize_scheduled_intent(row, state=state, now=now, phase=phase))
+    self_expectation_state = _mapping(state.get("self_expectation_state"))
+    for row in self_expectation_state.get("repair_expectations", []) or []:
+        if isinstance(row, Mapping):
+            add(_normalize_self_repair_expectation(row, state=state, now=now, phase=phase))
 
     return NormalizedExpectationSet(
         eligible_for_efe=eligible,
@@ -1032,10 +1098,15 @@ def _traceable_expectation_id(
     expectations: list[NormalizedExpectation],
     social: Mapping[str, float],
 ) -> str:
-    if not expectations:
+    outreach_candidates = [
+        expectation
+        for expectation in expectations
+        if expectation.source_kind != "self_repair_expectation"
+    ]
+    if not outreach_candidates:
         return ""
     ranked = sorted(
-        expectations,
+        outreach_candidates,
         key=lambda e: (
             -float(social.get(e.expectation_id, 0.0) or 0.0),
             e.due_at if e.due_at > 0 else 2**62,

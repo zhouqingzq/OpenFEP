@@ -200,8 +200,10 @@ from segmentum.dialogue.runtime.m19_self_expectation import (
     M19_ENGINEERING_PROXY_LABEL,
     apply_conscious_self_expectation_proposals,
     apply_idle_self_expectation_review,
+    apply_m19_traction_proposals_to_m13,
     apply_self_expectation_post_turn,
     build_self_repair_guidance,
+    collect_m19_audit_evidence_ids,
     default_self_expectation_state,
     normalize_self_expectation_outcome_results,
     normalize_self_response_expectation_proposals,
@@ -4029,7 +4031,11 @@ def build_memory_dynamics_guidance(
             }
         )
 
-    self_repair_guidance = build_self_repair_guidance(state, conscious_plan=conscious_plan)
+    self_repair_guidance = build_self_repair_guidance(
+        state,
+        conscious_plan=conscious_plan,
+        group_turn_binding=group_turn_binding,
+    )
     guidance = {
         "memory_value": {
             "should_encode": should_encode,
@@ -7386,18 +7392,34 @@ class MVPDialogueRuntime:
             reward_event_id=m13_reward_evaluation.event_id,
             now=now,
             turn_index=turn_index,
+            group_turn_binding=group_turn_binding,
         )
         for event in m19_post_turn.events:
             bus.append(event)
+        if m19_post_turn.traction_proposals:
+            m13_state, m19_traction_events = apply_m19_traction_proposals_to_m13(
+                m13_state,
+                m19_post_turn.traction_proposals,
+                user_id=user_id,
+                topic_fingerprint=m13_evaluation.topic_fingerprint,
+                turn_index=turn_index,
+            )
+            state["m13_drive_state"] = m13_state
+            for event in m19_traction_events:
+                bus.append(event)
         if isinstance(m19_post_turn.slow_patch_proposal, Mapping):
-            promotion_refs = set(_string_list(m19_post_turn.slow_patch_proposal.get("evidence_refs"), limit=8))
+            retrieved_ids = {
+                str(item.get("id", ""))
+                for item in retrieved
+                if item.get("id")
+            } | collect_m19_audit_evidence_ids(state)
             m19_patch_result = SelfCognitionPatchOwner.validate_and_commit(
                 state,
                 m19_post_turn.slow_patch_proposal,
-                retrieved_ids={*{str(item.get("id", "")) for item in retrieved if item.get("id")}, *promotion_refs},
+                retrieved_ids=retrieved_ids,
                 turn_index=turn_index,
                 now=now,
-                session_patches=0,
+                session_patches=int(count_session_idle_patches(state).get("self_cognition", 0)),
             )
             for event in m19_patch_result.events:
                 tagged = dict(event)

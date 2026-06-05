@@ -3,6 +3,15 @@ from __future__ import annotations
 from pathlib import Path
 
 from segmentum.dialogue.runtime.m14_idle_reflector import normalize_conscious_idle_plan
+from segmentum.dialogue.runtime.m19_self_expectation import (
+    apply_m19_traction_proposals_to_m13,
+    apply_self_expectation_post_turn,
+    build_self_repair_guidance,
+    build_shadow_validation,
+    default_self_expectation_state,
+    infer_matching_target_contexts,
+)
+from segmentum.dialogue.runtime.m13_drive import normalize_m13_drive_state
 from segmentum.dialogue.runtime.mvp_loop import (
     MVPDialogueRuntime,
     MVPStateStore,
@@ -166,6 +175,160 @@ def test_idle_plan_accepts_self_expectation_review_rows() -> None:
     )
     assert plan["reflection_focus"]["reflection_kind"] == "self_expectation_calibration"
     assert plan["self_expectation_review_proposals"][0]["review_status"] == "stale"
+
+
+def test_infer_matching_target_contexts_uses_pacing_without_proposal() -> None:
+    contexts = infer_matching_target_contexts(
+        {
+            "reply_pacing_hint": "casual_fast",
+            "prefers_compact_reply": True,
+            "self_response_expectation_proposals": [],
+        },
+        self_state=default_self_expectation_state(),
+    )
+    assert "short_casual_reply" in contexts
+
+
+def test_build_self_repair_guidance_reads_slow_repair_priors() -> None:
+    guidance = build_self_repair_guidance(
+        {
+            "self_expectation_state": default_self_expectation_state(),
+            "self_cognition": {
+                "repair_priors": [
+                    {
+                        "id": "repair_prior_1",
+                        "target_context": "short_casual_reply",
+                        "preferred_intervention": "prefer_short_casual_surface_form",
+                        "confidence": 0.8,
+                        "status": "active",
+                    }
+                ]
+            },
+        },
+        conscious_plan={
+            "reply_pacing_hint": "casual_fast",
+            "prefers_compact_reply": True,
+            "self_response_expectation_proposals": [],
+        },
+    )
+    assert guidance["repair_bias_delta"] > 0
+    assert guidance["reply_action_biases"].get("answer", 0.0) > 0
+
+
+def test_settlement_without_outcome_stays_uncertain() -> None:
+    state = {
+        "self_expectation_state": {
+            **default_self_expectation_state(),
+            "repair_expectations": [
+                {
+                    "expectation_id": "self_repair_1",
+                    "source_mismatch_key": "short_casual_reply:outcome_too_heavy_for_context",
+                    "target_context": "short_casual_reply",
+                    "intervention": "prefer_short_casual_surface_form",
+                    "prediction_error_reduction_target": 0.2,
+                    "status": "active",
+                    "created_turn_index": 0,
+                    "opportunity_window": 4,
+                    "expires_after_opportunities": 2,
+                    "evidence_refs": ["self_exp_0"],
+                    "opportunities_seen": 0,
+                }
+            ],
+        }
+    }
+    result = apply_self_expectation_post_turn(
+        state,
+        conscious_plan={
+            "reply_pacing_hint": "casual_fast",
+            "prefers_compact_reply": True,
+            "self_response_expectation_proposals": [],
+            "self_expectation_outcome_results": [],
+        },
+        control_guidance={"repair_bias": 0.1, "conflict_level": 0.1},
+        reward_prediction_error_proxy=0.05,
+        reward_event_id="m13_reward_test",
+        now=100,
+        turn_index=2,
+    )
+    settlements = state["self_expectation_state"]["settlements_tail"]
+    assert settlements
+    assert settlements[-1]["status"] == "uncertain"
+
+
+def test_shadow_validation_is_advisory_only() -> None:
+    shadow = build_shadow_validation(
+        {
+            "expectation_id": "self_repair_1",
+            "intervention": "prefer_short_casual_surface_form",
+        },
+        prediction_error_before=0.35,
+        prediction_error_after=0.12,
+        control_guidance={"repair_bias": 0.2},
+    )
+    assert shadow["advisory_only"] is True
+    assert shadow["estimated_prediction_error_delta"] > 0
+
+
+def test_shadow_validation_does_not_force_confirmed_settlement() -> None:
+    state = {
+        "self_expectation_state": {
+            **default_self_expectation_state(),
+            "repair_expectations": [
+                {
+                    "expectation_id": "self_repair_1",
+                    "source_mismatch_key": "short_casual_reply:outcome_too_heavy_for_context",
+                    "target_context": "short_casual_reply",
+                    "intervention": "prefer_short_casual_surface_form",
+                    "prediction_error_reduction_target": 0.2,
+                    "status": "active",
+                    "created_turn_index": 0,
+                    "opportunity_window": 4,
+                    "expires_after_opportunities": 2,
+                    "evidence_refs": ["self_exp_0"],
+                    "opportunities_seen": 0,
+                }
+            ],
+        }
+    }
+    result = apply_self_expectation_post_turn(
+        state,
+        conscious_plan={
+            "reply_pacing_hint": "casual_fast",
+            "prefers_compact_reply": True,
+            "self_response_expectation_proposals": [],
+            "self_expectation_outcome_results": [],
+        },
+        control_guidance={"repair_bias": 0.4, "conflict_level": 0.1},
+        reward_prediction_error_proxy=0.03,
+        reward_event_id="m13_reward_test",
+        now=100,
+        turn_index=2,
+    )
+    settlement = state["self_expectation_state"]["settlements_tail"][-1]
+    assert settlement["status"] == "uncertain"
+    assert settlement.get("shadow_validation")
+    assert any(event["type"] == "SelfRepairShadowValidationEvent" for event in result.events)
+
+
+def test_apply_m19_traction_proposals_updates_m13_state() -> None:
+    m13_state = normalize_m13_drive_state({})
+    updated, events = apply_m19_traction_proposals_to_m13(
+        m13_state,
+        [
+            {
+                "proposal_id": "m19_traction_1",
+                "intervention": "prefer_short_casual_surface_form",
+                "status": "confirmed",
+                "traction_delta": 0.05,
+            }
+        ],
+        user_id="user_a",
+        topic_fingerprint="casual|light",
+        turn_index=3,
+    )
+    assert events
+    assert updated["path_patterns_by_action"]
+    assert updated["traction_by_action"]
 
 
 def test_m19_end_to_end_runtime_promotes_slow_self_cognition(tmp_path: Path) -> None:

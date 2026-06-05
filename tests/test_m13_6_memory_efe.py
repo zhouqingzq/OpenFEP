@@ -766,3 +766,31 @@ def test_diagnostic_only_pool_emits_noisy_reason_not_active_cleanup() -> None:
     assert result.eligible_for_efe
     assert "diagnostic_expectation_pool_noisy" in result.reason_codes
     assert "cleanup_filtered_low_traceability_candidates" not in result.reason_codes
+
+
+def test_self_repair_expectation_registers_for_efe_but_not_outreach() -> None:
+    state = _state(
+        self_expectation_state={
+            "repair_expectations": [
+                {
+                    "expectation_id": "self_repair_1",
+                    "source_mismatch_key": "short_casual_reply:outcome_too_heavy_for_context",
+                    "target_context": "short_casual_reply",
+                    "intervention": "prefer_short_casual_surface_form",
+                    "status": "active",
+                    "created_at": NOW - 120,
+                    "opportunity_window": 4,
+                    "evidence_refs": ["self_exp_0", "short_casual_reply:outcome_too_heavy_for_context"],
+                    "priority": 0.7,
+                }
+            ]
+        }
+    )
+    bundle = normalize_expectations_for_efe(state, now=NOW, phase="in_turn")
+    eligible = [row for row in bundle.eligible_for_efe if row.source_kind == "self_repair_expectation"]
+    assert eligible
+    assert eligible[0].expectation_id == "self_repair_1"
+    result = evaluate_memory_efe(state, now=NOW, phase="idle", turn_index=6, user_active=False)
+    assert any(row.source_kind == "self_repair_expectation" for row in result.eligible_for_efe)
+    assert result.traceable_expectation_id != "self_repair_1"
+    assert result.should_outreach is False
