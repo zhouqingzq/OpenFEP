@@ -38,6 +38,14 @@ AUDIT_TYPES_OF_INTEREST = frozenset(
         "ConsolidationDeferredEvent",
         "MemoryGateRejectedEvent",
         "MemoryGateCommitEvent",
+        "SelfExpectationOutcomeConfirmedEvent",
+        "SelfExpectationMismatchObservedEvent",
+        "SelfRepairExpectationCreatedEvent",
+        "SelfRepairShadowValidationEvent",
+        "SelfRepairSettlementEvent",
+        "SelfRepairTractionProposalEvent",
+        "SelfExpectationSlowPromotionProposalEvent",
+        "SelfExpectationIdleReviewEvent",
     }
 )
 
@@ -74,6 +82,10 @@ def _join(values: Any, *, limit: int = 8) -> str:
 
 def _mapping(value: Any) -> dict[str, Any]:
     return dict(value) if isinstance(value, Mapping) else {}
+
+
+def _rows(value: Any) -> list[dict[str, Any]]:
+    return [dict(item) for item in value if isinstance(item, Mapping)] if isinstance(value, list) else []
 
 
 def _recent_audit_lines(path: Path, *, limit: int = 18) -> list[str]:
@@ -184,6 +196,163 @@ def _status_counts(rows: Any) -> dict[str, int]:
             status = "merged"
         counts[status or "pending"] = counts.get(status or "pending", 0) + 1
     return counts
+
+
+def _m19_log_counts(path: Path) -> dict[str, int]:
+    counts = {
+        "mismatch": 0,
+        "outcome_confirmed": 0,
+        "repair_created": 0,
+        "shadow_validation": 0,
+        "settlement_confirmed": 0,
+        "settlement_violated": 0,
+        "settlement_uncertain": 0,
+        "settlement_expired": 0,
+        "settlement_superseded": 0,
+        "traction_proposal": 0,
+        "slow_promotion": 0,
+        "idle_review": 0,
+    }
+    if not path.is_file():
+        return counts
+    try:
+        with path.open("r", encoding="utf-8") as handle:
+            for line in handle:
+                if not line.strip():
+                    continue
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if not isinstance(row, dict):
+                    continue
+                typ = str(row.get("type", "") or "")
+                if typ == "SelfExpectationMismatchObservedEvent":
+                    counts["mismatch"] += 1
+                elif typ == "SelfExpectationOutcomeConfirmedEvent":
+                    counts["outcome_confirmed"] += 1
+                elif typ == "SelfRepairExpectationCreatedEvent":
+                    counts["repair_created"] += 1
+                elif typ == "SelfRepairShadowValidationEvent":
+                    counts["shadow_validation"] += 1
+                elif typ == "SelfRepairSettlementEvent":
+                    status = str(row.get("status", "") or "").strip().lower()
+                    key = f"settlement_{status}"
+                    if key in counts:
+                        counts[key] += 1
+                elif typ == "SelfRepairTractionProposalEvent":
+                    counts["traction_proposal"] += 1
+                elif typ == "SelfExpectationSlowPromotionProposalEvent":
+                    counts["slow_promotion"] += 1
+                elif typ == "SelfExpectationIdleReviewEvent":
+                    counts["idle_review"] += 1
+    except OSError:
+        return counts
+    return counts
+
+
+def _m19_section(state: Mapping[str, Any], log_path: Path) -> list[str]:
+    self_state = _mapping(state.get("self_expectation_state"))
+    self_cognition = _mapping(state.get("self_cognition"))
+
+    focus_rows = _rows(self_state.get("active_mismatch_focus_topk"))
+    mismatch_memory_fast = _rows(self_state.get("mismatch_memory_fast"))
+    repair_expectations = _rows(self_state.get("repair_expectations"))
+    settlements = _rows(self_state.get("settlements_tail"))
+    observations = _rows(self_state.get("observations_tail"))
+    calibrated_tendencies = _rows(self_cognition.get("calibrated_tendencies"))
+    repair_priors = _rows(self_cognition.get("repair_priors"))
+
+    active_repairs = [
+        row for row in repair_expectations if str(row.get("status", "") or "pending").strip().lower() in {"pending", "active", "uncertain"}
+    ]
+    active_priors = [
+        row for row in repair_priors if str(row.get("status", "") or "active").strip().lower() in {"active", "downgraded"}
+    ]
+    active_tendencies = [
+        row for row in calibrated_tendencies if str(row.get("status", "") or "active").strip().lower() in {"active", "stale"}
+    ]
+
+    log_counts = _m19_log_counts(log_path)
+    fast_counts = _status_counts(mismatch_memory_fast)
+    repair_counts = _status_counts(repair_expectations)
+    settlement_counts = _status_counts(settlements)
+
+    lines = [
+        "## M19 self-expectation",
+        f"- active_focus={len(focus_rows)} active_repairs={len(active_repairs)} active_repair_priors={len(active_priors)} "
+        f"active_calibrated_tendencies={len(active_tendencies)} last_prediction_error_proxy={self_state.get('last_prediction_error_proxy', 0.0)}",
+        f"- state_totals: expectations_tail={len(_rows(self_state.get('expectations_tail')))} "
+        f"mismatches_tail={len(_rows(self_state.get('mismatches_tail')))} "
+        f"mismatch_memory_fast={len(mismatch_memory_fast)} settlements_tail={len(settlements)} observations_tail={len(observations)}",
+        f"- log_counts: mismatch={log_counts['mismatch']} confirmed_outcome={log_counts['outcome_confirmed']} "
+        f"repair_created={log_counts['repair_created']} shadow_validation={log_counts['shadow_validation']} "
+        f"settlement_confirmed={log_counts['settlement_confirmed']} settlement_violated={log_counts['settlement_violated']} "
+        f"settlement_uncertain={log_counts['settlement_uncertain']} settlement_expired={log_counts['settlement_expired']} "
+        f"traction_proposal={log_counts['traction_proposal']} slow_promotion={log_counts['slow_promotion']} "
+        f"idle_review={log_counts['idle_review']}",
+        f"- mismatch_memory_status_counts: active={fast_counts.get('active', 0)} cooling={fast_counts.get('cooling', 0)} "
+        f"resolved={fast_counts.get('resolved', 0)} revoked={fast_counts.get('revoked', 0)}",
+        f"- repair_expectation_status_counts: pending={repair_counts.get('pending', 0)} active={repair_counts.get('active', 0)} "
+        f"confirmed={repair_counts.get('confirmed', 0)} violated={repair_counts.get('violated', 0)} "
+        f"uncertain={repair_counts.get('uncertain', 0)} expired={repair_counts.get('expired', 0)} "
+        f"superseded={repair_counts.get('superseded', 0)}",
+        f"- settlement_status_counts: confirmed={settlement_counts.get('confirmed', 0)} violated={settlement_counts.get('violated', 0)} "
+        f"uncertain={settlement_counts.get('uncertain', 0)} expired={settlement_counts.get('expired', 0)} "
+        f"superseded={settlement_counts.get('superseded', 0)}",
+    ]
+
+    if focus_rows:
+        for row in focus_rows[:3]:
+            lines.append(
+                f"- focus `{_clip(row.get('mismatch_key'), limit=100)}` type=`{_clip(row.get('mismatch_type'), limit=40)}` "
+                f"context=`{_clip(row.get('target_context'), limit=40)}` status=`{_clip(row.get('status'), limit=20)}` "
+                f"support={row.get('weighted_support', 0)} last_error={row.get('last_prediction_error_proxy', 0)}"
+            )
+    else:
+        lines.append("- focus (none)")
+
+    if active_repairs:
+        for row in active_repairs[:4]:
+            lines.append(
+                f"- repair `{_clip(row.get('expectation_id'), limit=100)}` context=`{_clip(row.get('target_context'), limit=40)}` "
+                f"intervention=`{_clip(row.get('intervention'), limit=60)}` status=`{_clip(row.get('status'), limit=20)}` "
+                f"verify_on=`{_clip(row.get('verify_on'), limit=32)}` source_mismatch=`{_clip(row.get('source_mismatch_key'), limit=100)}`"
+            )
+    else:
+        lines.append("- repair (none active)")
+
+    if settlements:
+        for row in settlements[-4:]:
+            lines.append(
+                f"- settlement `{_clip(row.get('settlement_id'), limit=100)}` context=`{_clip(row.get('matched_context'), limit=40)}` "
+                f"status=`{_clip(row.get('status'), limit=20)}` delta={row.get('prediction_error_delta', 0)} "
+                f"expectation_id=`{_clip(row.get('expectation_id'), limit=100)}` source_mismatch=`{_clip(row.get('source_mismatch_key'), limit=100)}`"
+            )
+    else:
+        lines.append("- settlement (none)")
+
+    if active_priors:
+        for row in active_priors[:3]:
+            lines.append(
+                f"- repair_prior `{_clip(row.get('id'), limit=100)}` context=`{_clip(row.get('target_context'), limit=40)}` "
+                f"preferred_intervention=`{_clip(row.get('preferred_intervention'), limit=60)}` status=`{_clip(row.get('status'), limit=20)}` "
+                f"confidence={row.get('confidence', 0)}"
+            )
+    else:
+        lines.append("- repair_prior (none active)")
+
+    if active_tendencies:
+        for row in active_tendencies[:3]:
+            lines.append(
+                f"- calibrated_tendency `{_clip(row.get('id'), limit=100)}` context=`{_clip(row.get('target_context'), limit=40)}` "
+                f"status=`{_clip(row.get('status'), limit=20)}` confidence={row.get('confidence', 0)} "
+                f"source_mismatch=`{_clip(row.get('source_mismatch_key'), limit=100)}`"
+            )
+    else:
+        lines.append("- calibrated_tendency (none active)")
+
+    return lines
 
 
 def _queued_outreach_section(rows: Any, *, session_id: str = "") -> list[str]:
@@ -469,6 +638,8 @@ def build_mind_debug_bundle_text(
 
     lines.extend(
         [
+            "",
+            *_m19_section(state, log_path),
             "",
             *_strict_traceability_section(state),
             "",

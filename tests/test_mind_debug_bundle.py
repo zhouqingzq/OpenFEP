@@ -171,3 +171,158 @@ def test_debug_bundle_shows_separate_proactive_timeline_fields(tmp_path: Path) -
     assert "exp_try" in text
     assert "prop_ok" in text
     assert "delivery_assessor_reject" in text
+
+
+def test_debug_bundle_includes_m19_chain_summary(tmp_path: Path) -> None:
+    store = MVPStateStore(tmp_path / "session3")
+    state = store.load()
+    state.update(
+        {
+            "self_expectation_state": {
+                "expectations_tail": [
+                    {
+                        "expectation_id": "self_exp_1",
+                        "target_context": "short_casual_reply",
+                        "expected_outcome": "keep it light",
+                        "expected_reply_quality": "light",
+                    }
+                ],
+                "mismatches_tail": [
+                    {
+                        "mismatch_id": "mismatch_1",
+                        "mismatch_type": "outcome_too_heavy_for_context",
+                        "target_context": "short_casual_reply",
+                        "severity": 0.72,
+                    }
+                ],
+                "mismatch_memory_fast": [
+                    {
+                        "mismatch_key": "short_casual_reply|outcome_too_heavy_for_context",
+                        "mismatch_type": "outcome_too_heavy_for_context",
+                        "target_context": "short_casual_reply",
+                        "weighted_support": 1.35,
+                        "last_prediction_error_proxy": 0.28,
+                        "status": "active",
+                    }
+                ],
+                "active_mismatch_focus_topk": [
+                    {
+                        "mismatch_key": "short_casual_reply|outcome_too_heavy_for_context",
+                        "mismatch_type": "outcome_too_heavy_for_context",
+                        "target_context": "short_casual_reply",
+                        "weighted_support": 1.35,
+                        "last_prediction_error_proxy": 0.28,
+                        "status": "active",
+                    }
+                ],
+                "last_prediction_error_proxy": 0.28,
+                "repair_expectations": [
+                    {
+                        "expectation_id": "repair_exp_1",
+                        "target_context": "short_casual_reply",
+                        "intervention": "prefer_short_casual_surface_form",
+                        "status": "pending",
+                        "verify_on": "next_similar_turn",
+                        "source_mismatch_key": "short_casual_reply|outcome_too_heavy_for_context",
+                    }
+                ],
+                "settlements_tail": [
+                    {
+                        "settlement_id": "self_settlement_1",
+                        "expectation_id": "repair_exp_1",
+                        "source_mismatch_key": "short_casual_reply|outcome_too_heavy_for_context",
+                        "matched_context": "short_casual_reply",
+                        "status": "confirmed",
+                        "prediction_error_delta": 0.12,
+                    }
+                ],
+                "traction_proposals_tail": [],
+                "observations_tail": [
+                    {
+                        "observation_id": "self_obs_1",
+                        "target_context": "short_casual_reply",
+                        "review_status": "reinforced",
+                    }
+                ],
+            },
+            "self_cognition": {
+                "calibrated_tendencies": [
+                    {
+                        "id": "cal_tend_1",
+                        "target_context": "short_casual_reply",
+                        "confidence": 0.81,
+                        "source_mismatch_key": "short_casual_reply|outcome_too_heavy_for_context",
+                        "status": "active",
+                    }
+                ],
+                "repair_priors": [
+                    {
+                        "id": "repair_prior_1",
+                        "target_context": "short_casual_reply",
+                        "preferred_intervention": "prefer_short_casual_surface_form",
+                        "confidence": 0.84,
+                        "status": "active",
+                    }
+                ],
+            },
+        }
+    )
+    store.save(state)
+    store.append_log(
+        {
+            "event": "m13_proactive_audit",
+            "type": "SelfExpectationMismatchObservedEvent",
+            "at": 1_700_000_300,
+            "status": "violated",
+            "target_context": "short_casual_reply",
+        }
+    )
+    store.append_log(
+        {
+            "event": "m13_proactive_audit",
+            "type": "SelfRepairExpectationCreatedEvent",
+            "at": 1_700_000_301,
+            "expectation_id": "repair_exp_1",
+            "target_context": "short_casual_reply",
+        }
+    )
+    store.append_log(
+        {
+            "event": "m13_proactive_audit",
+            "type": "SelfRepairSettlementEvent",
+            "at": 1_700_000_302,
+            "settlement_id": "self_settlement_1",
+            "status": "confirmed",
+            "target_context": "short_casual_reply",
+        }
+    )
+    store.append_log(
+        {
+            "event": "m14_idle_audit",
+            "type": "SelfExpectationSlowPromotionProposalEvent",
+            "at": 1_700_000_303,
+            "reason": "m19_self_expectation_promotion",
+        }
+    )
+
+    text = build_mind_debug_bundle_text(
+        session_root=store.root,
+        persona_name="test_persona",
+        session_id="sess_3",
+        state=state,
+        observability={},
+        ui_hints={},
+        turn_index=3,
+    )
+
+    assert "## M19 self-expectation" in text
+    assert "active_focus=1 active_repairs=1 active_repair_priors=1 active_calibrated_tendencies=1" in text
+    assert "log_counts: mismatch=1 confirmed_outcome=0 repair_created=1" in text
+    assert "settlement_confirmed=1" in text
+    assert "slow_promotion=1" in text
+    assert "focus `short_casual_reply|outcome_too_heavy_for_context`" in text
+    assert "repair `repair_exp_1`" in text
+    assert "settlement `self_settlement_1`" in text
+    assert "repair_prior `repair_prior_1`" in text
+    assert "calibrated_tendency `cal_tend_1`" in text
+    assert "SelfRepairSettlementEvent" in text
