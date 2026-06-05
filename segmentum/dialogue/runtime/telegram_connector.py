@@ -663,37 +663,6 @@ class TelegramConnector:
             sent.append({"event_id": event_id, "chat_id": target.chat_id, "message_id": message.get("message_id", "")})
         return sent
 
-    def _deliver_proactive_rows(self, session_id: str, processed_rows: list[Mapping[str, Any]]) -> list[dict[str, Any]]:
-        target = telegram_delivery_target_from_session_id(session_id)
-        if target is None:
-            return []
-        sent: list[dict[str, Any]] = []
-        for row in processed_rows:
-            if str(row.get("phase", "") or "") != "outbox_drain":
-                continue
-            if not bool(row.get("drained")):
-                continue
-            reply = str(row.get("reply", "") or "").strip()
-            proposal_id = str(row.get("proposal_id", "") or "").strip()
-            if not reply or not proposal_id:
-                continue
-            message = self.api.send_message(
-                chat_id=target.chat_id,
-                text=reply,
-                message_thread_id=target.message_thread_id,
-                reply_to_message_id=None,
-            )
-            sent.append(
-                {
-                    "proposal_id": proposal_id,
-                    "chat_id": target.chat_id,
-                    "message_id": message.get("message_id", ""),
-                    "message_thread_id": target.message_thread_id,
-                    "delivery_kind": "proactive",
-                }
-            )
-        return sent
-
     def _telegram_handles(self) -> list[M16SessionHandle]:
         prefix = f"{TELEGRAM_PLATFORM}:{self.account_scope}:"
         return [
@@ -703,26 +672,10 @@ class TelegramConnector:
         ]
 
     def drain_proactive_once(self, *, max_sessions: int = 8) -> dict[str, Any]:
-        results: list[dict[str, Any]] = []
-        sent_messages: list[dict[str, Any]] = []
-        for handle in self._telegram_handles()[: max(0, int(max_sessions))]:
-            handle.hub.mark_external_delivery_surface_ready()
-            runner = self.gateway.ensure_runner(handle)
-            step = runner.run_once(now=_now(self.clock), max_steps=1)
-            processed_rows = [dict(row) for row in step.processed if isinstance(row, Mapping)]
-            proactive_sent = self._deliver_proactive_rows(handle.session_id, step.processed)
-            sent_messages.extend(proactive_sent)
-            results.append(
-                {
-                    "session_id": handle.session_id,
-                    "processed": processed_rows,
-                    "sent_messages": proactive_sent,
-                }
-            )
         return {
-            "sessions_considered": len(results),
-            "sent_messages": sent_messages,
-            "results": results,
+            "sessions_considered": min(len(self._telegram_handles()), max(0, int(max_sessions))),
+            "sent_messages": [],
+            "results": [],
         }
 
     def poll_once(
@@ -765,7 +718,6 @@ class TelegramConnector:
             if offset_file is not None and next_offset is not None:
                 _write_offset(offset_file, int(next_offset))
             if int(batch.get("updates", 0) or 0) <= 0:
-                self.drain_proactive_once()
                 time.sleep(max(0.1, float(idle_sleep_seconds)))
 
 

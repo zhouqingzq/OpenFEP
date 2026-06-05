@@ -262,7 +262,7 @@ def test_connector_idle_drain_no_traceable_outreach_sends_nothing(tmp_path: Path
     assert api.sent_messages == []
 
 
-def test_connector_idle_drain_sends_traceable_proactive_message_once(tmp_path: Path) -> None:
+def test_connector_idle_drain_skips_traceable_proactive_messages(tmp_path: Path) -> None:
     clk = _Clock()
     gateway = M16Gateway(
         clock=clk,
@@ -300,11 +300,11 @@ def test_connector_idle_drain_sends_traceable_proactive_message_once(tmp_path: P
     first = connector.drain_proactive_once()
     second = connector.drain_proactive_once()
 
-    assert len(first["sent_messages"]) == 1
-    assert first["sent_messages"][0]["proposal_id"] == "prop_tg_test"
-    assert api.sent_messages[0]["chat_id"] == "123456"
-    assert len(api.sent_messages) == 1
+    assert first["sessions_considered"] == 1
+    assert first["sent_messages"] == []
+    assert first["results"] == []
     assert second["sent_messages"] == []
+    assert api.sent_messages == []
 
 
 def test_connector_idle_drain_blocks_when_m13_assessor_disallows_delivery(tmp_path: Path) -> None:
