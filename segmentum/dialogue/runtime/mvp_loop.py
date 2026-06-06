@@ -213,6 +213,7 @@ from segmentum.dialogue.runtime.m19_self_expectation import (
     prompt_safe_state_with_self_expectation_summary,
 )
 from segmentum.dialogue.runtime.active_commitment import (
+    ActiveCommitment,
     ActiveCommitmentAdapter,
     GradedCorrectionDispatcher,
     SettlementScheduler,
@@ -225,6 +226,19 @@ from segmentum.dialogue.runtime.active_commitment import (
     update_commitment_registry_diagnostics,
     update_graded_correction_diagnostics,
     wrap_self_response_expectation_proposal,
+)
+from segmentum.dialogue.runtime.loop_invariants import (
+    LoopInvariants,
+    build_minimum_loop_coverage_missed_event,
+)
+from segmentum.dialogue.runtime.policy_producer import (
+    PolicyProducer,
+    build_policy_admitted_event,
+)
+from segmentum.dialogue.runtime.same_turn_surface import (
+    SameTurnSurfaceSettler,
+    SameTurnSurfaceVerdict,
+    build_same_turn_surface_verdict_event,
 )
 from segmentum.dialogue.runtime.active_commitment_grader import (
     route_expire,
@@ -2137,6 +2151,32 @@ ALLOWED_INTERACTION_FRAMEWORK_HINTS = frozenset(
 )
 ALLOWED_THOUGHT_INTENSITY_HINTS = frozenset({"none", "short", "long"})
 
+# M20.3 §3.1 bounded enum for the conscious-loop v2 attribute.
+# The default "" means "no signal" — PolicyProducer sees an empty
+# user_correction_signal and emits no identity-correction row.
+ALLOWED_CORRECTING_ASSISTANT_IDENTITY: frozenset[str] = frozenset({
+    "",
+    "wrong_persona",
+    "wrong_voice",
+    "right_persona_reaffirm",
+})
+
+
+def _normalize_correcting_assistant_identity(value: Any) -> str:
+    """Clamp the bounded 4-value enum (M20.3 §3.1).
+
+    Anything not in the frozen set (or non-string) maps to "" so
+    PolicyProducer's `user_correction_signal` is always a valid
+    bounded value. The LLM is the only legitimate source of this
+    field per CLAUDE.md; engineering does not invent it.
+    """
+    if not isinstance(value, str):
+        return ""
+    normalized = value.strip().lower()[:32]
+    if normalized not in ALLOWED_CORRECTING_ASSISTANT_IDENTITY:
+        return ""
+    return normalized
+
 
 def normalize_conscious_turn_plan(raw: Any) -> dict[str, Any]:
     """Validate bounded conscious-loop fields from LLM output."""
@@ -2175,6 +2215,14 @@ def normalize_conscious_turn_plan(raw: Any) -> dict[str, Any]:
             limit=8,
         ),
         "surface_commitment": normalize_surface_commitment(raw.get("surface_commitment")),
+        # M20.3 v2 attribute on the conscious loop. Bounded
+        # 4-value enum; "" means "no signal". Filled by the LLM
+        # (the only legitimate source per CLAUDE.md — no regex /
+        # keyword parsing). The mvp_loop reads this and feeds it
+        # to PolicyProducer as the `user_correction_signal` input.
+        "correcting_assistant_identity": _normalize_correcting_assistant_identity(
+            raw.get("correcting_assistant_identity")
+        ),
         "current_task": str(raw.get("current_task", "") or "").strip()[:240],
         "next_task": str(raw.get("next_task", "") or "").strip()[:240],
         "bus_messages_to_handle": _string_list(raw.get("bus_messages_to_handle"), limit=12),
@@ -5755,6 +5803,14 @@ def _admit_active_commitments(
             owner_id=commitment.owner_id,
             commitment=commitment,
         )
+        # M20.3 §3.1 — track horizon commitments so the pre-send
+        # / post-send gate can find them later in the turn.
+        if commitment.horizon == "same_turn_surface":
+            horizon_list = state.get("m20_3_horizon_commitments")
+            if not isinstance(horizon_list, list):
+                horizon_list = []
+            horizon_list.append(commitment)
+            state["m20_3_horizon_commitments"] = horizon_list
 
     rejected_counts: dict[str, int] = {}
     for rejection in rejected:
@@ -6115,6 +6171,198 @@ def _dispatch_graded_corrections(
             m19_3_shortcut=m19_3_shortcut,
             same_turn_advisory_violations=same_turn_advisory_violations,
         )
+
+
+# === M20.3 admission / invariant / surface hooks ========================
+
+
+def _bounded_string(value: Any, *, default: str = "", limit: int = 120) -> str:
+    if not isinstance(value, str):
+        return default
+    return value.strip()[:limit]
+
+
+def _string_list(value: Any, *, limit: int = 32) -> list[str]:
+    if not isinstance(value, (list, tuple)):
+        return []
+    out: list[str] = []
+    for item in value:
+        if isinstance(item, str) and item:
+            out.append(item)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _build_runtime_mode_flags(
+    *,
+    latency_mode: str,
+    surface_intent: str,
+    group_mode_ingress_change: bool,
+) -> dict[str, Any]:
+    """Build the v1 `runtime_mode_flags` for `PolicyProducer.evaluate`.
+
+    M20.3 §1.1 input: `runtime_mode_flags` carries the bounded
+    per-turn mode surface. The v1 shape mirrors M18.x's
+    `group_turn_binding.surface_intent` plus the latency mode and
+    an ingress change flag.
+    """
+    return {
+        "surface_intent": _bounded_string(surface_intent, default="", limit=32),
+        "conversation_mode": (
+            "bot" if latency_mode == "fast_chat" and surface_intent == "bot" else "chat"
+        ),
+        "group_mode": surface_intent,
+        "group_mode_ingress_change": bool(group_mode_ingress_change),
+    }
+
+
+def _build_command_envelope(bounded_group_turn: Mapping[str, Any]) -> dict[str, Any]:
+    """Build the v1 `command_envelope` for `PolicyProducer.evaluate`.
+
+    M20.3 §1.1 input: `envelope.platform_command` and
+    `envelope.bot_command_args`. These come from M18.x
+    `group_turn_binding` (added at v1 by the bounded group envelope
+    builder).
+    """
+    platform_command = _bounded_string(
+        bounded_group_turn.get("platform_command"), default="", limit=64,
+    )
+    bot_command_args = _string_list(
+        bounded_group_turn.get("bot_command_args"), limit=8,
+    )
+    if not platform_command and not bot_command_args:
+        return {}
+    return {
+        "platform_command": platform_command,
+        "bot_command_args": bot_command_args,
+    }
+
+
+def _admit_policy_commitments(
+    *,
+    bus: list,
+    state: dict,
+    producer: PolicyProducer,
+    turn_index: int,
+    at: str,
+    runtime_mode_flags: Mapping[str, Any],
+    command_envelope: Mapping[str, Any],
+    user_correction_signal: str,
+) -> list[ActiveCommitment]:
+    """M20.3 §1 admission: run PolicyProducer, register rows, emit events.
+
+    Returns the admitted commitments so the caller can pass them to
+    `LoopInvariants.enforce_minimum_loop_coverage`. The producer is
+    a single-shot; this helper is called once with empty
+    `user_correction_signal` (pre-conscious) and once with the
+    conscious-loop signal (post-conscious). Both calls share the
+    same `commit_id` derivation (deterministic sha1 of source_ref).
+
+    Horizon commitments (`horizon = "same_turn_surface"`) are also
+    appended to `state["m20_3_horizon_commitments"]` so the
+    pre-send / post-send gate can find them later in the turn.
+    """
+    admitted, audit_events = producer.evaluate(
+        turn_context={"turn_index": turn_index, "at": at},
+        runtime_mode_flags=runtime_mode_flags,
+        command_envelope=command_envelope,
+        user_correction_signal=user_correction_signal,
+    )
+    for event in audit_events:
+        bus.append(event)
+        record_active_commitment_event(state, event)
+    for commitment in admitted:
+        event = build_active_commitment_created_event(commitment)
+        bus.append(event)
+        record_active_commitment_event(state, event)
+        record_pending_commitment(state, commitment)
+        init_owner_observability_for_commitment(
+            state,
+            owner_id=commitment.owner_id,
+            commitment=commitment,
+        )
+        if commitment.horizon == "same_turn_surface":
+            horizon_list = state.get("m20_3_horizon_commitments")
+            if not isinstance(horizon_list, list):
+                horizon_list = []
+            horizon_list.append(commitment)
+            state["m20_3_horizon_commitments"] = horizon_list
+    update_commitment_registry_diagnostics(state, admitted=len(admitted))
+    return admitted
+
+
+def _enforce_minimum_loop(
+    *,
+    bus: list,
+    state: dict,
+    invariants: LoopInvariants,
+    turn_index: int,
+    at: str,
+    proposed_commitments: list[ActiveCommitment],
+    surface_intent: str,
+    is_external_turn: bool,
+) -> None:
+    """M20.3 §4 invariant: audit only, never blocks the turn."""
+    verdict = invariants.enforce_minimum_loop_coverage(
+        turn_index=turn_index,
+        proposed_commitments=proposed_commitments,
+        surface_intent=surface_intent,
+        is_external_turn=is_external_turn,
+    )
+    if not verdict.missed:
+        return
+    event = build_minimum_loop_coverage_missed_event(verdict)
+    event["at"] = at
+    bus.append(event)
+    record_active_commitment_event(state, event)
+
+
+def _run_same_turn_surface(
+    *,
+    bus: list,
+    state: dict,
+    settler: SameTurnSurfaceSettler,
+    horizon_commitments: list[ActiveCommitment],
+    draft_reply: str,
+    committed_reply: str,
+    observation_context: Mapping[str, Any],
+    turn_index: int,
+    at: str,
+) -> tuple[SameTurnSurfaceVerdict | None, SameTurnSurfaceVerdict | None, str]:
+    """M20.3 §3 pre-send + post-send gate.
+
+    Returns (pre_verdict, post_verdict, final_reply). If the
+    pre-send gate `block`s, the reply is replaced with
+    `verdict.replacement` (the bounded persona fallback); otherwise
+    the original draft is returned unchanged.
+    """
+    pre_verdict = settler.run_pre_send(
+        draft_reply,
+        horizon_commitments=horizon_commitments,
+        observation_context=observation_context,
+        turn_index=turn_index,
+        at=at,
+    )
+    final_reply = draft_reply
+    if pre_verdict is not None:
+        event = build_same_turn_surface_verdict_event(pre_verdict)
+        bus.append(event)
+        record_active_commitment_event(state=state, event=event)
+        if pre_verdict.decision == "block" and pre_verdict.replacement:
+            final_reply = pre_verdict.replacement
+    post_verdict = settler.run_post_send(
+        committed_reply,
+        horizon_commitments=horizon_commitments,
+        observation_context=observation_context,
+        turn_index=turn_index,
+        at=at,
+    )
+    if post_verdict is not None:
+        event = build_same_turn_surface_verdict_event(post_verdict)
+        bus.append(event)
+        record_active_commitment_event(state=state, event=event)
+    return pre_verdict, post_verdict, final_reply
 
 
 def _route_decision(
@@ -7002,6 +7250,14 @@ class MVPDialogueRuntime:
         )
         latency_mode = str(latency_mode_info.get("mode", "normal") or "normal")
         m12_cognitive_bus = CognitiveEventBus()
+        # M20.3 per-turn admission / invariant singletons. The
+        # `SameTurnSurfaceSettler` resets its per-turn dedup at
+        # the start of each turn via `reset_turn_dedup` (callers
+        # must invoke this before `run_pre_send`).
+        policy_producer = PolicyProducer()
+        loop_invariants = LoopInvariants()
+        same_turn_surface_settler = SameTurnSurfaceSettler()
+        same_turn_surface_settler.reset_turn_dedup()
         if _m12_enabled_for_state(state) and not proactive_turn and latency_mode != "fast_chat":
             m12_state = _load_m12_state(state)
             m11_readonly_pre: dict[str, object] = {}
@@ -7178,6 +7434,30 @@ class MVPDialogueRuntime:
             bus.append(addendum)
 
         _report_progress("m13_settlement")
+        # M20.3 §1 — call PolicyProducer BEFORE the conscious loop so
+        # the runtime invariant at step 3 sees the union of T0
+        # admissions. The first call passes an empty
+        # `user_correction_signal`; the conscious loop fills the
+        # v2 attribute, and a second call (below) admits the
+        # signal-driven rows.
+        pre_conscious_admitted: list[ActiveCommitment] = _admit_policy_commitments(
+            bus=bus,
+            state=state,
+            producer=policy_producer,
+            turn_index=turn_index,
+            at=now,
+            runtime_mode_flags=_build_runtime_mode_flags(
+                latency_mode=latency_mode,
+                surface_intent=str(
+                    bounded_group_turn.get("surface_intent", "") or ""
+                ),
+                group_mode_ingress_change=bool(
+                    bounded_group_turn.get("group_mode_ingress_change", False)
+                ),
+            ),
+            command_envelope=_build_command_envelope(bounded_group_turn),
+            user_correction_signal="",
+        )
         conscious_system, conscious_user = build_conscious_loop_prompt(
             state=state,
             user_text=user_text,
@@ -7197,12 +7477,59 @@ class MVPDialogueRuntime:
             turn_index=turn_index,
         ):
             bus.append(event)
+        # M20.3 §1 — second PolicyProducer call. The conscious loop
+        # fills `correcting_assistant_identity`; we forward it as
+        # the bounded `user_correction_signal`. If the conscious
+        # loop ran in fast_chat and produced an empty signal, this
+        # call emits no identity-correction rows. The next turn
+        # re-evaluates (M20.3 §3.1a).
+        post_conscious_signal = str(
+            conscious.get("correcting_assistant_identity", "") or ""
+        )
+        post_conscious_admitted: list[ActiveCommitment] = _admit_policy_commitments(
+            bus=bus,
+            state=state,
+            producer=policy_producer,
+            turn_index=turn_index,
+            at=now,
+            runtime_mode_flags=_build_runtime_mode_flags(
+                latency_mode=latency_mode,
+                surface_intent=str(
+                    bounded_group_turn.get("surface_intent", "") or ""
+                ),
+                group_mode_ingress_change=bool(
+                    bounded_group_turn.get("group_mode_ingress_change", False)
+                ),
+            ),
+            command_envelope=_build_command_envelope(bounded_group_turn),
+            user_correction_signal=post_conscious_signal,
+        )
         _admit_active_commitments(
             bus=bus,
             state=state,
             conscious_plan=conscious,
             turn_index=turn_index,
             now=now,
+        )
+        # M20.3 §4 — runtime invariant. Audit-only, runs after both
+        # PolicyProducer calls and the M20.0 conscious-loop
+        # admission. Reads the union of all T0-admitted
+        # commitments.
+        _enforce_minimum_loop(
+            bus=bus,
+            state=state,
+            invariants=loop_invariants,
+            turn_index=turn_index,
+            at=now,
+            proposed_commitments=(
+                list(pre_conscious_admitted)
+                + list(post_conscious_admitted)
+                + list(conscious.get("active_commitment_proposals") or [])
+            ),
+            surface_intent=str(
+                bounded_group_turn.get("surface_intent", "") or ""
+            ),
+            is_external_turn=bool(not proactive_turn),
         )
         _settle_active_commitments(
             bus=bus,
@@ -8118,6 +8445,40 @@ class MVPDialogueRuntime:
                 except Exception as exc:
                     group_policy_actions.extend(repair_reason_codes)
                     group_policy_actions.append(f"llm_reply_repair_pre_validation_error:{type(exc).__name__}")
+            # M20.3 §3.2 — pre-send gate. Runs BEFORE
+            # `validate_visible_reply` so a `block` decision can
+            # replace the draft reply before the existing
+            # surface-consistency validation runs on it. Reads
+            # `state["m20_3_horizon_commitments"]` (all horizon =
+            # "same_turn_surface" commitments admitted earlier in
+            # the turn). Observation context passes the M19.x
+            # `surface_consistency_verification` audit envelope.
+            horizon_commitments = state.get("m20_3_horizon_commitments")
+            if not isinstance(horizon_commitments, list):
+                horizon_commitments = []
+            observation_context = {
+                "now": str(now),
+                "turn_index": int(turn_index),
+                "surface_consistency_verification": dict(
+                    _mapping(reply_contract.get("surface_consistency_verification"))
+                ),
+            }
+            _pre_verdict, _post_verdict, _replaced_reply = _run_same_turn_surface(
+                bus=bus,
+                state=state,
+                settler=same_turn_surface_settler,
+                horizon_commitments=[
+                    c for c in horizon_commitments if isinstance(c, ActiveCommitment)
+                ],
+                draft_reply=raw_reply,
+                committed_reply=raw_reply,
+                observation_context=observation_context,
+                turn_index=turn_index,
+                at=str(now),
+            )
+            if _replaced_reply and _replaced_reply != raw_reply:
+                raw_reply = _replaced_reply
+                group_policy_actions.append("m20_3_pre_send_block_replacement")
             reply, reply_validation = validate_visible_reply(raw_reply, reply_contract)
             if path_b_field_enforcement_actions:
                 reply_validation = dict(reply_validation)

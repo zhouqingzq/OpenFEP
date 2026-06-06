@@ -15,6 +15,25 @@ to `state["commitment_owner_observability"][owner_id][commit_id]`,
 which is a diagnostic surface that M20.2 reads to drive graded
 correction. M20.1 also does NOT implement promotion / microadjust /
 revocation / expiration logic.
+
+M20.2 adds: graded correction dispatcher (6 levels, per-owner
+`graded_action_set`), and routing stubs that call into the existing
+owner write paths. M20.2 ships no real write paths; M20.2.1 wires
+the m13_drive_state / self_cognition_calibrated_tendencies scopes.
+
+M20.3 adds (additive v2 vocabulary):
+- `runtime_mode_state` owner row + observable (registry v2 bump)
+- `outreach_intent_on` / `outreach_intent_off` observables
+- `horizon` attribute on `ActiveCommitment` (v2-only, defaults to
+  "next_turn" for v1 commitments)
+- registry v2 `accepts_policy_correction` flag — let PolicyProducer-
+  admitted `runtime_mode_state` commitments actually update the
+  persistent mode state through the regular M20.2 dispatch path,
+  bypassing M20.2 §2's general "policy -> expire" rule.
+
+M20.3 is a layer above M20.0–M20.2. v1 rows in
+`COMMITMENT_REGISTRY_V1` and `OBSERVABLE_V1` are unchanged; v2
+additions live in `COMMITMENT_REGISTRY_V2` and `OBSERVABLE_V2`.
 """
 
 from __future__ import annotations
@@ -65,6 +84,8 @@ ENGINEERING_PROXY_LABELS_V1: frozenset[str] = frozenset({
     "mvp_local_m15_episode",
     "mvp_local_boundary",
     "mvp_local_outreach",
+    # M20.3 v1 additive label: PolicyProducer-admitted rows.
+    "mvp_local_policy_admission",
 })
 
 
@@ -246,6 +267,11 @@ class ActiveCommitment:
     created_at: str
     reason_codes: tuple[str, ...]
     engineering_proxy_label: str
+    # M20.3 v2 attribute. Defaults to "next_turn" so v1 commitments
+    # constructed without it continue to work. v2 producers (e.g.
+    # PolicyProducer, the post-settled M19.x / M18.x hooks) may set
+    # "same_turn_surface" or "natural_context".
+    horizon: str = "next_turn"
 
 
 def compute_commit_id(
@@ -347,6 +373,10 @@ class ActiveCommitmentAdapter:
         if due_at is not None and not isinstance(due_at, Mapping):
             due_at = None
 
+        horizon = _string(proposal.get("horizon"), default="next_turn")
+        if horizon not in HORIZON_V1:
+            horizon = "next_turn"
+
         commitment = ActiveCommitment(
             commit_id=commit_id,
             owner_id=owner_id,
@@ -364,6 +394,7 @@ class ActiveCommitmentAdapter:
             created_at=created_at,
             reason_codes=reason_codes,
             engineering_proxy_label=proxy_label,
+            horizon=horizon,
         )
         return commitment, None
 
@@ -396,7 +427,10 @@ class ActiveCommitmentAdapter:
         created_at: str,
     ) -> dict[str, Any] | None:
         owner_id = _string(proposal.get("owner_id"))
-        if owner_id not in COMMITMENT_REGISTRY_V1:
+        # M20.3 bump: consult the v2 registry, which is v1 ∪ new
+        # owners. v1 owners pass unchanged; v2-only owners
+        # (e.g. `runtime_mode_state`) are accepted.
+        if owner_id not in COMMITMENT_REGISTRY_V2:
             return self._rejection(
                 proposal=proposal,
                 turn_index=turn_index,
@@ -432,7 +466,7 @@ class ActiveCommitmentAdapter:
             )
 
         observable = _string(proposal.get("observable"))
-        if observable not in OBSERVABLE_V1:
+        if observable not in OBSERVABLE_V2:
             return self._rejection(
                 proposal=proposal,
                 turn_index=turn_index,
@@ -440,7 +474,7 @@ class ActiveCommitmentAdapter:
                 created_at=created_at,
             )
 
-        owner_row = COMMITMENT_REGISTRY_V1[owner_id]
+        owner_row = COMMITMENT_REGISTRY_V2[owner_id]
         if layer not in owner_row.get("accepts_layers", []):
             return self._rejection(
                 proposal=proposal,
@@ -602,8 +636,8 @@ def update_commitment_registry_diagnostics(
     if not isinstance(index, dict):
         index = {}
 
-    index["commitment_registry_owner_count"] = len(COMMITMENT_REGISTRY_V1)
-    index["commitment_registry_observable_count"] = len(OBSERVABLE_V1)
+    index["commitment_registry_owner_count"] = len(COMMITMENT_REGISTRY_V2)
+    index["commitment_registry_observable_count"] = len(OBSERVABLE_V2)
 
     index["active_commitment_created_total"] = int(
         index.get("active_commitment_created_total", 0)
@@ -914,6 +948,7 @@ def _commitment_to_observability_row(commitment: ActiveCommitment) -> dict[str, 
         "engineering_proxy_label": commitment.engineering_proxy_label,
         "created_turn": commitment.created_turn,
         "created_at": commitment.created_at,
+        "horizon": commitment.horizon,
     }
 
 
@@ -1010,6 +1045,7 @@ def record_pending_commitment(
             "engineering_proxy_label": commitment.engineering_proxy_label,
             "created_turn": commitment.created_turn,
             "created_at": commitment.created_at,
+            "horizon": commitment.horizon,
         }
     )
     # Cap pending list to prevent unbounded growth; M20.2 may tighten.
@@ -1446,6 +1482,7 @@ def _row_to_active_commitment(
         created_at=str(row.get("created_at", "") or now),
         reason_codes=tuple(_string_list(row.get("reason_codes"), limit=16)),
         engineering_proxy_label=str(row.get("engineering_proxy_label", "") or ""),
+        horizon=str(row.get("horizon", "") or "next_turn"),
     )
 
 
@@ -1580,8 +1617,10 @@ class GradedCorrectionDispatcher:
             engineering_proxy_label=commitment.engineering_proxy_label,
         )
 
-        # Unknown owner → reject.
-        if owner_id not in COMMITMENT_REGISTRY_V1:
+        # Unknown owner → reject. M20.3 bump: consult v2 registry
+        # (v1 ∪ new v2 owners), so `runtime_mode_state` is a known
+        # owner at dispatch time.
+        if owner_id not in COMMITMENT_REGISTRY_V2:
             return GradedCorrectionDecision(
                 **common_kwargs,
                 correction_level="expire",
@@ -1591,13 +1630,20 @@ class GradedCorrectionDispatcher:
                 rejected=True,
             )
 
-        owner_row = COMMITMENT_REGISTRY_V1[owner_id]
+        owner_row = COMMITMENT_REGISTRY_V2[owner_id]
         action_set = owner_row.get("graded_action_set", [])
         if not isinstance(action_set, list):
             action_set = []
 
         # source_kind = "policy" → expire (observation-only).
-        if source_kind == "policy":
+        # M20.3 §3.5 v2 exception: if the owner has
+        # `accepts_policy_correction: true` in the v2 registry, the
+        # general "policy -> expire" rule is bypassed and the
+        # regular magnitude-to-level table applies. M20.2's frozen
+        # rule remains "policy -> expire"; the registry column is
+        # the parameterization point. The exception only applies
+        # to the v2 `runtime_mode_state` owner in v1 scope.
+        if source_kind == "policy" and not is_registry_v2_accepts_policy_correction(owner_id):
             return GradedCorrectionDecision(
                 **common_kwargs,
                 correction_level="expire",
@@ -1832,15 +1878,19 @@ __all__ = [
     "ActiveCommitmentAdapter",
     "COMMITMENT_PHASE",
     "COMMITMENT_REGISTRY_V1",
+    "COMMITMENT_REGISTRY_V2",
     "DISPATCHER_REASON_CODES_V1",
     "ENGINEERING_PROXY_LABELS_V1",
     "GRADED_CORRECTION_V1",
     "GradedCorrectionDecision",
     "GradedCorrectionDispatcher",
+    "HORIZON_V1",
     "MAGNITUDE_SCALES_V1",
     "NoSettlement",
     "OBSERVABLE_V1",
+    "OBSERVABLE_V2",
     "OUTCOME_BY_OBSERVABLE_V1",
+    "OUTCOME_BY_OBSERVABLE_V2",
     "OUTCOME_V1",
     "REASON_CODES_V1",
     "SETTLER_REASON_CODES_V1",
@@ -1867,3 +1917,152 @@ __all__ = [
     "wrap_self_response_expectation_proposal",
     "write_owner_observability",
 ]
+
+
+# === M20.3 v2 vocabulary =================================================
+# M20.3 is a layer above M20.0–M20.2. v1 rows in
+# `COMMITMENT_REGISTRY_V1` and `OBSERVABLE_V1` are unchanged. v2
+# additions live in `COMMITMENT_REGISTRY_V2` and `OBSERVABLE_V2` and
+# are derived as v1 ∪ new entries.
+
+# v2 horizon enum. M20.3 v2 attribute on ActiveCommitment. Default
+# is "next_turn" for v1 commitments. PolicyProducer sets
+# "same_turn_surface" on `runtime_mode_state` rows.
+HORIZON_V1: frozenset[str] = frozenset({
+    "same_turn_surface",
+    "next_turn",
+    "natural_context",
+})
+
+
+# v2 owner row. Added in M20.3; the v2 registry is v1 ∪ this row.
+_RUNTIME_MODE_STATE_OWNER: Mapping[str, Any] = MappingProxyType({
+    "description": (
+        "Writable runtime mode container. Holds the current persona / "
+        "surface / roleplay mode, mode_changed_at, mode_owner, and "
+        "mode_constraints. Distinct from policy_state (which is "
+        "observation-only)."
+    ),
+    "storage_hint": (
+        "runtime_mode_state.{mode, mode_changed_at, mode_owner, mode_constraints}"
+    ),
+    "accepts_layers": ["A_long_term_prior", "B_per_turn_commitment"],
+    "accepts_source_kinds": ["policy", "state"],
+    "graded_action_set": ["microadjust", "next_turn", "same_turn", "revoke"],
+    # M20.3 v2 fields.
+    "accepts_same_turn_block": True,
+    "accepts_policy_correction": True,
+    "notes": (
+        "Accepts same_turn BLOCK (pre-send gate can refuse a reply "
+        "that violates the current mode). All other same_turn routes "
+        "from M20.2 are advisory only; this owner is the documented "
+        "exception. Also accepts policy-source correction (registry "
+        "v2 exception table in §3.5), bypassing M20.2 §2's general "
+        "'policy -> expire' rule."
+    ),
+})
+
+
+COMMITMENT_REGISTRY_V2: Mapping[str, Mapping[str, Any]] = MappingProxyType({
+    **dict(COMMITMENT_REGISTRY_V1),
+    "runtime_mode_state": dict(_RUNTIME_MODE_STATE_OWNER),
+    # M20.3 v2 additive: v1 `outreach_intent_registry` opts into
+    # `policy` source_kind so PolicyProducer's /quiet + /resume
+    # commands route through. v1 owners remain unchanged.
+    "outreach_intent_registry": {
+        **dict(COMMITMENT_REGISTRY_V1["outreach_intent_registry"]),
+        "accepts_source_kinds": ["state", "episodic", "policy"],
+    },
+})
+
+
+# v2 observable additions. `runtime_mode_state` is the new observable
+# the pre-send gate can block on. `outreach_intent_on/off` are
+# observation-only in v1 (no settler; only "silent" carries forward).
+_RUNTIME_MODE_STATE_OBSERVABLE: Mapping[str, Any] = MappingProxyType({
+    "payload_keys": (
+        "expected_mode",
+        "actual_mode",
+        "mode_owner",
+        "evidence_refs",
+    ),
+    "settler_hint": "llm_judge",
+    "notes": (
+        "LLM judge checks whether the reply's persona / surface "
+        "matches the currently admitted mode. Uses bounded M19.x "
+        "surface_consistency call shape."
+    ),
+})
+
+_OUTREACH_INTENT_ON_OBSERVABLE: Mapping[str, Any] = MappingProxyType({
+    "payload_keys": ("expected_mode", "evidence_refs"),
+    "settler_hint": "silent",
+    "notes": "Observation-only; no settler v1. silent carries forward.",
+})
+
+_OUTREACH_INTENT_OFF_OBSERVABLE: Mapping[str, Any] = MappingProxyType({
+    "payload_keys": ("expected_mode", "evidence_refs"),
+    "settler_hint": "silent",
+    "notes": "Observation-only; no settler v1. silent carries forward.",
+})
+
+
+OBSERVABLE_V2: Mapping[str, Mapping[str, Any]] = MappingProxyType({
+    **dict(OBSERVABLE_V1),
+    "runtime_mode_state": dict(_RUNTIME_MODE_STATE_OBSERVABLE),
+    "outreach_intent_on": dict(_OUTREACH_INTENT_ON_OBSERVABLE),
+    "outreach_intent_off": dict(_OUTREACH_INTENT_OFF_OBSERVABLE),
+})
+
+
+# v2 outcome set per observable. v1 outcomes carry forward; v2
+# observables get the LLM-judge 3-outcome set (confirmed / violated /
+# ambiguous). outreach_intent_on/off are observation-only; the only
+# outcome that carries forward is "confirmed" (i.e. observed) when
+# the settler_hint is "silent".
+OUTCOME_BY_OBSERVABLE_V2: Mapping[str, frozenset[str]] = MappingProxyType({
+    **dict(OUTCOME_BY_OBSERVABLE_V1),
+    "runtime_mode_state": frozenset({"confirmed", "violated", "ambiguous"}),
+    "outreach_intent_on": frozenset({"confirmed", "violated"}),
+    "outreach_intent_off": frozenset({"confirmed", "violated"}),
+})
+
+
+def registry_v2_owner_row(owner_id: str) -> Mapping[str, Any] | None:
+    """Return the v2 owner row (or None for unknown owners).
+
+    Convenience for the dispatcher v2 exception table and the
+    PolicyProducer. Read-only access; callers MUST NOT mutate.
+    """
+    row = COMMITMENT_REGISTRY_V2.get(owner_id)
+    if row is None:
+        return None
+    return row
+
+
+def is_registry_v2_accepts_policy_correction(owner_id: str) -> bool:
+    """Return True iff the v2 owner row opts into the M20.2 §2
+    policy-source-correction exception.
+
+    M20.2 §2 freezes the rule "policy -> expire" for any outcome. The
+    M20.3 v2 exception table in §3.5 lets a v2 owner opt out by
+    declaring `accepts_policy_correction: true`. The dispatcher reads
+    this flag at runtime; the frozen M20.2 rule is unchanged.
+    """
+    row = registry_v2_owner_row(owner_id)
+    if row is None:
+        return False
+    return bool(row.get("accepts_policy_correction", False))
+
+
+def is_registry_v2_accepts_same_turn_block(owner_id: str) -> bool:
+    """Return True iff the v2 owner row opts into same-turn BLOCK.
+
+    The pre-send gate can only `block` for owners that opt in via
+    `accepts_same_turn_block: true`. For all other observables, the
+    gate returns `pass` or `advisory_guidance`.
+    """
+    row = registry_v2_owner_row(owner_id)
+    if row is None:
+        return False
+    return bool(row.get("accepts_same_turn_block", False))

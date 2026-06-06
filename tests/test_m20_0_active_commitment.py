@@ -26,8 +26,10 @@ from segmentum.dialogue.runtime.active_commitment import (
     ActiveCommitmentAdapter,
     COMMITMENT_PHASE,
     COMMITMENT_REGISTRY_V1,
+    COMMITMENT_REGISTRY_V2,
     ENGINEERING_PROXY_LABELS_V1,
     OBSERVABLE_V1,
+    OBSERVABLE_V2,
     REASON_CODES_V1,
     build_active_commitment_created_event,
     compute_commit_id,
@@ -487,8 +489,8 @@ def test_commitment_registry_index_diagnostic_exposes_counts() -> None:
         rejected_by_reason_code={"unknown_owner": 1, "empty_evidence_refs": 2},
     )
     index = state["commitment_registry_index"]
-    assert index["commitment_registry_owner_count"] == len(COMMITMENT_REGISTRY_V1)
-    assert index["commitment_registry_observable_count"] == len(OBSERVABLE_V1)
+    assert index["commitment_registry_owner_count"] == len(COMMITMENT_REGISTRY_V2)
+    assert index["commitment_registry_observable_count"] == len(OBSERVABLE_V2)
     assert index["active_commitment_created_total"] == 3
     assert index["active_commitment_rejected_total"] == 3
     assert index["active_commitment_rejected_by_reason_code"] == {
@@ -610,7 +612,10 @@ def test_reason_codes_v1_is_frozen() -> None:
 def test_engineering_proxy_labels_v1_is_frozen() -> None:
     assert "mvp_local_self_expectation" in ENGINEERING_PROXY_LABELS_V1
     assert "mvp_local_active_commitment" not in ENGINEERING_PROXY_LABELS_V1
-    assert len(ENGINEERING_PROXY_LABELS_V1) == 9
+    # M20.3 adds `mvp_local_policy_admission` (additive) for
+    # PolicyProducer-admitted rows. The v1 set is now 10 labels.
+    assert len(ENGINEERING_PROXY_LABELS_V1) == 10
+    assert "mvp_local_policy_admission" in ENGINEERING_PROXY_LABELS_V1
 
 
 def test_allowed_source_kinds_is_frozen() -> None:
