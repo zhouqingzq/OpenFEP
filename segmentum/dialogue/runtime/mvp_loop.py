@@ -2061,6 +2061,15 @@ current_interlocutor:
   "interaction_framework_hint": "normal_dialogue|roleplay|mixed|uncertain",
   "prefers_compact_reply": false,
   "reply_pacing_reason": "为何选择该回复节奏（给系统审计，不要写进用户可见回复）",
+  "surface_commitment": {{
+    "surface_intent": "chat|bot_command|roleplay|abstaining",
+    "self_identification": "本轮回复里我承诺要保持的身份/表面标签（例如胡桃 / ClawdGroupChat Bot / 群聊机器人 / 角色名），最长64字",
+    "persona_should_apply": true|false,
+    "character_voice_should_apply": true|false,
+    "predicted_drift_risk": "low|medium|high",
+    "reason": "为什么本轮会采用这个表面意图/身份（给系统审计，不要写进用户可见回复），最长240字",
+    "evidence_refs": ["bus/event id, prior turn id 等可追溯引用"]
+  }},
   "reasoning_notes": "给系统看的简短判断"
 }}
 """
@@ -2071,6 +2080,7 @@ Also include the following M19 fields in the same JSON object:
 - "self_expectation_outcome_results": later-turn review rows with source_expectation_id, target_context, status, evidence_refs, reason_codes, engineering_proxy_label
 - target_context must be one of: short_casual_reply, group_privacy_boundary, user_requests_directness, high_stakes_clarification, initiative_after_silence, repair_after_prior_tension
 - expected_reply_quality must be one of: light, direct, repair, boundary_safe, compact
+- "surface_commitment" must be a single bounded object (not an array). surface_intent must be one of: chat, bot_command, roleplay, abstaining. self_identification is the assistant's own commitment about which identity/voice the reply will hold; engineering layer uses this contract to verify the eventual reply. Do not paste raw user text into evidence_refs.
 """
     return system_prompt, user_prompt
 
@@ -2114,6 +2124,7 @@ def normalize_conscious_turn_plan(raw: Any) -> dict[str, Any]:
         "self_expectation_outcome_results": normalize_self_expectation_outcome_results(
             raw.get("self_expectation_outcome_results")
         ),
+        "surface_commitment": normalize_surface_commitment(raw.get("surface_commitment")),
         "current_task": str(raw.get("current_task", "") or "").strip()[:240],
         "next_task": str(raw.get("next_task", "") or "").strip()[:240],
         "bus_messages_to_handle": _string_list(raw.get("bus_messages_to_handle"), limit=12),
@@ -4728,51 +4739,6 @@ def _positive_int(value: Any, *, default: int) -> int:
     return max(0, numeric)
 
 
-def _normalized_self_name_token(value: str) -> str:
-    token = str(value or "").strip()
-    if not token:
-        return ""
-    token = re.split(r"[\s，。！？、~,:;()（）]+", token, maxsplit=1)[0].strip()
-    token = token.rstrip("呀啦呢哦喔哈")
-    return token[:24]
-
-
-def _alternate_self_name_in_reply(reply: str, contract: Mapping[str, Any]) -> str:
-    allowed_names = {
-        _normalized_self_name_token(item).casefold()
-        for item in _string_list(contract.get("assistant_allowed_self_names"), limit=8)
-    }
-    persona_name = _normalized_self_name_token(str(contract.get("assistant_persona_name", "") or ""))
-    if persona_name:
-        allowed_names.add(persona_name.casefold())
-    if not allowed_names:
-        return ""
-    patterns = (
-        r"(?:我(?:是|就是|叫)|你可以叫我)([A-Za-z0-9_\-\u4e00-\u9fff@ ]{1,24})",
-        r"(?:我也叫|也可以叫我)([A-Za-z0-9_\-\u4e00-\u9fff@ ]{1,24})",
-    )
-    for pattern in patterns:
-        match = re.search(pattern, reply)
-        if not match:
-            continue
-        candidate = _normalized_self_name_token(match.group(1))
-        if candidate and candidate.casefold() not in allowed_names:
-            return candidate
-    return ""
-
-
-def _reply_claims_persona_absent(reply: str, contract: Mapping[str, Any]) -> bool:
-    persona_name = str(contract.get("assistant_persona_name", "") or "").strip()
-    if not persona_name:
-        return False
-    return bool(
-        re.search(
-            rf"{re.escape(persona_name)}.{{0,8}}(没上线|还没上线|不在|没来|还没来|未上线|不在线)",
-            reply,
-        )
-    )
-
-
 def _assistant_identity_repair_fallback(contract: Mapping[str, Any]) -> str:
     surface_intent = str(contract.get("assistant_surface_intent", "") or "").strip()
     platform_command = str(contract.get("platform_command", "") or "").strip()
@@ -4784,6 +4750,166 @@ def _assistant_identity_repair_fallback(contract: Mapping[str, Any]) -> str:
     if persona_name:
         return f"刚才那句身份说乱了，我按{persona_name}继续和你说。"
     return "刚才那句身份说乱了，我按当前这个身份继续说。"
+
+
+ALLOWED_SURFACE_INTENTS = frozenset({"chat", "bot_command", "roleplay", "abstaining"})
+ALLOWED_SURFACE_CONSISTENCY_OUTCOMES = frozenset(
+    {"consistent", "drifted_intent", "drifted_self_id", "drifted_voice", "ambiguous"}
+)
+ALLOWED_DRIFT_RISK_BANDS = frozenset({"low", "medium", "high"})
+MAX_SURFACE_SELF_ID_CHARS = 64
+MAX_SURFACE_REASON_CHARS = 240
+MAX_SURFACE_EVIDENCE_SPAN_CHARS = 120
+MAX_SURFACE_VERIFICATION_REASON_CHARS = 200
+MAX_SURFACE_EVIDENCE_REFS = 6
+
+
+def normalize_surface_commitment(raw: Any) -> dict[str, Any]:
+    """Validate bounded surface_commitment fields from conscious-loop LLM output."""
+    if not isinstance(raw, Mapping):
+        raw = {}
+    surface_intent = str(raw.get("surface_intent", "") or "").strip().lower()
+    if surface_intent not in ALLOWED_SURFACE_INTENTS:
+        surface_intent = "chat"
+    self_identification = str(raw.get("self_identification", "") or "").strip()[:MAX_SURFACE_SELF_ID_CHARS]
+    persona_should_apply = bool(raw.get("persona_should_apply", False))
+    character_voice_should_apply = bool(raw.get("character_voice_should_apply", False))
+    drift_risk = str(raw.get("predicted_drift_risk", "") or "").strip().lower()
+    if drift_risk not in ALLOWED_DRIFT_RISK_BANDS:
+        drift_risk = "low"
+    reason = str(raw.get("reason", "") or "").strip()[:MAX_SURFACE_REASON_CHARS]
+    evidence_refs = _string_list(raw.get("evidence_refs"), limit=MAX_SURFACE_EVIDENCE_REFS)
+    return {
+        "surface_intent": surface_intent,
+        "self_identification": self_identification,
+        "persona_should_apply": persona_should_apply,
+        "character_voice_should_apply": character_voice_should_apply,
+        "predicted_drift_risk": drift_risk,
+        "reason": reason,
+        "evidence_refs": evidence_refs,
+    }
+
+
+def normalize_surface_consistency_verification(raw: Any) -> dict[str, Any]:
+    """Validate bounded surface_consistency_verification fields from LLM self-audit."""
+    if not isinstance(raw, Mapping):
+        raw = {}
+    outcome = str(raw.get("surface_intent_outcome", "") or "").strip().lower()
+    if outcome not in ALLOWED_SURFACE_CONSISTENCY_OUTCOMES:
+        outcome = "ambiguous"
+    self_id_drift_target = str(raw.get("self_id_drift_target", "") or "").strip()[:MAX_SURFACE_SELF_ID_CHARS]
+    evidence_span = str(raw.get("evidence_span", "") or "").strip()[:MAX_SURFACE_EVIDENCE_SPAN_CHARS]
+    confidence = round(
+        max(0.0, min(1.0, _bounded_float(raw.get("confidence"), default=0.0))),
+        6,
+    )
+    reason = str(raw.get("reason", "") or "").strip()[:MAX_SURFACE_VERIFICATION_REASON_CHARS]
+    evidence_refs = _string_list(raw.get("evidence_refs"), limit=MAX_SURFACE_EVIDENCE_REFS)
+    return {
+        "surface_intent_outcome": outcome,
+        "self_id_drift_target": self_id_drift_target,
+        "evidence_span": evidence_span,
+        "confidence": confidence,
+        "reason": reason,
+        "evidence_refs": evidence_refs,
+    }
+
+
+def build_surface_consistency_verification_prompt(
+    *,
+    user_text: str,
+    draft_reply: str,
+    surface_commitment: Mapping[str, Any],
+    reply_contract: Mapping[str, Any],
+    turn_index: int,
+) -> tuple[str, str]:
+    """Ask the LLM to self-audit whether the draft reply actually honored its prior surface_commitment.
+
+    Returns the system and user prompt for the self-audit stage. Engineering code
+    must not parse the reply text with keyword/regex cues; the LLM is the only
+    semantic judge of consistency, and it must return a bounded enum.
+    """
+    system_prompt = """You are the assistant-side self-audit module for surface consistency.
+You receive the conscious-loop's surface_commitment (the assistant's own promise
+about which identity/voice/role it would use in this reply) and the draft
+visible reply. Decide whether the reply honored the commitment.
+
+Output JSON only. Do not include any commentary, debug fields, or markdown.
+
+Rules:
+- "consistent" only when the reply's surface_intent, self_identification, and
+  voice all match the commitment.
+- "drifted_intent" when the reply's surface_intent deviates from the commitment
+  (for example: commitment was "bot_command" but reply adopted a persona voice).
+- "drifted_self_id" when the reply claims a different self_identification than
+  the commitment (for example: commitment self_id was "胡桃" but reply says
+  "我是小千" or claims the persona is absent/offline).
+- "drifted_voice" when the reply's tone/register does not match the commitment
+  (for example: commitment said persona_should_apply=true but the reply
+  switched to a different persona's verbal habits, or commitment said no
+  character voice but the reply used roleplay voice).
+- "ambiguous" when the available evidence is too thin to commit to a drift
+  diagnosis.
+- self_id_drift_target is required when outcome is "drifted_self_id"; pass the
+  free-text self_identification the reply actually adopted, or empty string
+  otherwise.
+- evidence_span must be a short quoted phrase from the draft reply (no more
+  than 120 characters). Pass empty string if you cannot point at one phrase.
+- evidence_refs may include bounded handles such as prior turn ids, conscious
+  plan ids, or memory ids. Do not include raw user text.
+"""
+    user_prompt = f"""turn_index: {turn_index}
+
+latest_user_text:
+{user_text}
+
+surface_commitment (conscious loop's promise for this reply):
+{_json_text(dict(surface_commitment))}
+
+reply_contract (the engineering-side envelope facts):
+{_json_text(dict(reply_contract))}
+
+draft_reply (the reply the assistant is about to commit):
+{draft_reply}
+
+Return JSON:
+{{
+  "surface_intent_outcome": "consistent|drifted_intent|drifted_self_id|drifted_voice|ambiguous",
+  "self_id_drift_target": "",
+  "evidence_span": "",
+  "confidence": 0.0,
+  "reason": "",
+  "evidence_refs": []
+}}"""
+    return system_prompt, user_prompt
+
+
+def _build_surface_consistency_verification_event(
+    *,
+    turn_index: int,
+    verification: Mapping[str, Any],
+    commitment: Mapping[str, Any],
+) -> dict[str, Any]:
+    return {
+        "type": "SurfaceConsistencyVerifiedEvent",
+        "turn_index": turn_index,
+        "surface_intent_outcome": str(verification.get("surface_intent_outcome", "ambiguous") or "ambiguous"),
+        "self_id_drift_target": str(verification.get("self_id_drift_target", "") or "")[:MAX_SURFACE_SELF_ID_CHARS],
+        "evidence_span": str(verification.get("evidence_span", "") or "")[:MAX_SURFACE_EVIDENCE_SPAN_CHARS],
+        "confidence": round(_bounded_float(verification.get("confidence"), default=0.0), 6),
+        "committed_surface_intent": str(commitment.get("surface_intent", "chat") or "chat"),
+        "committed_self_identification": str(commitment.get("self_identification", "") or "")[:MAX_SURFACE_SELF_ID_CHARS],
+        "committed_persona_should_apply": bool(commitment.get("persona_should_apply", False)),
+        "reason_codes": _string_list(verification.get("evidence_refs"), limit=MAX_SURFACE_EVIDENCE_REFS),
+        "engineering_proxy_label": "mvp_local_surface_consistency_audit",
+    }
+
+
+def _empty_surface_consistency_verification(*, reason: str = "") -> dict[str, Any]:
+    base = normalize_surface_consistency_verification({})
+    if reason:
+        base["reason"] = reason[:MAX_SURFACE_VERIFICATION_REASON_CHARS]
+    return base
 
 
 def validate_visible_reply(reply: str, contract: Mapping[str, Any] | None) -> tuple[str, dict[str, Any]]:
@@ -4841,13 +4967,20 @@ def validate_visible_reply(reply: str, contract: Mapping[str, Any] | None) -> tu
         if re.search(assertion_pattern, cleaned):
             cleaned = "我先不下身份结论，先按你这轮提供的信息继续观察。"
             actions.append("softened_identity_assertion")
-    alternate_self_name = _alternate_self_name_in_reply(cleaned, contract_map)
-    if alternate_self_name:
-        cleaned = _assistant_identity_repair_fallback(contract_map)
-        actions.append("blocked_alternate_persona_identity")
-    elif _reply_claims_persona_absent(cleaned, contract_map):
-        cleaned = _assistant_identity_repair_fallback(contract_map)
-        actions.append("blocked_persona_absence_claim")
+    surface_verification = _mapping(contract_map.get("surface_consistency_verification"))
+    if surface_verification:
+        outcome = str(surface_verification.get("surface_intent_outcome", "") or "").strip().lower()
+        if outcome in {"drifted_intent", "drifted_self_id", "drifted_voice"}:
+            cleaned = _assistant_identity_repair_fallback(contract_map)
+            actions.append(f"blocked_surface_consistency_{outcome}")
+        # consistent / ambiguous / absent outcomes must NOT add to `actions`.
+        # Adding an action would flip `changed=True` and trip the existing
+        # post-validation repair loop, which would overwrite the reply with
+        # whatever the repair LLM returns. Only true drift must trigger repair.
+    # When surface_consistency_verification is absent (e.g. fast_chat latency mode
+    # or no conscious-plan commitment), engineering does NOT silently fall back
+    # to keyword/regex matching. Identity drift detection in that path requires a
+    # later turn's conscious-loop commitment plus an LLM self-audit.
     validation = {
         "original_length": len(original),
         "final_length": len(cleaned),
@@ -4948,6 +5081,7 @@ _AUXILIARY_LLM_STAGES = {
     "m12_2_second_order",
     "reply_repair",
     "post_reply_observer",
+    "surface_consistency_verification",
 }
 
 
@@ -5067,16 +5201,23 @@ def _has_latency_marker(text: str, markers: tuple[str, ...]) -> bool:
     return any(marker.casefold() in lowered for marker in markers)
 
 
-def _assistant_identity_challenge_detected(user_text: str, persona_name: str = "") -> bool:
-    text = str(user_text or "").strip()
-    if not text:
+def _prior_surface_drift_observed(state: Mapping[str, Any]) -> bool:
+    """Read previous turn's surface_consistency_verification from state.
+
+    Returns True when the most recent surface audit row on the turn-overflow
+    surface_consistency_audit_tail reports a drifted outcome. Replaces the
+    prior regex over user text; the assistant's own contract is the only
+    signal that the previous reply lost identity, and a drifted outcome is
+    the only semantic authority for upgrading this turn's latency.
+    """
+    audit = _mapping(_mapping(state).get("surface_consistency_audit_tail"))
+    if not audit:
         return False
-    if re.search(r"(你又成|你又变成|你不是|不是[，,。 ]*你|身份|别装|错乱了)", text):
-        return True
-    persona = str(persona_name or "").strip()
-    if persona and re.search(rf"{re.escape(persona)}.{{0,8}}(不在|没上线|还没上线|没来|未上线|不在线)", text):
-        return True
-    return False
+    last_event = audit.get("last_event") if isinstance(audit.get("last_event"), Mapping) else None
+    if not last_event:
+        return False
+    outcome = str(last_event.get("surface_intent_outcome", "") or "").strip().lower()
+    return outcome in {"drifted_intent", "drifted_self_id", "drifted_voice"}
 
 
 def _classify_turn_latency_mode(
@@ -5103,8 +5244,8 @@ def _classify_turn_latency_mode(
     explicit_secret, _secret_phrase = _detect_explicit_secrecy(text)
     if explicit_secret:
         return {"mode": "full", "reason_codes": ["explicit_secrecy"]}
-    if _assistant_identity_challenge_detected(text, persona_name):
-        return {"mode": "normal", "reason_codes": ["assistant_identity_challenge"]}
+    if _prior_surface_drift_observed(state):
+        return {"mode": "normal", "reason_codes": ["prior_surface_consistency_drift"]}
     if assessable_pending_rows:
         reasons.append("pending_reward_settlement")
         mode = "normal"
@@ -5516,6 +5657,27 @@ def _record_prediction_lock_event(state: dict[str, Any], event: Mapping[str, Any
     state["prediction_lock_audit_tail"] = events[-80:]
 
 
+def _record_surface_consistency_event(state: dict[str, Any], event: Mapping[str, Any]) -> None:
+    """Record a surface-consistency audit event in state for next-turn reads.
+
+    Keeps the most recent 40 events and exposes a compact `last_event` pointer
+    that the latency classifier can read without scanning the tail. Replaces
+    any user-text regex heuristic for "did the previous reply lose identity?".
+    """
+    if not isinstance(state, dict):
+        return
+    audit = state.get("surface_consistency_audit_tail")
+    if not isinstance(audit, dict):
+        audit = {}
+    tail = audit.get("events") if isinstance(audit, Mapping) else None
+    if not isinstance(tail, list):
+        tail = []
+    tail.append(dict(event))
+    audit["events"] = tail[-40:]
+    audit["last_event"] = dict(event)
+    state["surface_consistency_audit_tail"] = audit
+
+
 def _update_prediction_lock_diagnostics(state: dict[str, Any], m11_state: M11RuntimeState) -> None:
     latest_entries: dict[str, Mapping[str, Any]] = {}
     for entry in m11_state.prediction_ledger.entries:
@@ -5651,6 +5813,7 @@ def _merge_surface_identity_contract_into_memory_guidance(
     *,
     persona_name: str,
     group_turn_binding: Mapping[str, Any] | None,
+    conscious_plan: Mapping[str, Any] | None = None,
 ) -> None:
     control = _mapping(memory_dynamics.get("control_guidance"))
     contract = _mapping(control.get("reply_contract"))
@@ -5669,6 +5832,9 @@ def _merge_surface_identity_contract_into_memory_guidance(
     contract["assistant_allowed_self_names"] = allowed_self_names
     if platform_command:
         contract["platform_command"] = platform_command
+    conscious_commitment = _mapping(_mapping(conscious_plan).get("surface_commitment"))
+    if conscious_commitment:
+        contract["surface_commitment"] = dict(conscious_commitment)
     control["reply_contract"] = contract
     memory_dynamics["control_guidance"] = control
 
@@ -7043,6 +7209,7 @@ class MVPDialogueRuntime:
             memory_dynamics,
             persona_name=self.persona_name,
             group_turn_binding=group_turn_binding,
+            conscious_plan=conscious,
         )
 
         _report_progress("user_modeling")
@@ -7255,6 +7422,46 @@ class MVPDialogueRuntime:
         )
         action = recorded_action
         reply = raw_reply
+        surface_commitment = _mapping(reply_contract.get("surface_commitment"))
+        surface_consistency_verification = _empty_surface_consistency_verification()
+        surface_consistency_audit_event: dict[str, Any] | None = None
+        if surface_commitment and latency_mode != "fast_chat":
+            try:
+                verify_system, verify_user = build_surface_consistency_verification_prompt(
+                    user_text=user_text,
+                    draft_reply=raw_reply,
+                    surface_commitment=surface_commitment,
+                    reply_contract=reply_contract,
+                    turn_index=turn_index,
+                )
+                verify_payload = _complete_json_stage(
+                    "surface_consistency_verification", verify_system, verify_user
+                )
+                surface_consistency_verification = normalize_surface_consistency_verification(verify_payload)
+            except Exception as exc:
+                surface_consistency_verification = _empty_surface_consistency_verification(
+                    reason=f"llm_error:{type(exc).__name__}"
+                )
+            surface_consistency_audit_event = _build_surface_consistency_verification_event(
+                turn_index=turn_index,
+                verification=surface_consistency_verification,
+                commitment=surface_commitment,
+            )
+            bus.append(surface_consistency_audit_event)
+            _record_surface_consistency_event(state, surface_consistency_audit_event)
+            reply_contract["surface_consistency_verification"] = dict(surface_consistency_verification)
+        else:
+            reply_contract["surface_consistency_verification"] = dict(surface_consistency_verification)
+            if surface_commitment and latency_mode == "fast_chat":
+                surface_consistency_audit_event = {
+                    "type": "SurfaceConsistencyVerificationSkippedEvent",
+                    "turn_index": turn_index,
+                    "reason_code": "latency_fast_path",
+                    "committed_surface_intent": str(surface_commitment.get("surface_intent", "chat") or "chat"),
+                    "engineering_proxy_label": "mvp_local_surface_consistency_audit",
+                }
+                bus.append(surface_consistency_audit_event)
+                _record_surface_consistency_event(state, surface_consistency_audit_event)
         reply_validation: dict[str, Any] = {
             "original_length": len(raw_reply),
             "final_length": len(raw_reply),
@@ -7268,6 +7475,7 @@ class MVPDialogueRuntime:
             "selected_disclosure_action": str(reply_contract.get("selected_disclosure_action", "none") or "none"),
             "redaction_targets": _string_list(reply_contract.get("redaction_targets"), limit=12),
             "identity_anchored_action": bool(reply_contract.get("identity_anchored_action", False)),
+            "surface_consistency_verification": dict(surface_consistency_verification),
         }
         group_policy_actions: list[str] = []
         repair_requirements, repair_reason_codes, forced_group_action = _reply_repair_requirements(
