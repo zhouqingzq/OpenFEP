@@ -449,6 +449,23 @@ def _collect_entity_mentions(
     return explicit_mentions[:8], mentioned_participant_ids[:8], addressed_assistant
 
 
+def _extract_bot_command(message: Mapping[str, Any], text: str) -> str:
+    entities = list(message.get("entities") or []) + list(message.get("caption_entities") or [])
+    for raw_entity in entities:
+        entity = _mapping(raw_entity)
+        entity_type = str(entity.get("type", "") or "").strip().lower()
+        if entity_type != "bot_command":
+            continue
+        command_text = _telegram_slice(
+            text,
+            int(entity.get("offset", 0) or 0),
+            int(entity.get("length", 0) or 0),
+        ).strip()
+        if command_text.startswith("/"):
+            return command_text[:64]
+    return ""
+
+
 def normalize_telegram_update(
     update: Mapping[str, Any],
     *,
@@ -490,6 +507,7 @@ def normalize_telegram_update(
         bot=bot,
         account_scope=bot.account_scope,
     )
+    platform_command = _extract_bot_command(message, text)
     visible_participant_ids: list[str] = [speaker_participant_id, bot.assistant_participant_id]
     seen_visible = set(visible_participant_ids)
     reply_to_turn_id = ""
@@ -519,7 +537,7 @@ def normalize_telegram_update(
             )
         if reply_from_id == bot.bot_user_id:
             addressed_participant_ids = [bot.assistant_participant_id]
-    if not addressed_participant_ids and (chat_type == "private" or addressed_by_mention):
+    if not addressed_participant_ids and (chat_type == "private" or addressed_by_mention or platform_command):
         addressed_participant_ids = [bot.assistant_participant_id]
     for participant_id in mentioned_participant_ids:
         if participant_id not in seen_visible:
@@ -539,6 +557,10 @@ def normalize_telegram_update(
         envelope["quoted_turn_ids"] = [reply_to_turn_id]
     if explicit_mentions:
         envelope["explicit_mentions"] = explicit_mentions[:8]
+    if platform_command:
+        envelope["surface_intent"] = "bot_command"
+        envelope["platform_command"] = platform_command
+        envelope["assistant_surface_label"] = bot.username[:64]
     if chat_type == "private":
         ingress_evidence_band = "structured_full"
     elif reply_to_turn_id and addressed_participant_ids:

@@ -59,6 +59,9 @@ class GroupTurnEnvelopeBody(BaseModel):
     reply_to_turn_id: str = Field(default="", max_length=120)
     quoted_turn_ids: list[str] = Field(default_factory=list, max_length=8)
     explicit_mentions: list[str] = Field(default_factory=list, max_length=8)
+    surface_intent: str = Field(default="", max_length=32)
+    platform_command: str = Field(default="", max_length=64)
+    assistant_surface_label: str = Field(default="", max_length=64)
 
 
 class ClientInputBody(BaseModel):

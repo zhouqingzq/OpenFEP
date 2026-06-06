@@ -214,6 +214,15 @@ def bounded_group_turn_envelope(raw: Mapping[str, Any] | None) -> dict[str, Any]
     explicit = _bounded_string_list(envelope.get("explicit_mentions"), limit=8, item_max_chars=64)
     if explicit:
         payload["explicit_mentions"] = explicit
+    surface_intent = str(envelope.get("surface_intent", "") or "").strip()[:32]
+    if surface_intent:
+        payload["surface_intent"] = surface_intent
+    platform_command = str(envelope.get("platform_command", "") or "").strip()[:64]
+    if platform_command:
+        payload["platform_command"] = platform_command
+    assistant_surface_label = str(envelope.get("assistant_surface_label", "") or "").strip()[:64]
+    if assistant_surface_label:
+        payload["assistant_surface_label"] = assistant_surface_label
     return payload
 
 

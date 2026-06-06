@@ -525,6 +525,15 @@ def _bounded_group_turn_envelope(raw: Mapping[str, Any] | None) -> dict[str, Any
     explicit = _bounded_string_list(envelope.get("explicit_mentions"), limit=8, item_max_chars=64)
     if explicit:
         payload["explicit_mentions"] = explicit
+    surface_intent = str(envelope.get("surface_intent", "") or "").strip()[:32]
+    if surface_intent:
+        payload["surface_intent"] = surface_intent
+    platform_command = str(envelope.get("platform_command", "") or "").strip()[:64]
+    if platform_command:
+        payload["platform_command"] = platform_command
+    assistant_surface_label = str(envelope.get("assistant_surface_label", "") or "").strip()[:64]
+    if assistant_surface_label:
+        payload["assistant_surface_label"] = assistant_surface_label
     return payload
 
 
@@ -582,6 +591,9 @@ def _build_group_turn_binding(
         "pronoun_bindings": _mapping(_mapping(entity_binding).get("pronoun_bindings")),
         "ambiguity_band": ambiguity_band,
         "conflict_flags": conflict_flags,
+        "surface_intent": str(envelope.get("surface_intent", "") or "").strip()[:32],
+        "platform_command": str(envelope.get("platform_command", "") or "").strip()[:64],
+        "assistant_surface_label": str(envelope.get("assistant_surface_label", "") or "").strip()[:64],
     }
 
 
@@ -4716,6 +4728,64 @@ def _positive_int(value: Any, *, default: int) -> int:
     return max(0, numeric)
 
 
+def _normalized_self_name_token(value: str) -> str:
+    token = str(value or "").strip()
+    if not token:
+        return ""
+    token = re.split(r"[\s，。！？、~,:;()（）]+", token, maxsplit=1)[0].strip()
+    token = token.rstrip("呀啦呢哦喔哈")
+    return token[:24]
+
+
+def _alternate_self_name_in_reply(reply: str, contract: Mapping[str, Any]) -> str:
+    allowed_names = {
+        _normalized_self_name_token(item).casefold()
+        for item in _string_list(contract.get("assistant_allowed_self_names"), limit=8)
+    }
+    persona_name = _normalized_self_name_token(str(contract.get("assistant_persona_name", "") or ""))
+    if persona_name:
+        allowed_names.add(persona_name.casefold())
+    if not allowed_names:
+        return ""
+    patterns = (
+        r"(?:我(?:是|就是|叫)|你可以叫我)([A-Za-z0-9_\-\u4e00-\u9fff@ ]{1,24})",
+        r"(?:我也叫|也可以叫我)([A-Za-z0-9_\-\u4e00-\u9fff@ ]{1,24})",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, reply)
+        if not match:
+            continue
+        candidate = _normalized_self_name_token(match.group(1))
+        if candidate and candidate.casefold() not in allowed_names:
+            return candidate
+    return ""
+
+
+def _reply_claims_persona_absent(reply: str, contract: Mapping[str, Any]) -> bool:
+    persona_name = str(contract.get("assistant_persona_name", "") or "").strip()
+    if not persona_name:
+        return False
+    return bool(
+        re.search(
+            rf"{re.escape(persona_name)}.{{0,8}}(没上线|还没上线|不在|没来|还没来|未上线|不在线)",
+            reply,
+        )
+    )
+
+
+def _assistant_identity_repair_fallback(contract: Mapping[str, Any]) -> str:
+    surface_intent = str(contract.get("assistant_surface_intent", "") or "").strip()
+    platform_command = str(contract.get("platform_command", "") or "").strip()
+    persona_name = str(contract.get("assistant_persona_name", "") or "").strip()
+    if surface_intent == "bot_command" and platform_command == "/status":
+        return "在线，路由正常，待命中。"
+    if surface_intent == "bot_command":
+        return "收到，我按当前这个机器人身份继续。"
+    if persona_name:
+        return f"刚才那句身份说乱了，我按{persona_name}继续和你说。"
+    return "刚才那句身份说乱了，我按当前这个身份继续说。"
+
+
 def validate_visible_reply(reply: str, contract: Mapping[str, Any] | None) -> tuple[str, dict[str, Any]]:
     original = str(reply or "").strip()
     contract_map = _mapping(contract)
@@ -4771,6 +4841,13 @@ def validate_visible_reply(reply: str, contract: Mapping[str, Any] | None) -> tu
         if re.search(assertion_pattern, cleaned):
             cleaned = "我先不下身份结论，先按你这轮提供的信息继续观察。"
             actions.append("softened_identity_assertion")
+    alternate_self_name = _alternate_self_name_in_reply(cleaned, contract_map)
+    if alternate_self_name:
+        cleaned = _assistant_identity_repair_fallback(contract_map)
+        actions.append("blocked_alternate_persona_identity")
+    elif _reply_claims_persona_absent(cleaned, contract_map):
+        cleaned = _assistant_identity_repair_fallback(contract_map)
+        actions.append("blocked_persona_absence_claim")
     validation = {
         "original_length": len(original),
         "final_length": len(cleaned),
@@ -4990,25 +5067,44 @@ def _has_latency_marker(text: str, markers: tuple[str, ...]) -> bool:
     return any(marker.casefold() in lowered for marker in markers)
 
 
+def _assistant_identity_challenge_detected(user_text: str, persona_name: str = "") -> bool:
+    text = str(user_text or "").strip()
+    if not text:
+        return False
+    if re.search(r"(你又成|你又变成|你不是|不是[，,。 ]*你|身份|别装|错乱了)", text):
+        return True
+    persona = str(persona_name or "").strip()
+    if persona and re.search(rf"{re.escape(persona)}.{{0,8}}(不在|没上线|还没上线|没来|未上线|不在线)", text):
+        return True
+    return False
+
+
 def _classify_turn_latency_mode(
     state: Mapping[str, Any],
     *,
     user_text: str,
     user_id: str,
+    persona_name: str,
     proactive_turn: bool,
     identity_anchored_action: bool,
     assessable_pending_rows: list[Mapping[str, Any]],
+    group_turn_envelope: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     text = str(user_text or "").strip()
     reasons: list[str] = []
     mode = "fast_chat"
+    envelope = _bounded_group_turn_envelope(group_turn_envelope)
     if proactive_turn:
         return {"mode": "full", "reason_codes": ["proactive_turn"]}
     if identity_anchored_action:
         return {"mode": "full", "reason_codes": ["identity_anchored_action"]}
+    if str(envelope.get("surface_intent", "") or "").strip() == "bot_command":
+        return {"mode": "normal", "reason_codes": ["bot_command_surface"]}
     explicit_secret, _secret_phrase = _detect_explicit_secrecy(text)
     if explicit_secret:
         return {"mode": "full", "reason_codes": ["explicit_secrecy"]}
+    if _assistant_identity_challenge_detected(text, persona_name):
+        return {"mode": "normal", "reason_codes": ["assistant_identity_challenge"]}
     if assessable_pending_rows:
         reasons.append("pending_reward_settlement")
         mode = "normal"
@@ -5547,6 +5643,33 @@ def _merge_m12_2_into_memory_guidance(
         "reply_policy_hints": hints,
         "relationship_value_assessment": relationship_assessment,
     }
+    memory_dynamics["control_guidance"] = control
+
+
+def _merge_surface_identity_contract_into_memory_guidance(
+    memory_dynamics: dict[str, Any],
+    *,
+    persona_name: str,
+    group_turn_binding: Mapping[str, Any] | None,
+) -> None:
+    control = _mapping(memory_dynamics.get("control_guidance"))
+    contract = _mapping(control.get("reply_contract"))
+    binding = _mapping(group_turn_binding)
+    surface_intent = str(binding.get("surface_intent", "") or "").strip()
+    platform_command = str(binding.get("platform_command", "") or "").strip()
+    assistant_surface_label = str(binding.get("assistant_surface_label", "") or "").strip()
+    allowed_self_names = _unique_strings(
+        [persona_name],
+        [assistant_surface_label] if surface_intent == "bot_command" and assistant_surface_label else [],
+        limit=6,
+    )
+    contract["assistant_persona_name"] = str(persona_name or "").strip()
+    contract["assistant_surface_intent"] = surface_intent or "chat"
+    contract["assistant_surface_label"] = assistant_surface_label
+    contract["assistant_allowed_self_names"] = allowed_self_names
+    if platform_command:
+        contract["platform_command"] = platform_command
+    control["reply_contract"] = contract
     memory_dynamics["control_guidance"] = control
 
 
@@ -6127,9 +6250,11 @@ class MVPDialogueRuntime:
             state,
             user_text=user_text,
             user_id=user_id,
+            persona_name=self.persona_name,
             proactive_turn=proactive_turn,
             identity_anchored_action=identity_anchored_action,
             assessable_pending_rows=assessable_pending_rows,
+            group_turn_envelope=bounded_group_turn,
         )
         latency_mode = str(latency_mode_info.get("mode", "normal") or "normal")
         m12_cognitive_bus = CognitiveEventBus()
@@ -6914,6 +7039,11 @@ class MVPDialogueRuntime:
                 memory_dynamics,
                 relationship_value_context,
             )
+        _merge_surface_identity_contract_into_memory_guidance(
+            memory_dynamics,
+            persona_name=self.persona_name,
+            group_turn_binding=group_turn_binding,
+        )
 
         _report_progress("user_modeling")
         m13_evaluator = M13DriveEvaluator()

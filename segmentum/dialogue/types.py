@@ -20,6 +20,9 @@ class GroupTurnEnvelope(TypedDict, total=False):
     reply_to_turn_id: str
     quoted_turn_ids: list[str]
     explicit_mentions: list[str]
+    surface_intent: str
+    platform_command: str
+    assistant_surface_label: str
 
 
 class TranscriptUtterance(TypedDict):
@@ -36,6 +39,9 @@ class TranscriptUtterance(TypedDict):
     reply_to_turn_id: NotRequired[str]
     quoted_turn_ids: NotRequired[list[str]]
     explicit_mentions: NotRequired[list[str]]
+    surface_intent: NotRequired[str]
+    platform_command: NotRequired[str]
+    assistant_surface_label: NotRequired[str]
 
 
 # Alias for spec / readability (distinct from world.DialogueTurn replay row dataclass)
