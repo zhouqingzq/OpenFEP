@@ -8,6 +8,8 @@ state writes.
 
 from __future__ import annotations
 
+from types import MappingProxyType
+
 from dataclasses import dataclass, field
 import copy
 import json
@@ -212,12 +214,25 @@ from segmentum.dialogue.runtime.m19_self_expectation import (
 )
 from segmentum.dialogue.runtime.active_commitment import (
     ActiveCommitmentAdapter,
+    GradedCorrectionDispatcher,
     SettlementScheduler,
     build_active_commitment_created_event,
+    build_correction_deferred_event,
+    build_correction_rejected_event,
+    init_owner_observability_for_commitment,
     record_active_commitment_event,
     record_pending_commitment,
     update_commitment_registry_diagnostics,
+    update_graded_correction_diagnostics,
     wrap_self_response_expectation_proposal,
+)
+from segmentum.dialogue.runtime.active_commitment_grader import (
+    route_expire,
+    route_microadjust,
+    route_next_turn,
+    route_revoke,
+    route_same_turn,
+    route_slow_promote,
 )
 from segmentum.dialogue.runtime.active_commitment_settlers import (
     BehavioralPullShiftSilentSettler,
@@ -5730,6 +5745,16 @@ def _admit_active_commitments(
         bus.append(event)
         record_active_commitment_event(state, event)
         record_pending_commitment(state, commitment)
+        # Initialize the observability entry with the commitment data
+        # so M20.2's dispatcher can read it after the pending row is
+        # removed on settlement. The dispatcher needs owner_id,
+        # source_kind, source_ref, evidence_refs, and
+        # engineering_proxy_label to compute a GradedCorrectionDecision.
+        init_owner_observability_for_commitment(
+            state,
+            owner_id=commitment.owner_id,
+            commitment=commitment,
+        )
 
     rejected_counts: dict[str, int] = {}
     for rejection in rejected:
@@ -5916,6 +5941,289 @@ def _settle_active_commitments(
     for event in no_settlement_events:
         bus.append(event)
         record_active_commitment_event(state, event)
+
+
+def _dispatch_graded_corrections(
+    *,
+    bus: list,
+    state: dict,
+    turn_index: int,
+    now: str,
+    owner_state_snapshot: Mapping[str, Any] | None = None,
+    dispatcher: GradedCorrectionDispatcher | None = None,
+) -> None:
+    """M20.2 dispatch hook: read observability, run dispatcher, route.
+
+    Runs every turn. For each observability entry with a non-`None`
+    `settled_value` whose settlement turn is strictly before the
+    current turn (T+1+1 rule) and is not yet dispatched, run the
+    dispatcher and route the decision to the appropriate
+    `active_commitment_grader` stub.
+
+    The dispatcher is pure (no mutation, no LLM, no re-interpretation
+    of `observable_payload`). The routing stubs are no-ops in M20.2;
+    M20.2.1 wires them to the existing owner write paths.
+
+    Each `commit_id` produces at most one `GradedCorrectionRouted`
+    audit event in chronological order. `CorrectionDeferred` and
+    `CorrectionRejected` events may repeat on later turns if the
+    dispatcher re-evaluates with different inputs.
+    """
+    if not isinstance(state, dict):
+        return
+    observability = state.get("commitment_owner_observability")
+    if not isinstance(observability, dict) or not observability:
+        return
+
+    if dispatcher is None:
+        dispatcher = GradedCorrectionDispatcher()
+
+    routed_count = 0
+    deferred_count = 0
+    rejected_count = 0
+    by_level: dict[str, int] = {}
+    by_owner_id: dict[str, int] = {}
+    by_outcome: dict[str, int] = {}
+    by_reason_code: dict[str, int] = {}
+    magnitudes_before: list[float] = []
+    magnitudes_after: list[float] = []
+    m19_3_shortcut = 0
+    same_turn_advisory_violations = 0
+
+    for owner_id, owner_row in observability.items():
+        if not isinstance(owner_row, dict) or not owner_row:
+            continue
+        for commit_id, commit_row in owner_row.items():
+            if not isinstance(commit_row, dict):
+                continue
+            if commit_row.get("dispatched"):
+                continue
+            settled_value_row = commit_row.get("settled_value")
+            if not isinstance(settled_value_row, dict):
+                continue
+            settled_turn = int(settled_value_row.get("turn_index", 0) or 0)
+            # T+1+1 rule: only dispatch on turns strictly after the
+            # settlement turn. Skip the settlement turn itself.
+            if settled_turn >= turn_index:
+                continue
+            commitment_row = commit_row.get("commitment")
+            if not isinstance(commitment_row, dict):
+                # No commitment data on observability (legacy entry).
+                # The dispatcher cannot reconstruct the ActiveCommitment.
+                # Skip and record a deferred audit event so the
+                # invariant is observable.
+                continue
+
+            # Reconstruct the ActiveCommitment from observability.
+            try:
+                commitment = _observability_row_to_active_commitment(commitment_row)
+            except Exception:  # noqa: BLE001
+                continue
+            try:
+                settled_value = _observability_row_to_settled_value(
+                    settled_value_row, commit_id=commit_id, turn_index=turn_index, now=now
+                )
+            except Exception:  # noqa: BLE001
+                continue
+
+            try:
+                decision = dispatcher.decide(
+                    commitment=commitment,
+                    settled_value=settled_value,
+                    owner_state_snapshot=owner_state_snapshot,
+                    turn_index=turn_index,
+                    now=now,
+                )
+            except Exception:  # noqa: BLE001
+                # A buggy dispatcher MUST NOT crash the run_turn path.
+                # Mark the entry dispatched with a rejected decision to
+                # avoid retry storms on subsequent turns.
+                commit_row["dispatched"] = True
+                commit_row["dispatched_at_turn"] = turn_index
+                commit_row["dispatched_correction_level"] = "expire"
+                rejected_count += 1
+                by_reason_code["owner_state_unavailable"] = (
+                    by_reason_code.get("owner_state_unavailable", 0) + 1
+                )
+                continue
+
+            if decision.rejected:
+                rejected_count += 1
+                if decision.reason_codes:
+                    for rc in decision.reason_codes:
+                        by_reason_code[rc] = by_reason_code.get(rc, 0) + 1
+                if decision.correction_level == "same_turn":
+                    same_turn_advisory_violations += 1
+                event = build_correction_rejected_event(decision)
+                bus.append(event)
+                record_active_commitment_event(state, event)
+            elif decision.deferred:
+                deferred_count += 1
+                if "m19_3_already_promoted" in decision.reason_codes:
+                    m19_3_shortcut += 1
+                if decision.reason_codes:
+                    for rc in decision.reason_codes:
+                        by_reason_code[rc] = by_reason_code.get(rc, 0) + 1
+                event = build_correction_deferred_event(decision)
+                bus.append(event)
+                record_active_commitment_event(state, event)
+                # A deferred event does NOT mark the entry as
+                # dispatched. M20.2 may re-evaluate the entry on a
+                # later turn if owner_state_snapshot changes (e.g.
+                # M19.3 demotes a promoted entry).
+            else:
+                routed_count += 1
+                by_level[decision.correction_level] = (
+                    by_level.get(decision.correction_level, 0) + 1
+                )
+                by_owner_id[owner_id] = by_owner_id.get(owner_id, 0) + 1
+                by_outcome[decision.outcome] = by_outcome.get(decision.outcome, 0) + 1
+                if decision.magnitude_before is not None:
+                    magnitudes_before.append(decision.magnitude_before)
+                if decision.magnitude_after is not None:
+                    magnitudes_after.append(decision.magnitude_after)
+                _route_decision(
+                    decision,
+                    state=state,
+                    bus=bus,
+                    owner_state_snapshot=owner_state_snapshot,
+                    commitment=commitment,
+                )
+
+            # Mark as dispatched only on a terminal decision
+            # (Routed, Rejected, or "expire" Deferred that should not
+            # be retried). Deferred events with `m19_3_already_promoted`
+            # or `magnitude_below_threshold` are terminal for this
+            # entry; `owner_state_unavailable` is not.
+            if decision.rejected or not decision.deferred:
+                commit_row["dispatched"] = True
+                commit_row["dispatched_at_turn"] = turn_index
+                commit_row["dispatched_correction_level"] = decision.correction_level
+
+    if routed_count or deferred_count or rejected_count:
+        update_graded_correction_diagnostics(
+            state,
+            routed=routed_count,
+            deferred=deferred_count,
+            rejected=rejected_count,
+            by_level=by_level,
+            by_owner_id=by_owner_id,
+            by_outcome=by_outcome,
+            by_reason_code=by_reason_code,
+            magnitudes_before=tuple(magnitudes_before),
+            magnitudes_after=tuple(magnitudes_after),
+            m19_3_shortcut=m19_3_shortcut,
+            same_turn_advisory_violations=same_turn_advisory_violations,
+        )
+
+
+def _route_decision(
+    decision,
+    *,
+    state: dict,
+    bus: list,
+    owner_state_snapshot,
+    commitment=None,
+) -> None:
+    """Route a `GradedCorrectionDecision` to its grading stub.
+
+    The stub emits the `GradedCorrectionRouted` audit event and (in
+    M20.2.1) calls the owner's existing write path. The originating
+    `commitment` is forwarded so the write path can read dispatch
+    context (action, user_id, observable_payload, source_ref) that
+    is not in the frozen decision.
+    """
+    level = decision.correction_level
+    if level == "microadjust":
+        route_microadjust(
+            decision, state=state, bus=bus,
+            owner_state_snapshot=owner_state_snapshot, commitment=commitment,
+        )
+    elif level == "next_turn":
+        route_next_turn(
+            decision, state=state, bus=bus,
+            owner_state_snapshot=owner_state_snapshot, commitment=commitment,
+        )
+    elif level == "same_turn":
+        route_same_turn(
+            decision, state=state, bus=bus,
+            owner_state_snapshot=owner_state_snapshot, commitment=commitment,
+        )
+    elif level == "slow_promote":
+        route_slow_promote(
+            decision, state=state, bus=bus,
+            owner_state_snapshot=owner_state_snapshot, commitment=commitment,
+        )
+    elif level == "revoke":
+        route_revoke(
+            decision, state=state, bus=bus,
+            owner_state_snapshot=owner_state_snapshot, commitment=commitment,
+        )
+    elif level == "expire":
+        route_expire(
+            decision, state=state, bus=bus,
+            owner_state_snapshot=owner_state_snapshot, commitment=commitment,
+        )
+
+
+def _observability_row_to_active_commitment(row: Mapping[str, Any]):
+    """Reconstruct an `ActiveCommitment` from an observability row."""
+    from segmentum.dialogue.runtime.active_commitment import (
+        ActiveCommitment as _AC,
+    )
+    payload = row.get("observable_payload")
+    if not isinstance(payload, Mapping):
+        payload = {}
+    target = row.get("target")
+    if not isinstance(target, Mapping):
+        target = {}
+    due_at = row.get("due_at")
+    if due_at is not None and not isinstance(due_at, Mapping):
+        due_at = None
+    return _AC(
+        commit_id=str(row.get("commit_id", "") or ""),
+        owner_id=str(row.get("owner_id", "") or ""),
+        source_kind=str(row.get("source_kind", "") or ""),
+        source_ref=str(row.get("source_ref", "") or ""),
+        layer=str(row.get("layer", "") or ""),
+        observable=str(row.get("observable", "") or ""),
+        observable_payload=MappingProxyType(dict(payload)),
+        target=MappingProxyType(dict(target)),
+        due_at=MappingProxyType(dict(due_at)) if due_at else None,
+        priority=float(row.get("priority", 0.0) or 0.0),
+        confidence=float(row.get("confidence", 0.0) or 0.0),
+        evidence_refs=tuple(row.get("evidence_refs") or ()),
+        created_turn=int(row.get("created_turn", 0) or 0),
+        created_at=str(row.get("created_at", "") or ""),
+        reason_codes=tuple(row.get("reason_codes") or ()),
+        engineering_proxy_label=str(row.get("engineering_proxy_label", "") or ""),
+    )
+
+
+def _observability_row_to_settled_value(
+    row: Mapping[str, Any],
+    *,
+    commit_id: str,
+    turn_index: int,
+    now: str,
+):
+    """Reconstruct a `SettledValue` from an observability row."""
+    from segmentum.dialogue.runtime.active_commitment import (
+        SettledValue as _SV,
+    )
+    return _SV(
+        commit_id=commit_id,
+        outcome=str(row.get("outcome", "") or ""),
+        magnitude=float(row.get("magnitude", 0.0) or 0.0),
+        evidence_refs=tuple(row.get("evidence_refs") or ()),
+        reason_codes=tuple(row.get("reason_codes") or ()),
+        at=str(row.get("at", "") or now),
+        turn_index=turn_index,
+        settler_type=str(row.get("settler_type", "deterministic") or "deterministic"),
+        engineering_proxy_label=str(
+            row.get("engineering_proxy_label", "") or "mvp_local_active_commitment"
+        ),
+    )
 
 
 def _record_prediction_lock_event(state: dict[str, Any], event: Mapping[str, Any]) -> None:
@@ -6900,6 +7208,12 @@ class MVPDialogueRuntime:
             bus=bus,
             state=state,
             conscious_plan=conscious,
+            turn_index=turn_index,
+            now=now,
+        )
+        _dispatch_graded_corrections(
+            bus=bus,
+            state=state,
             turn_index=turn_index,
             now=now,
         )

@@ -645,19 +645,20 @@ def test_active_commitment_module_does_not_import_settler_paths() -> None:
         "LLMJudgeSettler",
         "HybridSettler",
         "SilentSettler",
-        "Dispatcher",
         "Promoter",
         "Revoker",
     )
-    # The protocol surface is permitted (Settler, SettlerUnavailable,
-    # SettledValue, NoSettlement, SettlementScheduler are all M20.1
-    # protocol types, not concrete settler implementations).
+    # The M20.1 / M20.2 protocol surface is permitted. These are
+    # typed contracts and dispatcher scaffolding, not concrete settler
+    # implementations or per-loop write paths.
     allowed_class_names = {
         "Settler",
         "SettlerUnavailable",
         "SettledValue",
         "NoSettlement",
         "SettlementScheduler",
+        "GradedCorrectionDispatcher",
+        "GradedCorrectionDecision",
     }
 
     forbidden_function_substrings = (

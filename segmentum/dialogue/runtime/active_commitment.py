@@ -78,6 +78,7 @@ COMMITMENT_REGISTRY_V1: Mapping[str, Mapping[str, Any]] = MappingProxyType({
         ),
         "accepts_layers": ["A_long_term_prior", "C_observation"],
         "accepts_source_kinds": ["policy", "episodic"],
+        "graded_action_set": [],
     },
     "m13_drive_state": {
         "description": "behavioral pull, traction, path patterns",
@@ -87,24 +88,28 @@ COMMITMENT_REGISTRY_V1: Mapping[str, Mapping[str, Any]] = MappingProxyType({
         ),
         "accepts_layers": ["A_long_term_prior", "C_observation"],
         "accepts_source_kinds": ["state", "episodic"],
+        "graded_action_set": ["microadjust", "next_turn", "same_turn"],
     },
     "m15_episode_ledger": {
         "description": "episodic memory ledger",
         "storage_hint": "m15_episode_ledger",
         "accepts_layers": ["B_per_turn_commitment", "C_observation"],
         "accepts_source_kinds": ["episodic"],
+        "graded_action_set": ["microadjust", "next_turn"],
     },
     "mismatch_memory_fast": {
         "description": "M19.0 fast-layer mismatch memory",
         "storage_hint": "self_expectation_state.mismatch_memory_fast",
         "accepts_layers": ["B_per_turn_commitment", "C_observation"],
         "accepts_source_kinds": ["episodic", "state"],
+        "graded_action_set": ["microadjust", "next_turn", "revoke"],
     },
     "self_repair_expectation": {
         "description": "M19.1 mid-layer repair expectations",
         "storage_hint": "self_repair_expectation_state.expectations_tail",
         "accepts_layers": ["B_per_turn_commitment"],
         "accepts_source_kinds": ["state", "episodic"],
+        "graded_action_set": ["next_turn", "same_turn", "slow_promote", "revoke"],
     },
     "self_cognition_calibrated_tendencies": {
         "description": "M19.3 slow-layer calibrated tendencies",
@@ -114,32 +119,65 @@ COMMITMENT_REGISTRY_V1: Mapping[str, Mapping[str, Any]] = MappingProxyType({
         ),
         "accepts_layers": ["A_long_term_prior"],
         "accepts_source_kinds": ["policy", "episodic"],
+        "graded_action_set": ["slow_promote", "revoke"],
     },
     "user_prediction_ledger": {
         "description": "M11/M17 user-side predictions",
         "storage_hint": "UserPredictionLedger.pending | confirmed | violated | uncertain",
         "accepts_layers": ["B_per_turn_commitment", "C_observation"],
         "accepts_source_kinds": ["state", "episodic"],
+        "graded_action_set": ["microadjust", "next_turn"],
     },
     "memory_dynamics_control_guidance": {
         "description": "M9.0 control guidance floats",
         "storage_hint": "memory_dynamics.control_guidance",
         "accepts_layers": ["A_long_term_prior"],
         "accepts_source_kinds": ["policy", "state"],
+        "graded_action_set": ["microadjust", "next_turn", "same_turn"],
     },
     "outreach_intent_registry": {
         "description": "M13.3 / M14.x outreach intents",
         "storage_hint": "outreach_intent_registry",
         "accepts_layers": ["B_per_turn_commitment", "C_observation"],
         "accepts_source_kinds": ["state", "episodic"],
+        "graded_action_set": ["next_turn", "same_turn", "revoke"],
     },
     "group_addressee_graph": {
         "description": "M18.2 addressee / target graph",
         "storage_hint": "addressee_graph",
         "accepts_layers": ["B_per_turn_commitment", "C_observation"],
         "accepts_source_kinds": ["state", "episodic"],
+        "graded_action_set": ["microadjust", "next_turn"],
     },
 })
+
+
+# === M20.2 GradedCorrection types and thresholds ========================
+
+GRADED_CORRECTION_V1: frozenset[str] = frozenset({
+    "microadjust",
+    "next_turn",
+    "same_turn",
+    "slow_promote",
+    "revoke",
+    "expire",
+})
+
+
+# Magnitude -> level table (M20.2 §2). A change is a vocabulary bump.
+# Magnitudes are clamped to [0.0, 1.0] before the table is consulted.
+_MAGNITUDE_LEVEL_TABLE: tuple[tuple[float, float, str], ...] = (
+    (0.0, 0.1, "expire"),
+    (0.1, 0.3, "microadjust"),
+    (0.3, 0.6, "next_turn"),
+    (0.6, 0.85, "same_turn"),
+    (0.85, 1.00001, "slow_promote"),
+)
+
+
+# Settler reason codes for the dispatcher side. M20.2 = M20.1's
+# settler codes ∪ dispatcher codes. Defined after
+# `ALL_SETTLEMENT_REASON_CODES_V1` so it can take the union.
 
 
 OBSERVABLE_V1: Mapping[str, Mapping[str, Any]] = MappingProxyType({
@@ -669,6 +707,28 @@ ALL_SETTLEMENT_REASON_CODES_V1: frozenset[str] = (
 )
 
 
+# Dispatcher reason codes (M20.2 §6). The dispatcher may surface any
+# of these on a `CorrectionDeferred` or `CorrectionRejected` event.
+DISPATCHER_REASON_CODES_V1: frozenset[str] = frozenset({
+    "magnitude_below_threshold",
+    "policy_source_no_correction",
+    "ambiguous_outcome",
+    "m19_3_already_promoted",
+    "action_set_violation",
+    "slow_promote_not_supported",
+    "same_turn_not_advisory",
+    "owner_state_unavailable",
+    "unknown_owner",
+})
+
+
+# All reason codes a graded correction may surface across the unified
+# commitment loop. M20.2 = M20.1's settlement codes ∪ dispatcher codes.
+ALL_GRADED_CORRECTION_REASON_CODES_V1: frozenset[str] = (
+    ALL_SETTLEMENT_REASON_CODES_V1 | DISPATCHER_REASON_CODES_V1
+)
+
+
 # Minimal eligibility window: a commitment whose `due_at` is
 # `{"kind": "next_turn"}` is considered past when current_turn >
 # created_turn + this constant. Frozen at 1 by M20.1 §3.
@@ -787,6 +847,76 @@ def _ensure_owner_observability_map(
     return observability
 
 
+def init_owner_observability_for_commitment(
+    state: dict,
+    *,
+    owner_id: str,
+    commitment: ActiveCommitment,
+) -> None:
+    """Initialize the observability entry for a freshly admitted commitment.
+
+    Called at admission time (M20.0) so the dispatcher (M20.2) can
+    read the commitment data after the pending row is removed on
+    settlement. The observability map is the only durable record of
+    the commitment once the pending list drops it.
+
+    This is an additive write; it does NOT touch any owner storage
+    bucket. It only sets:
+    - `commitment`: a bounded copy of the fields the dispatcher needs
+    - `settled_value`: None (filled by M20.1 settlement)
+    - `settlement_attempts`: 0
+    - `dispatched`: False (M20.2 sets True after GradedCorrectionRouted)
+    - `dispatched_at_turn`: None
+    - `dispatched_correction_level`: None
+    """
+    if not isinstance(state, dict):
+        return
+    observability = _ensure_owner_observability_map(state)
+    owner_row = observability.get(owner_id)
+    if not isinstance(owner_row, dict):
+        owner_row = {}
+    prior = owner_row.get(commitment.commit_id)
+    if not isinstance(prior, dict) or not prior.get("commitment"):
+        prior = {
+            "commitment": _commitment_to_observability_row(commitment),
+            "settled_value": None,
+            "settlement_attempts": 0,
+            "last_attempt_turn_index": None,
+            "last_attempt_reason_code": None,
+            "dispatched": False,
+            "dispatched_at_turn": None,
+            "dispatched_correction_level": None,
+        }
+        owner_row[commitment.commit_id] = prior
+    observability[owner_id] = owner_row
+
+
+def _commitment_to_observability_row(commitment: ActiveCommitment) -> dict[str, Any]:
+    """Build a bounded dict copy of the commitment for observability.
+
+    M20.2's dispatcher only needs a small subset of fields. Storing
+    the full `ActiveCommitment` would bloat state without value.
+    """
+    return {
+        "commit_id": commitment.commit_id,
+        "owner_id": commitment.owner_id,
+        "source_kind": commitment.source_kind,
+        "source_ref": commitment.source_ref,
+        "layer": commitment.layer,
+        "observable": commitment.observable,
+        "observable_payload": dict(commitment.observable_payload),
+        "target": dict(commitment.target),
+        "due_at": dict(commitment.due_at) if commitment.due_at else None,
+        "priority": commitment.priority,
+        "confidence": commitment.confidence,
+        "evidence_refs": list(commitment.evidence_refs),
+        "reason_codes": list(commitment.reason_codes),
+        "engineering_proxy_label": commitment.engineering_proxy_label,
+        "created_turn": commitment.created_turn,
+        "created_at": commitment.created_at,
+    }
+
+
 def write_owner_observability(
     state: dict,
     *,
@@ -800,6 +930,10 @@ def write_owner_observability(
 
     Owners MUST NOT lose their existing fields. The observability map
     is additive. M20.1 only writes to it; M20.2 will read from it.
+
+    If the entry does not yet exist (e.g. settlement before admission
+    was wired into observability), this function initializes a minimal
+    one without commitment data. M20.2 may skip such entries.
     """
     if not isinstance(state, dict):
         return
@@ -810,10 +944,14 @@ def write_owner_observability(
     prior = owner_row.get(commit_id)
     if not isinstance(prior, dict):
         prior = {
+            "commitment": None,
             "settled_value": None,
             "settlement_attempts": 0,
             "last_attempt_turn_index": None,
             "last_attempt_reason_code": None,
+            "dispatched": False,
+            "dispatched_at_turn": None,
+            "dispatched_correction_level": None,
         }
     prior["settled_value"] = (
         {
@@ -1326,15 +1464,379 @@ def _settler_type_of(settler: Any) -> str:
     return "deterministic"
 
 
+# === M20.2 dispatcher core ==============================================
+
+
+@dataclass(frozen=True)
+class GradedCorrectionDecision:
+    """Frozen result of the pure dispatcher (M20.2 §4).
+
+    The dispatcher does NOT mutate state. The router reads this
+    decision and dispatches to the existing owner write path.
+    """
+
+    commit_id: str
+    correction_level: str
+    routed_owner_id: str
+    reason_codes: tuple[str, ...]
+    evidence_refs: tuple[str, ...]
+    magnitude_before: float | None
+    magnitude_after: float | None
+    outcome: str
+    at: str
+    turn_index: int
+    engineering_proxy_label: str
+    deferred: bool = False
+    rejected: bool = False
+
+
+def _level_from_magnitude(magnitude: float) -> str:
+    """Map magnitude to a `GradedCorrection` level via the frozen table."""
+    for low, high, level in _MAGNITUDE_LEVEL_TABLE:
+        if low <= magnitude < high:
+            return level
+    return "slow_promote"
+
+
+def _is_m19_3_already_promoted(
+    owner_state_snapshot: Mapping[str, Any] | None,
+    source_ref: str,
+) -> bool:
+    """Return True if M19.3 has already promoted `source_ref`.
+
+    M20.2 only reads. The promotion lock is owned by M19.3.
+    """
+    if not isinstance(owner_state_snapshot, Mapping):
+        return False
+    # M19.3 may surface the lock in multiple shapes. The M20.2
+    # dispatcher only reads known keys; new keys are a M19.3
+    # vocabulary bump.
+    promotion_lock = owner_state_snapshot.get("m19_3_promotion_lock")
+    if isinstance(promotion_lock, Mapping):
+        if source_ref in promotion_lock:
+            return True
+        promoted_set = promotion_lock.get("promoted")
+        if isinstance(promoted_set, list) and source_ref in promoted_set:
+            return True
+    calibrated = owner_state_snapshot.get("calibrated_tendencies")
+    if isinstance(calibrated, list):
+        for row in calibrated:
+            if (
+                isinstance(row, Mapping)
+                and str(row.get("source_ref", "") or "") == source_ref
+            ):
+                return True
+    return False
+
+
+class GradedCorrectionDispatcher:
+    """Pure dispatcher (M20.2 §4).
+
+    Maps `(commitment, settled_value, owner_state_snapshot)` to a
+    `GradedCorrectionDecision`. Does NOT mutate state, call any LLM,
+    or re-interpret `observable_payload`.
+    """
+
+    def __init__(
+        self,
+        *,
+        # m19_3 already promoted check is read-only. Default reads from
+        # the standard M19.3 surface. Tests may inject a custom check.
+        is_m19_3_already_promoted: Any = _is_m19_3_already_promoted,
+    ) -> None:
+        self._is_m19_3_already_promoted = is_m19_3_already_promoted
+
+    def decide(
+        self,
+        *,
+        commitment: ActiveCommitment,
+        settled_value: SettledValue,
+        owner_state_snapshot: Mapping[str, Any] | None = None,
+        turn_index: int = 0,
+        now: str = "",
+    ) -> GradedCorrectionDecision:
+        """Map (commitment, settled_value, owner_state_snapshot) to a decision."""
+        owner_id = commitment.owner_id
+        outcome = settled_value.outcome
+        magnitude = float(settled_value.magnitude)
+        # Clamp magnitude to [0.0, 1.0].
+        if magnitude < 0.0:
+            magnitude = 0.0
+        elif magnitude > 1.0:
+            magnitude = 1.0
+        source_kind = commitment.source_kind
+        source_ref = commitment.source_ref
+        evidence_refs = tuple(_string_list(list(settled_value.evidence_refs), limit=32))
+        if not evidence_refs:
+            evidence_refs = tuple(_string_list(list(commitment.evidence_refs), limit=32))
+
+        common_kwargs: dict[str, Any] = dict(
+            commit_id=commitment.commit_id,
+            routed_owner_id=owner_id,
+            evidence_refs=evidence_refs,
+            outcome=outcome,
+            at=now,
+            turn_index=turn_index,
+            engineering_proxy_label=commitment.engineering_proxy_label,
+        )
+
+        # Unknown owner → reject.
+        if owner_id not in COMMITMENT_REGISTRY_V1:
+            return GradedCorrectionDecision(
+                **common_kwargs,
+                correction_level="expire",
+                reason_codes=("unknown_owner",),
+                magnitude_before=magnitude,
+                magnitude_after=magnitude,
+                rejected=True,
+            )
+
+        owner_row = COMMITMENT_REGISTRY_V1[owner_id]
+        action_set = owner_row.get("graded_action_set", [])
+        if not isinstance(action_set, list):
+            action_set = []
+
+        # source_kind = "policy" → expire (observation-only).
+        if source_kind == "policy":
+            return GradedCorrectionDecision(
+                **common_kwargs,
+                correction_level="expire",
+                reason_codes=("policy_source_no_correction",),
+                magnitude_before=magnitude,
+                magnitude_after=magnitude,
+                deferred=True,
+            )
+
+        # outcome = "ambiguous" → expire (not enough signal).
+        if outcome == "ambiguous":
+            return GradedCorrectionDecision(
+                **common_kwargs,
+                correction_level="expire",
+                reason_codes=("ambiguous_outcome",),
+                magnitude_before=magnitude,
+                magnitude_after=magnitude,
+                deferred=True,
+            )
+
+        # Map magnitude → base level.
+        base_level = _level_from_magnitude(magnitude)
+
+        # outcome = "uncertain" → microadjust only if magnitude >= 0.5
+        # else expire.
+        if outcome == "uncertain":
+            if magnitude < 0.5:
+                return GradedCorrectionDecision(
+                    **common_kwargs,
+                    correction_level="expire",
+                    reason_codes=("magnitude_below_threshold",),
+                    magnitude_before=magnitude,
+                    magnitude_after=magnitude,
+                    deferred=True,
+                )
+            base_level = "microadjust"
+
+        # outcome = "violated" AND magnitude >= 0.85 → revoke.
+        if outcome == "violated" and magnitude >= 0.85:
+            base_level = "revoke"
+
+        # M19.3 already promoted → downgrade slow_promote to deferred.
+        if base_level == "slow_promote":
+            already_promoted = bool(
+                self._is_m19_3_already_promoted(owner_state_snapshot, source_ref)
+            )
+            if already_promoted:
+                return GradedCorrectionDecision(
+                    **common_kwargs,
+                    correction_level="expire",
+                    reason_codes=("m19_3_already_promoted",),
+                    magnitude_before=magnitude,
+                    magnitude_after=magnitude,
+                    deferred=True,
+                )
+
+        # Action-set validation.
+        if base_level not in action_set:
+            reason_code = (
+                "slow_promote_not_supported"
+                if base_level == "slow_promote"
+                else "action_set_violation"
+            )
+            return GradedCorrectionDecision(
+                **common_kwargs,
+                correction_level="expire",
+                reason_codes=(reason_code,),
+                magnitude_before=magnitude,
+                magnitude_after=magnitude,
+                rejected=True,
+            )
+
+        # Compute magnitude_after as a small bounded delta.
+        if base_level == "microadjust":
+            delta = 0.05 * magnitude
+            magnitude_after = min(1.0, magnitude + delta)
+        elif base_level == "next_turn":
+            delta = 0.1 * magnitude
+            magnitude_after = min(1.0, magnitude + delta)
+        elif base_level == "same_turn":
+            delta = 0.15 * magnitude
+            magnitude_after = min(1.0, magnitude + delta)
+        elif base_level == "slow_promote":
+            magnitude_after = 1.0
+        elif base_level == "revoke":
+            magnitude_after = 0.0
+        else:
+            magnitude_after = magnitude
+
+        return GradedCorrectionDecision(
+            **common_kwargs,
+            correction_level=base_level,
+            reason_codes=("graded_correction_routed",),
+            magnitude_before=magnitude,
+            magnitude_after=magnitude_after,
+        )
+
+
+# === M20.2 audit event builders =========================================
+
+
+def build_graded_correction_routed_event(
+    decision: GradedCorrectionDecision,
+) -> dict[str, Any]:
+    return {
+        "type": "GradedCorrectionRouted",
+        "turn_index": decision.turn_index,
+        "commit_id": decision.commit_id,
+        "routed_owner_id": decision.routed_owner_id,
+        "correction_level": decision.correction_level,
+        "outcome": decision.outcome,
+        "magnitude_before": decision.magnitude_before,
+        "magnitude_after": decision.magnitude_after,
+        "evidence_refs": list(decision.evidence_refs),
+        "reason_codes": list(decision.reason_codes),
+        "engineering_proxy_label": decision.engineering_proxy_label,
+        "at": decision.at,
+    }
+
+
+def build_correction_deferred_event(
+    decision: GradedCorrectionDecision,
+) -> dict[str, Any]:
+    return {
+        "type": "CorrectionDeferred",
+        "turn_index": decision.turn_index,
+        "commit_id": decision.commit_id,
+        "routed_owner_id": decision.routed_owner_id,
+        "reason_code": (
+            decision.reason_codes[0] if decision.reason_codes else "magnitude_below_threshold"
+        ),
+        "engineering_proxy_label": decision.engineering_proxy_label,
+        "at": decision.at,
+    }
+
+
+def build_correction_rejected_event(
+    decision: GradedCorrectionDecision,
+) -> dict[str, Any]:
+    return {
+        "type": "CorrectionRejected",
+        "turn_index": decision.turn_index,
+        "commit_id": decision.commit_id,
+        "routed_owner_id": decision.routed_owner_id,
+        "reason_code": (
+            decision.reason_codes[0] if decision.reason_codes else "action_set_violation"
+        ),
+        "engineering_proxy_label": decision.engineering_proxy_label,
+        "at": decision.at,
+    }
+
+
+# === M20.2 graded correction diagnostic counters ========================
+
+
+def update_graded_correction_diagnostics(
+    state: dict,
+    *,
+    routed: int = 0,
+    deferred: int = 0,
+    rejected: int = 0,
+    by_level: Mapping[str, int] | None = None,
+    by_owner_id: Mapping[str, int] | None = None,
+    by_outcome: Mapping[str, int] | None = None,
+    by_reason_code: Mapping[str, int] | None = None,
+    magnitudes_before: tuple[float, ...] | None = None,
+    magnitudes_after: tuple[float, ...] | None = None,
+    m19_3_shortcut: int = 0,
+    same_turn_advisory_violations: int = 0,
+) -> None:
+    """Accumulate M20.2 dispatcher diagnostic counters (M20.2 §9)."""
+    if not isinstance(state, dict):
+        return
+    diag = state.get("graded_correction_diagnostics")
+    if not isinstance(diag, dict):
+        diag = {}
+    diag["graded_correction_total"] = int(diag.get("graded_correction_total", 0)) + int(routed) + int(deferred) + int(rejected)
+    diag["graded_correction_routed_total"] = int(diag.get("graded_correction_routed_total", 0)) + int(routed)
+    diag["correction_deferred_total"] = int(diag.get("correction_deferred_total", 0)) + int(deferred)
+    diag["correction_rejected_total"] = int(diag.get("correction_rejected_total", 0)) + int(rejected)
+    diag["m19_3_already_promoted_shortcut_count"] = (
+        int(diag.get("m19_3_already_promoted_shortcut_count", 0)) + int(m19_3_shortcut)
+    )
+    diag["same_turn_advisory_violations"] = (
+        int(diag.get("same_turn_advisory_violations", 0)) + int(same_turn_advisory_violations)
+    )
+
+    def _merge(target_key: str, additions: Mapping[str, int] | None) -> None:
+        if not additions:
+            return
+        target = diag.get(target_key)
+        if not isinstance(target, dict):
+            target = {}
+        for key, count in additions.items():
+            if not isinstance(key, str) or not key:
+                continue
+            target[key] = int(target.get(key, 0)) + int(count)
+        diag[target_key] = target
+
+    _merge("graded_correction_by_level", by_level)
+    _merge("graded_correction_by_owner_id", by_owner_id)
+    _merge("graded_correction_by_outcome", by_outcome)
+    _merge("correction_by_reason_code", by_reason_code)
+
+    def _append_distribution(key: str, additions: tuple[float, ...] | None) -> None:
+        if not additions:
+            return
+        bucket = diag.get(key)
+        if not isinstance(bucket, list):
+            bucket = []
+        for m in additions:
+            try:
+                v = float(m)
+            except (TypeError, ValueError):
+                continue
+            if v != v:
+                continue
+            bucket.append(max(0.0, min(1.0, v)))
+        diag[key] = bucket[-256:]
+
+    _append_distribution("magnitude_before_distribution", magnitudes_before)
+    _append_distribution("magnitude_after_distribution", magnitudes_after)
+    state["graded_correction_diagnostics"] = diag
+
+
 __all__ = [
     "ALLOWED_LAYERS",
     "ALLOWED_SOURCE_KINDS",
+    "ALL_GRADED_CORRECTION_REASON_CODES_V1",
     "ALL_SETTLEMENT_REASON_CODES_V1",
     "ActiveCommitment",
     "ActiveCommitmentAdapter",
     "COMMITMENT_PHASE",
     "COMMITMENT_REGISTRY_V1",
+    "DISPATCHER_REASON_CODES_V1",
     "ENGINEERING_PROXY_LABELS_V1",
+    "GRADED_CORRECTION_V1",
+    "GradedCorrectionDecision",
+    "GradedCorrectionDispatcher",
     "MAGNITUDE_SCALES_V1",
     "NoSettlement",
     "OBSERVABLE_V1",
@@ -1349,13 +1851,18 @@ __all__ = [
     "SettlerUnavailable",
     "build_active_commitment_created_event",
     "build_active_commitment_settled_event",
+    "build_correction_deferred_event",
+    "build_correction_rejected_event",
+    "build_graded_correction_routed_event",
     "build_no_settlement_made_event",
     "compute_commit_id",
+    "init_owner_observability_for_commitment",
     "compute_magnitude",
     "record_active_commitment_event",
     "record_pending_commitment",
     "remove_pending_commitment",
     "update_commitment_registry_diagnostics",
+    "update_graded_correction_diagnostics",
     "update_settlement_attempts_diagnostics",
     "wrap_self_response_expectation_proposal",
     "write_owner_observability",
