@@ -80,6 +80,9 @@ M19.0: Self-Expectation Formation, Indirect Observation, And Fast Mismatch Memor
 M19.1: Traceable Self-Repair Expectations And Free-Energy Guidance Bridge
 M19.2: Natural-Scene Settlement, Prediction-Error Writeback, And Shadow Validation
 M19.3: Slow Self-Cognition Consolidation, Downgrade, And Revocation
+M20.0: ActiveCommitment Meta-Contract, Registry, And Observable Vocabulary — schema-only; freezes owner map and observable enum v1; no settler, no promotion.
+M20.1: Settler Protocol And Observable Settlement Runtime — adds deterministic / llm_judge / hybrid / silent settlers; emits ActiveCommitmentSettled and NoSettlementMade; writes only to owner.observability.
+M20.2: Graded Correction, Revocation, And Slow Promotion Runtime — routes (outcome, magnitude) through frozen levels (microadjust / next_turn / same_turn / slow_promote / revoke / expire) to existing owner write paths; no new long-term state, no duplication of M19.x / M9.0 / M17.4 / M15.1 logic.
 ```
 
 M8.9 is a bridge milestone. It does not replace the original roadmap; it locks state ownership, memory write intent, and generation evidence boundaries before M9-M12 expand the system.
@@ -103,6 +106,39 @@ revocation. User correction and `reply_validation` remain auxiliary evidence
 only; the primary signal is internal self-expectation mismatch.
 
 M18 starts the group-chat readiness track. M18.0 freezes the acceptance boundary so "speaker switching" cannot be mistaken for true multi-party capability, and it also freezes the minimal structured group-turn input assumptions plus the bounded operating envelope. This is a readiness track, not a full "excellent group performance" track. M18.1 makes participant identity first-class across runtime, transcript references, and memory writes, while separating identity ownership from transcript persistence. M18.2 replaces single-target binding with a bounded addressee/target graph that consumes reply-to, mention, quote, and recent ownership structure when available. M18.3 makes transcript ownership durable and replay-safe, including compatibility migration from legacy single-user rows. M18.4 hardens cross-user memory/privacy boundaries for group conditions with an explicit source-audience-disclosure policy matrix. M18.5 adds deterministic multi-party reply policy, turn-taking precedence, bounded intentional non-reply, and unresolved-thread continuity. M18.6 provides end-to-end scripted and held-out validation before any claim that Hu Tao is truly ready for group chat, and requires pass criteria to distinguish structured assertions from rubric-based judgments.
+
+M20 starts the Path B unified-commitment meta-contract track. M20.0 is
+schema-only: it freezes `ActiveCommitment`, `CommitmentRegistry` v1
+(owner map for `policy_state` / `m13_drive_state` / `m15_episode_ledger` /
+`mismatch_memory_fast` / `self_repair_expectation` /
+`self_cognition_calibrated_tendencies` / `user_prediction_ledger` /
+`memory_dynamics_control_guidance` / `outreach_intent_registry` /
+`group_addressee_graph`), and `Observable` vocabulary v1
+(`expectation_outcome_match` / `prediction_error_band` / `repair_bias_band` /
+`behavioral_pull_shift` / `mismatch_type_band` / `pacing_match` /
+`identity_voice_match` / `boundary_handled` / `initiative_timing_match` /
+`silent_then_resolved` / `traction_delta_band`). M20.0 does not implement
+settlers, promotion, or revocation; it only validates admissions and emits
+`ActiveCommitmentCreated` / `ActiveCommitmentRejected` audit events. M20.1
+builds the settler protocol (deterministic / llm_judge / hybrid / silent)
+against the frozen registry, with a single `Settler` interface and bounded
+reference implementations (e.g. `IdentityVoiceMatchLLMJudgeSettler` wraps
+the existing M19.x surface-consistency call; `BehavioralPullShiftSilentSettler`
+is a `silent` reference). M20.1 writes only to `owner.observability[commit_id]`,
+a new additive diagnostic surface. M20.2 builds the graded correction and
+slow-promotion runtime: a pure dispatcher maps `(outcome, magnitude,
+source_kind, owner_id)` to one of six frozen levels (microadjust / next_turn /
+same_turn / slow_promote / revoke / expire) and routes to existing owner
+write paths (M19.1 traction, M19.3 slow promotion, M9.0 control_guidance,
+M17.4 precision EMA, M15.1 episode aggregation). M20.2 introduces no new
+long-term state bucket and does not duplicate any existing owner mutation
+logic. `same_turn` corrections are advisory only; visible reply text still
+flows through the conscious loop, thinking, validation, and the M19.x
+surface-consistency check. Later M17 / M19 milestones consume the registry
+through bounded adapter producers; they do not refactor M19.0/19.1 storage
+shapes. A later M20.1.1 migrates the existing per-loop settlers (M17.1,
+M19.0 outcome settlement, M13.2 band check, M15.0 episode aggregation,
+M18.5 boundary judgment) onto the new runtime.
 
 ## Migration Note
 
