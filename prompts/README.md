@@ -83,6 +83,7 @@ M19.3: Slow Self-Cognition Consolidation, Downgrade, And Revocation
 M20.0: ActiveCommitment Meta-Contract, Registry, And Observable Vocabulary — schema-only; freezes owner map and observable enum v1; no settler, no promotion.
 M20.1: Settler Protocol And Observable Settlement Runtime — adds deterministic / llm_judge / hybrid / silent settlers; emits ActiveCommitmentSettled and NoSettlementMade; writes only to owner.observability.
 M20.2: Graded Correction, Revocation, And Slow Promotion Runtime — routes (outcome, magnitude) through frozen levels (microadjust / next_turn / same_turn / slow_promote / revoke / expire) to existing owner write paths; no new long-term state, no duplication of M19.x / M9.0 / M17.4 / M15.1 logic.
+M20.3: Policy Admission, Same-Turn Surface Horizon, Runtime Loop Invariants, And Settler Migration — adds PolicyProducer (non-LLM policy admission), `runtime_mode_state` owner (registry v2), `horizon` attribute (same_turn_surface fast settler with pre-send block for runtime_mode_state only), `LoopInvariants` minimum loop coverage (no fast_chat skip), and M20.1.1 migration of M17.1 / M19.0 / M13.2 / M15.0 / M18.5 onto the M20.1 runtime. 6+1+1 master acceptance fixture. Three internal Tiers (A / B / C), all required.
 ```
 
 M8.9 is a bridge milestone. It does not replace the original roadmap; it locks state ownership, memory write intent, and generation evidence boundaries before M9-M12 expand the system.
@@ -136,9 +137,44 @@ logic. `same_turn` corrections are advisory only; visible reply text still
 flows through the conscious loop, thinking, validation, and the M19.x
 surface-consistency check. Later M17 / M19 milestones consume the registry
 through bounded adapter producers; they do not refactor M19.0/19.1 storage
-shapes. A later M20.1.1 migrates the existing per-loop settlers (M17.1,
+shapes. M20.1.1 (in M20.3) migrates the existing per-loop settlers (M17.1,
 M19.0 outcome settlement, M13.2 band check, M15.0 episode aggregation,
 M18.5 boundary judgment) onto the new runtime.
+
+M20.3 is the operational layer that closes the five gaps the
+M20.0–M20.2 review identified. It (1) adds a non-LLM `PolicyProducer` that
+admits `ActiveCommitment` rows with `source_kind = "policy"` from the
+command surface (turn-scoped `/status` vs durable `/mode` / `/persona` /
+group ingress), runtime mode flags, and a new bounded
+`correcting_assistant_identity` conscious-loop field; (2) bumps
+`CommitmentRegistry` to v2 (additive over v1) with a new writable
+`runtime_mode_state` owner (distinct from the read-only `policy_state`)
+that has `accepts_same_turn_block = true` and `accepts_policy_correction
+= true`; (3) adds a v2 `horizon` attribute on `ActiveCommitment` and a
+same-turn-surface settler fast path whose pre-send gate can BLOCK only
+when the violator is `runtime_mode_state`, with a post-send advisory
+path that writes only to next-turn `control_guidance`; (4) adds a
+runtime invariant module `LoopInvariants.enforce_minimum_loop_coverage`
+with a hard rule matrix (rule A: policy ≥ 1 per external turn; rule B:
+`runtime_mode_state` ≥ 1 when `surface_intent ∈ {chat, bot}`) that emits
+`MinimumLoopCoverageMissed` audit events on every external turn
+(including fast_chat) so the meta-loop cannot be skipped to zero; and
+(5) migrates the 5 existing per-loop settlers (M17.1, M19.0, M13.2,
+M15.0, M18.5) onto the M20.1 runtime via thin adapters that must agree
+with the existing owner audit events. M20.3 also adds the M20.2 §2
+special case **registry v2 exception table** so policy-source corrections
+routed to `runtime_mode_state` are not expired by the frozen
+"policy → expire" rule. M20.3 is structured as a single milestone with
+three internal Tiers (A: PolicyProducer + mode owner + same_turn_surface
++ LoopInvariants + 6+1+1 sub-scenarios; B: M17.1 / M19.0 / M18.5
+migration; C: M13.2 / M15.0 thin adapters + outcome-agreement tests);
+all three Tiers are required for M20.3 acceptance. The 6+1+1 master
+acceptance fixture is the M20-series total acceptance: base 6 steps
+(eventual consistency) plus an identity sub-scenario (strict timing,
+predict → observe → block) and a fast_chat sub-scenario (strict
+invariants, no `MinimumLoopCoverageMissed`). M20.3 closes the loop on
+the engineering side; the conscious loop, thinking, reply validation,
+and M19.x surface-consistency check all still run unchanged.
 
 ## Migration Note
 
