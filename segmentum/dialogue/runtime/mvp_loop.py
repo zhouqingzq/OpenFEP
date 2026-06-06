@@ -210,6 +210,13 @@ from segmentum.dialogue.runtime.m19_self_expectation import (
     prompt_safe_self_expectation_summary,
     prompt_safe_state_with_self_expectation_summary,
 )
+from segmentum.dialogue.runtime.active_commitment import (
+    ActiveCommitmentAdapter,
+    build_active_commitment_created_event,
+    record_active_commitment_event,
+    update_commitment_registry_diagnostics,
+    wrap_self_response_expectation_proposal,
+)
 from segmentum.dialogue.runtime.m13_reward import (
     M13RewardEvaluator,
     apply_post_turn_m13_reward_state,
@@ -435,6 +442,20 @@ def _string_list(value: Any, *, limit: int = 12) -> list[str]:
     if isinstance(value, list):
         return [str(item).strip()[:240] for item in value[:limit] if str(item).strip()]
     return []
+
+
+def _string_list_of_mappings(
+    value: Any,
+    *,
+    limit: int = 8,
+) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for item in value[:limit]:
+        if isinstance(item, Mapping):
+            out.append(dict(item))
+    return out
 
 
 def _mapping(value: Any) -> dict[str, Any]:
@@ -2123,6 +2144,10 @@ def normalize_conscious_turn_plan(raw: Any) -> dict[str, Any]:
         ),
         "self_expectation_outcome_results": normalize_self_expectation_outcome_results(
             raw.get("self_expectation_outcome_results")
+        ),
+        "active_commitment_proposals": _string_list_of_mappings(
+            raw.get("active_commitment_proposals"),
+            limit=8,
         ),
         "surface_commitment": normalize_surface_commitment(raw.get("surface_commitment")),
         "current_task": str(raw.get("current_task", "") or "").strip()[:240],
@@ -5648,6 +5673,67 @@ def _prediction_lock_skip_event(*, turn_index: int, reason_code: str) -> dict[st
     }
 
 
+def _admit_active_commitments(
+    *,
+    bus: list,
+    state: dict,
+    conscious_plan: Mapping[str, Any],
+    turn_index: int,
+    now: str,
+) -> None:
+    """M20.0 admission: validate and emit ActiveCommitment audit events.
+
+    Pulls from two bounded sources in M20.0:
+    - conscious_plan["active_commitment_proposals"] (new field, default empty)
+    - conscious_plan["self_response_expectation_proposals"] wrapped to
+      observable = "expectation_outcome_match" on owner mismatch_memory_fast
+
+    M20.0 is admission-only. The adapter does NOT write to any owner's
+    storage bucket. M20.1+ implement settlers that consume the audit tail.
+    """
+    proposals: list[dict] = []
+    for item in conscious_plan.get("active_commitment_proposals", []) or []:
+        if isinstance(item, Mapping):
+            proposals.append(dict(item))
+
+    for sre in conscious_plan.get("self_response_expectation_proposals", []) or []:
+        wrapped = wrap_self_response_expectation_proposal(
+            sre,
+            created_turn=turn_index,
+        )
+        if wrapped is not None:
+            proposals.append(wrapped)
+
+    if not proposals:
+        update_commitment_registry_diagnostics(state, admitted=0)
+        return
+
+    adapter = ActiveCommitmentAdapter()
+    admitted, rejected = adapter.admit_batch(
+        proposals=proposals,
+        turn_index=turn_index,
+        created_at=now,
+    )
+
+    for commitment in admitted:
+        event = build_active_commitment_created_event(commitment)
+        bus.append(event)
+        record_active_commitment_event(state, event)
+
+    rejected_counts: dict[str, int] = {}
+    for rejection in rejected:
+        bus.append(rejection)
+        record_active_commitment_event(state, rejection)
+        code = str(rejection.get("reason_code", "") or "unknown")
+        rejected_counts[code] = rejected_counts.get(code, 0) + 1
+
+    update_commitment_registry_diagnostics(
+        state,
+        admitted=len(admitted),
+        rejected_by_reason_code=rejected_counts,
+    )
+
+
 def _record_prediction_lock_event(state: dict[str, Any], event: Mapping[str, Any]) -> None:
     events = state.setdefault("prediction_lock_audit_tail", [])
     if not isinstance(events, list):
@@ -6619,6 +6705,13 @@ class MVPDialogueRuntime:
             turn_index=turn_index,
         ):
             bus.append(event)
+        _admit_active_commitments(
+            bus=bus,
+            state=state,
+            conscious_plan=conscious,
+            turn_index=turn_index,
+            now=now,
+        )
         _report_progress("conscious_loop")
         m13_state, m13_memory_efe_settlement_events = settle_memory_efe_outreach(
             m13_state,
