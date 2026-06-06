@@ -1,25 +1,20 @@
 """M20.0 ActiveCommitment meta-contract: schema, registry, observable, adapter.
-
-This module is the schema-only milestone. It freezes:
-
-- the `ActiveCommitment` dataclass shape
-- `CommitmentRegistry` v1 (10 owners with accepts_layers / accepts_source_kinds)
-- `Observable` v1 (11 observables with settler hints)
-- `CommitmentPhase` enum
-- `reason_codes` v1
-- `engineering_proxy_label` v1
-- `ALLOWED_SOURCE_KINDS`, `ALLOWED_LAYERS` enums
-- `ActiveCommitmentAdapter` admission path
-- `compute_commit_id` deterministic sha1
-- `wrap_self_response_expectation_proposal` M19.0 wrapper
-- `record_active_commitment_event` next-turn state read
-- `update_commitment_registry_diagnostics` counter helper
+M20.1 adds: settler protocol, SettledValue / NoSettlement result types,
+SettlementScheduler, owner observability writes, and per-observable
+outcome / magnitude / reason-code freezes.
 
 M20.0 is admission-only. It does NOT implement:
 - settlers (M20.1)
 - promotion / revocation / expiration (M20.2)
 - actual owner storage writes (M20.1+)
 - per-loop settler migration (M20.3 / M20.1.1)
+
+M20.1 owns the observation half (settlers, scheduler, observability).
+M20.1 does NOT mutate any long-term state bucket. It only writes
+to `state["commitment_owner_observability"][owner_id][commit_id]`,
+which is a diagnostic surface that M20.2 reads to drive graded
+correction. M20.1 also does NOT implement promotion / microadjust /
+revocation / expiration logic.
 """
 
 from __future__ import annotations
@@ -27,7 +22,7 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import Any, Mapping
+from typing import Any, Mapping, Protocol
 
 
 ALLOWED_SOURCE_KINDS: frozenset[str] = frozenset({"policy", "state", "episodic"})
@@ -590,19 +585,778 @@ def update_commitment_registry_diagnostics(
     state["commitment_registry_index"] = index
 
 
+# === M20.1 settler protocol core =========================================
+# M20.1 freezes the settler half of the unified-commitment loop. The
+# scheduler and reference settlers speak through these types. M20.1 does
+# not write to any long-term state bucket; it only writes to
+# `state["commitment_owner_observability"][owner_id][commit_id]`.
+
+SETTLER_TYPE_V1: frozenset[str] = frozenset({
+    "deterministic",
+    "llm_judge",
+    "hybrid",
+    "silent",
+})
+
+
+OUTCOME_V1: frozenset[str] = frozenset({
+    "confirmed",
+    "violated",
+    "uncertain",
+    "ambiguous",
+})
+
+
+# Per-observable bounded outcome set. A new outcome is a vocabulary bump.
+OUTCOME_BY_OBSERVABLE_V1: Mapping[str, frozenset[str]] = MappingProxyType({
+    "expectation_outcome_match": frozenset({"confirmed", "violated", "uncertain"}),
+    "prediction_error_band": frozenset({"confirmed", "violated", "uncertain"}),
+    "repair_bias_band": frozenset({"confirmed", "violated", "uncertain"}),
+    "behavioral_pull_shift": frozenset({"confirmed", "violated", "uncertain"}),
+    "mismatch_type_band": frozenset({"confirmed", "violated", "uncertain"}),
+    "pacing_match": frozenset({"confirmed", "violated", "ambiguous"}),
+    "identity_voice_match": frozenset({"confirmed", "violated", "ambiguous"}),
+    "boundary_handled": frozenset({"confirmed", "violated", "ambiguous"}),
+    "initiative_timing_match": frozenset({"confirmed", "violated", "uncertain"}),
+    "silent_then_resolved": frozenset({"confirmed", "violated"}),
+    "traction_delta_band": frozenset({"confirmed", "violated", "uncertain"}),
+})
+
+
+# Per-observable magnitude scale (§3a). All scales are non-zero.
+# Binary / categorical observables use 1.0; bounded-delta observables
+# use 0.5.
+MAGNITUDE_SCALES_V1: Mapping[str, float] = MappingProxyType({
+    "expectation_outcome_match": 1.0,
+    "prediction_error_band": 1.0,
+    "repair_bias_band": 1.0,
+    "behavioral_pull_shift": 0.5,
+    "mismatch_type_band": 1.0,
+    "pacing_match": 1.0,
+    "identity_voice_match": 1.0,
+    "boundary_handled": 1.0,
+    "initiative_timing_match": 1.0,
+    "silent_then_resolved": 1.0,
+    "traction_delta_band": 0.5,
+})
+
+
+# Settler-side reason codes v1. Additive to M20.0's REASON_CODES_V1.
+# A `SettledValue` MUST include at least one of these. A `NoSettlement`
+# MUST include at least one of `due_at_passed`, `settler_unavailable`,
+# `no_eligible_observation`, or an M20.0 vocabulary code surfaced by
+# the settler.
+SETTLER_REASON_CODES_V1: frozenset[str] = frozenset({
+    "settler_deterministic",
+    "settler_llm_judge",
+    "settler_hybrid_fallback",
+    "settler_silent_carry_forward",
+    "magnitude_defaulted",
+    "evidence_ref_filtered",
+    "due_at_passed",
+    "settler_unavailable",
+    "no_eligible_observation",
+    "settler_hybrid_fallback_exhausted",
+    "settler_llm_invalid_response",
+    "observation_already_processed",
+})
+
+
+# All reason codes a settler may surface in a `SettledValue` or
+# `NoSettlement`. M20.1 = M20.0 reason codes ∪ settler reason codes.
+ALL_SETTLEMENT_REASON_CODES_V1: frozenset[str] = (
+    REASON_CODES_V1 | SETTLER_REASON_CODES_V1
+)
+
+
+# Minimal eligibility window: a commitment whose `due_at` is
+# `{"kind": "next_turn"}` is considered past when current_turn >
+# created_turn + this constant. Frozen at 1 by M20.1 §3.
+_NEXT_TURN_DUE_AT_WINDOW: int = 1
+
+
+@dataclass(frozen=True)
+class SettledValue:
+    """Frozen result of a successful settlement attempt (M20.1 §1).
+
+    The promoter (M20.2) reads `magnitude` to choose graded correction
+    intensity. M20.1 freezes the field and emits it; the promotion
+    semantics belong to M20.2.
+    """
+
+    commit_id: str
+    outcome: str
+    magnitude: float
+    evidence_refs: tuple[str, ...]
+    reason_codes: tuple[str, ...]
+    at: str
+    turn_index: int
+    settler_type: str
+    engineering_proxy_label: str
+
+
+@dataclass(frozen=True)
+class NoSettlement:
+    """Frozen result when a settler declines to produce a `SettledValue`.
+
+    This is the *only* non-result path in M20.1. The scheduler emits a
+    `NoSettlementMade` audit event from this dataclass.
+    """
+
+    commit_id: str
+    reason_code: str
+    settler_type: str
+    engineering_proxy_label: str
+    at: str
+    turn_index: int
+
+
+class SettlerUnavailable(Exception):
+    """Raised when a settler cannot run (e.g. LLM offline, invalid input).
+
+    The scheduler catches this and converts to a `NoSettlement` with
+    `reason_code="settler_unavailable"`.
+    """
+
+
+class Settler(Protocol):
+    """Structural interface for a settler (M20.1 §5).
+
+    All four settler types (deterministic, llm_judge, hybrid, silent)
+    implement this protocol. The caller (scheduler) treats them
+    uniformly.
+    """
+
+    def settle(
+        self,
+        commitment: ActiveCommitment,
+        observation_context: Mapping[str, Any],
+    ) -> SettledValue | NoSettlement:
+        ...
+
+
+# === M20.1 event builders ==============================================
+
+
+def build_active_commitment_settled_event(
+    settled: SettledValue,
+) -> dict[str, Any]:
+    """Build the `ActiveCommitmentSettled` audit envelope (M20.1 §10)."""
+    return {
+        "type": "ActiveCommitmentSettled",
+        "turn_index": settled.turn_index,
+        "commit_id": settled.commit_id,
+        "outcome": settled.outcome,
+        "magnitude": settled.magnitude,
+        "evidence_refs": list(settled.evidence_refs),
+        "reason_codes": list(settled.reason_codes),
+        "settler_type": settled.settler_type,
+        "engineering_proxy_label": settled.engineering_proxy_label,
+        "at": settled.at,
+    }
+
+
+def build_no_settlement_made_event(
+    no_settlement: NoSettlement,
+) -> dict[str, Any]:
+    """Build the `NoSettlementMade` audit envelope (M20.1 §6, §10)."""
+    return {
+        "type": "NoSettlementMade",
+        "turn_index": no_settlement.turn_index,
+        "commit_id": no_settlement.commit_id,
+        "reason_code": no_settlement.reason_code,
+        "settler_type": no_settlement.settler_type,
+        "engineering_proxy_label": no_settlement.engineering_proxy_label,
+        "at": no_settlement.at,
+    }
+
+
+# === M20.1 owner observability writes ==================================
+
+
+def _ensure_owner_observability_map(
+    state: dict,
+) -> dict[str, dict[str, dict[str, Any]]]:
+    """Return the per-owner observability map, creating it on first read."""
+    if not isinstance(state, dict):
+        return {}
+    observability = state.get("commitment_owner_observability")
+    if not isinstance(observability, dict):
+        observability = {}
+        state["commitment_owner_observability"] = observability
+    return observability
+
+
+def write_owner_observability(
+    state: dict,
+    *,
+    owner_id: str,
+    commit_id: str,
+    settled_value: SettledValue | None,
+    last_attempt_turn_index: int,
+    last_attempt_reason_code: str,
+) -> None:
+    """Write a single (owner, commit) observability entry (M20.1 §9).
+
+    Owners MUST NOT lose their existing fields. The observability map
+    is additive. M20.1 only writes to it; M20.2 will read from it.
+    """
+    if not isinstance(state, dict):
+        return
+    observability = _ensure_owner_observability_map(state)
+    owner_row = observability.get(owner_id)
+    if not isinstance(owner_row, dict):
+        owner_row = {}
+    prior = owner_row.get(commit_id)
+    if not isinstance(prior, dict):
+        prior = {
+            "settled_value": None,
+            "settlement_attempts": 0,
+            "last_attempt_turn_index": None,
+            "last_attempt_reason_code": None,
+        }
+    prior["settled_value"] = (
+        {
+            "outcome": settled_value.outcome,
+            "magnitude": settled_value.magnitude,
+            "settler_type": settled_value.settler_type,
+            "evidence_refs": list(settled_value.evidence_refs),
+            "reason_codes": list(settled_value.reason_codes),
+            "at": settled_value.at,
+            "turn_index": settled_value.turn_index,
+            "engineering_proxy_label": settled_value.engineering_proxy_label,
+        }
+        if settled_value is not None
+        else None
+    )
+    prior["settlement_attempts"] = int(prior.get("settlement_attempts", 0)) + 1
+    prior["last_attempt_turn_index"] = int(last_attempt_turn_index)
+    prior["last_attempt_reason_code"] = str(last_attempt_reason_code)
+    owner_row[commit_id] = prior
+    observability[owner_id] = owner_row
+
+
+# === M20.1 pending-commitment bookkeeping ==============================
+
+
+def record_pending_commitment(
+    state: dict,
+    commitment: ActiveCommitment,
+) -> None:
+    """Append an admitted commitment to the pending list (M20.1 §7).
+
+    The scheduler reads this list. M20.1 only appends (admission) and
+    removes (settled or `due_at_passed`). M20.2 adds removal paths for
+    promotion / revocation / expiration.
+    """
+    if not isinstance(state, dict):
+        return
+    pending = state.get("active_commitments_pending")
+    if not isinstance(pending, list):
+        pending = []
+    pending.append(
+        {
+            "commit_id": commitment.commit_id,
+            "owner_id": commitment.owner_id,
+            "source_kind": commitment.source_kind,
+            "source_ref": commitment.source_ref,
+            "layer": commitment.layer,
+            "observable": commitment.observable,
+            "observable_payload": dict(commitment.observable_payload),
+            "target": dict(commitment.target),
+            "due_at": dict(commitment.due_at) if commitment.due_at else None,
+            "priority": commitment.priority,
+            "confidence": commitment.confidence,
+            "evidence_refs": list(commitment.evidence_refs),
+            "reason_codes": list(commitment.reason_codes),
+            "engineering_proxy_label": commitment.engineering_proxy_label,
+            "created_turn": commitment.created_turn,
+            "created_at": commitment.created_at,
+        }
+    )
+    # Cap pending list to prevent unbounded growth; M20.2 may tighten.
+    state["active_commitments_pending"] = pending[-256:]
+
+
+def remove_pending_commitment(state: dict, commit_id: str) -> None:
+    """Remove a commitment from the pending list (M20.1 §7).
+
+    Called after a successful settlement or after a `due_at_passed`
+    emission. The scheduler never re-attempts a removed commitment.
+    """
+    if not isinstance(state, dict):
+        return
+    pending = state.get("active_commitments_pending")
+    if not isinstance(pending, list):
+        return
+    state["active_commitments_pending"] = [
+        row for row in pending
+        if isinstance(row, dict) and row.get("commit_id") != commit_id
+    ]
+
+
+def _is_due_at_passed(due_at: Any, created_turn: int, turn_index: int) -> bool:
+    """Return True if the commitment's due window has elapsed (M20.1 §7).
+
+    Frozen semantics in M20.1: only `{"kind": "next_turn"}` is recognized.
+    All other shapes (or no `due_at`) are treated as open-ended (never
+    past). M20.2 may add explicit timestamp and `natural_idle_shadow_eval`
+    semantics.
+    """
+    if not isinstance(due_at, Mapping):
+        return False
+    kind = str(due_at.get("kind", "") or "")
+    if kind == "next_turn":
+        return turn_index > created_turn + _NEXT_TURN_DUE_AT_WINDOW
+    return False
+
+
+# === M20.1 magnitude computation ========================================
+
+
+def compute_magnitude(
+    *,
+    observable: str,
+    observable_payload: Mapping[str, Any],
+    committed_value: Any,
+    expected_value: Any,
+) -> tuple[float, tuple[str, ...]]:
+    """Deterministically compute magnitude (M20.1 §3).
+
+    Returns (magnitude, reason_codes). If the observable has no numeric
+    value, magnitude defaults to 0.5 and `magnitude_defaulted` is added
+    to reason_codes.
+    """
+    reason_codes: list[str] = []
+    if observable not in MAGNITUDE_SCALES_V1:
+        reason_codes.append("magnitude_defaulted")
+        return 0.5, tuple(reason_codes)
+    scale = float(MAGNITUDE_SCALES_V1[observable])
+    if scale <= 0.0:
+        reason_codes.append("magnitude_defaulted")
+        return 0.5, tuple(reason_codes)
+    try:
+        committed_num = float(committed_value) if committed_value is not None else None
+    except (TypeError, ValueError):
+        committed_num = None
+    try:
+        expected_num = float(expected_value) if expected_value is not None else None
+    except (TypeError, ValueError):
+        expected_num = None
+    if committed_num is None or expected_num is None or committed_num != committed_num or expected_num != expected_num:
+        reason_codes.append("magnitude_defaulted")
+        return 0.5, tuple(reason_codes)
+    raw = abs(committed_num - expected_num) / scale
+    if raw != raw or raw < 0.0:
+        reason_codes.append("magnitude_defaulted")
+        return 0.5, tuple(reason_codes)
+    clamped = 0.0 if raw < 0.0 else (1.0 if raw > 1.0 else raw)
+    return clamped, tuple(reason_codes)
+
+
+# === M20.1 settlement attempts diagnostics ==============================
+
+
+def update_settlement_attempts_diagnostics(
+    state: dict,
+    *,
+    settled: int = 0,
+    no_settlement: int = 0,
+    by_settler_type: Mapping[str, int] | None = None,
+    by_observable: Mapping[str, int] | None = None,
+    by_reason_code: Mapping[str, int] | None = None,
+    magnitudes: tuple[float, ...] | None = None,
+) -> None:
+    """Accumulate M20.1 settlement diagnostic counters (M20.1 §8)."""
+    if not isinstance(state, dict):
+        return
+    diag = state.get("settlement_attempts_diagnostics")
+    if not isinstance(diag, dict):
+        diag = {}
+    diag["settlement_attempts_total"] = int(diag.get("settlement_attempts_total", 0)) + int(settled) + int(no_settlement)
+    diag["settled_total"] = int(diag.get("settled_total", 0)) + int(settled)
+    diag["no_settlement_total"] = int(diag.get("no_settlement_total", 0)) + int(no_settlement)
+
+    def _merge(target_key: str, additions: Mapping[str, int] | None) -> None:
+        if not additions:
+            return
+        target = diag.get(target_key)
+        if not isinstance(target, dict):
+            target = {}
+        for key, count in additions.items():
+            if not isinstance(key, str) or not key:
+                continue
+            target[key] = int(target.get(key, 0)) + int(count)
+        diag[target_key] = target
+
+    _merge("settlement_attempts_by_settler_type", by_settler_type)
+    _merge("settlement_attempts_by_observable", by_observable)
+    _merge("no_settlement_by_reason_code", by_reason_code)
+
+    if magnitudes:
+        bucket = diag.get("settled_value_magnitude_distribution")
+        if not isinstance(bucket, list):
+            bucket = []
+        for m in magnitudes:
+            try:
+                v = float(m)
+            except (TypeError, ValueError):
+                continue
+            if v != v:
+                continue
+            bucket.append(max(0.0, min(1.0, v)))
+        diag["settled_value_magnitude_distribution"] = bucket[-256:]
+
+    state["settlement_attempts_diagnostics"] = diag
+
+
+# === M20.1 SettlementScheduler =========================================
+
+
+class SettlementScheduler:
+    """Schedules settlement attempts on admitted commitments (M20.1 §7).
+
+    The scheduler is the *only* place that decides *when* to attempt
+    settlement. The settler decides *how* to interpret the payload.
+    The scheduler does NOT mutate any long-term state bucket; it
+    writes only to `commitment_owner_observability` and emits audit
+    events.
+    """
+
+    def __init__(
+        self,
+        *,
+        settlers_by_observable: Mapping[str, Settler] | None = None,
+    ) -> None:
+        self._settlers: dict[str, Settler] = (
+            dict(settlers_by_observable) if settlers_by_observable else {}
+        )
+
+    def register_settler(self, observable: str, settler: Settler) -> None:
+        if observable not in OBSERVABLE_V1:
+            raise ValueError(f"unknown observable: {observable!r}")
+        self._settlers[observable] = settler
+
+    def get_settler(self, observable: str) -> Settler | None:
+        return self._settlers.get(observable)
+
+    def attempt_settlements(
+        self,
+        *,
+        state: dict,
+        turn_index: int,
+        now: str,
+        observation_context_provider: Any = None,
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        """Attempt settlement for any eligible pending commitments.
+
+        Returns (settled_events, no_settlement_events). Each tuple
+        contains audit envelopes ready to be appended to the per-turn
+        bus. The caller is responsible for also writing them to the
+        conversation log and diagnose surface.
+        """
+        if not isinstance(state, dict):
+            return [], []
+
+        pending = state.get("active_commitments_pending")
+        if not isinstance(pending, list) or not pending:
+            return [], []
+
+        settled_events: list[dict[str, Any]] = []
+        no_settlement_events: list[dict[str, Any]] = []
+
+        diag_by_settler: dict[str, int] = {}
+        diag_by_observable: dict[str, int] = {}
+        diag_by_reason: dict[str, int] = {}
+        diag_magnitudes: list[float] = []
+
+        # Snapshot the observability map for "already settled" checks.
+        observability = _ensure_owner_observability_map(state)
+
+        for row in pending:
+            if not isinstance(row, Mapping):
+                continue
+            commit_id = str(row.get("commit_id", "") or "")
+            owner_id = str(row.get("owner_id", "") or "")
+            observable = str(row.get("observable", "") or "")
+            if not commit_id or not owner_id or not observable:
+                continue
+            created_turn = int(row.get("created_turn", 0) or 0)
+
+            # T0+1 minimum eligibility.
+            if turn_index < created_turn + 1:
+                continue
+
+            # Skip if already settled.
+            owner_row = observability.get(owner_id)
+            if isinstance(owner_row, dict):
+                commit_row = owner_row.get(commit_id)
+                if isinstance(commit_row, dict) and commit_row.get("settled_value") is not None:
+                    # Already settled: do not re-attempt.
+                    diag_by_reason["observation_already_processed"] = (
+                        diag_by_reason.get("observation_already_processed", 0) + 1
+                    )
+                    continue
+
+            # `due_at` past and not yet settled: emit once and drop.
+            if _is_due_at_passed(row.get("due_at"), created_turn, turn_index):
+                no_settlement = NoSettlement(
+                    commit_id=commit_id,
+                    reason_code="due_at_passed",
+                    settler_type="deterministic",  # scheduler-level, not settler-level
+                    engineering_proxy_label=str(row.get("engineering_proxy_label", "") or ""),
+                    at=now,
+                    turn_index=turn_index,
+                )
+                event = build_no_settlement_made_event(no_settlement)
+                no_settlement_events.append(event)
+                write_owner_observability(
+                    state,
+                    owner_id=owner_id,
+                    commit_id=commit_id,
+                    settled_value=None,
+                    last_attempt_turn_index=turn_index,
+                    last_attempt_reason_code="due_at_passed",
+                )
+                diag_by_reason["due_at_passed"] = (
+                    diag_by_reason.get("due_at_passed", 0) + 1
+                )
+                remove_pending_commitment(state, commit_id)
+                continue
+
+            # Route to settler.
+            settler = self._settlers.get(observable)
+            if settler is None:
+                # No settler for this observable in M20.1 (not yet migrated
+                # in M20.1.1). Emit NoSettlement with settler_unavailable.
+                no_settlement = NoSettlement(
+                    commit_id=commit_id,
+                    reason_code="settler_unavailable",
+                    settler_type="deterministic",
+                    engineering_proxy_label=str(row.get("engineering_proxy_label", "") or ""),
+                    at=now,
+                    turn_index=turn_index,
+                )
+                event = build_no_settlement_made_event(no_settlement)
+                no_settlement_events.append(event)
+                write_owner_observability(
+                    state,
+                    owner_id=owner_id,
+                    commit_id=commit_id,
+                    settled_value=None,
+                    last_attempt_turn_index=turn_index,
+                    last_attempt_reason_code="settler_unavailable",
+                )
+                diag_by_reason["settler_unavailable"] = (
+                    diag_by_reason.get("settler_unavailable", 0) + 1
+                )
+                diag_by_observable[observable] = (
+                    diag_by_observable.get(observable, 0) + 1
+                )
+                # Per M20.1 §7: do not remove on settler_unavailable; the
+                # settler may be wired up in a later milestone. The
+                # observability entry is recorded but the commitment
+                # stays pending.
+                continue
+
+            # Build observation context.
+            if observation_context_provider is not None:
+                ctx = observation_context_provider(turn_index, row)
+                if not isinstance(ctx, Mapping):
+                    ctx = {}
+            else:
+                ctx = {}
+
+            # Run the settler.
+            try:
+                result = settler.settle(
+                    commitment=_row_to_active_commitment(row, turn_index=turn_index, now=now),
+                    observation_context=ctx,
+                )
+            except SettlerUnavailable:
+                result = NoSettlement(
+                    commit_id=commit_id,
+                    reason_code="settler_unavailable",
+                    settler_type=_settler_type_of(settler),
+                    engineering_proxy_label=str(row.get("engineering_proxy_label", "") or ""),
+                    at=now,
+                    turn_index=turn_index,
+                )
+            except Exception:  # noqa: BLE001
+                # A buggy settler MUST NOT crash the run_turn path. Emit
+                # NoSettlement with settler_unavailable and continue.
+                result = NoSettlement(
+                    commit_id=commit_id,
+                    reason_code="settler_unavailable",
+                    settler_type=_settler_type_of(settler),
+                    engineering_proxy_label=str(row.get("engineering_proxy_label", "") or ""),
+                    at=now,
+                    turn_index=turn_index,
+                )
+
+            if isinstance(result, SettledValue):
+                # Validate outcome is in the per-observable set.
+                allowed = OUTCOME_BY_OBSERVABLE_V1.get(observable, frozenset())
+                if result.outcome not in allowed:
+                    result = NoSettlement(
+                        commit_id=commit_id,
+                        reason_code="settler_llm_invalid_response",
+                        settler_type=result.settler_type,
+                        engineering_proxy_label=result.engineering_proxy_label,
+                        at=now,
+                        turn_index=turn_index,
+                    )
+                else:
+                    event = build_active_commitment_settled_event(result)
+                    settled_events.append(event)
+                    write_owner_observability(
+                        state,
+                        owner_id=owner_id,
+                        commit_id=commit_id,
+                        settled_value=result,
+                        last_attempt_turn_index=turn_index,
+                        last_attempt_reason_code=str(result.reason_codes[0]) if result.reason_codes else "settler_deterministic",
+                    )
+                    diag_by_settler[result.settler_type] = (
+                        diag_by_settler.get(result.settler_type, 0) + 1
+                    )
+                    diag_by_observable[observable] = (
+                        diag_by_observable.get(observable, 0) + 1
+                    )
+                    diag_magnitudes.append(result.magnitude)
+                    remove_pending_commitment(state, commit_id)
+                    continue
+
+            if isinstance(result, NoSettlement):
+                event = build_no_settlement_made_event(result)
+                no_settlement_events.append(event)
+                write_owner_observability(
+                    state,
+                    owner_id=owner_id,
+                    commit_id=commit_id,
+                    settled_value=None,
+                    last_attempt_turn_index=turn_index,
+                    last_attempt_reason_code=result.reason_code,
+                )
+                diag_by_reason[result.reason_code] = (
+                    diag_by_reason.get(result.reason_code, 0) + 1
+                )
+                diag_by_observable[observable] = (
+                    diag_by_observable.get(observable, 0) + 1
+                )
+                # Removal policy (M20.1 §7): drop the commitment only
+                # when the failure is terminal for that commitment.
+                # `due_at_passed` is terminal. `settler_hybrid_fallback_exhausted`
+                # is terminal for the hybrid settler. `settler_unavailable`
+                # and `no_eligible_observation` are transient: the
+                # settler may be wired up later (M20.1.1) or the
+                # observation may arrive on a later turn, so the
+                # commitment stays pending.
+                if result.reason_code in (
+                    "due_at_passed",
+                    "settler_hybrid_fallback_exhausted",
+                ):
+                    remove_pending_commitment(state, commit_id)
+                continue
+
+        update_settlement_attempts_diagnostics(
+            state,
+            settled=len(settled_events),
+            no_settlement=len(no_settlement_events),
+            by_settler_type=diag_by_settler,
+            by_observable=diag_by_observable,
+            by_reason_code=diag_by_reason,
+            magnitudes=tuple(diag_magnitudes),
+        )
+        return settled_events, no_settlement_events
+
+
+def _row_to_active_commitment(
+    row: Mapping[str, Any],
+    *,
+    turn_index: int,
+    now: str,
+) -> ActiveCommitment:
+    """Reconstruct an `ActiveCommitment` from a pending-list row.
+
+    Used by the scheduler to hand a typed value to the settler. The
+    commit_id is preserved (deterministic sha1 from admission).
+    """
+    payload = row.get("observable_payload")
+    if not isinstance(payload, Mapping):
+        payload = {}
+    target = row.get("target")
+    if not isinstance(target, Mapping):
+        target = {}
+    due_at = row.get("due_at")
+    if due_at is not None and not isinstance(due_at, Mapping):
+        due_at = None
+    return ActiveCommitment(
+        commit_id=str(row.get("commit_id", "") or ""),
+        owner_id=str(row.get("owner_id", "") or ""),
+        source_kind=str(row.get("source_kind", "") or ""),
+        source_ref=str(row.get("source_ref", "") or ""),
+        layer=str(row.get("layer", "") or ""),
+        observable=str(row.get("observable", "") or ""),
+        observable_payload=MappingProxyType(dict(payload)),
+        target=MappingProxyType(dict(target)),
+        due_at=MappingProxyType(dict(due_at)) if due_at else None,
+        priority=_bounded_float(row.get("priority")),
+        confidence=_bounded_float(row.get("confidence")),
+        evidence_refs=tuple(_string_list(row.get("evidence_refs"), limit=32)),
+        created_turn=int(row.get("created_turn", 0) or 0),
+        created_at=str(row.get("created_at", "") or now),
+        reason_codes=tuple(_string_list(row.get("reason_codes"), limit=16)),
+        engineering_proxy_label=str(row.get("engineering_proxy_label", "") or ""),
+    )
+
+
+def _settler_type_of(settler: Any) -> str:
+    """Best-effort inference of a settler's `settler_type` label."""
+    cls = getattr(settler, "__class__", None)
+    name = getattr(cls, "__name__", "") or ""
+    if "Deterministic" in name:
+        return "deterministic"
+    if "Hybrid" in name:
+        return "hybrid"
+    if "Silent" in name:
+        return "silent"
+    if "LLMJudge" in name or "LLM" in name:
+        return "llm_judge"
+    return "deterministic"
+
+
 __all__ = [
     "ALLOWED_LAYERS",
     "ALLOWED_SOURCE_KINDS",
+    "ALL_SETTLEMENT_REASON_CODES_V1",
     "ActiveCommitment",
     "ActiveCommitmentAdapter",
     "COMMITMENT_PHASE",
     "COMMITMENT_REGISTRY_V1",
     "ENGINEERING_PROXY_LABELS_V1",
+    "MAGNITUDE_SCALES_V1",
+    "NoSettlement",
     "OBSERVABLE_V1",
+    "OUTCOME_BY_OBSERVABLE_V1",
+    "OUTCOME_V1",
     "REASON_CODES_V1",
+    "SETTLER_REASON_CODES_V1",
+    "SETTLER_TYPE_V1",
+    "SettledValue",
+    "SettlementScheduler",
+    "Settler",
+    "SettlerUnavailable",
     "build_active_commitment_created_event",
+    "build_active_commitment_settled_event",
+    "build_no_settlement_made_event",
     "compute_commit_id",
+    "compute_magnitude",
     "record_active_commitment_event",
+    "record_pending_commitment",
+    "remove_pending_commitment",
     "update_commitment_registry_diagnostics",
+    "update_settlement_attempts_diagnostics",
     "wrap_self_response_expectation_proposal",
+    "write_owner_observability",
 ]

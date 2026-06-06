@@ -627,16 +627,39 @@ def test_allowed_layers_is_frozen() -> None:
 
 def test_active_commitment_module_does_not_import_settler_paths() -> None:
     # M20.0 is schema-only. The active_commitment module must not define
-    # settler, dispatcher, or promotion machinery at code level. We
-    # inspect the module AST (not the source text) so that the docstring's
-    # explanatory references to M20.1 / M20.2 do not trigger a false
-    # positive.
+    # concrete settler, dispatcher, or promotion machinery at code level.
+    # The M20.1 *protocol* surface (Settler Protocol, SettlerUnavailable,
+    # SettledValue, NoSettlement, SettlementScheduler) is allowed because
+    # it is the runtime's typed contract, not a concrete implementation.
+    # We inspect the module AST (not the source text) so that the
+    # docstring's explanatory references to M20.1 / M20.2 do not trigger
+    # a false positive.
     import ast
 
     from segmentum.dialogue.runtime import active_commitment
     tree = ast.parse(inspect.getsource(active_commitment))
 
-    forbidden_class_substrings = ("Settler", "Dispatcher", "Promoter", "Revoker")
+    # Concrete settler implementation shapes — forbidden in the core module.
+    forbidden_class_substrings = (
+        "DeterministicSettler",
+        "LLMJudgeSettler",
+        "HybridSettler",
+        "SilentSettler",
+        "Dispatcher",
+        "Promoter",
+        "Revoker",
+    )
+    # The protocol surface is permitted (Settler, SettlerUnavailable,
+    # SettledValue, NoSettlement, SettlementScheduler are all M20.1
+    # protocol types, not concrete settler implementations).
+    allowed_class_names = {
+        "Settler",
+        "SettlerUnavailable",
+        "SettledValue",
+        "NoSettlement",
+        "SettlementScheduler",
+    }
+
     forbidden_function_substrings = (
         "settle_",
         "dispatch_",
@@ -651,10 +674,12 @@ def test_active_commitment_module_does_not_import_settler_paths() -> None:
 
     for node in tree.body:
         if isinstance(node, ast.ClassDef):
+            if node.name in allowed_class_names:
+                continue
             for fragment in forbidden_class_substrings:
                 assert fragment not in node.name, (
                     f"active_commitment must not define class with name "
-                    f"containing {fragment!r} in M20.0 (got {node.name!r})"
+                    f"containing {fragment!r} in M20.0 core (got {node.name!r})"
                 )
         elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             for fragment in forbidden_function_substrings:

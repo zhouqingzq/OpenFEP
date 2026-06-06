@@ -212,10 +212,20 @@ from segmentum.dialogue.runtime.m19_self_expectation import (
 )
 from segmentum.dialogue.runtime.active_commitment import (
     ActiveCommitmentAdapter,
+    SettlementScheduler,
     build_active_commitment_created_event,
     record_active_commitment_event,
+    record_pending_commitment,
     update_commitment_registry_diagnostics,
     wrap_self_response_expectation_proposal,
+)
+from segmentum.dialogue.runtime.active_commitment_settlers import (
+    BehavioralPullShiftSilentSettler,
+    BoundaryHandledLLMJudgeSettler,
+    ExpectationOutcomeMatchDeterministicSettler,
+    IdentityVoiceMatchLLMJudgeSettler,
+    InitiativeTimingMatchHybridSettler,
+    PredictionErrorBandDeterministicSettler,
 )
 from segmentum.dialogue.runtime.m13_reward import (
     M13RewardEvaluator,
@@ -5719,6 +5729,7 @@ def _admit_active_commitments(
         event = build_active_commitment_created_event(commitment)
         bus.append(event)
         record_active_commitment_event(state, event)
+        record_pending_commitment(state, commitment)
 
     rejected_counts: dict[str, int] = {}
     for rejection in rejected:
@@ -5732,6 +5743,179 @@ def _admit_active_commitments(
         admitted=len(admitted),
         rejected_by_reason_code=rejected_counts,
     )
+
+
+def _build_m20_1_settlement_scheduler() -> SettlementScheduler:
+    """Build the M20.1 SettlementScheduler with the v1 reference settlers.
+
+    M20.1 wires the protocol surface and the six reference settlers.
+    The LLM-judge settlers (`boundary_handled`, `initiative_timing_match`
+    hybrid fallback) are constructed without an injected LLM call;
+    they will return NoSettlement with `settler_unavailable` /
+    `settler_hybrid_fallback_exhausted` until M20.1.1 (or a later
+    milestone) injects the real LLM stage. This keeps M20.1 acceptance
+    free of any new visible behavior.
+    """
+    scheduler = SettlementScheduler()
+    scheduler.register_settler(
+        "expectation_outcome_match",
+        ExpectationOutcomeMatchDeterministicSettler(),
+    )
+    scheduler.register_settler(
+        "prediction_error_band",
+        PredictionErrorBandDeterministicSettler(),
+    )
+    scheduler.register_settler(
+        "identity_voice_match",
+        IdentityVoiceMatchLLMJudgeSettler(),
+    )
+    scheduler.register_settler(
+        "boundary_handled",
+        BoundaryHandledLLMJudgeSettler(),
+    )
+    scheduler.register_settler(
+        "initiative_timing_match",
+        InitiativeTimingMatchHybridSettler(),
+    )
+    scheduler.register_settler(
+        "behavioral_pull_shift",
+        BehavioralPullShiftSilentSettler(),
+    )
+    return scheduler
+
+
+def _build_m20_1_observation_context(
+    *,
+    state: dict,
+    bus: list,
+    conscious_plan: Mapping[str, Any],
+    turn_index: int,
+    now: str,
+) -> dict[str, Any]:
+    """Build the observation_context dict for the M20.1 scheduler.
+
+    Pulls bounded, read-only evidence rows from the conscious plan,
+    the per-turn bus, and the active surface-consistency audit pointer.
+    The provider MUST NOT mutate any long-term state bucket.
+    """
+    outcome_results = conscious_plan.get("self_expectation_outcome_results")
+    if not isinstance(outcome_results, list):
+        outcome_results = []
+    bounded_outcome_results = [
+        dict(row) for row in outcome_results if isinstance(row, Mapping)
+    ][:16]
+
+    prediction_settlements: list[dict[str, Any]] = []
+    surface_consistency: dict[str, Any] | None = None
+    user_explicit: dict[str, Any] | None = None
+    excerpts: list[dict[str, Any]] = []
+    for event in bus:
+        if not isinstance(event, Mapping):
+            continue
+        event_type = str(event.get("type", "") or "")
+        if event_type == "M17SettlementAssessorEvent":
+            # The actual settlement_judgments live on the LLM payload,
+            # which the conscious loop re-rendered into the plan. Read
+            # them off the conscious plan if present; otherwise leave
+            # empty.
+            continue
+        if event_type == "SurfaceConsistencyVerification":
+            surface_consistency = dict(event)
+            continue
+        if event_type == "UserExplicitRequest":
+            user_explicit = dict(event)
+            continue
+        if event_type in {"ActiveCommitmentCreated", "ActiveCommitmentRejected"}:
+            # Skip admission audit events from observation context.
+            continue
+        # Capture a bounded text excerpt for LLM judges.
+        text = event.get("text") or event.get("reason") or event.get("excerpt")
+        if isinstance(text, str) and text:
+            excerpts.append(
+                {
+                    "type": event_type,
+                    "text": text[:200],
+                }
+            )
+            if len(excerpts) >= 8:
+                break
+
+    # The M13.2 prediction settlement rows are stored on
+    # conscious_plan["prediction_judgments"] when the LLM settlement
+    # assessor runs. Read them through the normalize layer.
+    raw_judgments = conscious_plan.get("prediction_judgments")
+    if not isinstance(raw_judgments, list):
+        raw_judgments = []
+    for row in raw_judgments[:16]:
+        if not isinstance(row, Mapping):
+            continue
+        prediction_id = str(row.get("prediction_id", "") or "")
+        if not prediction_id:
+            continue
+        band = str(row.get("band", "") or "")
+        prediction_settlements.append(
+            {
+                "prediction_id": prediction_id,
+                "band": band,
+                "evidence_refs": [
+                    str(ref) for ref in row.get("evidence_refs", [])
+                    if isinstance(ref, str) and ref
+                ][:16],
+            }
+        )
+
+    return {
+        "now": now,
+        "turn_index": turn_index,
+        "self_expectation_outcome_results": bounded_outcome_results,
+        "prediction_settlements": prediction_settlements,
+        "surface_consistency_verification": surface_consistency or {},
+        "user_explicit_request": user_explicit,
+        "excerpts": excerpts,
+    }
+
+
+def _settle_active_commitments(
+    *,
+    bus: list,
+    state: dict,
+    conscious_plan: Mapping[str, Any],
+    turn_index: int,
+    now: str,
+) -> None:
+    """M20.1 settlement hook: run the scheduler after admission.
+
+    The scheduler attempts to settle any pending commitments (T0+1
+    minimum, single attempt per (commit_id, turn), due_at_passed on
+    missing window). It does NOT mutate any long-term state bucket;
+    it only writes to `commitment_owner_observability` and emits
+    audit events.
+    """
+    pending = state.get("active_commitments_pending")
+    if not isinstance(pending, list) or not pending:
+        return
+
+    scheduler = _build_m20_1_settlement_scheduler()
+    observation_context = _build_m20_1_observation_context(
+        state=state,
+        bus=bus,
+        conscious_plan=conscious_plan,
+        turn_index=turn_index,
+        now=now,
+    )
+
+    settled_events, no_settlement_events = scheduler.attempt_settlements(
+        state=state,
+        turn_index=turn_index,
+        now=now,
+        observation_context_provider=lambda _turn, _row: observation_context,
+    )
+    for event in settled_events:
+        bus.append(event)
+        record_active_commitment_event(state, event)
+    for event in no_settlement_events:
+        bus.append(event)
+        record_active_commitment_event(state, event)
 
 
 def _record_prediction_lock_event(state: dict[str, Any], event: Mapping[str, Any]) -> None:
@@ -6706,6 +6890,13 @@ class MVPDialogueRuntime:
         ):
             bus.append(event)
         _admit_active_commitments(
+            bus=bus,
+            state=state,
+            conscious_plan=conscious,
+            turn_index=turn_index,
+            now=now,
+        )
+        _settle_active_commitments(
             bus=bus,
             state=state,
             conscious_plan=conscious,
