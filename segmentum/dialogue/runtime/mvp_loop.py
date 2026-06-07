@@ -252,6 +252,12 @@ from segmentum.dialogue.runtime.m20_4_attribution import (
     build_reaction_attribution_match_admitted_event as _emit_reaction_attribution_match_admitted_event,
     produce_m20_4_attribution_commitments as _produce_m20_4_attribution_commitments,
 )
+from segmentum.dialogue.runtime.m20_4_1_same_turn_gate import (
+    REASON_GATE_FIRED as _M20_4_1_REASON_GATE_FIRED,
+    clear_pending_override as _m20_4_1_clear_pending_override,
+    get_pending_override as _m20_4_1_get_pending_override,
+    same_turn_addressee_hypothesis_gate as _run_m20_4_1_same_turn_gate,
+)
 from segmentum.dialogue.runtime.active_commitment_grader import (
     route_expire,
     route_microadjust,
@@ -7825,6 +7831,30 @@ class MVPDialogueRuntime:
             if bounded_group_turn
             else None,
         )
+        # M20.4.1 §1 — same-turn addressee hypothesis gate. Pure
+        # rule, no LLM. Runs at "step 3" (immediately after the
+        # M18.7 orchestrator, before the M20.4 producer and the
+        # reply generation stages). When the rule fires, the gate
+        # writes a single-slot override handoff
+        # `state["m20_4_1_pending_override"]` that the M18.5
+        # enforcement point (below) reads to replace the
+        # `no_reply` / `clarify_addressee` force with
+        # `reply_to_current_speaker`. The M18.5 structural
+        # outcome is preserved in the audit envelope. fast_chat
+        # safe (no LLM). Does NOT modify the M18.5 decision tree.
+        _run_m20_4_1_same_turn_gate(
+            conscious_plan=conscious,
+            group_turn_binding=dict(bounded_group_turn)
+            if bounded_group_turn
+            else None,
+            m18_5_structural_decision=str(
+                group_reply_policy.get("action", "") or ""
+            ),
+            bus=bus,
+            state=state,
+            turn_index=turn_index,
+            now=now,
+        )
         # M20.4 §2 — M18.7 → M20 attribution commitment bridge.
         # Reads `state["m18_7_attribution_hypotheses"]` and admits
         # `ActiveCommitment` rows on `group_addressee_graph` per the
@@ -8790,6 +8820,16 @@ class MVPDialogueRuntime:
             "surface_consistency_verification": dict(surface_consistency_verification),
         }
         group_policy_actions: list[str] = []
+        # M20.4.1 §4 — read the same-turn gate override handoff.
+        # The gate wrote this slot earlier in the turn (after the
+        # conscious loop). When set, we override the M18.5
+        # `no_reply` / `clarify_addressee` force to
+        # `reply_to_current_speaker` (the visible reply gets a
+        # bounded T0 patch). The slot is cleared immediately so it
+        # does not leak to T+1. M18.5's structural outcome is
+        # preserved in the gate's audit envelope (the
+        # `m18_5_structural_decision` field) for diagnose.
+        m20_4_1_override = _m20_4_1_get_pending_override(state)
         repair_requirements, repair_reason_codes, forced_group_action = _reply_repair_requirements(
             reply_contract=reply_contract,
             group_privacy_policy=group_privacy_policy,
@@ -8802,6 +8842,20 @@ class MVPDialogueRuntime:
             reply = ""
             action = "no_reply"
             group_policy_actions.append("group_privacy_forced_refusal_silence")
+        elif m20_4_1_override is not None:
+            # M20.4.1 — same-turn override fired. The visible
+            # reply is unblocked: action becomes
+            # `reply_to_current_speaker`, and we keep `raw_reply`
+            # (do NOT blank the reply text). The audit envelope
+            # carries `m18_5_structural_decision` so the diagnose
+            # surface can see the original M18.5 outcome. The
+            # override wins over M18.5's `no_reply` /
+            # `defer_side_thread` / `clarify_addressee` path; the
+            # privacy forced_refusal above still wins.
+            action = "reply_to_current_speaker"
+            group_policy_actions.append(
+                "m20_4_1_same_turn_override"
+            )
         elif str(group_reply_policy.get("action", "") or "") == "defer_side_thread":
             reply = ""
             action = "defer_side_thread"
@@ -9436,6 +9490,11 @@ class MVPDialogueRuntime:
                 }
             )
         _report_progress("finalize")
+        # M20.4.1 §4 — clear the override handoff slot. The gate
+        # wrote the verdict earlier in this turn; the M18.5
+        # enforcement point already read it. The slot MUST be
+        # cleared before return so it does not leak to T+1.
+        _m20_4_1_clear_pending_override(state)
         return MVPTurnResult(
             reply=reply,
             action=action,
