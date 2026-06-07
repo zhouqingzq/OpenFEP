@@ -240,6 +240,11 @@ from segmentum.dialogue.runtime.same_turn_surface import (
     SameTurnSurfaceVerdict,
     build_same_turn_surface_verdict_event,
 )
+from segmentum.dialogue.runtime.m18_7_attribution import (
+    emit_m18_7_attribution_for_turn as _emit_m18_7_attribution_for_turn,
+    normalize_addressee_hypothesis as _normalize_m18_7_addressee_hypothesis,
+    normalize_reaction_attribution_hypothesis as _normalize_m18_7_reaction_attribution_hypothesis,
+)
 from segmentum.dialogue.runtime.active_commitment_grader import (
     route_expire,
     route_microadjust,
@@ -2135,6 +2140,83 @@ current_interlocutor:
 """
     user_prompt += """
 
+Also include the following M18.7 fields in the same JSON object
+(only when group_turn_binding is non-empty; otherwise omit both
+fields entirely and let engineering default to {}):
+
+- "addressee_hypothesis": bounded object describing whether the
+  current turn is addressed to the assistant. Empty {} means
+  "no hypothesis" (do not invent low-confidence guesses for the
+  brief-interjection class of turns).
+  - "participant_id" must equal the speaker's id from
+    group_turn_binding.current_speaker_participant_id. Use ""
+    if M18.4 disclosure policy forbids the identification or
+    you cannot determine it.
+  - "addressed_to_assistant" is a boolean. Use false when the
+    message falls into one of these semantic categories:
+    (a) short acknowledgement without explicit recipient
+    — a brief interjection that is not directed at any
+    specific participant; (b) side-thread interjection — a
+    comment directed at another participant, identifiable
+    from context or addressed_participant_ids / mention
+    structure; (c) room-level comment — a statement about
+    the group's state, not targeting the assistant. The
+    prompt describes these as categories, not as a keyword
+    cue list.
+  - "confidence" is your self-rated 0.0–1.0 probability that
+    the boolean is correct. 0.5 means "I genuinely cannot
+    tell". Below 0.4, you SHOULD leave the field empty ({})
+    so engineering treats it as "no hypothesis".
+  - "rationale" is a one-sentence justification, ≤ 200 chars.
+    DO NOT paste the user text, the assistant's prior text,
+    or any substring of either into the rationale. Reference
+    structural signals by name or by turn id.
+  - "evidence_refs" is a list of bounded turn-local handles
+    (e.g., "turn_<n>_user_utterance",
+    "turn_<n>_reply_to_turn_id",
+    "turn_<n>_addressed_participant_ids",
+    "bus_event_<uuid>", "participant_<id>"). DO NOT include
+    raw text.
+  - "alternative_hypotheses" is optional, ≤ 2 entries. Each
+    entry has the same shape as the primary fields, with a
+    different (addressed_to_assistant, confidence,
+    rationale) tuple.
+
+- "reaction_attribution_hypothesis": bounded object describing
+  which prior turn a reaction refers to. Empty {} means
+  "no hypothesis".
+  - "participant_id" must equal the reaction-speaker's id.
+    Use "" if you cannot determine it.
+  - "reaction_to_turn_id" is the prior turn id the reaction
+    most likely refers to. Use "" if no prior turn is a
+    plausible referent.
+  - "reaction_to_participant_id" is whose prior turn is the
+    referent. Use "" if you cannot tell.
+  - "is_about_assistant_claim" is true only when
+    reaction_to_participant_id equals the assistant's id AND
+    the reaction is targeting the assistant's own claim.
+    False otherwise. The "targeting the assistant's own
+    claim" semantic category covers reactions like
+    (a) confirming the assistant's prior statement,
+    (b) denying the assistant's prior statement,
+    (c) asking the assistant to re-state or justify a
+    prior claim. The prompt describes the category, not a
+    specific user-text cue.
+  - "confidence" is your self-rated 0.0–1.0 probability.
+    Below 0.4, you SHOULD leave the field empty.
+  - "rationale" is a one-sentence justification, ≤ 200
+    chars, no quoted text.
+  - "evidence_refs" is bounded handles, no raw text.
+  - "alternative_attributions" is optional, ≤ 2 entries.
+
+Use your own semantic judgment of the conversation. Do not
+match keywords, regex, or text-pattern cues. The structural
+signals from group_turn_binding are inputs to your reasoning,
+not a lookup table. When the conscious plan is for a
+non-group turn (group_turn_binding is empty or absent), you
+MAY omit both fields entirely. The empty default ({}) is
+acceptable.
+
 Also include the following M19 fields in the same JSON object:
 - "self_response_expectation_proposals": up to 2 rows with proposal_id, target_context, expected_outcome, expected_reply_quality, confidence, evidence_refs, reason_codes, engineering_proxy_label
 - "self_expectation_outcome_results": later-turn review rows with source_expectation_id, target_context, status, evidence_refs, reason_codes, engineering_proxy_label
@@ -2222,6 +2304,20 @@ def normalize_conscious_turn_plan(raw: Any) -> dict[str, Any]:
         # to PolicyProducer as the `user_correction_signal` input.
         "correcting_assistant_identity": _normalize_correcting_assistant_identity(
             raw.get("correcting_assistant_identity")
+        ),
+        # M18.7 v2 attributes on the conscious loop. Both
+        # default to {} (no hypothesis) per M18.7 DECIDED 6
+        # (empty / null is valid; the LLM is the only
+        # legitimate source). Engineering normalizes the
+        # shape, clamps the values, and persists to the
+        # bounded state surface. The m18_7_attribution
+        # orchestrator reads these and emits the bus events
+        # + writes the state surface entries.
+        "addressee_hypothesis": _normalize_m18_7_addressee_hypothesis(
+            raw.get("addressee_hypothesis")
+        ),
+        "reaction_attribution_hypothesis": _normalize_m18_7_reaction_attribution_hypothesis(
+            raw.get("reaction_attribution_hypothesis")
         ),
         "current_task": str(raw.get("current_task", "") or "").strip()[:240],
         "next_task": str(raw.get("next_task", "") or "").strip()[:240],
@@ -7477,6 +7573,24 @@ class MVPDialogueRuntime:
             turn_index=turn_index,
         ):
             bus.append(event)
+        # M18.7 §3 / §5 / DECIDED 13 — emit the addressee +
+        # reaction attribution bus events, append the bounded
+        # state surface entries, and emit
+        # `AttributionHypothesisSkipped` on fast_chat + group
+        # turns with empty M18.7 fields. The orchestrator is a
+        # pure function; engineering does NOT call the LLM here
+        # (per CLAUDE.md "no keyword / regex" red line).
+        _emit_m18_7_attribution_for_turn(
+            bus=bus,
+            state=state,
+            conscious_plan=conscious,
+            turn_index=turn_index,
+            at=now,
+            latency_mode=latency_mode,
+            group_turn_binding=dict(bounded_group_turn)
+            if bounded_group_turn
+            else None,
+        )
         # M20.3 §1 — second PolicyProducer call. The conscious loop
         # fills `correcting_assistant_identity`; we forward it as
         # the bounded `user_correction_signal`. If the conscious

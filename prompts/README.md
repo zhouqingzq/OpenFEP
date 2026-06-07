@@ -76,6 +76,7 @@ M18.3: Group Transcript Ownership And Durable Replay
 M18.4: Group-Safe Memory, Privacy, And Cross-User Recall Boundaries
 M18.5: Multi-Party Reply Policy, Turn-Taking, And Social Continuity
 M18.6: Group Chat Acceptance Harness And Held-Out Validation
+M18.7: Group Turn Semantic Attribution Contract — adds `addressee_hypothesis` + `reaction_attribution_hypothesis` bounded fields to the conscious-loop JSON (v2 attributes; the LLM is the only source per CLAUDE.md). Frozen state surface `state["m18_7_attribution_hypotheses"]` (≤ 8 entries, rolling window) is the M20.4 hand-off contract. Three bus events: `AddresseeHypothesisAdmitted` / `ReactionAttributionHypothesisAdmitted` / `AttributionHypothesisSkipped` (fast_chat + group_turn_binding + empty fields, the M20.3 §3.1a precedent). M18.7 alone records structured fields; the user-perceived same-turn capability requires M20.4 + M20.4.1. **landed**.
 M19.0: Self-Expectation Formation, Indirect Observation, And Fast Mismatch Memory
 M19.1: Traceable Self-Repair Expectations And Free-Energy Guidance Bridge
 M19.2: Natural-Scene Settlement, Prediction-Error Writeback, And Shadow Validation
