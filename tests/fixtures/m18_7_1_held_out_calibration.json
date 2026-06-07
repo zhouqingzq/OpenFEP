@@ -1,0 +1,257 @@
+[
+  {
+    "turn_index": 0,
+    "text": "Can you reply to that one?",
+    "speaker_name": "Carol",
+    "group_turn_envelope": {
+      "speaker_participant_id": "carol",
+      "visible_participant_ids": ["carol", "dave", "hutao"],
+      "mentioned_participant_ids": ["carol", "dave"],
+      "explicit_mentions": ["Carol", "Dave"]
+    },
+    "assertion_kind": "addressee_only",
+    "ground_truth": {
+      "addressed_to_assistant": true,
+      "addressee_participant_id": "carol",
+      "reaction_to_turn_id": "unknown",
+      "reaction_to_participant_id": "unknown",
+      "is_about_assistant_claim": "unknown"
+    },
+    "expected_confidence_band": "high",
+    "note": "Explicit 'Can you' with assistant as the implied addressee; high confidence the LLM should produce addressed_to_assistant=true. The 'reply to that one' refers to a prior turn, not a reaction-attribution target for this turn's hypothesis (the LLM is being asked to act, not attributing a reaction)."
+  },
+  {
+    "turn_index": 1,
+    "text": "Actually, my previous question still stands.",
+    "speaker_name": "Carol",
+    "group_turn_envelope": {
+      "speaker_participant_id": "carol",
+      "visible_participant_ids": ["carol", "dave", "hutao"],
+      "mentioned_participant_ids": [],
+      "explicit_mentions": []
+    },
+    "assertion_kind": "addressee_only",
+    "ground_truth": {
+      "addressed_to_assistant": true,
+      "addressee_participant_id": "carol",
+      "reaction_to_turn_id": "unknown",
+      "reaction_to_participant_id": "unknown",
+      "is_about_assistant_claim": "unknown"
+    },
+    "expected_confidence_band": "medium",
+    "note": "Implicit continuation: 'my previous question' is a callback to a turn the assistant produced, with no reply-to / mention / quote. The LLM should weigh conversation history. Medium confidence the LLM picks up the implicit continuation correctly."
+  },
+  {
+    "turn_index": 2,
+    "text": "yeah.",
+    "speaker_name": "Dave",
+    "group_turn_envelope": {
+      "speaker_participant_id": "dave",
+      "visible_participant_ids": ["carol", "dave", "hutao"],
+      "mentioned_participant_ids": [],
+      "explicit_mentions": []
+    },
+    "assertion_kind": "addressee_only",
+    "ground_truth": {
+      "addressed_to_assistant": false,
+      "addressee_participant_id": "dave",
+      "reaction_to_turn_id": "unknown",
+      "reaction_to_participant_id": "unknown",
+      "is_about_assistant_claim": "unknown"
+    },
+    "expected_confidence_band": "low",
+    "note": "Short acknowledgement without explicit recipient (M18.7 DECIDED 1(a) category). The M18.7 prompt says the LLM MAY leave the field empty here. Low confidence band tests whether the LLM correctly identifies this as not-addressed-to-assistant without inventing high confidence."
+  },
+  {
+    "turn_index": 3,
+    "text": "Dave you first.",
+    "speaker_name": "Carol",
+    "group_turn_envelope": {
+      "speaker_participant_id": "carol",
+      "visible_participant_ids": ["carol", "dave", "hutao"],
+      "addressed_participant_ids": ["dave"],
+      "mentioned_participant_ids": ["dave"],
+      "explicit_mentions": ["Dave"]
+    },
+    "assertion_kind": "addressee_only",
+    "ground_truth": {
+      "addressed_to_assistant": false,
+      "addressee_participant_id": "carol",
+      "reaction_to_turn_id": "unknown",
+      "reaction_to_participant_id": "unknown",
+      "is_about_assistant_claim": "unknown"
+    },
+    "expected_confidence_band": "medium",
+    "note": "Side-thread interjection: Carol is directing Dave to speak first (M18.7 DECIDED 1(b) category). addressed_to_assistant=false; structural addressee is Dave."
+  },
+  {
+    "turn_index": 4,
+    "text": "Someone from the team is reading this. Don't name them.",
+    "speaker_name": "Carol",
+    "group_turn_envelope": {
+      "speaker_participant_id": "carol",
+      "visible_participant_ids": ["carol", "dave", "hutao"],
+      "mentioned_participant_ids": [],
+      "explicit_mentions": []
+    },
+    "assertion_kind": "addressee_only",
+    "ground_truth": {
+      "addressed_to_assistant": true,
+      "addressee_participant_id": "",
+      "reaction_to_turn_id": "unknown",
+      "reaction_to_participant_id": "unknown",
+      "is_about_assistant_claim": "unknown"
+    },
+    "expected_confidence_band": "low",
+    "note": "M18.4 disclosure-forbid: Carol instructs the assistant to NOT identify the third party. The LLM should return addressed_to_assistant=true (she's talking to the assistant) BUT addressee_participant_id='' (M18.4 forbids identification). Low confidence band tests the LLM's compliance with the disclosure policy."
+  },
+  {
+    "turn_index": 5,
+    "text": "Wait, you said that was free, right?",
+    "speaker_name": "Dave",
+    "group_turn_envelope": {
+      "speaker_participant_id": "dave",
+      "visible_participant_ids": ["carol", "dave", "hutao"],
+      "mentioned_participant_ids": [],
+      "explicit_mentions": []
+    },
+    "assertion_kind": "reaction_only",
+    "ground_truth": {
+      "addressed_to_assistant": "unknown",
+      "addressee_participant_id": "unknown",
+      "reaction_to_turn_id": "turn_<assistant_prior_turn_id>",
+      "reaction_to_participant_id": "hutao",
+      "is_about_assistant_claim": true
+    },
+    "expected_confidence_band": "medium",
+    "note": "Reaction to assistant's prior claim: 'you said' is a direct callback to the assistant. is_about_assistant_claim=true. The LLM should produce a reaction_to_turn_id pointing to the assistant's prior turn. Medium confidence band tests whether the LLM attributes the reaction to the assistant's claim rather than a Carol/Dave turn."
+  },
+  {
+    "turn_index": 6,
+    "text": "Yeah, what Carol said earlier about the deadline.",
+    "speaker_name": "Dave",
+    "group_turn_envelope": {
+      "speaker_participant_id": "dave",
+      "visible_participant_ids": ["carol", "dave", "hutao"],
+      "mentioned_participant_ids": ["carol"],
+      "explicit_mentions": ["Carol"]
+    },
+    "assertion_kind": "reaction_only",
+    "ground_truth": {
+      "addressed_to_assistant": "unknown",
+      "addressee_participant_id": "unknown",
+      "reaction_to_turn_id": "turn_<carol_prior_turn_id>",
+      "reaction_to_participant_id": "carol",
+      "is_about_assistant_claim": false
+    },
+    "expected_confidence_band": "high",
+    "note": "Reaction to third-party's prior turn: explicit reference to Carol. reaction_to_participant_id=carol, is_about_assistant_claim=false. High confidence band tests the LLM correctly attributing the reaction to Carol (not the assistant)."
+  },
+  {
+    "turn_index": 7,
+    "text": "hmm, interesting.",
+    "speaker_name": "Carol",
+    "group_turn_envelope": {
+      "speaker_participant_id": "carol",
+      "visible_participant_ids": ["carol", "dave", "hutao"],
+      "mentioned_participant_ids": [],
+      "explicit_mentions": []
+    },
+    "assertion_kind": "reaction_only",
+    "ground_truth": {
+      "addressed_to_assistant": "unknown",
+      "addressee_participant_id": "unknown",
+      "reaction_to_turn_id": "",
+      "reaction_to_participant_id": "",
+      "is_about_assistant_claim": false
+    },
+    "expected_confidence_band": "low",
+    "note": "No clear referent: a vague interjection with no specific reaction target. The LLM MAY leave the field empty (M18.7 DECIDED 6). Low confidence band tests whether the LLM correctly declines to attribute."
+  },
+  {
+    "turn_index": 8,
+    "text": "OK胡桃, can you go back to the part about Eve's note?",
+    "speaker_name": "Carol",
+    "group_turn_envelope": {
+      "speaker_participant_id": "carol",
+      "visible_participant_ids": ["carol", "dave", "hutao"],
+      "addressed_participant_ids": ["hutao"],
+      "mentioned_participant_ids": ["eve"],
+      "explicit_mentions": ["胡桃", "Eve"]
+    },
+    "assertion_kind": "both",
+    "ground_truth": {
+      "addressed_to_assistant": true,
+      "addressee_participant_id": "carol",
+      "reaction_to_turn_id": "turn_<assistant_prior_turn_id>",
+      "reaction_to_participant_id": "hutao",
+      "is_about_assistant_claim": true
+    },
+    "expected_confidence_band": "high",
+    "note": "Both addressee and reaction: 'OK胡桃' makes the assistant the addressee; 'can you go back to the part about Eve's note' is a reaction to the assistant's prior turn where Eve's note was mentioned. is_about_assistant_claim=true. High confidence band tests the LLM correctly populates BOTH fields."
+  },
+  {
+    "turn_index": 9,
+    "text": "Dave, sorry — actually that thing Carol raised was the real issue.",
+    "speaker_name": "Eve",
+    "group_turn_envelope": {
+      "speaker_participant_id": "eve",
+      "visible_participant_ids": ["carol", "dave", "eve", "hutao"],
+      "addressed_participant_ids": ["dave"],
+      "mentioned_participant_ids": ["carol"],
+      "explicit_mentions": ["Dave", "Carol"]
+    },
+    "assertion_kind": "both",
+    "ground_truth": {
+      "addressed_to_assistant": false,
+      "addressee_participant_id": "eve",
+      "reaction_to_turn_id": "turn_<carol_prior_turn_id>",
+      "reaction_to_participant_id": "carol",
+      "is_about_assistant_claim": false
+    },
+    "expected_confidence_band": "medium",
+    "note": "Both: addressed to Dave (not assistant), AND a reaction to Carol's prior turn (not the assistant's claim). Side-thread interjection (M18.7 DECIDED 1(b)) + third-party reaction. Medium confidence band tests both at once."
+  },
+  {
+    "turn_index": 10,
+    "text": "...",
+    "speaker_name": "Dave",
+    "group_turn_envelope": {
+      "speaker_participant_id": "dave",
+      "visible_participant_ids": ["carol", "dave", "hutao"],
+      "mentioned_participant_ids": [],
+      "explicit_mentions": []
+    },
+    "assertion_kind": "probe",
+    "ground_truth": {
+      "addressed_to_assistant": "unknown",
+      "addressee_participant_id": "unknown",
+      "reaction_to_turn_id": "unknown",
+      "reaction_to_participant_id": "unknown",
+      "is_about_assistant_claim": "unknown"
+    },
+    "expected_confidence_band": "low",
+    "note": "Probe: pure non-content interjection. The LLM should leave BOTH fields empty (M18.7 DECIDED 6: empty is a first-class answer). The calibration harness should NOT penalize the LLM here. All ground truth fields are 'unknown' to mark the turn as not-decidable."
+  },
+  {
+    "turn_index": 11,
+    "text": "I think hutao had it right earlier, but let me check first.",
+    "speaker_name": "Carol",
+    "group_turn_envelope": {
+      "speaker_participant_id": "carol",
+      "visible_participant_ids": ["carol", "dave", "hutao"],
+      "mentioned_participant_ids": ["hutao"],
+      "explicit_mentions": ["hutao"]
+    },
+    "assertion_kind": "both",
+    "ground_truth": {
+      "addressed_to_assistant": false,
+      "addressee_participant_id": "carol",
+      "reaction_to_turn_id": "turn_<assistant_prior_turn_id>",
+      "reaction_to_participant_id": "hutao",
+      "is_about_assistant_claim": true
+    },
+    "expected_confidence_band": "medium",
+    "note": "Probe near-miss: addresses the group (not the assistant specifically, even though 'hutao had it right' is about the assistant's claim), AND reactions to the assistant's prior turn. addressed_to_assistant=false (side-thread/room-level comment about the assistant's accuracy); reaction is true. Tests whether the LLM correctly separates addressee from reaction."
+  }
+]
