@@ -244,7 +244,10 @@ def test_policy_producer_emits_for_wrong_persona_signal() -> None:
     commitment = admitted[0]
     assert commitment.owner_id == "runtime_mode_state"
     assert audit_events[0]["rule_kind"] == "user_correction_wrong_persona"
-    assert commitment.observable_payload["expected_mode"] == "persona_chat"
+    # N4 (M20.3 follow-up): correction signals without explicit
+    # target return expected_mode="" so the LLM downstream (not
+    # engineering) picks the target.
+    assert commitment.observable_payload["expected_mode"] == ""
 
 
 def test_policy_producer_emits_for_wrong_voice_signal() -> None:
@@ -269,6 +272,9 @@ def test_policy_producer_emits_for_reaffirm_signal() -> None:
     )
     assert len(admitted) == 1
     assert audit_events[0]["rule_kind"] == "user_correction_reaffirm"
+    # N4: reaffirm also returns "" (no target) — the conscious
+    # loop LLM picks the reaffirmed target.
+    assert admitted[0].observable_payload["expected_mode"] == ""
 
 
 def test_policy_producer_unknown_correction_signal_emits_nothing() -> None:
@@ -280,6 +286,31 @@ def test_policy_producer_unknown_correction_signal_emits_nothing() -> None:
         user_correction_signal="unknown_signal",
     )
     assert admitted == []
+
+
+def test_policy_producer_n4_correction_signal_returns_empty_target() -> None:
+    """N4 (M20.3 follow-up): when a correction signal is set
+    without an explicit target, `expected_mode` is empty so the
+    LLM downstream (not engineering) picks the target.
+
+    Previously the producer hardcoded `persona_chat` which
+    silently forced a durable mutate toward a specific mode
+    without the LLM seeing what the user actually wanted.
+    """
+    producer = PolicyProducer()
+    for signal in ("wrong_persona", "wrong_voice", "right_persona_reaffirm"):
+        admitted, _ = producer.evaluate(
+            turn_context={"turn_index": 100, "at": "2026-06-06T00:00:00Z"},
+            runtime_mode_flags={},
+            command_envelope={},
+            user_correction_signal=signal,
+        )
+        assert len(admitted) == 1, f"signal {signal!r} should admit one row"
+        commitment = admitted[0]
+        assert commitment.observable_payload["expected_mode"] == "", (
+            f"signal {signal!r} should return empty expected_mode, got "
+            f"{commitment.observable_payload['expected_mode']!r}"
+        )
 
 
 # === group_mode_ingress_change ==========================================

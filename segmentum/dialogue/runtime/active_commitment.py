@@ -187,6 +187,15 @@ GRADED_CORRECTION_V1: frozenset[str] = frozenset({
 
 # Magnitude -> level table (M20.2 §2). A change is a vocabulary bump.
 # Magnitudes are clamped to [0.0, 1.0] before the table is consulted.
+#
+# N2 (M20.3 follow-up): the threshold boundaries (0.1, 0.3, 0.6,
+# 0.85) and the level mapping are design-time constants, not
+# calibrated against any empirical replay. They were chosen so
+# the v1 table covered the full [0, 1] interval with five
+# monotonic levels. A future M20.x milestone should run a
+# replay-style calibration (e.g. on the M20.0 acceptance
+# fixture) and re-pick the boundaries if needed. Changing this
+# table is a M20.2 vocabulary bump.
 _MAGNITUDE_LEVEL_TABLE: tuple[tuple[float, float, str], ...] = (
     (0.0, 0.1, "expire"),
     (0.1, 0.3, "microadjust"),
@@ -657,6 +666,54 @@ def update_commitment_registry_diagnostics(
     state["commitment_registry_index"] = index
 
 
+def _record_long_pending_staleness(
+    state: dict,
+    *,
+    commit_id: str,
+    owner_id: str,
+    observable: str,
+    current_turn: int,
+    created_turn: int,
+    reason_code: str,
+) -> None:
+    """Surface long-pending commitment staleness in the diagnostic index.
+
+    M20.3 N1 follow-up: when a commitment has been retried for at
+    least `LONG_PENDING_STALENESS_TURNS` turns without settling
+    (`settler_unavailable` or `no_eligible_observation`), record
+    the staleness in `state["commitment_registry_index"]`. The
+    scheduler does NOT change behavior (it still preserves the
+    commitment per M20.1 §7); the operator can see the capacity
+    drain via the diagnose surface.
+
+    The counter is keyed by `commit_id` so a single commitment that
+    is retried many times does not double-count: only the first
+    time it crosses the staleness threshold is recorded.
+    """
+    if not isinstance(state, dict):
+        return
+    if current_turn - created_turn < LONG_PENDING_STALENESS_TURNS:
+        return
+    index = state.get("commitment_registry_index")
+    if not isinstance(index, dict):
+        index = {}
+    long_pending = index.get("long_pending_commitments")
+    if not isinstance(long_pending, dict):
+        long_pending = {}
+    if commit_id in long_pending:
+        return  # already recorded
+    long_pending[commit_id] = {
+        "owner_id": owner_id,
+        "observable": observable,
+        "first_stale_turn": int(current_turn),
+        "created_turn": int(created_turn),
+        "reason_code": reason_code,
+    }
+    index["long_pending_commitments"] = long_pending
+    index["long_pending_commitment_count"] = len(long_pending)
+    state["commitment_registry_index"] = index
+
+
 # === M20.1 settler protocol core =========================================
 # M20.1 freezes the settler half of the unified-commitment loop. The
 # scheduler and reference settlers speak through these types. M20.1 does
@@ -1100,6 +1157,22 @@ def compute_magnitude(
     Returns (magnitude, reason_codes). If the observable has no numeric
     value, magnitude defaults to 0.5 and `magnitude_defaulted` is added
     to reason_codes.
+
+    N3 (M20.3 follow-up): the 0.5 default places a non-numeric
+    commitment in the `next_turn` band (0.3–0.6) of the magnitude
+    level table, which means a non-numeric observation defaults
+    to a moderate "next-turn" correction. This is the opposite
+    direction from R2 (which expires `ambiguous`/`uncertain`):
+    R2 expires at the SETTLE stage when the settler reports
+    low-signal outcomes; N3 default-applies at the MAGNITUDE
+    stage when the committed/expected value is not numeric.
+    Both paths exist and may fire on different commitments. A
+    future M20.x milestone may want a smaller default (e.g.
+    0.0 → expire) for non-numeric observables, but that is a
+    M20.1 vocabulary change. The current default of 0.5 is
+    documented so the operator can read it off the diagnostic
+    surface (`magnitude_defaulted` in settled_value's
+    reason_codes).
     """
     reason_codes: list[str] = []
     if observable not in MAGNITUDE_SCALES_V1:
@@ -1331,6 +1404,23 @@ class SettlementScheduler:
                 # settler may be wired up in a later milestone. The
                 # observability entry is recorded but the commitment
                 # stays pending.
+                #
+                # N1 (M20.3 follow-up): a long-pending commitment
+                # (e.g. observable without a settler, or
+                # `no_eligible_observation` that never resolves) can
+                # silently drain the 256-row pending cap. The
+                # scheduler does not change behavior here, but it
+                # records the staleness in the diagnostic surface so
+                # the operator can see the capacity drain.
+                _record_long_pending_staleness(
+                    state,
+                    commit_id=commit_id,
+                    owner_id=owner_id,
+                    observable=observable,
+                    current_turn=turn_index,
+                    created_turn=created_turn,
+                    reason_code="settler_unavailable",
+                )
                 continue
 
             # Build observation context.
@@ -1426,6 +1516,23 @@ class SettlementScheduler:
                 # settler may be wired up later (M20.1.1) or the
                 # observation may arrive on a later turn, so the
                 # commitment stays pending.
+                #
+                # N1 (M20.3 follow-up): record staleness in the
+                # diagnostic surface so a long-pending
+                # `no_eligible_observation` is observable.
+                if result.reason_code in (
+                    "no_eligible_observation",
+                    "settler_unavailable",
+                ):
+                    _record_long_pending_staleness(
+                        state,
+                        commit_id=commit_id,
+                        owner_id=owner_id,
+                        observable=observable,
+                        current_turn=turn_index,
+                        created_turn=created_turn,
+                        reason_code=result.reason_code,
+                    )
                 if result.reason_code in (
                     "due_at_passed",
                     "settler_hybrid_fallback_exhausted",
@@ -1924,6 +2031,14 @@ __all__ = [
 # `COMMITMENT_REGISTRY_V1` and `OBSERVABLE_V1` are unchanged. v2
 # additions live in `COMMITMENT_REGISTRY_V2` and `OBSERVABLE_V2` and
 # are derived as v1 ∪ new entries.
+
+# N1 (M20.3 follow-up): a commitment is "long-pending" when it has
+# been retried for at least this many turns without a settlement.
+# The scheduler does not auto-expire such commitments (M20.1 §7
+# preserves them for future M20.1.1 migration), but it surfaces the
+# staleness in `state["commitment_registry_index"]` so the operator
+# can see the capacity drain. Frozen at 8 turns by M20.3.
+LONG_PENDING_STALENESS_TURNS: int = 8
 
 # v2 horizon enum. M20.3 v2 attribute on ActiveCommitment. Default
 # is "next_turn" for v1 commitments. PolicyProducer sets

@@ -259,6 +259,63 @@ def test_pre_send_advisory_when_audit_absent() -> None:
     assert "runtime_mode_state_audit_absent" in verdict.reason_codes
 
 
+def test_r4_pre_send_block_defeated_by_missing_audit() -> None:
+    """R4 (M20.3 follow-up): when the surface_consistency_verification
+    audit is absent (e.g. fast_chat didn't run the LLM self-audit),
+    the pre-send gate CANNOT block, even for `runtime_mode_state`
+    with a clear persona drift. This is a real, documented gap.
+
+    Implication: the only `runtime_mode_state` block protection
+    depends on the upstream M19.x LLM self-audit having run and
+    produced a `drifted_*` outcome. The fast_chat path may skip
+    the audit (latency optimization), in which case a persona
+    drift in the draft reply would still be sent. This is
+    intentional — blocking on a missing audit would be too eager.
+    A future M20.x milestone can either (a) force the LLM audit
+    to always run, or (b) add a fast_chat-aware fallback
+    (e.g. compare draft persona markers against the expected_mode
+    heuristically).
+    """
+    settler = SameTurnSurfaceSettler()
+    commitment = ActiveCommitment(
+        commit_id="cid_r4",
+        owner_id="runtime_mode_state",
+        source_kind="policy",
+        source_ref="surface_intent_chat",
+        layer="B_per_turn_commitment",
+        observable="runtime_mode_state",
+        observable_payload={"expected_mode": "persona_chat"},
+        target={},
+        due_at=None,
+        priority=0.5,
+        confidence=0.5,
+        evidence_refs=("ref",),
+        created_turn=0,
+        created_at="2026-06-06T00:00:00Z",
+        reason_codes=("policy_prior",),
+        engineering_proxy_label="mvp_local_policy_admission",
+        horizon="same_turn_surface",
+    )
+    # The draft reply is in bot_system voice; the LLM surface
+    # audit is absent. The gate should NOT block.
+    verdict = settler.run_pre_send(
+        draft_reply="在线，路由正常，待命中。",
+        horizon_commitments=[commitment],
+        observation_context={},  # no audit
+        turn_index=0,
+        at="2026-06-06T00:00:00Z",
+    )
+    assert verdict is not None
+    assert verdict.decision != "block", (
+        "R4 regression: pre-send gate blocked despite missing audit"
+    )
+    assert verdict.decision == "advisory_guidance"
+    assert "runtime_mode_state_audit_absent" in verdict.reason_codes
+    assert not verdict.replacement, (
+        "R4: no replacement string when audit is absent"
+    )
+
+
 # === post-send advisory =================================================
 
 

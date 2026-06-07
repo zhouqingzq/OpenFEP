@@ -511,6 +511,75 @@ def test_commitment_registry_index_diagnostic_exposes_counts() -> None:
     ] == 1
 
 
+def test_long_pending_staleness_is_recorded_in_diagnostic_index() -> None:
+    """N1 (M20.3 follow-up): a commitment retried for >= 8 turns
+    without settling surfaces in `commitment_registry_index` so
+    the operator can see the capacity drain. The scheduler does
+    NOT change behavior — the commitment still stays pending
+    (M20.1 §7) — but the staleness is observable.
+    """
+    from segmentum.dialogue.runtime.active_commitment import (
+        LONG_PENDING_STALENESS_TURNS,
+        _record_long_pending_staleness,
+    )
+
+    state: dict = {}
+    # A commitment that's been retried for fewer than the threshold
+    # turns is NOT recorded.
+    _record_long_pending_staleness(
+        state,
+        commit_id="cid1",
+        owner_id="policy_state",
+        observable="repair_bias_band",
+        current_turn=5,
+        created_turn=0,
+        reason_code="settler_unavailable",
+    )
+    assert state.get("commitment_registry_index", {}) == {}
+
+    # Same commitment, after the threshold.
+    _record_long_pending_staleness(
+        state,
+        commit_id="cid1",
+        owner_id="policy_state",
+        observable="repair_bias_band",
+        current_turn=LONG_PENDING_STALENESS_TURNS,
+        created_turn=0,
+        reason_code="settler_unavailable",
+    )
+    index = state["commitment_registry_index"]
+    assert index["long_pending_commitment_count"] == 1
+    assert "cid1" in index["long_pending_commitments"]
+    entry = index["long_pending_commitments"]["cid1"]
+    assert entry["owner_id"] == "policy_state"
+    assert entry["observable"] == "repair_bias_band"
+    assert entry["reason_code"] == "settler_unavailable"
+
+    # A second commitment also goes stale.
+    _record_long_pending_staleness(
+        state,
+        commit_id="cid2",
+        owner_id="policy_state",
+        observable="silent_then_resolved",
+        current_turn=20,
+        created_turn=10,
+        reason_code="no_eligible_observation",
+    )
+    assert state["commitment_registry_index"]["long_pending_commitment_count"] == 2
+
+    # Re-recording the same commit_id does not double-count.
+    _record_long_pending_staleness(
+        state,
+        commit_id="cid1",
+        owner_id="policy_state",
+        observable="repair_bias_band",
+        current_turn=20,
+        created_turn=0,
+        reason_code="settler_unavailable",
+    )
+    assert state["commitment_registry_index"]["long_pending_commitment_count"] == 2
+
+
 def test_m19_0_self_response_expectation_proposal_wraps_to_active_commitment() -> None:
     sre = {
         "proposal_id": "self_exp_42",

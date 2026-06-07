@@ -289,8 +289,23 @@ def _resolve_runtime_mode(
     1. `arg0` from /mode or /persona (when present and valid).
     2. `command == "/status"` (turn-scoped bot_system).
     3. `surface_intent` mapped to a runtime mode.
-    4. Correction signal → persona_chat.
+    4. Correction signal → empty (no target).
     5. Empty (the commitment is admitted without `expected_mode`).
+
+    N4 (M20.3 follow-up): a correction signal (`wrong_persona` /
+    `wrong_voice` / `right_persona_reaffirm`) without an explicit
+    target returns "" (no target) rather than guessing
+    `persona_chat`. The previous v1 default of `persona_chat`
+    silently forced a durable mutate toward a specific mode
+    without the LLM downstream seeing what the user actually
+    wanted. With this fix, the commitment is admitted with no
+    target; the conscious loop's LLM is the only legitimate
+    source for the target selection (per CLAUDE.md), and the
+    downstream pre-send gate's drift check naturally returns
+    `advisory` for an empty `expected_mode` (it does not block
+    for an unknown target). `right_persona_reaffirm` similarly
+    returns "" — the conscious loop is the source of the
+    reaffirmed identity, not PolicyProducer.
     """
     if arg0 and arg0 in _ALLOWED_RUNTIME_MODES:
         return arg0
@@ -304,9 +319,9 @@ def _resolve_runtime_mode(
         if surface_intent == "chat":
             return "persona_chat"
     if signal in {"wrong_persona", "wrong_voice", "right_persona_reaffirm"}:
-        # Without an explicit target, the correction implies the
-        # persona_chat target (the engineer's most common case).
-        return "persona_chat"
+        # No explicit target. The downstream LLM in the conscious
+        # loop fills the target. Engineering does NOT guess.
+        return ""
     return ""
 
 
