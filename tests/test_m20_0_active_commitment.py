@@ -28,9 +28,13 @@ from segmentum.dialogue.runtime.active_commitment import (
     COMMITMENT_REGISTRY_V1,
     COMMITMENT_REGISTRY_V2,
     ENGINEERING_PROXY_LABELS_V1,
+    ENGINEERING_PROXY_LABELS_V2,
     OBSERVABLE_V1,
     OBSERVABLE_V2,
+    OBSERVABLE_V3,
+    OUTCOME_BY_OBSERVABLE_V3,
     REASON_CODES_V1,
+    REASON_CODES_V2,
     build_active_commitment_created_event,
     compute_commit_id,
     record_active_commitment_event,
@@ -490,7 +494,7 @@ def test_commitment_registry_index_diagnostic_exposes_counts() -> None:
     )
     index = state["commitment_registry_index"]
     assert index["commitment_registry_owner_count"] == len(COMMITMENT_REGISTRY_V2)
-    assert index["commitment_registry_observable_count"] == len(OBSERVABLE_V2)
+    assert index["commitment_registry_observable_count"] == len(OBSERVABLE_V3)
     assert index["active_commitment_created_total"] == 3
     assert index["active_commitment_rejected_total"] == 3
     assert index["active_commitment_rejected_by_reason_code"] == {
@@ -685,6 +689,61 @@ def test_engineering_proxy_labels_v1_is_frozen() -> None:
     # PolicyProducer-admitted rows. The v1 set is now 10 labels.
     assert len(ENGINEERING_PROXY_LABELS_V1) == 10
     assert "mvp_local_policy_admission" in ENGINEERING_PROXY_LABELS_V1
+
+
+def test_engineering_proxy_labels_v2_is_frozen() -> None:
+    # M20.4 adds `mvp_local_group_attribution` (additive) for
+    # M18.7 / M20.4 shared label. The v2 set is v1 ∪ this entry.
+    assert ENGINEERING_PROXY_LABELS_V2 - ENGINEERING_PROXY_LABELS_V1 == frozenset(
+        {"mvp_local_group_attribution"}
+    )
+    assert len(ENGINEERING_PROXY_LABELS_V2) == 11
+    assert "mvp_local_group_attribution" in ENGINEERING_PROXY_LABELS_V2
+
+
+def test_reason_codes_v2_is_frozen() -> None:
+    # M20.4 v2 = v1 ∪ {M18.7 reason codes, M20.4 admission
+    # reason codes, M20.4 dispatcher outcome labels}.
+    expected_v2_additions = frozenset({
+        "m18_7_field_present",
+        "m18_7_field_skipped_fast_chat",
+        "m20_4_attribution",
+        "m20_4_attribution_tie_breaker_engaged",
+        "m20_4_attribution_tie_breaker_rejected",
+        "m20_4_addressee_graph_microadjust",
+        "m20_4_addressee_graph_revoke",
+        "m20_4_addressee_graph_noop",
+    })
+    assert REASON_CODES_V2 - REASON_CODES_V1 == expected_v2_additions
+    # v1 still passes through (v1 reason codes are still valid).
+    for rc in ("policy_prior", "self_expectation_formation", "boundary_check"):
+        assert rc in REASON_CODES_V2
+
+
+def test_observable_v3_is_frozen() -> None:
+    # M20.4 v3 = v2 ∪ 2 new (addressee_target_match,
+    # reaction_attribution_match).
+    assert "addressee_target_match" in OBSERVABLE_V3
+    assert "reaction_attribution_match" in OBSERVABLE_V3
+    # v2 rows still present.
+    assert "runtime_mode_state" in OBSERVABLE_V3
+    # Settler hint is llm_judge.
+    assert OBSERVABLE_V3["addressee_target_match"]["settler_hint"] == "llm_judge"
+    assert OBSERVABLE_V3["reaction_attribution_match"]["settler_hint"] == "llm_judge"
+
+
+def test_outcome_by_observable_v3_is_frozen() -> None:
+    # M20.4 v3 = v2 ∪ 2 new with {confirmed, violated, ambiguous}.
+    assert OUTCOME_BY_OBSERVABLE_V3["addressee_target_match"] == frozenset(
+        {"confirmed", "violated", "ambiguous"}
+    )
+    assert OUTCOME_BY_OBSERVABLE_V3["reaction_attribution_match"] == frozenset(
+        {"confirmed", "violated", "ambiguous"}
+    )
+    # v2 outcomes still present.
+    assert OUTCOME_BY_OBSERVABLE_V3["runtime_mode_state"] == frozenset(
+        {"confirmed", "violated", "ambiguous"}
+    )
 
 
 def test_allowed_source_kinds_is_frozen() -> None:

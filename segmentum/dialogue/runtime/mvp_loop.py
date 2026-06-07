@@ -245,6 +245,13 @@ from segmentum.dialogue.runtime.m18_7_attribution import (
     normalize_addressee_hypothesis as _normalize_m18_7_addressee_hypothesis,
     normalize_reaction_attribution_hypothesis as _normalize_m18_7_reaction_attribution_hypothesis,
 )
+from segmentum.dialogue.runtime.m20_4_attribution import (
+    AddresseeTargetMatchLLMJudgeSettler as _AddresseeTargetMatchLLMJudgeSettler,
+    ReactionAttributionMatchLLMJudgeSettler as _ReactionAttributionMatchLLMJudgeSettler,
+    build_addressee_target_match_admitted_event as _emit_addressee_target_match_admitted_event,
+    build_reaction_attribution_match_admitted_event as _emit_reaction_attribution_match_admitted_event,
+    produce_m20_4_attribution_commitments as _produce_m20_4_attribution_commitments,
+)
 from segmentum.dialogue.runtime.active_commitment_grader import (
     route_expire,
     route_microadjust,
@@ -5932,6 +5939,13 @@ def _build_m20_1_settlement_scheduler() -> SettlementScheduler:
     `settler_hybrid_fallback_exhausted` until M20.1.1 (or a later
     milestone) injects the real LLM stage. This keeps M20.1 acceptance
     free of any new visible behavior.
+
+    M20.4 registers the two new LLM-judge settlers
+    (`addressee_target_match`, `reaction_attribution_match`).
+    They follow the same pattern (constructed without an
+    injected LLM call in v1; fail closed with
+    `settler_unavailable` until a later milestone injects
+    the real LLM stage).
     """
     scheduler = SettlementScheduler()
     scheduler.register_settler(
@@ -5957,6 +5971,15 @@ def _build_m20_1_settlement_scheduler() -> SettlementScheduler:
     scheduler.register_settler(
         "behavioral_pull_shift",
         BehavioralPullShiftSilentSettler(),
+    )
+    # M20.4 v1 — two new LLM-judge settlers.
+    scheduler.register_settler(
+        "addressee_target_match",
+        _AddresseeTargetMatchLLMJudgeSettler(),
+    )
+    scheduler.register_settler(
+        "reaction_attribution_match",
+        _ReactionAttributionMatchLLMJudgeSettler(),
     )
     return scheduler
 
@@ -6333,6 +6356,217 @@ def _build_command_envelope(bounded_group_turn: Mapping[str, Any]) -> dict[str, 
         "platform_command": platform_command,
         "bot_command_args": bot_command_args,
     }
+
+
+def _admit_m20_4_attribution_commitments(
+    *,
+    bus: list,
+    state: dict,
+    current_turn_id: int,
+    inbound_excerpt: str = "",
+    group_turn_binding: Mapping[str, Any] | None = None,
+    at: str = "",
+) -> list[ActiveCommitment]:
+    """M20.4 §2 — admission from the M18.7 attribution surface.
+
+    The producer reads `state["m18_7_attribution_hypotheses"]`
+    (M18.7 §5 state surface), filters on `confidence >= 0.4`
+    AND `participant_id != ""`, and admits one
+    `ActiveCommitment` per matching entry on
+    `group_addressee_graph`. Empty surface → silent no-op.
+
+    The admitted rows go through the M20.0 admission gate
+    (the ActiveCommitmentAdapter validates shape, clamps,
+    and registers the row in state["active_commitments_pending"]).
+    The M20.1 scheduler settles them on subsequent turns
+    via the registered LLM-judge settlers; the M20.2
+    dispatcher routes the outcome to the real
+    `group_addressee_graph.microadjust` write path.
+
+    This function does NOT call the LLM.
+    """
+    admitted = _produce_m20_4_attribution_commitments(
+        state=state,
+        bus=bus,
+        current_turn_id=current_turn_id,
+        inbound_excerpt=inbound_excerpt,
+        group_turn_binding=group_turn_binding,
+        at=at,
+    )
+    if not admitted:
+        return admitted
+    # Run the proposals through the M20.0 admission gate.
+    from segmentum.dialogue.runtime.active_commitment import (
+        ActiveCommitmentAdapter,
+        build_active_commitment_created_event,
+        init_owner_observability_for_commitment,
+        record_active_commitment_event,
+        record_pending_commitment,
+        update_commitment_registry_diagnostics,
+    )
+    proposals: list[dict] = []
+    for commitment in admitted:
+        proposals.append(
+            {
+                "owner_id": commitment.owner_id,
+                "source_kind": commitment.source_kind,
+                "source_ref": commitment.source_ref,
+                "layer": commitment.layer,
+                "observable": commitment.observable,
+                "observable_payload": dict(commitment.observable_payload or {}),
+                "target": dict(commitment.target or {}),
+                "due_at": dict(commitment.due_at or {}),
+                "priority": commitment.priority,
+                "confidence": commitment.confidence,
+                "evidence_refs": list(commitment.evidence_refs or []),
+                "reason_codes": list(commitment.reason_codes or []),
+                "engineering_proxy_label": commitment.engineering_proxy_label,
+                "horizon": commitment.horizon,
+            }
+        )
+    adapter = ActiveCommitmentAdapter()
+    accepted, rejected = adapter.admit_batch(
+        proposals=proposals,
+        turn_index=current_turn_id,
+        created_at=str(at),
+    )
+    for commitment in accepted:
+        event = build_active_commitment_created_event(commitment)
+        bus.append(event)
+        record_active_commitment_event(state, event)
+        record_pending_commitment(state, commitment)
+        init_owner_observability_for_commitment(
+            state,
+            owner_id=commitment.owner_id,
+            commitment=commitment,
+        )
+    rejected_counts: dict[str, int] = {}
+    for rejection in rejected:
+        bus.append(rejection)
+        record_active_commitment_event(state, rejection)
+        code = str(rejection.get("reason_code", "") or "unknown")
+        rejected_counts[code] = rejected_counts.get(code, 0) + 1
+    update_commitment_registry_diagnostics(
+        state,
+        admitted=len(accepted),
+        rejected_by_reason_code=rejected_counts,
+    )
+    return admitted
+
+
+def _emit_m20_4_tie_breaker_feedback_for_turn(
+    *,
+    bus: list,
+    state: dict,
+    turn_index: int,
+    now: str,
+) -> None:
+    """M20.4 v1 — emit the gated M18.5 tie-breaker feedback row
+    for any M20.4-admitted commitments that were just
+    dispatched this turn.
+
+    M20.4 v1 ships CROSS-TURN feedback only. The T+1+ flip
+    engages on subsequent turns when M18.5 reads the
+    feedback row. The feedback row is bounded; the
+    diagnostic counters record the engagement / rejection
+    histogram.
+
+    The function scans observability for
+    `addressee_target_match` / `reaction_attribution_match`
+    commitments that were just dispatched at this turn and
+    runs the engagement rule (C1 fix: AND not OR). Each
+    dispatch produces a row in
+    `state["m18_5_attribution_feedback"]`. A bus event
+    `M18_5AttributionFeedbackRow` is emitted so diagnose
+    can cross-reference.
+    """
+    from segmentum.dialogue.runtime.m20_4_attribution import (
+        emit_m20_4_tie_breaker_feedback as _m20_4_feedback,
+    )
+    if not isinstance(state, dict):
+        return
+    observability = state.get("commitment_owner_observability")
+    if not isinstance(observability, dict) or not observability:
+        return
+    for owner_id, owner_row in observability.items():
+        if owner_id != "group_addressee_graph":
+            continue
+        if not isinstance(owner_row, dict):
+            continue
+        for _commit_id, commit_row in owner_row.items():
+            if not isinstance(commit_row, dict):
+                continue
+            if not commit_row.get("dispatched"):
+                continue
+            dispatched_at_turn = int(
+                commit_row.get("dispatched_at_turn", 0) or 0
+            )
+            if dispatched_at_turn != turn_index:
+                continue
+            # Reconstruct the commitment + settled value from
+            # observability (same as the dispatcher does).
+            commitment_row = commit_row.get("commitment")
+            if not isinstance(commitment_row, dict):
+                continue
+            try:
+                commitment = _observability_row_to_active_commitment(
+                    commitment_row
+                )
+            except Exception:  # noqa: BLE001
+                continue
+            settled_value_row = commit_row.get("settled_value")
+            if not isinstance(settled_value_row, dict):
+                continue
+            try:
+                settled_value = _observability_row_to_settled_value(
+                    settled_value_row,
+                    commit_id=str(commitment_row.get("commit_id", "")),
+                    turn_index=turn_index,
+                    now=now,
+                )
+            except Exception:  # noqa: BLE001
+                continue
+            # M18.5 structural decision: read from the dispatch
+            # decision (stored in commit_row). The dispatcher
+            # embeds the structural decision indirectly; the
+            # M20.4 v1 reads it from the active state.
+            # For v1, we read the existing action on this
+            # turn. The pre-existing `_action` value is the
+            # M18.5 outcome.
+            m18_5_decision = str(
+                state.get("_m20_4_m18_5_decision_at_turn", "")
+                or "no_reply"
+            )
+            decision = type("D", (), {"correction_level": str(
+                commit_row.get("dispatched_correction_level", "")
+            )})()
+            row = _m20_4_feedback(
+                state=state,
+                decision=decision,
+                commitment=commitment,
+                settled_value=settled_value,
+                m18_5_structural_decision=m18_5_decision,
+                at=now,
+            )
+            if row:
+                bus.append(
+                    {
+                        "type": "M18_5AttributionFeedbackRow",
+                        "turn_index": int(turn_index),
+                        "feedback_id": str(row.get("feedback_id", "")),
+                        "tie_breaker_engaged": bool(
+                            row.get("tie_breaker_engaged", False)
+                        ),
+                        "patched_decision": row.get("patched_decision"),
+                        "patched_reason": str(
+                            row.get("patched_reason", "")
+                        ),
+                        "engineering_proxy_label": str(
+                            row.get("engineering_proxy_label", "")
+                        ),
+                        "at": str(now),
+                    }
+                )
 
 
 def _admit_policy_commitments(
@@ -7591,6 +7825,35 @@ class MVPDialogueRuntime:
             if bounded_group_turn
             else None,
         )
+        # M20.4 §2 — M18.7 → M20 attribution commitment bridge.
+        # Reads `state["m18_7_attribution_hypotheses"]` and admits
+        # `ActiveCommitment` rows on `group_addressee_graph` per the
+        # v1 rule (confidence >= 0.4 AND participant_id != "").
+        # Empty M18.7 surface → silent no-op. The admitted rows go
+        # through the existing M20.0 / M20.1 / M20.2 / M20.2.1
+        # pipeline; the dispatcher routes to the real
+        # `group_addressee_graph.microadjust` write path that was
+        # no-op in M20.3.
+        m20_4_attribution_admitted: list[ActiveCommitment] = (
+            _admit_m20_4_attribution_commitments(
+                bus=bus,
+                state=state,
+                current_turn_id=turn_index,
+                inbound_excerpt=user_text,
+                group_turn_binding=dict(bounded_group_turn)
+                if bounded_group_turn
+                else None,
+                at=now,
+            )
+        )
+        for commitment in m20_4_attribution_admitted:
+            event = _emit_addressee_target_match_admitted_event(
+                turn_index=turn_index,
+                commitment=commitment,
+                at=now,
+            )
+            if event:
+                bus.append(event)
         # M20.3 §1 — second PolicyProducer call. The conscious loop
         # fills `correcting_assistant_identity`; we forward it as
         # the bounded `user_correction_signal`. If the conscious
@@ -7653,6 +7916,16 @@ class MVPDialogueRuntime:
             now=now,
         )
         _dispatch_graded_corrections(
+            bus=bus,
+            state=state,
+            turn_index=turn_index,
+            now=now,
+        )
+        # M20.4 v1 — emit the gated M18.5 tie-breaker feedback row
+        # for any newly-dispatched M20.4 commitments. The feedback
+        # row is the T+1+ cross-turn path (M20.4 v1 ships
+        # cross-turn only; same-turn is M20.4.1 territory).
+        _emit_m20_4_tie_breaker_feedback_for_turn(
             bus=bus,
             state=state,
             turn_index=turn_index,

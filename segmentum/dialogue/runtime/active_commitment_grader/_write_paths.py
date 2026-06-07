@@ -500,7 +500,59 @@ def run_m20_2_1_write_path(
     if level == "revoke" and owner_id == "self_cognition_calibrated_tendencies":
         apply_self_cognition_revoke(decision, commitment, state, bus)
         return True
+    # M20.4 — real write path on `group_addressee_graph.microadjust`
+    # (was no-op in M20.3). The v1 group_addressee_graph.owner row
+    # is in COMMITMENT_REGISTRY_V1 with graded_action_set =
+    # ["microadjust", "next_turn"]. M20.4 fills in microadjust.
+    if level == "microadjust" and owner_id == "group_addressee_graph":
+        apply_group_addressee_graph_microadjust(decision, commitment, state, bus)
+        return True
+    if level == "revoke" and owner_id == "group_addressee_graph":
+        apply_group_addressee_graph_revoke(decision, commitment, state, bus)
+        return True
     return False
+
+
+def apply_group_addressee_graph_microadjust(
+    decision: GradedCorrectionDecision,
+    commitment: ActiveCommitment,
+    state: dict,
+    bus: list,
+) -> None:
+    """`microadjust` for owner `group_addressee_graph` (M20.4).
+
+    Appends an attribution row to `state["addressee_graph"]`
+    keyed by the M18.7 commit_id. Emits a
+    `GroupAddresseeGraphUpdated` audit event. The
+    previously no-op write path (M20.3) is now real.
+    """
+    from segmentum.dialogue.runtime.m20_4_attribution import (
+        write_addressee_graph_microadjust as _m20_4_write,
+    )
+    at = str(getattr(decision, "at", "") or "")
+    event = _m20_4_write(
+        state=state,
+        decision=decision,
+        commitment=commitment,
+        at=at,
+    )
+    if event:
+        bus.append(event)
+
+
+def apply_group_addressee_graph_revoke(
+    decision: GradedCorrectionDecision,
+    commitment: ActiveCommitment,
+    state: dict,
+    bus: list,
+) -> None:
+    """`revoke` for owner `group_addressee_graph` (M20.4)."""
+    from segmentum.dialogue.runtime.m20_4_attribution import (
+        clear_addressee_graph_row as _m20_4_clear,
+    )
+    event = _m20_4_clear(state=state, commitment=commitment)
+    if event:
+        bus.append(event)
 
 
 __all__ = [

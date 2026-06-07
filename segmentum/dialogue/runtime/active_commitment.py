@@ -74,6 +74,39 @@ REASON_CODES_V1: frozenset[str] = frozenset({
     "silent_resolution",
 })
 
+# M20.4 §1b — v2 additive reason codes for M18.7 / M20.4.
+# The v1 set is unchanged; v2 = v1 ∪ new entries. M18.7
+# audit envelopes use `m18_7_field_present` and
+# `m18_7_field_skipped_fast_chat`. M20.4 ActiveCommitment
+# rows use `m20_4_attribution`. M20.2 dispatcher outcome
+# labels use `m20_4_addressee_graph_*`. The
+# ActiveCommitmentAdapter consumes v2; v1 reason codes
+# still pass (since v2 ⊃ v1).
+REASON_CODES_V2: frozenset[str] = frozenset({
+    "policy_prior",
+    "user_explicit_statement",
+    "user_implied_signal",
+    "self_expectation_formation",
+    "self_repair_bridge",
+    "mismatch_observation",
+    "memory_dynamics_guidance",
+    "m13_drive_signal",
+    "outreach_intent",
+    "boundary_check",
+    "silent_resolution",
+    # M18.7 audit envelope reason codes
+    "m18_7_field_present",
+    "m18_7_field_skipped_fast_chat",
+    # M20.4 ActiveCommitment admission reason codes
+    "m20_4_attribution",
+    "m20_4_attribution_tie_breaker_engaged",
+    "m20_4_attribution_tie_breaker_rejected",
+    # M20.4 dispatcher outcome labels
+    "m20_4_addressee_graph_microadjust",
+    "m20_4_addressee_graph_revoke",
+    "m20_4_addressee_graph_noop",
+})
+
 ENGINEERING_PROXY_LABELS_V1: frozenset[str] = frozenset({
     "mvp_local_prediction_lock",
     "mvp_local_self_expectation",
@@ -86,6 +119,26 @@ ENGINEERING_PROXY_LABELS_V1: frozenset[str] = frozenset({
     "mvp_local_outreach",
     # M20.3 v1 additive label: PolicyProducer-admitted rows.
     "mvp_local_policy_admission",
+})
+
+# M20.4 §1b — v2 additive engineering proxy label for M18.7
+# and M20.4. Both modules share the label. The v1 set is
+# unchanged; v2 = v1 ∪ this entry. M18.7 bus events
+# (AddresseeHypothesisAdmitted etc.) and M20.4 ActiveCommitment
+# rows use this label.
+ENGINEERING_PROXY_LABELS_V2: frozenset[str] = frozenset({
+    "mvp_local_prediction_lock",
+    "mvp_local_self_expectation",
+    "mvp_local_self_repair",
+    "mvp_local_mismatch",
+    "mvp_local_memory_dynamics",
+    "mvp_local_m13_drive",
+    "mvp_local_m15_episode",
+    "mvp_local_boundary",
+    "mvp_local_outreach",
+    "mvp_local_policy_admission",
+    # M18.7 / M20.4 shared label
+    "mvp_local_group_attribution",
 })
 
 
@@ -475,7 +528,7 @@ class ActiveCommitmentAdapter:
             )
 
         observable = _string(proposal.get("observable"))
-        if observable not in OBSERVABLE_V2:
+        if observable not in OBSERVABLE_V3:
             return self._rejection(
                 proposal=proposal,
                 turn_index=turn_index,
@@ -517,7 +570,7 @@ class ActiveCommitmentAdapter:
                 created_at=created_at,
             )
         for rc in reason_codes:
-            if rc not in REASON_CODES_V1:
+            if rc not in REASON_CODES_V2:
                 return self._rejection(
                     proposal=proposal,
                     turn_index=turn_index,
@@ -526,7 +579,7 @@ class ActiveCommitmentAdapter:
                 )
 
         proxy_label = _string(proposal.get("engineering_proxy_label"))
-        if proxy_label not in ENGINEERING_PROXY_LABELS_V1:
+        if proxy_label not in ENGINEERING_PROXY_LABELS_V2:
             return self._rejection(
                 proposal=proposal,
                 turn_index=turn_index,
@@ -646,7 +699,7 @@ def update_commitment_registry_diagnostics(
         index = {}
 
     index["commitment_registry_owner_count"] = len(COMMITMENT_REGISTRY_V2)
-    index["commitment_registry_observable_count"] = len(OBSERVABLE_V2)
+    index["commitment_registry_observable_count"] = len(OBSERVABLE_V3)
 
     index["active_commitment_created_total"] = int(
         index.get("active_commitment_created_total", 0)
@@ -1280,7 +1333,7 @@ class SettlementScheduler:
         )
 
     def register_settler(self, observable: str, settler: Settler) -> None:
-        if observable not in OBSERVABLE_V1:
+        if observable not in OBSERVABLE_V3:
             raise ValueError(f"unknown observable: {observable!r}")
         self._settlers[observable] = settler
 
@@ -1460,7 +1513,7 @@ class SettlementScheduler:
 
             if isinstance(result, SettledValue):
                 # Validate outcome is in the per-observable set.
-                allowed = OUTCOME_BY_OBSERVABLE_V1.get(observable, frozenset())
+                allowed = OUTCOME_BY_OBSERVABLE_V3.get(observable, frozenset())
                 if result.outcome not in allowed:
                     result = NoSettlement(
                         commit_id=commit_id,
@@ -1988,6 +2041,7 @@ __all__ = [
     "COMMITMENT_REGISTRY_V2",
     "DISPATCHER_REASON_CODES_V1",
     "ENGINEERING_PROXY_LABELS_V1",
+    "ENGINEERING_PROXY_LABELS_V2",
     "GRADED_CORRECTION_V1",
     "GradedCorrectionDecision",
     "GradedCorrectionDispatcher",
@@ -1996,10 +2050,13 @@ __all__ = [
     "NoSettlement",
     "OBSERVABLE_V1",
     "OBSERVABLE_V2",
+    "OBSERVABLE_V3",
     "OUTCOME_BY_OBSERVABLE_V1",
     "OUTCOME_BY_OBSERVABLE_V2",
+    "OUTCOME_BY_OBSERVABLE_V3",
     "OUTCOME_V1",
     "REASON_CODES_V1",
+    "REASON_CODES_V2",
     "SETTLER_REASON_CODES_V1",
     "SETTLER_TYPE_V1",
     "SettledValue",
@@ -2130,6 +2187,65 @@ OBSERVABLE_V2: Mapping[str, Mapping[str, Any]] = MappingProxyType({
 })
 
 
+# M20.4 §1a — v3 additive observables for the M18.7 →
+# M20 bridge. v3 = v2 ∪ 2 new entries. The new observables
+# are LLM-judge (per M20.4 v1 design). The addressee
+# settler compares the M18.7 hypothesis against the
+# INBOUND turn excerpt (C2 fix), not the assistant's
+# reply. The reaction settler compares against the
+# attributed turn excerpt.
+
+_ADDRESSEE_TARGET_MATCH_OBSERVABLE: Mapping[str, Any] = MappingProxyType({
+    "payload_keys": (
+        "hypothesis",
+        "current_turn_id",
+        "inbound_bounded_excerpt",
+        "group_turn_binding_snapshot",
+        "ambiguity_band",
+    ),
+    "settler_hint": "llm_judge",
+    "notes": (
+        "M20.4 §3 (C2 design). The settler compares the M18.7 "
+        "addressee_hypothesis against the INBOUND turn excerpt "
+        "(first 200 chars) and the group_turn_binding_snapshot, "
+        "not the assistant's reply. Answers: 'is the M18.7 LLM's "
+        "addressed_to_assistant boolean consistent with the inbound "
+        "turn evidence + structural snapshot?' The outcome drives "
+        "the M18.5 tie-breaker feedback (gated, see tie_breaker)."
+    ),
+})
+
+_REACTION_ATTRIBUTION_MATCH_OBSERVABLE: Mapping[str, Any] = MappingProxyType({
+    "payload_keys": (
+        "hypothesis",
+        "current_turn_id",
+        "attributed_turn_id",
+        "attributed_bounded_excerpt",
+        "group_turn_binding_snapshot",
+        "ambiguity_band",
+    ),
+    "settler_hint": "llm_judge",
+    "notes": (
+        "M20.4 §3. The settler compares the M18.7 "
+        "reaction_attribution_hypothesis against the attributed "
+        "turn excerpt (first 200 chars) and the "
+        "group_turn_binding_snapshot. Answers: 'is the assistant's "
+        "prior claim in the attributed turn consistent with the "
+        "M18.7 reaction hypothesis?' The outcome feeds the M19.x "
+        "expectation outcome settlement path (existing M19.x, no "
+        "new wire-up)."
+    ),
+})
+
+OBSERVABLE_V3: Mapping[str, Mapping[str, Any]] = MappingProxyType({
+    **dict(OBSERVABLE_V2),
+    "addressee_target_match": dict(_ADDRESSEE_TARGET_MATCH_OBSERVABLE),
+    "reaction_attribution_match": dict(
+        _REACTION_ATTRIBUTION_MATCH_OBSERVABLE
+    ),
+})
+
+
 # v2 outcome set per observable. v1 outcomes carry forward; v2
 # observables get the LLM-judge 3-outcome set (confirmed / violated /
 # ambiguous). outreach_intent_on/off are observation-only; the only
@@ -2140,6 +2256,20 @@ OUTCOME_BY_OBSERVABLE_V2: Mapping[str, frozenset[str]] = MappingProxyType({
     "runtime_mode_state": frozenset({"confirmed", "violated", "ambiguous"}),
     "outreach_intent_on": frozenset({"confirmed", "violated"}),
     "outreach_intent_off": frozenset({"confirmed", "violated"}),
+})
+
+
+# v3 outcome set per observable. v1 + v2 outcomes carry
+# forward; the new M20.4 observables get the LLM-judge
+# 3-outcome set (confirmed / violated / ambiguous).
+OUTCOME_BY_OBSERVABLE_V3: Mapping[str, frozenset[str]] = MappingProxyType({
+    **dict(OUTCOME_BY_OBSERVABLE_V2),
+    "addressee_target_match": frozenset(
+        {"confirmed", "violated", "ambiguous"}
+    ),
+    "reaction_attribution_match": frozenset(
+        {"confirmed", "violated", "ambiguous"}
+    ),
 })
 
 
