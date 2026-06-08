@@ -15,6 +15,12 @@ Engagement conditions (C1 fix):
 - `mentioned_participant_ids` empty
 - `reply_to_turn_id` empty
 - `m18_5_structural_decision ∈ {clarify_addressee, no_reply}`
+
+P0-3 (2026-06-08): the confidence threshold is now per-field.
+`addressee` engages at `> 0.9`; `reaction` engages at `> 0.7`;
+unknown kinds fall back to the v1 `> 0.85` default. The
+per-field values come from M18.7.1 v3 real-LLM calibration
+(`reports/m18_7_2_implementation_summary.md`).
 """
 
 from __future__ import annotations
@@ -26,6 +32,9 @@ from segmentum.dialogue.runtime.active_commitment import (
 )
 from segmentum.dialogue.runtime.m20_4_attribution import (
     M20_4_TIE_BREAKER_CONFIDENCE_MIN,
+    M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND,
+    _kind_from_observable,
+    _tie_breaker_min_for,
     build_m18_5_attribution_feedback_row,
     emit_m20_4_tie_breaker_feedback,
     record_m18_5_attribution_feedback,
@@ -34,6 +43,17 @@ from segmentum.dialogue.runtime.m20_4_attribution import (
 
 
 def _commitment(*, observable: str = "addressee_target_match") -> ActiveCommitment:
+    # P0-3 (2026-06-08): per-field thresholds. addressee
+    # engages at conf > 0.9 (fixture uses 0.91); reaction
+    # engages at conf > 0.7 (fixture uses 0.71). The v1 0.9
+    # and 0.7 confidences from the prior fixture no longer
+    # engage under strict inequality.
+    if observable == "addressee_target_match":
+        confidence = 0.91
+    elif observable == "reaction_attribution_match":
+        confidence = 0.71
+    else:
+        confidence = 0.86  # unknown observable → v1 0.85 default engages
     return ActiveCommitment(
         commit_id="cid_tb",
         owner_id="group_addressee_graph",
@@ -44,11 +64,11 @@ def _commitment(*, observable: str = "addressee_target_match") -> ActiveCommitme
         observable_payload={
             "hypothesis": {
                 "addressed_to_assistant": True,
-                "confidence": 0.9,
+                "confidence": confidence,
             } if observable == "addressee_target_match" else {
                 "is_about_assistant_claim": True,
                 "reaction_to_turn_id": "turn_0",
-                "confidence": 0.7,
+                "confidence": confidence,
             },
             "hypothesis_commit_id": "abcd" * 10,
             "current_turn_id": "0",
@@ -108,7 +128,187 @@ def _settled_value(*, outcome: str = "confirmed", magnitude: float = 1.0) -> Set
 
 
 def test_tie_breaker_constant_is_frozen() -> None:
+    """P0-3 (2026-06-08): the v1 single threshold (0.85) is
+    preserved as the `M20_4_TIE_BREAKER_CONFIDENCE_MIN` alias
+    (= `_M20_4_TIE_BREAKER_DEFAULT`) for backward compat. The
+    new per-field dispatch reads
+    `M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND` directly.
+    """
     assert M20_4_TIE_BREAKER_CONFIDENCE_MIN == 0.85
+    assert M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND == {
+        "addressee": 0.9,
+        "reaction": 0.7,
+    }
+    # All three values are strict inequalities; check the
+    # exact v3 calibration candidates. Drift from these
+    # values is intentional and requires a calibration
+    # re-run (M18.7.1) plus a documented decision (M20.4).
+    assert M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND["addressee"] > 0.5
+    assert M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND["reaction"] > 0.5
+
+
+# === P0-3 per-field dispatch ==========================================
+
+
+def test_tie_breaker_kind_from_observable_dispatch() -> None:
+    """`_kind_from_observable` is the per-field dispatch
+    entry point. addressee_target_match -> "addressee",
+    reaction_attribution_match -> "reaction", unknown -> "".
+    """
+    assert _kind_from_observable("addressee_target_match") == "addressee"
+    assert _kind_from_observable("reaction_attribution_match") == "reaction"
+    assert _kind_from_observable("") == ""
+    assert _kind_from_observable("unknown_observable") == ""
+    # Whitespace + case insensitive
+    assert _kind_from_observable("  Addressee_Target_Match  ") == "addressee"
+    # Non-string fallback
+    assert _kind_from_observable(None) == ""
+    assert _kind_from_observable(123) == ""
+
+
+def test_tie_breaker_min_for_dispatch() -> None:
+    """`_tie_breaker_min_for(kind)` returns the per-field
+    threshold; unknown kinds fall back to the v1 0.85.
+    """
+    assert _tie_breaker_min_for("addressee") == 0.9
+    assert _tie_breaker_min_for("reaction") == 0.7
+    assert _tie_breaker_min_for("unknown_kind") == 0.85
+    assert _tie_breaker_min_for("") == 0.85
+    assert _tie_breaker_min_for(None) == 0.85
+    # Whitespace + case insensitive
+    assert _tie_breaker_min_for("  Addressee  ") == 0.9
+
+
+def test_tie_breaker_per_field_addressee_threshold_engages_at_0_91() -> None:
+    """P0-3: addressee tie-breaker engages at conf > 0.9
+    (v1 was 0.85; v3 calibration surfaced 0.9). At conf=0.91
+    the v1 0.85 threshold would engage, but the v3
+    addressee-specific 0.9 threshold also engages — this
+    test pins the new boundary."""
+    state: dict = {}
+    commitment = _commitment(observable="addressee_target_match")
+    commitment.observable_payload["hypothesis"]["confidence"] = 0.91
+    row = emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=commitment,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    assert row is not None
+    assert row["tie_breaker_engaged"] is True
+
+
+def test_tie_breaker_per_field_addressee_threshold_rejects_at_0_89() -> None:
+    """P0-3: addressee tie-breaker rejects at conf=0.89,
+    which would have engaged under the v1 0.85 threshold.
+    This is the strict-inequality boundary: 0.89 < 0.9.
+    """
+    state: dict = {}
+    commitment = _commitment(observable="addressee_target_match")
+    commitment.observable_payload["hypothesis"]["confidence"] = 0.89
+    row = emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=commitment,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    assert row is not None
+    assert row["tie_breaker_engaged"] is False
+    assert row["patched_reason"] == "confidence_below_threshold"
+
+
+def test_tie_breaker_per_field_reaction_threshold_engages_at_0_71() -> None:
+    """P0-3: reaction tie-breaker engages at conf > 0.7
+    (v3 surfaced 0.7 from reaction calibration)."""
+    state: dict = {}
+    commitment = _commitment(observable="reaction_attribution_match")
+    commitment.observable_payload["hypothesis"]["confidence"] = 0.71
+    row = emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=commitment,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    assert row is not None
+    assert row["tie_breaker_engaged"] is True
+
+
+def test_tie_breaker_per_field_reaction_threshold_engages_at_0_85() -> None:
+    """P0-3 clarification: M18.7.1 surfaced a calibration
+    candidate of 0.7 for reaction. The candidate is the
+    threshold that minimizes the bin-level gap (ECE/Brier),
+    NOT a behavioral tightening. Lowering the threshold from
+    0.85 to 0.7 makes engagement MORE permissive (engages
+    when conf > 0.7, including 0.85).
+
+    At conf=0.85 with the v3 candidate threshold of 0.7,
+    the tie-breaker STILL engages because 0.85 > 0.7. The
+    v3 data has 1 reaction prediction at conf=0.85 with
+    accuracy 0.0 (overconfidence_at_high_band drift). The
+    candidate does NOT fix that specific case; it just
+    matches the calibration data's Brier-minimizing boundary.
+    A future M20.4 follow-up could raise the reaction
+    threshold to 0.9+ to specifically reject the 0.85 case;
+    that would be a separate decision, not P0-3.
+    """
+    state: dict = {}
+    commitment = _commitment(observable="reaction_attribution_match")
+    commitment.observable_payload["hypothesis"]["confidence"] = 0.85
+    row = emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=commitment,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    assert row is not None
+    assert row["tie_breaker_engaged"] is True
+
+
+def test_tie_breaker_per_field_reaction_threshold_rejects_at_0_69() -> None:
+    """P0-3 strict-inequality boundary for reaction: 0.69
+    rejects (0.69 < 0.7), 0.71 engages (0.71 > 0.7)."""
+    state: dict = {}
+    commitment = _commitment(observable="reaction_attribution_match")
+    commitment.observable_payload["hypothesis"]["confidence"] = 0.69
+    row = emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=commitment,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    assert row is not None
+    assert row["tie_breaker_engaged"] is False
+    assert row["patched_reason"] == "confidence_below_threshold"
+
+
+def test_tie_breaker_unknown_observable_falls_back_to_v1_default() -> None:
+    """A future observable (M20.4.x) without a per-field
+    threshold falls back to the v1 0.85 default. The
+    fallback is intentionally conservative: no regression
+    from v1 for any new field."""
+    state: dict = {}
+    commitment = _commitment(observable="future_field_match")
+    commitment.observable_payload["hypothesis"]["confidence"] = 0.86
+    row = emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=commitment,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    assert row is not None
+    assert row["tie_breaker_engaged"] is True
 
 
 def test_tie_breaker_engages_when_all_conditions_hold() -> None:

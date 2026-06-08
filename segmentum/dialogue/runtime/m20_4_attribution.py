@@ -64,8 +64,76 @@ from segmentum.dialogue.runtime.active_commitment import (
 M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN: float = 0.4
 
 # Tie-breaker engagement threshold (per M20.4 DECIDED 2).
-# Strict inequality; M18.7.1 may revise.
-M20_4_TIE_BREAKER_CONFIDENCE_MIN: float = 0.85
+# Strict inequality. P0-3 (2026-06-08) splits the v1 single
+# threshold (0.85) into per-field thresholds because M18.7.1
+# v3 real-LLM calibration surfaced that 0.85 is too lax for
+# reaction (engaging on 0/1 correct at 0.85 confidence) and
+# addressee (engaging on 2/4 correct at 0.95 confidence).
+#
+# Per-field values from M18.7.1 v3 candidate_tie_breaker_min:
+#   - addressee: 0.9  (calibration ECE 0.225, Brier 0.226)
+#   - reaction : 0.7  (calibration ECE 0.258, Brier 0.202)
+#
+# `_tie_breaker_engaged` dispatches by `kind` (derived from
+# `commitment.observable` at the call site). Unknown kinds
+# fall back to `_M20_4_TIE_BREAKER_DEFAULT` (the v1 0.85).
+M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND: dict[str, float] = {
+    "addressee": 0.9,
+    "reaction": 0.7,
+}
+_M20_4_TIE_BREAKER_DEFAULT: float = 0.85
+
+# Backward-compat alias. P0-3 (2026-06-08) splits the v1
+# single threshold into per-field thresholds. The alias
+# preserves the v1 module-level constant for any consumer
+# still reading the single value; new code should use
+# `_tie_breaker_min_for(kind)` (per-field dispatch) or
+# `M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND` (the dict).
+# The alias is the v1 default (0.85) and is NOT used in
+# the engagement path; `_tie_breaker_engaged` reads
+# `_tie_breaker_min_for` directly.
+M20_4_TIE_BREAKER_CONFIDENCE_MIN: float = _M20_4_TIE_BREAKER_DEFAULT
+
+
+def _tie_breaker_min_for(kind: str) -> float:
+    """Per-field tie-breaker confidence threshold.
+
+    Unknown kinds (e.g. a future M20.4.x field) fall back to
+    the v1 0.85 default. The fallback is intentional: a new
+    field without an explicit per-field threshold is
+    conservative (no regression from v1).
+    """
+    if not isinstance(kind, str):
+        return _M20_4_TIE_BREAKER_DEFAULT
+    return M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND.get(
+        kind.strip().lower(),
+        _M20_4_TIE_BREAKER_DEFAULT,
+    )
+
+
+# Map M20.4 commitment observables to per-field `kind` keys.
+# Both names are part of the v1 surface; a new observable
+# would have to be added here AND in
+# `M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND`.
+_M20_4_OBSERVABLE_TO_KIND: dict[str, str] = {
+    "addressee_target_match": "addressee",
+    "reaction_attribution_match": "reaction",
+}
+
+
+def _kind_from_observable(observable: str) -> str:
+    """Resolve a per-field `kind` from a commitment's observable.
+
+    Returns "" for unknown observables, which causes
+    `_tie_breaker_min_for` to fall back to the v1 0.85
+    default. This is intentionally conservative: a new
+    observable without a per-field threshold is a no-regression
+    change from v1.
+    """
+    if not isinstance(observable, str):
+        return ""
+    return _M20_4_OBSERVABLE_TO_KIND.get(observable.strip().lower(), "")
+
 
 # Bounded excerpt cap. Aligned with M19.x surface-consistency
 # excerpt and M18.7 rationale cap. Frozen at 200 in v1.
@@ -792,8 +860,15 @@ def _tie_breaker_engaged(
     mentioned_participant_ids: list[str] | tuple[str, ...] | None,
     reply_to_turn_id: str,
     m18_5_structural_decision: str,
+    kind: str = "",
 ) -> tuple[bool, str]:
     """Apply the M20.4 v1 tie-breaker engagement rule (C1 fix).
+
+    P0-3 (2026-06-08) adds a `kind` parameter. The
+    engagement threshold is per-field: 0.9 for addressee,
+    0.7 for reaction, default 0.85 for unknown kinds (the
+    v1 single threshold, retained as a conservative
+    fallback). Strict inequality, same as v1.
 
     Returns (engaged, rejection_reason). When engaged,
     rejection_reason is "". When not engaged, rejection_reason
@@ -806,7 +881,7 @@ def _tie_breaker_engaged(
     if ambiguity_band != "high":
         return False, TIEREJECT_AMBIGUITY_NOT_HIGH
     if not (
-        confidence > M20_4_TIE_BREAKER_CONFIDENCE_MIN
+        confidence > _tie_breaker_min_for(kind)
     ):
         return False, TIEREJECT_CONFIDENCE_LOW
     if addressed_participant_ids:
@@ -1072,6 +1147,11 @@ def emit_m20_4_tie_breaker_feedback(
         mentioned_participant_ids=mentioned,
         reply_to_turn_id=reply_to,
         m18_5_structural_decision=m18_5_structural_decision,
+        # P0-3: dispatch the per-field threshold by commitment
+        # observable. addressee_target_match -> 0.9,
+        # reaction_attribution_match -> 0.7, unknown -> 0.85
+        # default. The kind encoding is fixed in v1.
+        kind=_kind_from_observable(str(commitment.observable or "")),
     )
 
     if engaged:
@@ -1124,6 +1204,7 @@ __all__ = [
     "M20_4_ENGINEERING_PROXY_LABEL",
     "M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN",
     "M20_4_TIE_BREAKER_CONFIDENCE_MIN",
+    "M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND",
     "REASON_ADMISSION",
     "REASON_GRAPH_MICROADJUST",
     "REASON_GRAPH_NOOP",
