@@ -18,7 +18,7 @@ import re
 import time
 import uuid
 from pathlib import Path
-from typing import Any, Mapping, Protocol, Sequence
+from typing import Any, Callable, Mapping, Protocol, Sequence
 
 from segmentum.user_model import (
     M11RuntimeConfig,
@@ -5024,6 +5024,312 @@ Return JSON:
     return system_prompt, user_prompt
 
 
+# === M20.3 pre-send minimal verify (P0-1) ==============================
+#
+# The full `surface_consistency_verification` (~3.4KB M19.x prompt) is
+# SKIPPED in `latency_mode == "fast_chat"`. That skip is fine for the
+# conscious-loop path (full audit, post-conscious latency-budget
+# awareness) but breaks the **M20.3 §3.2 pre-send gate** for
+# `runtime_mode_state` commitments with `expected_mode` set: the gate
+# reads `surface_consistency_verification` from `reply_contract` and
+# treats its absence as `ambiguous` (advisory_guidance, never
+# `block`). For the Sophia 短句纠正 scenario — the user types a
+# 短句纠正 to the bot while `expected_mode = "bot_system"` is
+# committed same-turn — the gate cannot block the same turn.
+#
+# Fix (P0-1): when in fast_chat AND a `runtime_mode_state` horizon
+# commitment with `expected_mode` is present for the current turn, run
+# a small bounded minimal LLM call that returns the same
+# surface-consistency audit shape (4-key JSON). Stage
+# `"m20_3_pre_send_minimal"` is registered in `_AUXILIARY_LLM_STAGES`
+# so it uses the 12s / 0-retries auxiliary profile. Try/except
+# fallback emits a degraded bus event and the gate sees `ambiguous`
+# (current fast_chat behavior is preserved on LLM failure).
+#
+
+
+# Allowed surface_intent_outcome values for the minimal verify. Reuses
+# the M19.x enum MINUS `drifted_voice` (the minimal prompt is focused
+# on persona/role match, not on tone/register — `drifted_voice` is
+# a v1 nuance the minimal call does not need to grade). When the LLM
+# reports a drift, engineering code maps it to the M19.x enum.
+_M20_3_PRE_SEND_MINIMAL_OUTCOMES = frozenset(
+    {"consistent", "drifted_intent", "drifted_self_id", "ambiguous"}
+)
+# A `drifted_voice` LLM response is folded into `drifted_intent` on
+# the M19.x audit row so the pre-send gate treats it as `violated`.
+# (The full M19.x LLM is the only source for the `drifted_voice`
+# nuance; the minimal call deliberately drops that dimension.)
+
+
+def build_m20_3_pre_send_minimal_prompt(
+    *,
+    user_text: str,
+    draft_reply: str,
+    surface_commitment: Mapping[str, Any],
+    expected_mode: str,
+    turn_index: int,
+) -> tuple[str, str]:
+    """Build the bounded minimal pre-send LLM prompt.
+
+    Mirrors the M18.7.2 minimal-prompt pattern: small focused prompt,
+    no coupling to the conscious loop / M13 / M19 schemas. ~1.0-1.5KB
+    system+user. Returns a 4-key JSON spec focused on
+    `runtime_mode_state` voice match.
+    """
+    system_prompt = """You are the minimal pre-send voice-match module for the
+`runtime_mode_state` owner. You receive the conscious-loop's
+`surface_commitment` (the assistant's own promise about which
+identity/role to use in this reply) plus the `expected_mode` derived
+from the producer's `runtime_mode_state` commitment, and the draft
+visible reply.
+
+Decide whether the draft reply's persona/role actually matches the
+`expected_mode`.
+
+Output JSON only. Do not include any commentary, debug fields, or
+markdown.
+
+Rules:
+- "consistent" only when the reply's persona/role matches the
+  `expected_mode` (e.g. expected bot_system and reply is a short
+  bounded bot acknowledgment; expected chat and reply is in
+  persona voice).
+- "drifted_intent" when the reply's persona/role deviates from
+  `expected_mode` (e.g. expected bot_system but reply adopted the
+  persona's full voice; expected chat but reply is a stale
+  bot-styled acknowledgment).
+- "drifted_self_id" when the reply claims a different identity than
+  the commitment's `self_identification` (e.g. commitment said
+  self_id "胡桃" but reply says "我是小千" or "我是bot").
+- "ambiguous" when the available evidence is too thin to commit to
+  a drift diagnosis (e.g. reply is a single punctuation mark, or
+  the persona voice is borderline and the bot mode is borderline).
+- `committed_surface_intent` is the persona/role you actually see
+  in the reply (e.g. "bot_system", "chat", "abstain"). Empty string
+  when you cannot tell.
+- `evidence_span` is a short quoted phrase from the draft reply
+  (no more than 120 characters). Empty string if you cannot point
+  at one phrase.
+- `confidence` is your 0-1 confidence in the outcome.
+"""
+    user_prompt = f"""turn_index: {turn_index}
+
+latest_user_text:
+{user_text}
+
+expected_mode (from runtime_mode_state commitment):
+{expected_mode}
+
+surface_commitment (conscious loop's promise for this reply):
+{_json_text(dict(surface_commitment))}
+
+draft_reply (the reply the assistant is about to commit):
+{draft_reply}
+
+Return JSON:
+{{
+  "surface_intent_outcome": "consistent|drifted_intent|drifted_self_id|ambiguous",
+  "confidence": 0.0,
+  "evidence_span": "",
+  "committed_surface_intent": ""
+}}"""
+    return system_prompt, user_prompt
+
+
+def normalize_m20_3_pre_send_minimal(raw: Any) -> dict[str, Any]:
+    """Validate bounded pre-send minimal verify fields from the LLM.
+
+    Returns a dict with the 4 bounded fields. Folds any
+    `drifted_voice` LLM response into `drifted_intent` so the
+    pre-send gate's `_SURFACE_TO_M20` table maps it to `violated`.
+
+    `committed_surface_intent` is NOT filtered through
+    `ALLOWED_SURFACE_INTENTS` (the conscious-loop's surface_intent
+    vocabulary is `{"bot", "chat", "abstain"}` — too narrow). The
+    minimal prompt's vocabulary mirrors `expected_mode` (e.g.
+    `bot_system`), so the LLM can report what it actually saw in
+    the draft reply. The pre-send gate's `_actual_mode` does a
+    case-insensitive string compare against `expected_mode`; both
+    sides speak the same vocabulary, so a `bot_system` expected
+    vs. a `bot_system` actual evaluates as `consistent` and a
+    `bot_system` expected vs. a `chat` actual evaluates as
+    `drifted_intent`. Empty / out-of-bounds values fall through
+    to `""` so the gate's `audit_absent` reason code is preserved.
+    """
+    if not isinstance(raw, Mapping):
+        raw = {}
+    outcome = str(raw.get("surface_intent_outcome", "") or "").strip().lower()
+    if outcome == "drifted_voice":
+        outcome = "drifted_intent"
+    if outcome not in _M20_3_PRE_SEND_MINIMAL_OUTCOMES:
+        outcome = "ambiguous"
+    confidence = round(
+        max(0.0, min(1.0, _bounded_float(raw.get("confidence"), default=0.0))),
+        6,
+    )
+    evidence_span = str(raw.get("evidence_span", "") or "").strip()[:MAX_SURFACE_EVIDENCE_SPAN_CHARS]
+    committed_surface_intent = str(
+        raw.get("committed_surface_intent", "") or ""
+    ).strip().lower()
+    if not committed_surface_intent or len(committed_surface_intent) > 32:
+        committed_surface_intent = ""
+    return {
+        "surface_intent_outcome": outcome,
+        "confidence": confidence,
+        "evidence_span": evidence_span,
+        "committed_surface_intent": committed_surface_intent,
+    }
+
+
+def _has_runtime_mode_state_horizon_with_expected_mode(state: Mapping[str, Any]) -> tuple[bool, str]:
+    """Return (found, expected_mode) for any `runtime_mode_state`
+    horizon commitment with a non-empty `expected_mode` payload.
+
+    The minimal pre-send verify only runs when a blockable
+    commitment (the only owner with `accepts_same_turn_block = true`
+    in v2 is `runtime_mode_state`) is present and has a non-empty
+    `expected_mode`. The function is pure: it does not mutate
+    `state`.
+    """
+    horizon_list = state.get("m20_3_horizon_commitments")
+    if not isinstance(horizon_list, list):
+        return False, ""
+    for c in horizon_list:
+        if not isinstance(c, ActiveCommitment):
+            continue
+        if c.observable != "runtime_mode_state":
+            continue
+        if c.horizon != "same_turn_surface":
+            continue
+        payload = dict(c.observable_payload or {})
+        expected = str(payload.get("expected_mode", "") or "").strip().lower()
+        if expected:
+            return True, expected
+    return False, ""
+
+
+def _build_m20_3_pre_send_minimal_verified_event(
+    *,
+    turn_index: int,
+    verification: Mapping[str, Any],
+    commitment: Mapping[str, Any],
+    expected_mode: str,
+) -> dict[str, Any]:
+    """Audit envelope for a successful minimal pre-send verify."""
+    return {
+        "type": "M20_3_PreSendMinimalVerifiedEvent",
+        "turn_index": turn_index,
+        "surface_intent_outcome": str(
+            verification.get("surface_intent_outcome", "ambiguous") or "ambiguous"
+        ),
+        "committed_surface_intent": str(
+            verification.get("committed_surface_intent", "") or ""
+        ),
+        "expected_mode": expected_mode,
+        "committed_self_identification": str(
+            commitment.get("self_identification", "") or ""
+        )[:MAX_SURFACE_SELF_ID_CHARS],
+        "confidence": round(_bounded_float(verification.get("confidence"), default=0.0), 6),
+        "evidence_span": str(verification.get("evidence_span", "") or "")[:MAX_SURFACE_EVIDENCE_SPAN_CHARS],
+        "engineering_proxy_label": "mvp_local_pre_send_minimal_audit",
+    }
+
+
+def _build_m20_3_pre_send_minimal_degraded_event(
+    *,
+    turn_index: int,
+    reason: str,
+) -> dict[str, Any]:
+    """Audit envelope for a failed minimal pre-send verify (LLM error)."""
+    return {
+        "type": "M20_3_PreSendMinimalDegradedEvent",
+        "turn_index": turn_index,
+        "reason_code": str(reason or "unknown")[:MAX_SURFACE_VERIFICATION_REASON_CHARS],
+        "engineering_proxy_label": "mvp_local_pre_send_minimal_audit",
+    }
+
+
+def _run_fast_chat_pre_send_minimal(
+    *,
+    state: Mapping[str, Any],
+    surface_commitment: Mapping[str, Any],
+    raw_reply: str,
+    user_text: str,
+    turn_index: int,
+    complete_json_stage: Callable[..., dict[str, Any]],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """P0-1 call site extracted for unit testability.
+
+    Returns `(verification_dict, audit_events)`. The verification dict
+    is in the M19.x audit-row shape (with `committed_surface_intent`
+    added so the pre-send gate's `_actual_mode` can read it). The
+    audit_events list is non-empty when the LLM call ran; on LLM
+    failure the function returns an empty verification (matching the
+    prior fast_chat skip behavior — gate sees `audit_absent` →
+    `ambiguous`) and emits a degraded event.
+
+    When no `runtime_mode_state` horizon commitment with
+    `expected_mode` is present, the function returns
+    `(empty_verification, [])` — the caller emits the existing
+    `SurfaceConsistencyVerificationSkippedEvent`.
+    """
+    has_runtime_mode_commitment, expected_mode = (
+        _has_runtime_mode_state_horizon_with_expected_mode(state)
+    )
+    if not has_runtime_mode_commitment:
+        return _empty_surface_consistency_verification(), []
+
+    audit_events: list[dict[str, Any]] = []
+    try:
+        minimal_system, minimal_user = build_m20_3_pre_send_minimal_prompt(
+            user_text=user_text,
+            draft_reply=raw_reply,
+            surface_commitment=surface_commitment,
+            expected_mode=expected_mode,
+            turn_index=turn_index,
+        )
+        minimal_payload = complete_json_stage(
+            "m20_3_pre_send_minimal", minimal_system, minimal_user
+        )
+        minimal_verify = normalize_m20_3_pre_send_minimal(minimal_payload)
+    except Exception as exc:
+        # LLM failure path. Return the empty verification (gate sees
+        # `audit_absent` → `ambiguous`, the prior fast_chat behavior
+        # is preserved) and emit ONLY a degraded event. We do NOT
+        # emit a `Verified` event with empty values — that would
+        # pollute the audit trail with a non-event.
+        return _empty_surface_consistency_verification(
+            reason=f"llm_error:{type(exc).__name__}"
+        ), [
+            _build_m20_3_pre_send_minimal_degraded_event(
+                turn_index=turn_index,
+                reason=f"llm_error:{type(exc).__name__}",
+            )
+        ]
+    # Map the minimal result onto the M19.x audit row shape so the
+    # pre-send gate's `_SURFACE_TO_M20` table reads a real value
+    # (not `audit_absent`). `normalize_surface_consistency_verification`
+    # does NOT carry `committed_surface_intent` through (the M19.x
+    # audit row is built at event-emit time, not at LLM-response
+    # time). The pre-send gate's `_actual_mode` reads
+    # `observation_context["surface_consistency_verification"]["committed_surface_intent"]`
+    # — so we add it explicitly here.
+    verification = normalize_surface_consistency_verification(minimal_verify)
+    verification["committed_surface_intent"] = minimal_verify.get(
+        "committed_surface_intent", ""
+    )
+    audit_events.append(
+        _build_m20_3_pre_send_minimal_verified_event(
+            turn_index=turn_index,
+            verification=verification,
+            commitment=surface_commitment,
+            expected_mode=expected_mode,
+        )
+    )
+    return verification, audit_events
+
+
 def _build_surface_consistency_verification_event(
     *,
     turn_index: int,
@@ -5223,6 +5529,7 @@ _AUXILIARY_LLM_STAGES = {
     "post_reply_observer",
     "surface_consistency_verification",
     "m18_7_2_minimal",
+    "m20_3_pre_send_minimal",
 }
 
 
@@ -8790,15 +9097,43 @@ class MVPDialogueRuntime:
         else:
             reply_contract["surface_consistency_verification"] = dict(surface_consistency_verification)
             if surface_commitment and latency_mode == "fast_chat":
-                surface_consistency_audit_event = {
-                    "type": "SurfaceConsistencyVerificationSkippedEvent",
-                    "turn_index": turn_index,
-                    "reason_code": "latency_fast_path",
-                    "committed_surface_intent": str(surface_commitment.get("surface_intent", "chat") or "chat"),
-                    "engineering_proxy_label": "mvp_local_surface_consistency_audit",
-                }
-                bus.append(surface_consistency_audit_event)
-                _record_surface_consistency_event(state, surface_consistency_audit_event)
+                # P0-1 — fast_chat minimal pre-send verify. When a
+                # blockable `runtime_mode_state` commitment with
+                # `expected_mode` is present, run a small bounded LLM
+                # call so the M20.3 §3.2 pre-send gate can read a
+                # real audit row (instead of `audit_absent` →
+                # `ambiguous` advisory). On LLM failure, fall back
+                # to the prior `ambiguous` behavior (gate sees no
+                # audit row).
+                surface_consistency_verification, p01_events = (
+                    _run_fast_chat_pre_send_minimal(
+                        state=state,
+                        surface_commitment=surface_commitment,
+                        raw_reply=raw_reply,
+                        user_text=user_text,
+                        turn_index=turn_index,
+                        complete_json_stage=_complete_json_stage,
+                    )
+                )
+                reply_contract["surface_consistency_verification"] = dict(
+                    surface_consistency_verification
+                )
+                for ev in p01_events:
+                    bus.append(ev)
+                    _record_surface_consistency_event(state, ev)
+                if not p01_events:
+                    # No LLM call ran (no blockable commitment). Emit
+                    # the prior `latency_fast_path` skip event so the
+                    # audit trail is unchanged.
+                    surface_consistency_audit_event = {
+                        "type": "SurfaceConsistencyVerificationSkippedEvent",
+                        "turn_index": turn_index,
+                        "reason_code": "latency_fast_path",
+                        "committed_surface_intent": str(surface_commitment.get("surface_intent", "chat") or "chat"),
+                        "engineering_proxy_label": "mvp_local_surface_consistency_audit",
+                    }
+                    bus.append(surface_consistency_audit_event)
+                    _record_surface_consistency_event(state, surface_consistency_audit_event)
         reply_validation: dict[str, Any] = {
             "original_length": len(raw_reply),
             "final_length": len(raw_reply),
