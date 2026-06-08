@@ -77,7 +77,15 @@ REASON_FIELD_SKIPPED_FAST_CHAT: str = "m18_7_field_skipped_fast_chat"
 # shape, with a `_m18_7_2_source` tag for traceability.
 
 M18_7_2_SOURCE_TAG: str = "m18_7_2_minimal"
-M18_7_2_MINIMAL_PROMPT_MAX_CHARS: int = 2000
+# P0-root-cause-update: the v1 2000-char bound was unrealistic
+# for typical fixture inputs (entity_binding + group_turn_binding
+# + 3-4 prior utterances + v1 semantic categories re-introduced
+# post-M18.7.2 P0 root-cause analysis bump the bound to 3500.
+# Realistic range: 2.6k-3.2k chars for typical group-turn inputs.
+# The minimal prompt is still ~5-10x smaller than the 7.7-26k
+# conscious-loop prompt it replaces; the bump is a hard cap, not
+# a soft target.
+M18_7_2_MINIMAL_PROMPT_MAX_CHARS: int = 3500
 M18_7_2_REASON_FIELD_PRESENT: str = "m18_7_2_field_present"
 M18_7_2_REASON_MINIMAL_DEGRADED: str = "m18_7_2_minimal_llm_failure"
 
@@ -883,7 +891,7 @@ def build_m18_7_minimal_prompt(
     attribution, decoupled from the conscious loop.
 
     Returns `(system_prompt, user_prompt)`. The combined length
-    is bounded at `M18_7_2_MINIMAL_PROMPT_MAX_CHARS = 2000`. The
+    is bounded at `M18_7_2_MINIMAL_PROMPT_MAX_CHARS = 3500`. The
     LLM is asked to fill a 4-key JSON:
 
     ```text
@@ -943,6 +951,31 @@ def build_m18_7_minimal_prompt(
         "5-key JSON spec (the 4 below + the _m18_7_2_source marker):\n"
         "  addressee_hypothesis, reaction_attribution_hypothesis, "
         "reasoning_notes, _m18_7_2_source.\n"
+        # === v1 semantic categories (re-introduced post-M18.7.2 P0
+        # root-cause analysis). The original v1 conscious-loop
+        # prompt had these categories at lines 2154-2231; M18.7.2
+        # dropped them to keep the minimal prompt small. The
+        # drop caused a regression: real-LLM replay
+        # (`reports/m18_7_2_implementation_summary.md`) shows
+        # reaction 0/6 (ECE 0.258, Brier 0.202) and addressee
+        # 2/8 (ECE 0.225, Brier 0.226). The LLM was filling the
+        # field (n_present=14/24) but with no semantic grounding
+        # for `addressed_to_assistant` or `is_about_assistant_claim`.
+        # === addressee semantics ===\n"
+        "addressee `addressed_to_assistant` is false in three cases:\n"
+        "  (a) short acknowledgement (e.g. 'yeah.', 'hmm, interesting.') — brief interjection not directed at any specific participant;\n"
+        "  (b) side-thread interjection — directed at another participant, identifiable from `addressed_participant_ids` / `mentioned_participant_ids` or explicit-name structure;\n"
+        "  (c) room-level comment — a statement about the group's state, not targeting you.\n"
+        "It is true only when the message is a question / request / continuation aimed at you (explicit 'you' / 你的名字 / implicit callback to a prior turn you produced). 0.5 confidence means 'genuinely cannot tell'.\n"
+        "=== reaction semantics ===\n"
+        "reaction `is_about_assistant_claim` is true ONLY when BOTH:\n"
+        "  - `reaction_to_participant_id` equals YOUR participant id (the assistant), AND\n"
+        "  - the reaction targets YOUR OWN prior claim (not just mentions your name).\n"
+        "The 'targets your own claim' semantic category covers:\n"
+        "  (a) confirming a statement you made,\n"
+        "  (b) denying a statement you made,\n"
+        "  (c) asking you to re-state or justify a prior claim.\n"
+        "It is false when the reaction refers to another participant's prior turn, even if your name is mentioned in passing. `reaction_to_turn_id` is the specific prior turn; `reaction_to_participant_id` is whose turn. The two can differ if a paraphrase of someone else is being reacted to.\n"
     )
 
     user_prompt = (
