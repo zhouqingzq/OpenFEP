@@ -81,6 +81,31 @@ M20_4_1_OVERRIDABLE_DECISIONS: frozenset[str] = frozenset(
     {"clarify_addressee", "no_reply"}
 )
 
+# === P3 kill-switch (2026-06-08) ==========================================
+# Real-LLM calibration on the M18.7.1 held-out fixture
+# (see reports/m18_7_2_implementation_summary.md) shows
+# LLM accuracy in the override band (conf >= 0.85) is
+# 0.5 on addressee and 0.0 on reaction. Strict-inequality
+# is not enough: the gate still fires in the high band
+# and overrides the M18.5 structural decision visible
+# to the user.
+#
+# P3 holds the override in **audit-only** mode. When
+# M20_4_1_OVERRIDE_ENABLED is False (default):
+#   - The gate still runs (rule check, verdict build,
+#     bounded state-surface append, bus event emit).
+#   - The override handoff to M18.5 is NOT written. M18.5
+#     applies its structural path unchanged, so the
+#     visible reply is what M18.5 decided.
+#   - The verdict envelope still records
+#     `m20_4_1_audit_only: True` so the production
+#     diagnose surface can count "would-have-fired"
+#     cases even though no override was applied.
+# This is a safety gate, not a removal. Re-enable by
+# editing the constant to True (explicit, not env-flag,
+# so the override path is never live-by-default).
+M20_4_1_OVERRIDE_ENABLED: bool = False
+
 # State surface cap. Frozen at 8 in v1 (rolling window).
 M20_4_1_STATE_SURFACE_LIMIT: int = 8
 
@@ -117,6 +142,17 @@ class SameTurnAddresseeHypothesisGateVerdict:
     the gate, and the bounded evidence_refs. The caller
     emits one verdict per `turn_index` when the rule
     fires; not emitted when the rule does not fire.
+
+    `m20_4_1_audit_only` (P3, 2026-06-08): when True,
+    the verdict's bus event and state-surface row were
+    recorded, but the override handoff to the M18.5
+    enforcement point was NOT written. The M18.5
+    structural decision applies unchanged on the visible
+    reply. Audit-only is the default at the kill-switch
+    `M20_4_1_OVERRIDE_ENABLED = False`; when the
+    kill-switch is flipped to True, the verdict's
+    `m20_4_1_audit_only` is False and the override
+    handoff IS written.
     """
 
     decision: str
@@ -127,6 +163,7 @@ class SameTurnAddresseeHypothesisGateVerdict:
     engineering_proxy_label: str
     turn_index: int
     at: str
+    m20_4_1_audit_only: bool = False
 
 
 # === Bounded helpers ======================================================
@@ -243,6 +280,7 @@ def build_same_turn_gate_verdict_event(
         "reason_codes": list(verdict.reason_codes),
         "engineering_proxy_label": str(verdict.engineering_proxy_label),
         "at": str(verdict.at),
+        "m20_4_1_audit_only": bool(verdict.m20_4_1_audit_only),
     }
 
 
@@ -256,6 +294,7 @@ def _build_verdict(
     evidence_refs: list[str],
     turn_index: int,
     at: str,
+    m20_4_1_audit_only: bool = False,
 ) -> SameTurnAddresseeHypothesisGateVerdict:
     return SameTurnAddresseeHypothesisGateVerdict(
         decision=DECISION_OVERRIDE,
@@ -266,6 +305,7 @@ def _build_verdict(
         engineering_proxy_label=M20_4_1_ENGINEERING_PROXY_LABEL,
         turn_index=int(turn_index),
         at=str(at),
+        m20_4_1_audit_only=bool(m20_4_1_audit_only),
     )
 
 
@@ -401,12 +441,22 @@ def same_turn_addressee_hypothesis_gate(
         else []
     )
 
+    # P3 kill-switch (2026-06-08): when disabled, the gate
+    # still records its verdict and bus event (audit-only
+    # mode) but does NOT write the override handoff. M18.5
+    # applies its structural decision unchanged on the
+    # visible reply. The verdict's `m20_4_1_audit_only`
+    # flag carries the diagnostic signal end-to-end so
+    # production diagnose can count "would-have-fired"
+    # cases even though no override was applied.
+    audit_only = not M20_4_1_OVERRIDE_ENABLED
     verdict = _build_verdict(
         m18_5_structural_decision=str(m18_5_structural_decision or ""),
         commit_ids=commit_ids,
         evidence_refs=evidence_refs,
         turn_index=int(turn_index),
         at=str(now),
+        m20_4_1_audit_only=audit_only,
     )
 
     # Append to bounded state surface.
@@ -418,9 +468,11 @@ def same_turn_addressee_hypothesis_gate(
         bus.append(build_same_turn_gate_verdict_event(verdict))
 
     # Write the override handoff for the M18.5 enforcement
-    # point. Single slot, cleared at the end of the
-    # enforcement point.
-    _set_pending_override(state, verdict)
+    # point ONLY when the kill-switch is enabled. When
+    # disabled, M18.5 sees no override and the visible
+    # reply is what M18.5 decided.
+    if not audit_only:
+        _set_pending_override(state, verdict)
 
     return verdict
 
@@ -431,6 +483,7 @@ __all__ = [
     "M20_4_1_AMBIGUITY_BANDS",
     "M20_4_1_ENGINEERING_PROXY_LABEL",
     "M20_4_1_OVERRIDABLE_DECISIONS",
+    "M20_4_1_OVERRIDE_ENABLED",
     "M20_4_1_STATE_SURFACE_LIMIT",
     "M20_4_1_TIE_BREAKER_CONFIDENCE_MIN",
     "REASON_GATE_FIRED",
