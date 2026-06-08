@@ -19,6 +19,7 @@ feedback row are M20.4 territory.
 from __future__ import annotations
 
 import hashlib
+import json
 from types import MappingProxyType
 from typing import Any, Mapping
 
@@ -66,6 +67,19 @@ M18_7_ENGINEERING_PROXY_LABEL: str = "mvp_local_group_attribution"
 # Reason codes emitted on the bus / state surface.
 REASON_FIELD_PRESENT: str = "m18_7_field_present"
 REASON_FIELD_SKIPPED_FAST_CHAT: str = "m18_7_field_skipped_fast_chat"
+
+
+# === M18.7.2 minimal-prompt call site constants ==========================
+# M18.7.2 owns a dedicated minimal-prompt LLM call site for
+# addressee / reaction attribution, decoupled from the conscious
+# loop. The minimal prompt is ~1.5-2.0k chars (vs the 7.7-26k
+# conscious-loop prompt) and the LLM fills only the M18.7 v1
+# shape, with a `_m18_7_2_source` tag for traceability.
+
+M18_7_2_SOURCE_TAG: str = "m18_7_2_minimal"
+M18_7_2_MINIMAL_PROMPT_MAX_CHARS: int = 2000
+M18_7_2_REASON_FIELD_PRESENT: str = "m18_7_2_field_present"
+M18_7_2_REASON_MINIMAL_DEGRADED: str = "m18_7_2_minimal_llm_failure"
 
 
 # === Bounded helpers ======================================================
@@ -788,10 +802,416 @@ def emit_m18_7_attribution_for_turn(
     return report
 
 
+# === M18.7.2 minimal-prompt call site ====================================
+# M18.7.2 owns a dedicated minimal-prompt LLM call site for
+# addressee / reaction attribution. It is decoupled from the
+# conscious loop, so the LLM does not compete with the 60+ other
+# conscious-loop fields for instruction-following budget. The
+# M18.7.1 real-LLM replay (commits b13f07f / b969d8e) confirmed
+# that the conscious-loop path is broken at scale: 0/12 turns
+# produce non-empty M18.7 v2 attrs when the segment sits at
+# char 2914 (37.7%) of a 7.7-26k prompt. The minimal prompt
+# is ~1.5-2.0k chars, focused on the two M18.7 fields, and
+# the v1 schema is reused unchanged.
+
+
+def _extract_recent_user_utterances(
+    bus_messages: list[Mapping[str, Any]] | None,
+    *,
+    limit: int = 3,
+) -> list[dict[str, Any]]:
+    """Return the last `limit` UserUtteranceEvent entries from the bus.
+
+    Used by `build_m18_7_minimal_prompt` to provide the LLM with
+    the prior 2-3 inbound turns so it can attribute reactions.
+    M18.7.2 NEVER inspects raw user text; only structural fields
+    (turn id, addressed_participant_ids, reply_to_turn_id,
+    ingress_evidence_band) are forwarded.
+    """
+    if not isinstance(bus_messages, (list, tuple)):
+        return []
+    out: list[dict[str, Any]] = []
+    for evt in reversed(list(bus_messages)):
+        if not isinstance(evt, Mapping):
+            continue
+        if str(evt.get("type", "") or "") != "UserUtteranceEvent":
+            continue
+        out.append({
+            "turn_index": int(evt.get("turn_index", 0) or 0),
+            "addressed_participant_ids": list(
+                evt.get("addressed_participant_ids", []) or []
+            ),
+            "mentioned_participant_ids": list(
+                evt.get("mentioned_participant_ids", []) or []
+            ),
+            "reply_to_turn_id": str(evt.get("reply_to_turn_id", "") or ""),
+            "quoted_turn_ids": list(evt.get("quoted_turn_ids", []) or []),
+            "ingress_evidence_band": str(
+                evt.get("ingress_evidence_band", "") or ""
+            ),
+        })
+        if len(out) >= limit:
+            break
+    out.reverse()
+    return out
+
+
+def _extract_persona_name(state: Mapping[str, Any]) -> str:
+    """Best-effort persona name from `state["self_basic_facts"]`."""
+    facts = state.get("self_basic_facts") if isinstance(state, Mapping) else None
+    if not isinstance(facts, Mapping):
+        return ""
+    for key in ("persona_name", "display_name", "name", "character_name"):
+        v = facts.get(key)
+        if isinstance(v, str) and v.strip():
+            return v.strip()[:64]
+    return ""
+
+
+def build_m18_7_minimal_prompt(
+    *,
+    state: Mapping[str, Any],
+    user_text: str,
+    speaker_name: str,
+    bus_messages: list[Mapping[str, Any]] | None,
+    turn_index: int,
+    entity_binding: Mapping[str, Any] | None,
+    group_turn_binding: Mapping[str, Any] | None,
+    m18_5_structural_decision: str,
+) -> tuple[str, str]:
+    """Build the M18.7.2 minimal prompt for addressee / reaction
+    attribution, decoupled from the conscious loop.
+
+    Returns `(system_prompt, user_prompt)`. The combined length
+    is bounded at `M18_7_2_MINIMAL_PROMPT_MAX_CHARS = 2000`. The
+    LLM is asked to fill a 4-key JSON:
+
+    ```text
+    {
+      "addressee_hypothesis": {...} or {},
+      "reaction_attribution_hypothesis": {...} or {},
+      "reasoning_notes": "<one short sentence>",
+      "_m18_7_2_source": "m18_7_2_minimal"   # marker; the LLM
+                                             # MUST emit this exact
+                                             # string verbatim
+    }
+    ```
+
+    The M18.7 v1 schema is reused unchanged: the LLM returns the
+    same `participant_id` / `addressed_to_assistant` /
+    `confidence` / `rationale` / `evidence_refs` /
+    `alternative_hypotheses` fields that
+    `normalize_addressee_hypothesis` and
+    `normalize_reaction_attribution_hypothesis` already accept.
+    The LLM is the only legitimate source of these fields per
+    CLAUDE.md "no keyword / regex" red line.
+
+    Inputs (small subset of state, ~1.5-2.0k chars total):
+    - `state["self_basic_facts"]` (persona name only)
+    - `state["conversation_log"]` is NOT used directly; the last
+      2-3 `UserUtteranceEvent` entries from the bus are forwarded
+      (structural fields only — no raw text)
+    - `entity_binding` (current_interlocutor, aliases,
+      pronoun_bindings)
+    - `group_turn_binding` (current_speaker,
+      addressed_participant_ids, mentioned_participant_ids,
+      ambiguity_band)
+    - `m18_5_structural_decision` (so the LLM knows what M18.5
+      decided and can reason about it)
+
+    Conscious-loop coupling (M13 / M19 / pending_expectations /
+    open_items / etc.) is intentionally absent. The M18.7.1
+    real-LLM replay (commits b13f07f / b969d8e) showed that
+    these fields consume ~76% of the conscious-loop prompt
+    volume but are 100% noise for the attribution decision.
+    """
+    persona_name = _extract_persona_name(state)
+    if persona_name:
+        identity_line = f"你是「{persona_name}」，数字人格系统的意识主体。"
+    else:
+        identity_line = "你是数字人格系统的群聊归因助手。"
+
+    system_prompt = (
+        f"{identity_line}\n"
+        "当前轮次可能是群聊里某人对当前说话方说的一句话。\n"
+        "判断两件事：\n"
+        "1. addressee_hypothesis: 这句话是否对你说的？\n"
+        "2. reaction_attribution_hypothesis: 这句话是否对某条之前轮次的反应？\n"
+        "基于 entity_binding / group_turn_binding / 之前几轮消息的结构化信号做语义判断。\n"
+        "不要用关键词或正则做判断；语义判断由你做。\n"
+        "不要生成回复内容；只输出 JSON。\n"
+        "5-key JSON spec (the 4 below + the _m18_7_2_source marker):\n"
+        "  addressee_hypothesis, reaction_attribution_hypothesis, "
+        "reasoning_notes, _m18_7_2_source.\n"
+    )
+
+    user_prompt = (
+        f"turn_index: {turn_index}\n"
+        f"speaker: {speaker_name or 'default_user'}\n"
+        f"m18_5_structural_decision: {m18_5_structural_decision or '(none)'}\n"
+        f"\n"
+        f"entity_binding:\n"
+        f"{json.dumps(dict(entity_binding or {}), ensure_ascii=False, indent=2)}\n"
+        f"\n"
+        f"group_turn_binding:\n"
+        f"{json.dumps(dict(group_turn_binding or {}), ensure_ascii=False, indent=2)}\n"
+        f"\n"
+        f"user_text:\n"
+        f"{user_text or ''}\n"
+        f"\n"
+        f"last_user_utterances (structural fields only, no raw text):\n"
+        f"{json.dumps(_extract_recent_user_utterances(bus_messages), ensure_ascii=False, indent=2)}\n"
+        f"\n"
+        f"输出 JSON（4 数据键 + 1 _m18_7_2_source 标记键）：\n"
+        f"{{\n"
+        f'  "addressee_hypothesis": {{participant_id, addressed_to_assistant, '
+        f'confidence(0-1), rationale(≤200字), evidence_refs(handles), '
+        f"alternative_hypotheses(≤2)}}\n"
+        f'    或 {{}}（confidence<0.4 或无明确收件人时省略），\n'
+        f'  "reaction_attribution_hypothesis": {{participant_id, '
+        f'reaction_to_turn_id, reaction_to_participant_id, '
+        f'is_about_assistant_claim, confidence(0-1), rationale(≤200字), '
+        f"evidence_refs, alternative_attributions(≤2)}}\n"
+        f'    或 {{}}（confidence<0.4 或无明确反应目标时省略），\n'
+        f'  "reasoning_notes": "<≤120字>",\n'
+        f'  "_m18_7_2_source": "m18_7_2_minimal"\n'
+        f"}}\n"
+    )
+
+    return system_prompt, user_prompt
+
+
+# === M18.7.2 bus event builders ==========================================
+
+
+def build_m18_7_2_addressee_hypothesis_admitted_event(
+    *,
+    turn_index: int,
+    entry: Mapping[str, Any],
+    at: str,
+    rationale_chars: int = 0,
+) -> dict[str, Any]:
+    """Build the `M18_7_2_AddresseeHypothesisAdmitted` audit envelope.
+
+    M18.7.2 — emitted by the M18.7.2 minimal-prompt call site
+    when the LLM fills a non-empty `addressee_hypothesis`. The
+    envelope shares `commit_id` with the state surface entry
+    so diagnose can cross-reference, and carries `source:
+    "m18_7_2_minimal"` so diagnose can distinguish minimal-path
+    fills from any future conscious-loop fills.
+
+    The envelope does NOT include the rationale text (M18.7
+    DECIDED 11). Engineering audits only the shape (length is
+    recorded as `rationale_chars`).
+    """
+    if not isinstance(entry, Mapping):
+        return {}
+    return {
+        "type": "M18_7_2_AddresseeHypothesisAdmitted",
+        "turn_index": int(turn_index),
+        "commit_id": str(entry.get("commit_id", "") or ""),
+        "participant_id": str(entry.get("participant_id", "") or ""),
+        "addressed_to_assistant": bool(
+            entry.get("addressed_to_assistant", False)
+        ),
+        "confidence": float(entry.get("confidence", 0.0) or 0.0),
+        "alternative_hypothesis_count": int(
+            entry.get("alternative_hypothesis_count", 0) or 0
+        ),
+        "evidence_ref_count": len(entry.get("evidence_refs", []) or []),
+        "rationale_chars": int(rationale_chars),
+        "source": M18_7_2_SOURCE_TAG,
+        "reason_codes": [M18_7_2_REASON_FIELD_PRESENT],
+        "engineering_proxy_label": M18_7_ENGINEERING_PROXY_LABEL,
+        "at": at,
+    }
+
+
+def build_m18_7_2_reaction_attribution_hypothesis_admitted_event(
+    *,
+    turn_index: int,
+    entry: Mapping[str, Any],
+    at: str,
+) -> dict[str, Any]:
+    """Build the `M18_7_2_ReactionAttributionHypothesisAdmitted`
+    audit envelope. M18.7.2 — emitted by the minimal-prompt
+    call site when the LLM fills a non-empty
+    `reaction_attribution_hypothesis`.
+    """
+    if not isinstance(entry, Mapping):
+        return {}
+    return {
+        "type": "M18_7_2_ReactionAttributionHypothesisAdmitted",
+        "turn_index": int(turn_index),
+        "commit_id": str(entry.get("commit_id", "") or ""),
+        "participant_id": str(entry.get("participant_id", "") or ""),
+        "reaction_to_turn_id": str(
+            entry.get("reaction_to_turn_id", "") or ""
+        ),
+        "reaction_to_participant_id": str(
+            entry.get("reaction_to_participant_id", "") or ""
+        ),
+        "is_about_assistant_claim": bool(
+            entry.get("is_about_assistant_claim", False)
+        ),
+        "confidence": float(entry.get("confidence", 0.0) or 0.0),
+        "alternative_attribution_count": int(
+            entry.get("alternative_attribution_count", 0) or 0
+        ),
+        "evidence_ref_count": len(entry.get("evidence_refs", []) or []),
+        "source": M18_7_2_SOURCE_TAG,
+        "reason_codes": [M18_7_2_REASON_FIELD_PRESENT],
+        "engineering_proxy_label": M18_7_ENGINEERING_PROXY_LABEL,
+        "at": at,
+    }
+
+
+def build_m18_7_2_minimal_degraded_event(
+    *,
+    turn_index: int,
+    reason: str,
+    at: str,
+) -> dict[str, Any]:
+    """Build the `M18_7_2_MinimalDegraded` audit envelope.
+
+    M18.7.2 — emitted when the minimal-prompt LLM call fails
+    (timeout, malformed JSON, missing required keys, etc.) and
+    the runtime falls back to empty `{}` for both M18.7 fields.
+    The envelope lets diagnose distinguish a graceful degraded
+    path from a crash. `run_turn` does NOT crash on M18.7.2
+    failures (M12-pre pattern).
+    """
+    return {
+        "type": "M18_7_2_MinimalDegraded",
+        "turn_index": int(turn_index),
+        "reason": str(reason or ""),
+        "reason_code": M18_7_2_REASON_MINIMAL_DEGRADED,
+        "source": M18_7_2_SOURCE_TAG,
+        "engineering_proxy_label": M18_7_ENGINEERING_PROXY_LABEL,
+        "at": at,
+    }
+
+
+# === M18.7.2 emission orchestrator =======================================
+
+
+def emit_m18_7_2_attribution_for_turn(
+    *,
+    bus: list,
+    state: dict,
+    plan: Mapping[str, Any],
+    turn_index: int,
+    at: str,
+) -> dict[str, Any]:
+    """M18.7.2 emission orchestrator — runs after the minimal-prompt
+    LLM call site. Emits `M18_7_2_*` bus events (when non-empty),
+    appends entries to the bounded state surface, and stamps
+    `source: "m18_7_2_minimal"` on every entry for traceability.
+
+    The orchestrator reuses `normalize_addressee_hypothesis`,
+    `normalize_reaction_attribution_hypothesis`,
+    `build_state_entry`, and `record_m18_7_attribution_hypotheses`
+    unchanged — the M18.7.1 calibration runner and the M20.4
+    producer read the same `state["m18_7_attribution_hypotheses"]`
+    surface and "just work" once M18.7.2 populates it. The
+    `commit_id` is the same SHA-1 as the conscious-loop path
+    would produce (`source_ref = "m18_7_{kind}_{turn_index}"`);
+    the `source: "m18_7_2_minimal"` field on the state entry
+    is the new distinguishability lever.
+
+    Returns a small report dict for diagnose / tests:
+
+    ```text
+    {
+        "addressee_event_emitted": bool,
+        "reaction_event_emitted": bool,
+        "addressee_commit_id": str,
+        "reaction_commit_id": str,
+        "source": "m18_7_2_minimal",
+    }
+    ```
+
+    This orchestrator does NOT emit
+    `AttributionHypothesisSkipped` — that event is owned by the
+    M18.7 fast-chat path and is not relevant to the M18.7.2
+    minimal call site.
+    """
+    addressee_normalized = normalize_addressee_hypothesis(
+        plan.get("addressee_hypothesis")
+        if isinstance(plan, Mapping) else None
+    )
+    reaction_normalized = normalize_reaction_attribution_hypothesis(
+        plan.get("reaction_attribution_hypothesis")
+        if isinstance(plan, Mapping) else None
+    )
+
+    report: dict[str, Any] = {
+        "addressee_event_emitted": False,
+        "reaction_event_emitted": False,
+        "addressee_commit_id": "",
+        "reaction_commit_id": "",
+        "source": M18_7_2_SOURCE_TAG,
+    }
+
+    if addressee_normalized:
+        rationale_chars = len(
+            str(addressee_normalized.get("rationale", "") or "")
+        )
+        addressee_normalized["_at"] = at
+        addressee_entry = build_state_entry(
+            kind=KIND_ADDRESSEE,
+            turn_index=turn_index,
+            normalized=addressee_normalized,
+        )
+        if addressee_entry:
+            addressee_entry["source"] = M18_7_2_SOURCE_TAG
+            record_m18_7_attribution_hypotheses(state, addressee_entry)
+            event = build_m18_7_2_addressee_hypothesis_admitted_event(
+                turn_index=turn_index,
+                entry=addressee_entry,
+                at=at,
+                rationale_chars=rationale_chars,
+            )
+            if event:
+                bus.append(event)
+                report["addressee_event_emitted"] = True
+                report["addressee_commit_id"] = str(
+                    addressee_entry.get("commit_id", "")
+                )
+
+    if reaction_normalized:
+        reaction_normalized["_at"] = at
+        reaction_entry = build_state_entry(
+            kind=KIND_REACTION,
+            turn_index=turn_index,
+            normalized=reaction_normalized,
+        )
+        if reaction_entry:
+            reaction_entry["source"] = M18_7_2_SOURCE_TAG
+            record_m18_7_attribution_hypotheses(state, reaction_entry)
+            event = build_m18_7_2_reaction_attribution_hypothesis_admitted_event(
+                turn_index=turn_index,
+                entry=reaction_entry,
+                at=at,
+            )
+            if event:
+                bus.append(event)
+                report["reaction_event_emitted"] = True
+                report["reaction_commit_id"] = str(
+                    reaction_entry.get("commit_id", "")
+                )
+
+    return report
+
+
 __all__ = [
     "ALLOWED_M18_7_KIND",
     "KIND_ADDRESSEE",
     "KIND_REACTION",
+    "M18_7_2_MINIMAL_PROMPT_MAX_CHARS",
+    "M18_7_2_REASON_FIELD_PRESENT",
+    "M18_7_2_REASON_MINIMAL_DEGRADED",
+    "M18_7_2_SOURCE_TAG",
     "M18_7_ENGINEERING_PROXY_LABEL",
     "M18_7_RATIONALE_MAX_CHARS",
     "M18_7_ALTERNATIVE_CAP",
@@ -803,9 +1223,14 @@ __all__ = [
     "REASON_FIELD_SKIPPED_FAST_CHAT",
     "build_addressee_hypothesis_admitted_event",
     "build_attribution_hypothesis_skipped_event",
+    "build_m18_7_2_addressee_hypothesis_admitted_event",
+    "build_m18_7_2_minimal_degraded_event",
+    "build_m18_7_2_reaction_attribution_hypothesis_admitted_event",
+    "build_m18_7_minimal_prompt",
     "build_reaction_attribution_hypothesis_admitted_event",
     "build_state_entry",
     "compute_m18_7_commit_id",
+    "emit_m18_7_2_attribution_for_turn",
     "emit_m18_7_attribution_for_turn",
     "normalize_addressee_hypothesis",
     "normalize_reaction_attribution_hypothesis",

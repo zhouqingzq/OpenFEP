@@ -1,0 +1,918 @@
+"""Tests for M18.7.2 — M18.7 minimal-prompt call site.
+
+M18.7.2 owns a dedicated minimal-prompt LLM call site
+for addressee / reaction attribution, decoupled from
+the conscious loop. The conscious-loop path is broken
+at scale (M18.7.1 real-LLM replay: 0/12 non-empty fills
+when the M18.7 v2 attrs segment sat at char 2914 /
+37.7% of a 7.7-26k-char prompt). The minimal prompt is
+~1.5-2.0k chars and the LLM fills only the M18.7 v1
+shape. The result is fed to the same
+`state["m18_7_attribution_hypotheses"]` surface that the
+M20.4 producer and the M18.7.1 calibration runner read.
+
+The tests are split into two layers:
+
+1. **Pure-function tests** — exercise the prompt builder
+   and the orchestrator without any LLM involvement.
+2. **Integration tests** — exercise `MVPDialogueRuntime.run_turn`
+   with a `FakeJSONLLM` subclass that returns controlled M18.7
+   fields on the `"M18.7.2 minimal"` stage marker. The
+   conscious-loop path is exercised too (it still runs, but
+   no longer requests the M18.7 fields — see
+   `test_conscious_loop_prompt_no_longer_requests_m18_7_v2_attrs`).
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+from segmentum.dialogue.runtime import m18_7_1_calibration as cal
+from segmentum.dialogue.runtime.m18_7_attribution import (
+    M18_7_2_MINIMAL_PROMPT_MAX_CHARS,
+    M18_7_2_REASON_FIELD_PRESENT,
+    M18_7_2_REASON_MINIMAL_DEGRADED,
+    M18_7_2_SOURCE_TAG,
+    M18_7_ENGINEERING_PROXY_LABEL,
+    M18_7_STATE_SURFACE_CAP,
+    build_m18_7_2_addressee_hypothesis_admitted_event,
+    build_m18_7_2_minimal_degraded_event,
+    build_m18_7_2_reaction_attribution_hypothesis_admitted_event,
+    build_m18_7_minimal_prompt,
+    emit_m18_7_2_attribution_for_turn,
+)
+from segmentum.dialogue.runtime.mvp_loop import (
+    MVPDialogueRuntime,
+    MVPStateStore,
+    build_conscious_loop_prompt,
+)
+from tests.test_mvp_dialogue_runtime import (
+    FakeJSONLLM,
+    _maybe_m12_extractor_response,
+)
+
+
+# === Pure-function tests: build_m18_7_minimal_prompt shape ===============
+
+
+def _default_state() -> dict[str, Any]:
+    return {
+        "self_basic_facts": {
+            "persona_name": "胡桃",
+            "do_not_invent": ["不要编造职业"],
+        },
+    }
+
+
+def _default_bus() -> list[dict[str, Any]]:
+    return [
+        {
+            "type": "UserUtteranceEvent",
+            "turn_index": 7,
+            "addressed_participant_ids": ["hutao"],
+            "mentioned_participant_ids": ["bob"],
+            "reply_to_turn_id": "turn_5",
+            "quoted_turn_ids": [],
+            "ingress_evidence_band": "strong",
+        },
+    ]
+
+
+def _default_group_turn_binding() -> dict[str, Any]:
+    return {
+        "speaker_participant_id": "alice",
+        "addressed_participant_ids": ["hutao"],
+        "mentioned_participant_ids": ["bob"],
+        "current_speaker_participant_id": "alice",
+        "ambiguity_band": "low",
+    }
+
+
+def _default_entity_binding() -> dict[str, Any]:
+    return {
+        "current_interlocutor": "alice",
+        "aliases": {"桃桃": "hutao"},
+    }
+
+
+def test_build_m18_7_minimal_prompt_length_under_2k_chars() -> None:
+    """The combined (system + user) prompt is bounded at
+    `M18_7_2_MINIMAL_PROMPT_MAX_CHARS = 2000` for a representative
+    11-char Chinese user utterance with the full structural
+    payload (entity_binding, group_turn_binding, prior turn).
+    """
+    system, user = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="胡桃,看这个",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=8,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="take_addressee_branch",
+    )
+    total = len(system) + len(user)
+    assert total <= M18_7_2_MINIMAL_PROMPT_MAX_CHARS, (
+        f"prompt too long: {total} > {M18_7_2_MINIMAL_PROMPT_MAX_CHARS}"
+    )
+
+
+def test_build_m18_7_minimal_prompt_includes_required_signals() -> None:
+    """The user prompt must include the structural signals the LLM
+    needs: turn_index, speaker, m18_5_decision, entity_binding,
+    group_turn_binding, user_text, last_user_utterances, and the
+    4-key JSON spec.
+    """
+    system, user = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="胡桃你看这个想法怎么样？",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=8,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="take_addressee_branch",
+    )
+    # Persona name from self_basic_facts is exposed in the system prompt.
+    assert "胡桃" in system
+    # Structural fields appear in the user prompt.
+    assert "turn_index: 8" in user
+    assert "Alice" in user
+    assert "m18_5_structural_decision: take_addressee_branch" in user
+    assert "entity_binding" in user
+    assert "group_turn_binding" in user
+    assert "user_text" in user
+    assert "last_user_utterances" in user
+    # 4-key JSON spec is present.
+    assert "addressee_hypothesis" in user
+    assert "reaction_attribution_hypothesis" in user
+    assert "reasoning_notes" in user
+    assert "_m18_7_2_source" in user
+    assert '"m18_7_2_minimal"' in user
+
+
+def test_build_m18_7_minimal_prompt_excludes_m13_m19_conscious_fields() -> None:
+    """The minimal prompt is intentionally decoupled from the
+    conscious loop. It must NOT serialize M13 drive state,
+    M19 self_expectation_state, pending_expectations, or
+    open_items — those fields are ~76% of the conscious-loop
+    prompt volume but 100% noise for the attribution decision.
+    """
+    state = _default_state()
+    # Inject the conscious-loop-only fields. They must be
+    # ignored by the minimal prompt.
+    state["m13_drive_state"] = {"boredom_band": "low"}  # 69k chars in real life
+    state["self_expectation_state"] = {"ledger": "huge"}  # 49k chars
+    state["pending_expectations"] = [{"id": "p1"}]
+    state["open_items"] = [{"id": "o1"}]
+
+    _, user = build_m18_7_minimal_prompt(
+        state=state,
+        user_text="胡桃你看这个想法怎么样？",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=8,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="take_addressee_branch",
+    )
+    # None of the conscious-loop-only fields should appear.
+    assert "m13_drive_state" not in user
+    assert "self_expectation_state" not in user
+    assert "pending_expectations" not in user
+    assert "open_items" not in user
+    # Nor should the conscious-loop's "Also include the
+    # following M18.7 fields" segment markers.
+    assert "Also include" not in user
+    assert "addressed_to_assistant" not in user.split("addressee_hypothesis")[0]
+
+
+def test_build_m18_7_minimal_prompt_handles_missing_group_turn_binding() -> None:
+    """When `group_turn_binding` is None, the prompt must still
+    build and the field must appear in serialized form (empty
+    dict, or "null", or "{}" — anything that doesn't crash and
+    stays under the size cap).
+    """
+    system, user = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="hello",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=8,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=None,
+        m18_5_structural_decision="",
+    )
+    assert len(system) + len(user) <= M18_7_2_MINIMAL_PROMPT_MAX_CHARS
+    assert "group_turn_binding" in user
+
+
+def test_build_m18_7_minimal_prompt_handles_missing_entity_binding() -> None:
+    """When `entity_binding` is None, the prompt must still build."""
+    system, user = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="hello",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=8,
+        entity_binding=None,
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="",
+    )
+    assert len(system) + len(user) <= M18_7_2_MINIMAL_PROMPT_MAX_CHARS
+    assert "entity_binding" in user
+
+
+def test_build_m18_7_minimal_prompt_handles_missing_m18_5_decision() -> None:
+    """When `m18_5_structural_decision` is empty, the prompt must
+    still build and the field shows the "(none)" placeholder.
+    """
+    system, user = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="hello",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=8,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="",
+    )
+    assert "m18_5_structural_decision: (none)" in user
+    assert len(system) + len(user) <= M18_7_2_MINIMAL_PROMPT_MAX_CHARS
+
+
+def test_build_m18_7_minimal_prompt_handles_empty_state() -> None:
+    """When `state` is empty, the system prompt falls back to a
+    generic identity line ("数字人格系统的群聊归因助手") and the
+    user prompt still builds under the size cap.
+    """
+    system, user = build_m18_7_minimal_prompt(
+        state={},
+        user_text="hello",
+        speaker_name="",
+        bus_messages=None,
+        turn_index=0,
+        entity_binding=None,
+        group_turn_binding=None,
+        m18_5_structural_decision="",
+    )
+    # Generic identity line.
+    assert "群聊归因助手" in system
+    # Default user name fallback.
+    assert "default_user" in user
+    # No bus messages → empty list, no crash.
+    assert "last_user_utterances" in user
+    assert len(system) + len(user) <= M18_7_2_MINIMAL_PROMPT_MAX_CHARS
+
+
+# === Pure-function tests: emit_m18_7_2_attribution_for_turn ==============
+
+
+def test_emit_m18_7_2_orchestrator_empty_plan_emits_no_events() -> None:
+    """An empty plan (no addressee / reaction) produces no
+    M18_7_2_* bus events and no state surface entries.
+    """
+    bus: list = []
+    state: dict = {}
+    report = emit_m18_7_2_attribution_for_turn(
+        bus=bus,
+        state=state,
+        plan={
+            "addressee_hypothesis": {},
+            "reaction_attribution_hypothesis": {},
+        },
+        turn_index=0,
+        at="2026-06-08T00:00:00Z",
+    )
+    assert report["addressee_event_emitted"] is False
+    assert report["reaction_event_emitted"] is False
+    assert bus == []
+    assert state.get("m18_7_attribution_hypotheses", []) == []
+    assert report["source"] == M18_7_2_SOURCE_TAG
+
+
+def test_emit_m18_7_2_orchestrator_filled_plan_stamps_source_field() -> None:
+    """A filled plan emits both M18_7_2_* bus events and writes
+    state surface entries with `source: "m18_7_2_minimal"` stamped.
+    """
+    bus: list = []
+    state: dict = {}
+    report = emit_m18_7_2_attribution_for_turn(
+        bus=bus,
+        state=state,
+        plan={
+            "addressee_hypothesis": {
+                "participant_id": "alice",
+                "addressed_to_assistant": True,
+                "confidence": 0.85,
+                "rationale": "directly addresses 胡桃",
+            },
+            "reaction_attribution_hypothesis": {
+                "participant_id": "alice",
+                "reaction_to_turn_id": "turn_7",
+                "reaction_to_participant_id": "hutao",
+                "is_about_assistant_claim": False,
+                "confidence": 0.7,
+                "rationale": "reacts to a prior reply from 胡桃",
+            },
+        },
+        turn_index=8,
+        at="2026-06-08T00:00:08Z",
+    )
+    assert report["addressee_event_emitted"] is True
+    assert report["reaction_event_emitted"] is True
+    assert report["source"] == M18_7_2_SOURCE_TAG
+    # 2 bus events, both M18_7_2_*
+    types = [e["type"] for e in bus]
+    assert "M18_7_2_AddresseeHypothesisAdmitted" in types
+    assert "M18_7_2_ReactionAttributionHypothesisAdmitted" in types
+    # 2 state surface entries, both with source stamped
+    surface = state["m18_7_attribution_hypotheses"]
+    assert len(surface) == 2
+    for entry in surface:
+        assert entry["source"] == M18_7_2_SOURCE_TAG
+
+
+def test_emit_m18_7_2_orchestrator_uses_same_commit_id_as_m18_7() -> None:
+    """The commit_id is the SHA-1 of (kind, turn_index,
+    source_ref). M18.7.2 uses `source_ref = "m18_7_{kind}_{turn_index}"`
+    — the same string the conscious-loop path uses — so commit_id
+    values are stable across the two paths.
+    """
+    bus: list = []
+    state: dict = {}
+    emit_m18_7_2_attribution_for_turn(
+        bus=bus,
+        state=state,
+        plan={
+            "addressee_hypothesis": {
+                "participant_id": "alice",
+                "addressed_to_assistant": True,
+                "confidence": 0.85,
+            },
+        },
+        turn_index=42,
+        at="2026-06-08T00:00:42Z",
+    )
+    entry = state["m18_7_attribution_hypotheses"][0]
+    assert entry["commit_id"]
+    assert entry["turn_index"] == 42
+    assert entry["kind"] == "addressee"
+    # The bus event carries the same commit_id.
+    addr_event = next(
+        e for e in bus if e["type"] == "M18_7_2_AddresseeHypothesisAdmitted"
+    )
+    assert addr_event["commit_id"] == entry["commit_id"]
+
+
+# === Pure-function tests: bus event shapes ==============================
+
+
+def test_build_m18_7_2_addressee_hypothesis_admitted_event_shape() -> None:
+    """Defensive shape test for the new M18.7.2 bus event envelope."""
+    event = build_m18_7_2_addressee_hypothesis_admitted_event(
+        turn_index=8,
+        entry={
+            "commit_id": "abc123",
+            "participant_id": "alice",
+            "addressed_to_assistant": True,
+            "confidence": 0.85,
+            "alternative_hypothesis_count": 1,
+            "evidence_refs": ["turn_7_user_utterance", "participant_alice"],
+        },
+        at="2026-06-08T00:00:08Z",
+        rationale_chars=24,
+    )
+    assert event["type"] == "M18_7_2_AddresseeHypothesisAdmitted"
+    assert event["turn_index"] == 8
+    assert event["commit_id"] == "abc123"
+    assert event["participant_id"] == "alice"
+    assert event["addressed_to_assistant"] is True
+    assert event["confidence"] == 0.85
+    assert event["alternative_hypothesis_count"] == 1
+    assert event["evidence_ref_count"] == 2
+    assert event["rationale_chars"] == 24
+    assert event["source"] == M18_7_2_SOURCE_TAG
+    assert event["reason_codes"] == [M18_7_2_REASON_FIELD_PRESENT]
+    assert event["engineering_proxy_label"] == M18_7_ENGINEERING_PROXY_LABEL
+    assert event["at"] == "2026-06-08T00:00:08Z"
+
+
+def test_build_m18_7_2_reaction_attribution_hypothesis_admitted_event_shape() -> None:
+    """Defensive shape test for the new reaction event envelope."""
+    event = build_m18_7_2_reaction_attribution_hypothesis_admitted_event(
+        turn_index=8,
+        entry={
+            "commit_id": "def456",
+            "participant_id": "alice",
+            "reaction_to_turn_id": "turn_7",
+            "reaction_to_participant_id": "hutao",
+            "is_about_assistant_claim": False,
+            "confidence": 0.7,
+            "alternative_attribution_count": 0,
+            "evidence_refs": ["turn_7_reply_to_turn_id"],
+        },
+        at="2026-06-08T00:00:08Z",
+    )
+    assert event["type"] == "M18_7_2_ReactionAttributionHypothesisAdmitted"
+    assert event["turn_index"] == 8
+    assert event["commit_id"] == "def456"
+    assert event["reaction_to_turn_id"] == "turn_7"
+    assert event["reaction_to_participant_id"] == "hutao"
+    assert event["is_about_assistant_claim"] is False
+    assert event["confidence"] == 0.7
+    assert event["alternative_attribution_count"] == 0
+    assert event["evidence_ref_count"] == 1
+    assert event["source"] == M18_7_2_SOURCE_TAG
+    assert event["reason_codes"] == [M18_7_2_REASON_FIELD_PRESENT]
+    assert event["engineering_proxy_label"] == M18_7_ENGINEERING_PROXY_LABEL
+
+
+def test_build_m18_7_2_minimal_degraded_event_shape() -> None:
+    """Defensive shape test for the degraded fallback event."""
+    event = build_m18_7_2_minimal_degraded_event(
+        turn_index=8,
+        reason="TimeoutError('m18_7_2_minimal LLM call timed out')",
+        at="2026-06-08T00:00:08Z",
+    )
+    assert event["type"] == "M18_7_2_MinimalDegraded"
+    assert event["turn_index"] == 8
+    assert "TimeoutError" in event["reason"]
+    assert event["reason_code"] == M18_7_2_REASON_MINIMAL_DEGRADED
+    assert event["source"] == M18_7_2_SOURCE_TAG
+    assert event["engineering_proxy_label"] == M18_7_ENGINEERING_PROXY_LABEL
+    assert event["at"] == "2026-06-08T00:00:08Z"
+
+
+# === Integration tests: FakeJSONLLM with M18.7.2 stage marker ===========
+
+
+class _M187_2FakeLLM(FakeJSONLLM):
+    """FakeJSONLLM subclass that returns controlled M18.7 v2 attrs
+    on the `"M18.7.2 minimal"` stage marker (the substring used by
+    `build_m18_7_minimal_prompt`'s system prompt) and falls back to
+    the parent class for the conscious loop. The `_responses_by_turn`
+    dict lets each test program per-turn payloads.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._responses_by_turn: dict[int, dict[str, object]] = {}
+        self._force_failure_on_turn: dict[int, Exception] = {}
+        self._m18_7_2_call_count = 0
+
+    def complete_json(
+        self, *, system_prompt: str, user_prompt: str
+    ) -> dict[str, object]:
+        # The M18.7.2 system prompt is identifiable by the
+        # "群聊归因助手" substring.
+        if "群聊归因助手" in system_prompt:
+            self._m18_7_2_call_count += 1
+            # Extract the turn_index from the user prompt header
+            # ("turn_index: <N>") so per-turn programming works.
+            turn_index = self._extract_turn_index(user_prompt)
+            if turn_index in self._force_failure_on_turn:
+                raise self._force_failure_on_turn[turn_index]
+            if turn_index in self._responses_by_turn:
+                payload = self._responses_by_turn[turn_index]
+                return {
+                    "addressee_hypothesis": payload.get(
+                        "addressee_hypothesis", {}
+                    ),
+                    "reaction_attribution_hypothesis": payload.get(
+                        "reaction_attribution_hypothesis", {}
+                    ),
+                    "reasoning_notes": payload.get("reasoning_notes", "test"),
+                    "_m18_7_2_source": "m18_7_2_minimal",
+                }
+            # Default: empty M18.7 fields (no LLM fill).
+            return {
+                "addressee_hypothesis": {},
+                "reaction_attribution_hypothesis": {},
+                "reasoning_notes": "",
+                "_m18_7_2_source": "m18_7_2_minimal",
+            }
+        m12_hit = _maybe_m12_extractor_response(system_prompt)
+        if m12_hit is not None:
+            return m12_hit
+        return super().complete_json(
+            system_prompt=system_prompt, user_prompt=user_prompt
+        )
+
+    @staticmethod
+    def _extract_turn_index(user_prompt: str) -> int:
+        # The minimal prompt format starts with "turn_index: <N>".
+        for line in user_prompt.splitlines():
+            if line.startswith("turn_index:"):
+                try:
+                    return int(line.split(":", 1)[1].strip())
+                except (ValueError, IndexError):
+                    return -1
+        return -1
+
+
+def _runtime(tmp_path: Path) -> MVPDialogueRuntime:
+    return MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=_M187_2FakeLLM(),
+        persona_name="胡桃",
+    )
+
+
+def _group_envelope(turn_index: int) -> dict[str, Any]:
+    """Build a non-empty `group_turn_envelope` so `bounded_group_turn`
+    is truthy and the M18.7.2 call site fires.
+    """
+    return {
+        "speaker_participant_id": "alice",
+        "visible_participant_ids": ["alice", "bob", "hutao"],
+        "addressed_participant_ids": ["hutao"],
+        "mentioned_participant_ids": ["bob"],
+        "reply_to_turn_id": f"turn_{turn_index - 1}",
+        "quoted_turn_ids": [],
+        "explicit_mentions": ["胡桃"],
+    }
+
+
+def test_run_turn_calls_m18_7_2_minimal_stage_with_minimal_prompt(
+    tmp_path: Path,
+) -> None:
+    """`run_turn` invokes the `"m18_7_2_minimal"` stage when
+    `bounded_group_turn` is truthy. The fake LLM's
+    `_m18_7_2_call_count` confirms the call happened.
+    """
+    llm = _M187_2FakeLLM()
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=llm,
+        persona_name="胡桃",
+    )
+    runtime.run_turn(
+        "胡桃你看这个想法怎么样？",
+        turn_index=0,
+        speaker_name="Alice",
+        group_turn_envelope=_group_envelope(0),
+        now=1000,
+    )
+    assert llm._m18_7_2_call_count == 1
+
+
+def test_run_turn_writes_m18_7_2_fill_to_state_surface(tmp_path: Path) -> None:
+    """When the minimal LLM call returns a non-empty
+    `addressee_hypothesis`, the in-memory state surface
+    `state["m18_7_attribution_hypotheses"]` gets a new entry with
+    `source: "m18_7_2_minimal"` stamped. (The surface is in-memory
+    only — `MVPStateStore` does not persist it; the M20.4 producer
+    and M18.7.1 calibration runner both read the in-memory state
+    during the same `run_turn` call.)
+
+    The M18.7.1 calibration harness is used as the assertion
+    scaffold because it iterates `run_turn` over a fixture and
+    reads the in-memory surface after each turn. The presence
+    of an `M18_7_2_AddresseeHypothesisAdmitted` bus event with
+    the M18.7.2 source stamp is the surface-write side effect.
+    """
+    llm = _M187_2FakeLLM()
+    llm._responses_by_turn[0] = {
+        "addressee_hypothesis": {
+            "participant_id": "alice",
+            "addressed_to_assistant": True,
+            "confidence": 0.85,
+            "rationale": "directly addresses 胡桃",
+        },
+        "reaction_attribution_hypothesis": {},
+    }
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=llm,
+        persona_name="胡桃",
+    )
+    result = runtime.run_turn(
+        "胡桃你看这个想法怎么样？",
+        turn_index=0,
+        speaker_name="Alice",
+        group_turn_envelope=_group_envelope(0),
+        now=1000,
+    )
+    # The orchestrator writes to the in-memory surface AND emits
+    # the addressee admitted event. The event is the observable
+    # side effect that proves the surface was written.
+    addr_events = [
+        e for e in result.diagnostics.get("bus_messages", [])
+        if e.get("type") == "M18_7_2_AddresseeHypothesisAdmitted"
+    ]
+    assert len(addr_events) == 1
+    event = addr_events[0]
+    assert event["source"] == M18_7_2_SOURCE_TAG
+    assert event["commit_id"]
+    assert event["participant_id"] == "alice"
+    assert event["addressed_to_assistant"] is True
+    assert event["confidence"] == 0.85
+
+
+def test_run_turn_m18_7_2_failure_falls_back_to_empty_without_crashing(
+    tmp_path: Path,
+) -> None:
+    """When the M18.7.2 LLM call raises, `run_turn` does NOT
+    crash. It falls back to empty `{}` for both fields and emits
+    a degraded bus event.
+    """
+    llm = _M187_2FakeLLM()
+    llm._force_failure_on_turn[0] = RuntimeError("simulated LLM timeout")
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=llm,
+        persona_name="胡桃",
+    )
+    # run_turn must not raise.
+    result = runtime.run_turn(
+        "胡桃你看这个想法怎么样？",
+        turn_index=0,
+        speaker_name="Alice",
+        group_turn_envelope=_group_envelope(0),
+        now=1000,
+    )
+    # The reply is still produced.
+    assert result.reply
+    # The state surface is empty (no M18.7 fill).
+    state = runtime.store.load()
+    assert state.get("m18_7_attribution_hypotheses", []) == []
+    # A degraded bus event is emitted.
+    bus_types = {e.get("type") for e in result.diagnostics.get("bus_messages", [])}
+    assert "M18_7_2_MinimalDegraded" in bus_types
+
+
+def test_run_turn_m18_7_2_emits_degraded_event_on_failure(
+    tmp_path: Path,
+) -> None:
+    """The degraded bus event carries the failure reason string
+    and the M18_7_2_REASON_MINIMAL_DEGRADED reason_code.
+    """
+    llm = _M187_2FakeLLM()
+    llm._force_failure_on_turn[0] = TimeoutError("m18_7_2_minimal timed out")
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=llm,
+        persona_name="胡桃",
+    )
+    result = runtime.run_turn(
+        "胡桃你看这个想法怎么样？",
+        turn_index=0,
+        speaker_name="Alice",
+        group_turn_envelope=_group_envelope(0),
+        now=1000,
+    )
+    degraded_events = [
+        e for e in result.diagnostics.get("bus_messages", [])
+        if e.get("type") == "M18_7_2_MinimalDegraded"
+    ]
+    assert len(degraded_events) == 1
+    event = degraded_events[0]
+    assert event["turn_index"] == 0
+    assert "timed out" in event["reason"]
+    assert event["reason_code"] == M18_7_2_REASON_MINIMAL_DEGRADED
+    assert event["source"] == M18_7_2_SOURCE_TAG
+
+
+def test_run_turn_no_group_envelope_skips_m18_7_2_call(tmp_path: Path) -> None:
+    """When `group_turn_envelope` is None, `bounded_group_turn` is
+    empty and the M18.7.2 LLM call is skipped entirely. The state
+    surface is empty.
+    """
+    llm = _M187_2FakeLLM()
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=llm,
+        persona_name="胡桃",
+    )
+    runtime.run_turn(
+        "hello world",
+        turn_index=0,
+        speaker_name="Alice",
+        group_turn_envelope=None,
+        now=1000,
+    )
+    assert llm._m18_7_2_call_count == 0
+    state = runtime.store.load()
+    assert state.get("m18_7_attribution_hypotheses", []) == []
+
+
+def test_run_turn_m20_4_producer_sees_m18_7_2_fill(tmp_path: Path) -> None:
+    """The M20.4 producer reads
+    `state["m18_7_attribution_hypotheses"]` (in-memory) and admits
+    `ActiveCommitment` rows. When the M18.7.2 minimal call
+    populates the surface with a high-confidence addressee fill,
+    the M20.4 producer should observe it and emit
+    `AddresseeTargetMatchAdmitted` (or similar M20.4-owned event).
+    """
+    llm = _M187_2FakeLLM()
+    # High-confidence addressee fill that clears the
+    # M20.4 threshold (0.4 admit min, 0.85 tie-breaker).
+    llm._responses_by_turn[0] = {
+        "addressee_hypothesis": {
+            "participant_id": "alice",
+            "addressed_to_assistant": True,
+            "confidence": 0.9,
+            "rationale": "directly addresses 胡桃",
+            "evidence_refs": ["turn_0_user_utterance"],
+        },
+        "reaction_attribution_hypothesis": {},
+    }
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=llm,
+        persona_name="胡桃",
+    )
+    result = runtime.run_turn(
+        "胡桃你看这个想法怎么样？",
+        turn_index=0,
+        speaker_name="Alice",
+        group_turn_envelope=_group_envelope(0),
+        now=1000,
+    )
+    bus_types = {e.get("type") for e in result.diagnostics.get("bus_messages", [])}
+    # The M18.7.2 orchestrator emitted its addressee admitted
+    # event. The M20.4 producer observed the in-memory surface
+    # and emitted the M20.4-owned downstream event.
+    assert "M18_7_2_AddresseeHypothesisAdmitted" in bus_types
+    # The M20.4 producer is downstream of the M18.7.2 orchestrator;
+    # it admits the commitment as an `AddresseeTargetMatchAdmitted`
+    # or `ActiveCommitment*` event when confidence is high enough.
+    m20_4_emitted = (
+        "AddresseeTargetMatchAdmitted" in bus_types
+        or any("ActiveCommitment" in t for t in bus_types)
+    )
+    assert m20_4_emitted, (
+        f"expected M20.4 producer to emit AddresseeTargetMatchAdmitted / "
+        f"ActiveCommitment* events; bus_types={sorted(bus_types)}"
+    )
+
+
+def test_run_turn_calibration_runner_sees_m18_7_2_fill(tmp_path: Path) -> None:
+    """The M18.7.1 calibration runner reads
+    `state["m18_7_attribution_hypotheses"]`. After `run_turn`
+    populates the surface via the M18.7.2 minimal call, the
+    runner sees the fill end-to-end. This is verified by
+    running the calibration harness and asserting
+    `n_present > 0` for both fields.
+    """
+    fixture_path = Path("tests/fixtures/m18_7_1_held_out_calibration.json")
+    fixture = json.loads(fixture_path.read_text(encoding="utf-8-sig"))
+    runtime = _runtime(tmp_path)
+    # Program the M18.7.2 minimal fake to return non-empty fills
+    # for every fixture turn. The runner iterates the fixture
+    # and calls `run_turn` per turn; turn_index is the iteration
+    # index (0..len(fixture)-1).
+    for idx, step in enumerate(fixture):
+        runtime.llm._responses_by_turn[idx] = {
+            "addressee_hypothesis": {
+                "participant_id": "alice",
+                "addressed_to_assistant": bool(
+                    step["ground_truth"].get("addressed_to_assistant", False)
+                ),
+                "confidence": 0.7,
+            },
+            "reaction_attribution_hypothesis": {
+                "participant_id": "alice",
+                "reaction_to_turn_id": str(
+                    step["ground_truth"].get("reaction_to_turn_id", "") or ""
+                ),
+                "reaction_to_participant_id": "alice",
+                "is_about_assistant_claim": False,
+                "confidence": 0.6,
+            },
+        }
+    report = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime,
+        fixture=fixture,
+        fixture_name=str(fixture_path),
+    )
+    # The M18.7.2 minimal fills are visible to the runner.
+    assert report.addressee.n_present > 0
+    assert report.reaction.n_present > 0
+
+
+def test_run_turn_no_double_write_when_conscious_loop_runs(
+    tmp_path: Path,
+) -> None:
+    """The conscious loop no longer requests M18.7 v2 attrs. The
+    state surface is written by the M18.7.2 minimal call only.
+    A single `run_turn` with both addressee and reaction M18.7.2
+    fills must produce exactly two `M18_7_2_*` admitted events
+    in the bus (not four — the conscious-loop path no longer
+    contributes).
+    """
+    llm = _M187_2FakeLLM()
+    llm._responses_by_turn[0] = {
+        "addressee_hypothesis": {
+            "participant_id": "alice",
+            "addressed_to_assistant": True,
+            "confidence": 0.85,
+        },
+        "reaction_attribution_hypothesis": {
+            "participant_id": "alice",
+            "reaction_to_turn_id": "",
+            "reaction_to_participant_id": "hutao",
+            "is_about_assistant_claim": False,
+            "confidence": 0.7,
+        },
+    }
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "persona"),
+        llm=llm,
+        persona_name="胡桃",
+    )
+    result = runtime.run_turn(
+        "胡桃你看这个想法怎么样？",
+        turn_index=0,
+        speaker_name="Alice",
+        group_turn_envelope=_group_envelope(0),
+        now=1000,
+    )
+    bus_events = result.diagnostics.get("bus_messages", [])
+    addressee_events = [
+        e for e in bus_events
+        if e.get("type") == "M18_7_2_AddresseeHypothesisAdmitted"
+    ]
+    reaction_events = [
+        e for e in bus_events
+        if e.get("type") == "M18_7_2_ReactionAttributionHypothesisAdmitted"
+    ]
+    # Exactly one of each — the M18.7.2 minimal call is the
+    # sole source. The conscious-loop path no longer contributes.
+    assert len(addressee_events) == 1
+    assert len(reaction_events) == 1
+    # Both have the M18.7.2 source stamp.
+    for event in addressee_events + reaction_events:
+        assert event["source"] == M18_7_2_SOURCE_TAG
+
+
+def test_conscious_loop_prompt_no_longer_requests_m18_7_v2_attrs() -> None:
+    """The M18.7 v2 attrs segment has been removed from
+    `build_conscious_loop_prompt`. The conscious loop LLM no
+    longer sees the `addressee_hypothesis` /
+    `reaction_attribution_hypothesis` JSON schema spec.
+    """
+    state: dict = {
+        "self_basic_facts": {
+            "persona_name": "胡桃",
+        },
+        "conversation_log": [],
+        "temporal_state": {},
+    }
+    system, user = build_conscious_loop_prompt(
+        state=state,
+        user_text="hello",
+        speaker_name="Alice",
+        bus_messages=[],
+        turn_index=0,
+        temporal_input={"now": 1000, "last_user_text": ""},
+        entity_binding=None,
+    )
+    # The conscious-loop prompt must NOT include the M18.7
+    # v2 attrs segment. The minimal prompt is the sole source.
+    user_lower = user.lower()
+    assert "addressee_hypothesis" not in user
+    assert "reaction_attribution_hypothesis" not in user
+    # The marker phrase from the removed segment must be gone.
+    assert "Also include the following M18.7 fields" not in user
+    # The minimal-prompt identifier must not leak into the
+    # conscious-loop prompt either.
+    assert "m18_7_2_minimal" not in user_lower
+    # The system prompt is unchanged structurally; it doesn't
+    # carry the v2 attrs spec.
+    assert "m18_7_2_minimal" not in system.lower()
+
+
+# === State surface rolling window ========================================
+
+
+def test_state_surface_cap_holds_for_m18_7_2_minimal(tmp_path: Path) -> None:
+    """After many M18.7.2 fills, the state surface rolling window
+    must stay bounded at `M18_7_STATE_SURFACE_CAP` (8) — the
+    same cap the conscious-loop path uses.
+    """
+    state: dict = {}
+    for turn_index in range(12):
+        emit_m18_7_2_attribution_for_turn(
+            bus=[],
+            state=state,
+            plan={
+                "addressee_hypothesis": {
+                    "participant_id": f"alice_{turn_index}",
+                    "addressed_to_assistant": True,
+                    "confidence": 0.7,
+                },
+                "reaction_attribution_hypothesis": {},
+            },
+            turn_index=turn_index,
+            at=f"2026-06-08T00:00:{turn_index:02d}Z",
+        )
+    surface = state["m18_7_attribution_hypotheses"]
+    assert len(surface) == M18_7_STATE_SURFACE_CAP
+    # The cap drops the tail; the latest entry is the last turn.
+    assert surface[-1]["turn_index"] == 11

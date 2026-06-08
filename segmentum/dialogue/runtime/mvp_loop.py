@@ -241,6 +241,9 @@ from segmentum.dialogue.runtime.same_turn_surface import (
     build_same_turn_surface_verdict_event,
 )
 from segmentum.dialogue.runtime.m18_7_attribution import (
+    build_m18_7_2_minimal_degraded_event as _build_m18_7_2_minimal_degraded_event,
+    build_m18_7_minimal_prompt as _build_m18_7_minimal_prompt,
+    emit_m18_7_2_attribution_for_turn as _emit_m18_7_2_attribution_for_turn,
     emit_m18_7_attribution_for_turn as _emit_m18_7_attribution_for_turn,
     normalize_addressee_hypothesis as _normalize_m18_7_addressee_hypothesis,
     normalize_reaction_attribution_hypothesis as _normalize_m18_7_reaction_attribution_hypothesis,
@@ -365,6 +368,13 @@ SYSTEM_FILE_DEFAULTS: dict[str, Any] = {
         "last_settlement_writeback": {},
         "last_turn_index": -1,
     },
+    # M18.7 attribution hypothesis surface. Bounded rolling
+    # window (≤8 entries), written by the M18.7.2 minimal
+    # orchestrator and read by the M20.4 producer, M20.4.1
+    # gate, and M18.7.1 calibration runner. Persisted so
+    # the calibration runner's `store.load()` can read it
+    # after a `run_turn` completes.
+    "m18_7_attribution_hypotheses": [],
 }
 
 SYSTEM_FILE_NAMES: dict[str, str] = {
@@ -2152,83 +2162,6 @@ current_interlocutor:
 }}
 """
     user_prompt += """
-
-Also include the following M18.7 fields in the same JSON object
-(only when group_turn_binding is non-empty; otherwise omit both
-fields entirely and let engineering default to {}):
-
-- "addressee_hypothesis": bounded object describing whether the
-  current turn is addressed to the assistant. Empty {} means
-  "no hypothesis" (do not invent low-confidence guesses for the
-  brief-interjection class of turns).
-  - "participant_id" must equal the speaker's id from
-    group_turn_binding.current_speaker_participant_id. Use ""
-    if M18.4 disclosure policy forbids the identification or
-    you cannot determine it.
-  - "addressed_to_assistant" is a boolean. Use false when the
-    message falls into one of these semantic categories:
-    (a) short acknowledgement without explicit recipient
-    — a brief interjection that is not directed at any
-    specific participant; (b) side-thread interjection — a
-    comment directed at another participant, identifiable
-    from context or addressed_participant_ids / mention
-    structure; (c) room-level comment — a statement about
-    the group's state, not targeting the assistant. The
-    prompt describes these as categories, not as a keyword
-    cue list.
-  - "confidence" is your self-rated 0.0–1.0 probability that
-    the boolean is correct. 0.5 means "I genuinely cannot
-    tell". Below 0.4, you SHOULD leave the field empty ({})
-    so engineering treats it as "no hypothesis".
-  - "rationale" is a one-sentence justification, ≤ 200 chars.
-    DO NOT paste the user text, the assistant's prior text,
-    or any substring of either into the rationale. Reference
-    structural signals by name or by turn id.
-  - "evidence_refs" is a list of bounded turn-local handles
-    (e.g., "turn_<n>_user_utterance",
-    "turn_<n>_reply_to_turn_id",
-    "turn_<n>_addressed_participant_ids",
-    "bus_event_<uuid>", "participant_<id>"). DO NOT include
-    raw text.
-  - "alternative_hypotheses" is optional, ≤ 2 entries. Each
-    entry has the same shape as the primary fields, with a
-    different (addressed_to_assistant, confidence,
-    rationale) tuple.
-
-- "reaction_attribution_hypothesis": bounded object describing
-  which prior turn a reaction refers to. Empty {} means
-  "no hypothesis".
-  - "participant_id" must equal the reaction-speaker's id.
-    Use "" if you cannot determine it.
-  - "reaction_to_turn_id" is the prior turn id the reaction
-    most likely refers to. Use "" if no prior turn is a
-    plausible referent.
-  - "reaction_to_participant_id" is whose prior turn is the
-    referent. Use "" if you cannot tell.
-  - "is_about_assistant_claim" is true only when
-    reaction_to_participant_id equals the assistant's id AND
-    the reaction is targeting the assistant's own claim.
-    False otherwise. The "targeting the assistant's own
-    claim" semantic category covers reactions like
-    (a) confirming the assistant's prior statement,
-    (b) denying the assistant's prior statement,
-    (c) asking the assistant to re-state or justify a
-    prior claim. The prompt describes the category, not a
-    specific user-text cue.
-  - "confidence" is your self-rated 0.0–1.0 probability.
-    Below 0.4, you SHOULD leave the field empty.
-  - "rationale" is a one-sentence justification, ≤ 200
-    chars, no quoted text.
-  - "evidence_refs" is bounded handles, no raw text.
-  - "alternative_attributions" is optional, ≤ 2 entries.
-
-Use your own semantic judgment of the conversation. Do not
-match keywords, regex, or text-pattern cues. The structural
-signals from group_turn_binding are inputs to your reasoning,
-not a lookup table. When the conscious plan is for a
-non-group turn (group_turn_binding is empty or absent), you
-MAY omit both fields entirely. The empty default ({}) is
-acceptable.
 
 Also include the following M19 fields in the same JSON object:
 - "self_response_expectation_proposals": up to 2 rows with proposal_id, target_context, expected_outcome, expected_reply_quality, confidence, evidence_refs, reason_codes, engineering_proxy_label
@@ -5289,6 +5222,7 @@ _AUXILIARY_LLM_STAGES = {
     "reply_repair",
     "post_reply_observer",
     "surface_consistency_verification",
+    "m18_7_2_minimal",
 }
 
 
@@ -7794,6 +7728,68 @@ class MVPDialogueRuntime:
             command_envelope=_build_command_envelope(bounded_group_turn),
             user_correction_signal="",
         )
+        # === M18.7.2: minimal-prompt attribution call site =========
+        # M18.7.2 owns a dedicated minimal-prompt LLM call site
+        # for addressee / reaction attribution, decoupled from
+        # the conscious loop. The conscious-loop path is broken
+        # at scale: M18.7.1 real-LLM replay (commits b13f07f /
+        # b969d8e) showed 0/12 non-empty fills when the M18.7
+        # v2 attrs segment sat at char 2914 (37.7%) of a
+        # 7.7-26k-char conscious-loop prompt. The minimal
+        # prompt is ~1.5-2.0k chars; the LLM fills only the
+        # M18.7 v1 shape. The result is fed to
+        # `_emit_m18_7_2_attribution_for_turn` below, which
+        # writes the SAME
+        # `state["m18_7_attribution_hypotheses"]` surface that
+        # the M20.4 producer and the M18.7.1 calibration runner
+        # already read. The dead path comes alive end-to-end.
+        _m18_7_2_plan: dict = {
+            "addressee_hypothesis": {},
+            "reaction_attribution_hypothesis": {},
+        }
+        if bounded_group_turn:
+            # Skip the LLM call for non-group turns; the M18.7
+            # fields are not meaningful without
+            # group_turn_binding. The orchestrator below is a
+            # no-op when the plan has empty fields.
+            try:
+                _m18_7_2_system, _m18_7_2_user = _build_m18_7_minimal_prompt(
+                    state=state,
+                    user_text=user_text,
+                    speaker_name=display_name,
+                    bus_messages=bus,
+                    turn_index=turn_index,
+                    entity_binding=entity_binding,
+                    group_turn_binding=group_turn_binding,
+                    m18_5_structural_decision=str(
+                        group_reply_policy.get("action", "") or ""
+                    ),
+                )
+                _m18_7_2_raw = _complete_json_stage(
+                    "m18_7_2_minimal",
+                    _m18_7_2_system,
+                    _m18_7_2_user,
+                )
+                _m18_7_2_plan = {
+                    "addressee_hypothesis": _normalize_m18_7_addressee_hypothesis(
+                        _m18_7_2_raw.get("addressee_hypothesis")
+                    ),
+                    "reaction_attribution_hypothesis": (
+                        _normalize_m18_7_reaction_attribution_hypothesis(
+                            _m18_7_2_raw.get("reaction_attribution_hypothesis")
+                        )
+                    ),
+                }
+            except Exception as _m18_7_2_exc:
+                # M12-pre pattern: degraded fallback, do NOT
+                # crash run_turn. Emit a degraded bus event so
+                # diagnose can distinguish a graceful degraded
+                # path from a crash.
+                bus.append(_build_m18_7_2_minimal_degraded_event(
+                    turn_index=turn_index,
+                    reason=repr(_m18_7_2_exc),
+                    at=now,
+                ))
         conscious_system, conscious_user = build_conscious_loop_prompt(
             state=state,
             user_text=user_text,
@@ -7813,23 +7809,22 @@ class MVPDialogueRuntime:
             turn_index=turn_index,
         ):
             bus.append(event)
-        # M18.7 §3 / §5 / DECIDED 13 — emit the addressee +
-        # reaction attribution bus events, append the bounded
-        # state surface entries, and emit
-        # `AttributionHypothesisSkipped` on fast_chat + group
-        # turns with empty M18.7 fields. The orchestrator is a
-        # pure function; engineering does NOT call the LLM here
-        # (per CLAUDE.md "no keyword / regex" red line).
-        _emit_m18_7_attribution_for_turn(
+        # M18.7.2 — emit the M18_7_2_* bus events, append the
+        # bounded state surface entries (with
+        # `source: "m18_7_2_minimal"` stamped on each). The
+        # orchestrator reuses `normalize_*` / `build_state_entry`
+        # / `record_m18_7_attribution_hypotheses` unchanged;
+        # M20.4 producer and M18.7.1 calibration runner read the
+        # same surface and "just work". The conscious-loop
+        # `addressee_hypothesis` / `reaction_attribution_hypothesis`
+        # fields are no longer requested by `build_conscious_loop_prompt`
+        # (M18.7.2 is the sole source).
+        _emit_m18_7_2_attribution_for_turn(
             bus=bus,
             state=state,
-            conscious_plan=conscious,
+            plan=_m18_7_2_plan,
             turn_index=turn_index,
             at=now,
-            latency_mode=latency_mode,
-            group_turn_binding=dict(bounded_group_turn)
-            if bounded_group_turn
-            else None,
         )
         # M20.4.1 §1 — same-turn addressee hypothesis gate. Pure
         # rule, no LLM. Runs at "step 3" (immediately after the
