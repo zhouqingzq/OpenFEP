@@ -383,6 +383,136 @@ def test_calibrate_addressee_field_treats_empty_prediction_as_incorrect() -> Non
     assert report.reliability_bins[0].count == 1
 
 
+# P4 Phase 2A: v1 byte-identity is preserved when the
+# kwarg is left at its default (False). The empty +
+# GT-true case is still incorrect under both v1 and
+# the v2 by_pid measurement fix (the fix only affects
+# GT-false cases).
+def test_p4_phase2a_empty_pred_still_incorrect_when_gt_true() -> None:
+    predictions = [
+        cal.AddresseePrediction(
+            present=False, addressed_to_assistant=False,
+            participant_id="", confidence=0.0,
+        ),
+    ]
+    ground_truth = [
+        cal.AddresseeGroundTruth(
+            addressed_to_assistant=True,
+            addressee_participant_id="alice",
+        ),
+    ]
+    # Default kwarg (False): v1 behavior preserved.
+    report_default = cal.calibrate_addressee_field(
+        predictions, ground_truth
+    )
+    assert report_default.n_correct == 0
+    assert report_default.n_incorrect == 1
+    # Opt-in kwarg (True): GT-true + no-emit is still
+    # incorrect (the fix only applies to GT-false).
+    report_optin = cal.calibrate_addressee_field(
+        predictions, ground_truth,
+        treat_no_emit_as_not_addressed=True,
+    )
+    assert report_optin.n_correct == 0
+    assert report_optin.n_incorrect == 1
+
+
+# P4 Phase 2A: empty prediction + GT false is
+# correct under the opt-in kwarg, but incorrect under
+# the v1 default. This is the v1 measurement bias
+# fix (P4 Phase 1 memo: 3-of-7 wrong cases in the
+# P0 regen are this pattern).
+def test_p4_phase2a_empty_pred_correct_when_gt_false_with_kwarg() -> None:
+    predictions = [
+        cal.AddresseePrediction(
+            present=False, addressed_to_assistant=False,
+            participant_id="", confidence=0.0,
+        ),
+        cal.AddresseePrediction(
+            present=False, addressed_to_assistant=False,
+            participant_id="", confidence=0.0,
+        ),
+    ]
+    ground_truth = [
+        cal.AddresseeGroundTruth(
+            addressed_to_assistant=False,  # "not addressed"
+            addressee_participant_id="carol",
+        ),
+        cal.AddresseeGroundTruth(
+            addressed_to_assistant=True,  # mixed: still wrong
+            addressee_participant_id="alice",
+        ),
+    ]
+    # v1 default: empty + GT false → incorrect.
+    report_default = cal.calibrate_addressee_field(
+        predictions, ground_truth
+    )
+    assert report_default.n_correct == 0
+    assert report_default.n_incorrect == 2
+    # v2 opt-in: empty + GT false → correct;
+    # empty + GT true → still incorrect.
+    report_optin = cal.calibrate_addressee_field(
+        predictions, ground_truth,
+        treat_no_emit_as_not_addressed=True,
+    )
+    assert report_optin.n_correct == 1
+    assert report_optin.n_incorrect == 1
+    # The 0.0-confidence bin still gets the empty-pred
+    # contribution; the correct one pulls accuracy up.
+    assert report_optin.reliability_bins[0].count == 2
+    assert abs(
+        report_optin.reliability_bins[0].accuracy - 0.5
+    ) < 1e-9
+
+
+# P4 Phase 2A: v2 by_pid runner path enables the
+# measurement fix; v1 mode keeps byte-identity.
+# Use the held-out fixture (regen-sized, 12 turns)
+# with the empty LLM (deterministic no-emit
+# behavior) to verify the runner dispatch.
+def test_p4_phase2a_runner_by_pid_enables_fix(
+    tmp_path: Path,
+) -> None:
+    fixture = json.loads(_fixture_path().read_text(encoding="utf-8"))
+    runtime = _runtime(tmp_path)
+    runtime.llm._responses_by_text = {}  # empty LLM = no emit
+    report_by_pid = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime,
+        fixture=fixture,
+        fixture_name="<p4_phase2a_by_pid>",
+        scoring_mode="by_pid",
+    )
+    # In by_pid mode, the no-emit + GT-false cases
+    # (turns 2, 3, 9, 11 — 4 cases) flip to correct.
+    # Empty LLM also produces 0 GT-correct emits, so
+    # the only correct cases are these 4.
+    assert report_by_pid.addressee.n_correct == 4
+    assert report_by_pid.addressee.n_incorrect == 4
+
+
+def test_p4_phase2a_runner_v1_mode_preserves_byte_identity(
+    tmp_path: Path,
+) -> None:
+    # v1 (by_turn_id_v1) mode must keep the v1 behavior
+    # for byte-identity with the baseline. The empty
+    # LLM produces 0 correct (all 8 decidable turns
+    # marked incorrect by v1 rule).
+    fixture = json.loads(_fixture_path().read_text(encoding="utf-8"))
+    runtime = _runtime(tmp_path)
+    runtime.llm._responses_by_text = {}
+    report_v1 = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime,
+        fixture=fixture,
+        fixture_name="<v1_baseline_capture>",
+        scoring_mode="by_turn_id_v1",
+    )
+    # v1 byte-identity: 0 correct, 8 incorrect
+    # (matches the v1 baseline fixture's addressee
+    # section).
+    assert report_v1.addressee.n_correct == 0
+    assert report_v1.addressee.n_incorrect == 8
+
+
 def test_calibrate_addressee_field_counts_only_present_predictions() -> None:
     predictions = [
         cal.AddresseePrediction(

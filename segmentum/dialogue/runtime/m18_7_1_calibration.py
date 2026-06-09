@@ -798,6 +798,8 @@ def _nearest_bin_boundary(mean_confidence: float) -> float:
 def calibrate_addressee_field(
     predictions: Sequence[AddresseePrediction],
     ground_truth: Sequence[AddresseeGroundTruth],
+    *,
+    treat_no_emit_as_not_addressed: bool = False,
 ) -> CalibrationFieldReport:
     """Calibrate the M18.7 `addressee_hypothesis` field.
 
@@ -807,6 +809,14 @@ def calibrate_addressee_field(
       `n_unknown++`; the prediction is not scored.
     - prediction empty AND ground truth is decidable →
       `n_incorrect++`; confidence is treated as 0.0.
+      (P4 Phase 2A opt-in: when
+      `treat_no_emit_as_not_addressed=True` AND
+      `gt.addressed_to_assistant is False`, the empty
+      prediction is treated as matching the GT
+      ("LLM correctly identified 'not addressed'") and
+      counted as `n_correct++`. This is the v2 by_pid
+      measurement fix; v1 byte-identity is preserved
+      when the kwarg is False.)
     - prediction non-empty AND ground truth is
       "unknown" → `n_unknown++`; the prediction is
       not scored.
@@ -821,6 +831,20 @@ def calibrate_addressee_field(
     `addressee_participant_id` field is recorded for
     traceability in the report's `reliability_bins` but
     is NOT used for outcome scoring.
+
+    P4 Phase 2A: the `treat_no_emit_as_not_addressed`
+    kwarg addresses a v1 measurement bias surfaced in
+    the P4 Phase 1 memo. On the held-out fixture, 3 of
+    the 7 wrong addressee cases in the P0 regen run
+    are the LLM correctly identifying "not addressed
+    to assistant" via no-emit on implicit side-thread /
+    short-ack cases (turns 2, 3, 9). The v1 rule marks
+    these as wrong; treating "no emit" as
+    "not addressed" reflects the LLM's actual
+    judgment and produces a more accurate calibration
+    signal. The kwarg defaults to False to preserve
+    v1 byte-identity (D6); the v2 by_pid runner path
+    enables it.
     """
     n_total = len(predictions)
     if n_total != len(ground_truth):
@@ -844,10 +868,21 @@ def calibrate_addressee_field(
             continue
         if not pred.present:
             # Empty prediction against decidable ground
-            # truth → incorrect; confidence = 0.0.
+            # truth. v1 behavior: incorrect, conf 0.0.
+            # P4 Phase 2A (opt-in): when GT is False
+            # (i.e., the message is NOT addressed to
+            # assistant), the LLM's no-emit is the
+            # correct judgment → count as correct.
             n_present += 1
-            n_incorrect += 1
-            correct_flags.append(False)
+            if (
+                treat_no_emit_as_not_addressed
+                and bool(gt.addressed_to_assistant) is False
+            ):
+                n_correct += 1
+                correct_flags.append(True)
+            else:
+                n_incorrect += 1
+                correct_flags.append(False)
             confidences.append(0.0)
             continue
         n_present += 1
@@ -1407,9 +1442,18 @@ def run_m18_7_1_calibration_harness(
         reaction_ground_truth = resolved_gt
 
     # === v2: dispatch scoring ============================
+    # P4 Phase 2A: enable the v2 by_pid no-emit
+    # measurement fix only in by_pid mode. The other
+    # modes (by_turn_id_v1, by_turn_id_resolved) keep
+    # the v1 byte-identical behavior to preserve D6
+    # (v1 baseline) and existing T9 / T12 regression
+    # tests.
     addressee_report = calibrate_addressee_field(
         addressee_predictions,
         addressee_ground_truth,
+        treat_no_emit_as_not_addressed=(
+            scoring_mode == "by_pid"
+        ),
     )
     if scoring_mode == "by_pid":
         reaction_report = _calibrate_reaction_by_pid(
