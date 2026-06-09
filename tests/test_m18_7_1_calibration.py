@@ -513,6 +513,370 @@ def test_p4_phase2a_runner_v1_mode_preserves_byte_identity(
     assert report_v1.addressee.n_incorrect == 8
 
 
+# === P1: precision/recall split tests ======================================
+
+
+def test_p1_t1_addressee_class_breakdown_pure_function() -> None:
+    """Pure-function test of `_compute_addressee_class_breakdown`
+    on a 5-turn synthetic fixture.
+
+    Fixture: 2 GT-true + 2 GT-false + 1 unknown.
+    LLM emits on all 4 decidable:
+    - turn 0: present + pred=True + GT=True  → TP_addr=1
+    - turn 1: present + pred=True + GT=False → FP_not_addr=1
+    - turn 2: present + pred=False + GT=False → TN_not_addr=1
+    - turn 3: present + pred=False + GT=True  → FN_addr=1
+
+    Expected:
+    - n_gt_true=2, n_gt_false=2, n_unknown=1
+    - tp_addressed=1, fn_addressed=1
+    - tp_not_addressed=1, fp_not_addressed=1
+    - precision_on_not_addressed = 1/(1+1) = 0.5
+    - recall_on_addressed = 1/(1+1) = 0.5
+    """
+    predictions = [
+        cal.AddresseePrediction(
+            present=True, addressed_to_assistant=True,
+            participant_id="alice", confidence=0.9,
+        ),
+        cal.AddresseePrediction(
+            present=True, addressed_to_assistant=True,
+            participant_id="bob", confidence=0.8,
+        ),
+        cal.AddresseePrediction(
+            present=True, addressed_to_assistant=False,
+            participant_id="carol", confidence=0.7,
+        ),
+        cal.AddresseePrediction(
+            present=True, addressed_to_assistant=False,
+            participant_id="alice", confidence=0.6,
+        ),
+        cal.AddresseePrediction(
+            present=True, addressed_to_assistant=True,
+            participant_id="alice", confidence=0.5,
+        ),
+    ]
+    ground_truth = [
+        cal.AddresseeGroundTruth(
+            addressed_to_assistant=True, addressee_participant_id="alice",
+        ),
+        cal.AddresseeGroundTruth(
+            addressed_to_assistant=False, addressee_participant_id="bob",
+        ),
+        cal.AddresseeGroundTruth(
+            addressed_to_assistant=False, addressee_participant_id="carol",
+        ),
+        cal.AddresseeGroundTruth(
+            addressed_to_assistant=True, addressee_participant_id="alice",
+        ),
+        # unknown — not scored
+        cal.AddresseeGroundTruth(
+            addressed_to_assistant=None, addressee_participant_id=None,
+        ),
+    ]
+    breakdown = cal._compute_addressee_class_breakdown(
+        predictions, ground_truth
+    )
+    assert breakdown["n_gt_true"] == 2
+    assert breakdown["n_gt_false"] == 2
+    assert breakdown["n_unknown"] == 1
+    assert breakdown["tp_addressed"] == 1
+    assert breakdown["fn_addressed"] == 1
+    assert breakdown["fn_addressed_present"] == 1
+    assert breakdown["fn_addressed_noemit"] == 0
+    assert breakdown["tp_not_addressed"] == 1
+    assert breakdown["tp_not_addressed_present"] == 1
+    assert breakdown["tp_not_addressed_noemit"] == 0
+    assert breakdown["fp_not_addressed"] == 1
+    assert breakdown["precision_on_not_addressed"] == 0.5
+    assert breakdown["recall_on_addressed"] == 0.5
+
+
+def test_p1_t2_addressee_class_breakdown_with_noemit_cases() -> None:
+    """Synthetic fixture with mixed emit / no-emit cases.
+
+    Verifies that the breakdown correctly attributes
+    no-emit cases to the FN (GT-true) and TP (GT-false)
+    cells. The TP on not-addressed includes no-emit
+    cases — this is the v2 fix view (the v1 scorer
+    counts these as wrong, but the breakdown is mode-
+    independent and shows them as "the LLM correctly
+    said not-addressed via no-emit").
+
+    Fixture: 2 GT-true (1 emit-true, 1 no-emit),
+    2 GT-false (1 emit-false, 1 no-emit).
+
+    Expected:
+    - tp_addressed=1, fn_addressed=1 (no-emit + GT-true)
+    - tp_not_addressed=2 (1 emit + 1 no-emit, both
+      correctly "not addressed")
+    - fp_not_addressed=0
+    - precision_on_not_addressed = 2/2 = 1.0
+    - recall_on_addressed = 1/2 = 0.5
+    """
+    predictions = [
+        cal.AddresseePrediction(
+            present=True, addressed_to_assistant=True,
+            participant_id="alice", confidence=0.9,
+        ),
+        cal.AddresseePrediction(
+            present=False, addressed_to_assistant=False,
+            participant_id="", confidence=0.0,
+        ),
+        cal.AddresseePrediction(
+            present=True, addressed_to_assistant=False,
+            participant_id="bob", confidence=0.7,
+        ),
+        cal.AddresseePrediction(
+            present=False, addressed_to_assistant=False,
+            participant_id="", confidence=0.0,
+        ),
+    ]
+    ground_truth = [
+        cal.AddresseeGroundTruth(
+            addressed_to_assistant=True, addressee_participant_id="alice",
+        ),
+        cal.AddresseeGroundTruth(
+            addressed_to_assistant=True, addressee_participant_id="bob",
+        ),
+        cal.AddresseeGroundTruth(
+            addressed_to_assistant=False, addressee_participant_id="bob",
+        ),
+        cal.AddresseeGroundTruth(
+            addressed_to_assistant=False, addressee_participant_id="alice",
+        ),
+    ]
+    breakdown = cal._compute_addressee_class_breakdown(
+        predictions, ground_truth
+    )
+    assert breakdown["n_gt_true"] == 2
+    assert breakdown["n_gt_false"] == 2
+    assert breakdown["tp_addressed"] == 1
+    assert breakdown["fn_addressed"] == 1
+    assert breakdown["fn_addressed_noemit"] == 1
+    assert breakdown["tp_not_addressed"] == 2
+    assert breakdown["tp_not_addressed_present"] == 1
+    assert breakdown["tp_not_addressed_noemit"] == 1
+    assert breakdown["fp_not_addressed"] == 0
+    assert breakdown["precision_on_not_addressed"] == 1.0
+    assert breakdown["recall_on_addressed"] == 0.5
+
+
+def test_p1_t3_addressee_breakdown_is_mode_independent() -> None:
+    """The addressee class breakdown is a pure function of
+    (predictions, ground_truth) — it does NOT depend on
+    the `treat_no_emit_as_not_addressed` kwarg. The
+    `n_correct` reported by the calibrator does depend
+    on the kwarg (v1 vs v2 fix), but the breakdown
+    cells are the same.
+
+    Fixture: 1 GT-true + no-emit, 1 GT-false + no-emit.
+    - v1: n_correct=0, n_incorrect=2.
+    - v2 (kwarg=True): n_correct=1, n_incorrect=1.
+    - breakdown (both modes): n_gt_true=1, n_gt_false=1,
+      tp_addressed=0, fn_addressed=1 (no-emit),
+      tp_not_addressed=1 (no-emit), fp_not_addressed=0,
+      precision_on_not_addressed=1.0, recall_on_addressed=0.0.
+    """
+    predictions = [
+        cal.AddresseePrediction(
+            present=False, addressed_to_assistant=False,
+            participant_id="", confidence=0.0,
+        ),
+        cal.AddresseePrediction(
+            present=False, addressed_to_assistant=False,
+            participant_id="", confidence=0.0,
+        ),
+    ]
+    ground_truth = [
+        cal.AddresseeGroundTruth(
+            addressed_to_assistant=True, addressee_participant_id="alice",
+        ),
+        cal.AddresseeGroundTruth(
+            addressed_to_assistant=False, addressee_participant_id="bob",
+        ),
+    ]
+    # v1 default
+    report_v1 = cal.calibrate_addressee_field(
+        predictions, ground_truth
+    )
+    # v2 opt-in
+    report_v2 = cal.calibrate_addressee_field(
+        predictions, ground_truth,
+        treat_no_emit_as_not_addressed=True,
+    )
+    # n_correct differs between modes (the v1 measurement
+    # bias fix only affects the n_correct accounting).
+    assert report_v1.n_correct == 0
+    assert report_v2.n_correct == 1
+    # The breakdown is the same in both modes.
+    assert (
+        report_v1.addressee_class_breakdown
+        == report_v2.addressee_class_breakdown
+    )
+    bd = report_v2.addressee_class_breakdown
+    assert bd["tp_not_addressed"] == 1
+    assert bd["tp_not_addressed_noemit"] == 1
+    assert bd["precision_on_not_addressed"] == 1.0
+    assert bd["recall_on_addressed"] == 0.0
+
+
+def test_p1_t4_reaction_joint_breakdown_pure_function() -> None:
+    """Pure-function test of `_compute_reaction_joint_breakdown`
+    with synthetic counters.
+
+    - all decidable: 6 turns
+    - emit subset: 4 turns (2 no-emit)
+    - correct in all decidable: 2
+    - correct in emit subset: 2
+    - n_no_emit_wrong = (6 - 4) - (2 - 2) = 2
+    - acc_joint_all_decidable = 2/6 ≈ 0.333
+    - acc_joint_emit_subset = 2/4 = 0.5
+    """
+    bd = cal._compute_reaction_joint_breakdown(
+        n_joint_all_decidable=6,
+        n_joint_emit_subset=4,
+        n_joint_correct_all=2,
+        n_joint_correct_emit=2,
+    )
+    assert bd["n_joint_all_decidable"] == 6
+    assert bd["n_joint_emit_subset"] == 4
+    assert bd["n_joint_correct_all_decidable"] == 2
+    assert bd["n_joint_correct_emit_subset"] == 2
+    assert bd["n_joint_no_emit_wrong"] == 2
+    assert abs(
+        bd["acc_joint_all_decidable"] - 2 / 6
+    ) < 1e-6
+    assert abs(
+        bd["acc_joint_emit_subset"] - 0.5
+    ) < 1e-6
+
+
+def test_p1_t5_reaction_joint_breakdown_with_empty_emit_subset() -> None:
+    """All decidable but no emit subset.
+
+    - n_joint_emit_subset=0 → acc_joint_emit_subset=0.0
+    - n_joint_all_decidable=5 → acc=0.0 (no correct emits)
+    - n_joint_no_emit_wrong = 5 - 0 - (0 - 0) = 5
+    """
+    bd = cal._compute_reaction_joint_breakdown(
+        n_joint_all_decidable=5,
+        n_joint_emit_subset=0,
+        n_joint_correct_all=0,
+        n_joint_correct_emit=0,
+    )
+    assert bd["n_joint_no_emit_wrong"] == 5
+    assert bd["acc_joint_emit_subset"] == 0.0
+    assert bd["acc_joint_all_decidable"] == 0.0
+
+
+def test_p1_t6_reaction_joint_breakdown_appears_in_v1_report() -> None:
+    """V1 (by_turn_id_v1) mode reaction report includes
+    the per-subset joint breakdown.
+
+    Uses the empty LLM on the held-out fixture. With
+    the empty LLM, n_present=0 (no LLM emits on the
+    reaction field), n_joint_all_decidable=6
+    (the GT-true cases), n_joint_emit_subset=0,
+    n_joint_no_emit_wrong=6.
+    """
+    fixture = json.loads(_fixture_path().read_text(encoding="utf-8"))
+    runtime = _runtime(Path("/tmp/p1_v1_test"))
+    runtime.llm._responses_by_text = {}
+    report_v1 = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime,
+        fixture=fixture,
+        fixture_name="<p1_v1_joint>",
+        scoring_mode="by_turn_id_v1",
+    )
+    jb = report_v1.reaction.reaction_joint_breakdown
+    assert jb is not None
+    # The held-out fixture has 6 reaction turns with
+    # decidable GT (turn_id is "unknown" for the
+    # other 6). All 6 are no-emit with the empty LLM.
+    assert jb["n_joint_all_decidable"] == 6
+    assert jb["n_joint_emit_subset"] == 0
+    assert jb["n_joint_no_emit_wrong"] == 6
+    assert jb["acc_joint_all_decidable"] == 0.0
+    assert jb["acc_joint_emit_subset"] == 0.0
+
+
+def test_p1_t7_reaction_joint_breakdown_appears_in_v2_by_pid_report() -> None:
+    """V2 by_pid mode reaction report includes the
+    per-subset joint breakdown, with `pid_breakdown`
+    and `is_about_breakdown` AND `reaction_joint_breakdown`
+    all populated.
+
+    Uses the empty LLM on the held-out fixture. With
+    the empty LLM, n_present=0 (no LLM emits on the
+    reaction field), n_joint_all_decidable=6 (the GT
+    cases where both sub-axes are known), n_joint_emit_subset=0.
+    """
+    fixture = json.loads(_fixture_path().read_text(encoding="utf-8"))
+    runtime = _runtime(Path("/tmp/p1_v2_test"))
+    runtime.llm._responses_by_text = {}
+    report_v2 = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime,
+        fixture=fixture,
+        fixture_name="<p1_v2_joint>",
+        scoring_mode="by_pid",
+    )
+    jb = report_v2.reaction.reaction_joint_breakdown
+    assert jb is not None
+    assert jb["n_joint_all_decidable"] == 6
+    assert jb["n_joint_emit_subset"] == 0
+    assert jb["n_joint_no_emit_wrong"] == 6
+    # pid_breakdown + is_about_breakdown also present.
+    assert report_v2.reaction.pid_breakdown is not None
+    assert report_v2.reaction.is_about_breakdown is not None
+
+
+def test_p1_t8_addressee_breakdown_emitted_in_to_dict_v2_modes() -> None:
+    """The `addressee_class_breakdown` and
+    `reaction_joint_breakdown` fields appear in the
+    v2-mode to_dict() output (in `by_pid` and
+    `by_turn_id_resolved` modes).
+
+    In v1 (by_turn_id_v1) mode, the breakdown is
+    also emitted (P1 is additive info, not v2-specific).
+    """
+    fixture = json.loads(_fixture_path().read_text(encoding="utf-8"))[:2]
+    runtime = _runtime(Path("/tmp/p1_to_dict_test"))
+    runtime.llm._responses_by_text = {}
+    # v1 mode
+    report_v1 = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime,
+        fixture=fixture,
+        fixture_name="<p1_todict_v1>",
+        scoring_mode="by_turn_id_v1",
+    )
+    d_v1 = report_v1.to_dict()
+    assert (
+        "addressee_class_breakdown"
+        in d_v1["addressee"]
+    )
+    assert (
+        "reaction_joint_breakdown"
+        in d_v1["reaction"]
+    )
+    # v2 by_pid mode
+    report_v2 = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime,
+        fixture=fixture,
+        fixture_name="<p1_todict_v2>",
+        scoring_mode="by_pid",
+    )
+    d_v2 = report_v2.to_dict()
+    assert (
+        "addressee_class_breakdown"
+        in d_v2["addressee"]
+    )
+    assert (
+        "reaction_joint_breakdown"
+        in d_v2["reaction"]
+    )
+
+
 def test_calibrate_addressee_field_counts_only_present_predictions() -> None:
     predictions = [
         cal.AddresseePrediction(

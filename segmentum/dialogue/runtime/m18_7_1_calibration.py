@@ -294,6 +294,21 @@ class CalibrationFieldReport:
     threshold_recommendation: dict[str, object]
     pid_breakdown: dict[str, object] | None = None
     is_about_breakdown: dict[str, object] | None = None
+    # P1 (2026-06-09): per-class confusion split for
+    # the addressee field, and per-subset split for the
+    # reaction joint axis. Both fields are pure
+    # functions of the (predictions, ground_truth) data
+    # and contain no scoring-mode-specific logic — they
+    # expose the raw TP/FP/FN counts and a derived
+    # precision/recall view. The fields are `None` for
+    # the "wrong" field: addressee_class_breakdown is
+    # `None` on reaction reports, and
+    # reaction_joint_breakdown is `None` on addressee
+    # reports. `to_dict()` omits None fields, preserving
+    # the v2 (pre-P1) byte-identity for callers that
+    # check the to_dict() shape.
+    addressee_class_breakdown: dict[str, object] | None = None
+    reaction_joint_breakdown: dict[str, object] | None = None
 
     def to_dict(self) -> dict[str, object]:
         out: dict[str, object] = {
@@ -323,6 +338,27 @@ class CalibrationFieldReport:
             out["is_about_breakdown"] = {
                 k: v
                 for k, v in self.is_about_breakdown.items()
+            }
+        # P1: per-class addressee breakdown (precision on
+        # not-addressed, recall on addressed). Populated
+        # for the addressee field in all modes (v1, v2
+        # by_pid, v2 by_turn_id_resolved) since it's a
+        # pure function of the (pred, gt) tuples.
+        if self.addressee_class_breakdown is not None:
+            out["addressee_class_breakdown"] = {
+                k: v
+                for k, v in self.addressee_class_breakdown.items()
+            }
+        # P1: per-subset reaction joint breakdown
+        # (all decidable vs LLM-emit subset). Populated
+        # for the reaction field in all modes; the joint
+        # axis is mode-specific (v1: turn_id equality;
+        # v2: pid + is_about) but the all-vs-emit split
+        # is a structural view that applies to both.
+        if self.reaction_joint_breakdown is not None:
+            out["reaction_joint_breakdown"] = {
+                k: v
+                for k, v in self.reaction_joint_breakdown.items()
             }
         return out
 
@@ -792,6 +828,207 @@ def _nearest_bin_boundary(mean_confidence: float) -> float:
     return float(best)
 
 
+# === P1 helpers: per-class + per-subset breakdowns ========================
+
+
+def _compute_addressee_class_breakdown(
+    predictions: Sequence[AddresseePrediction],
+    ground_truth: Sequence[AddresseeGroundTruth],
+) -> dict[str, object]:
+    """Compute the per-class confusion matrix for the
+    addressee field.
+
+    P1 (2026-06-09): splits the addressee metric into
+    precision-on-not-addressed and recall-on-addressed.
+    The breakdown is a pure function of the
+    (predictions, ground_truth) tuples — independent
+    of the scoring mode and the v4 Phase 2A kwarg. The
+    scorer decides how to count no-emit + GT-false
+    (v1: wrong, v2 fix: correct), but the raw TP/FP/FN
+    counts are the same either way.
+
+    Counts:
+
+    - `n_gt_true` / `n_gt_false` / `n_unknown`: total
+      decidable-true, decidable-false, and unknown-skip
+      turns in the GT.
+    - `tp_addressed`: pred present + pred=True + GT=True.
+    - `fn_addressed`: pred present + pred=False + GT=True,
+      OR pred absent + GT=True (no-emit missed).
+    - `tp_not_addressed`: pred present + pred=False + GT=False,
+      OR pred absent + GT=False (no-emit is the v2-fix
+      signal; in v1 this is `fn_v1` since v1 marks
+      no-emit + GT-False as wrong).
+    - `fp_not_addressed`: pred present + pred=True + GT=False.
+    - `precision_on_not_addressed`: tp / (tp + fp) when
+      tp + fp > 0; 0.0 otherwise. P(GT=False | pred=False).
+    - `recall_on_addressed`: tp / (tp + fn) when
+      tp + fn > 0; 0.0 otherwise. P(pred=True | GT=True).
+    """
+    n_gt_true = 0
+    n_gt_false = 0
+    n_unknown = 0
+    tp_addr = 0
+    fn_addr_present = 0
+    fn_addr_noemit = 0
+    fp_not_addr = 0
+    tn_not_addr_present = 0
+    tn_not_addr_noemit = 0
+
+    for pred, gt in zip(predictions, ground_truth):
+        gt_v = gt.addressed_to_assistant
+        if not _is_known(gt_v):
+            n_unknown += 1
+            continue
+        if gt_v:
+            n_gt_true += 1
+            if pred.present:
+                if pred.addressed_to_assistant:
+                    tp_addr += 1
+                else:
+                    fn_addr_present += 1
+            else:
+                fn_addr_noemit += 1
+        else:
+            n_gt_false += 1
+            if pred.present:
+                if pred.addressed_to_assistant:
+                    fp_not_addr += 1
+                else:
+                    tn_not_addr_present += 1
+            else:
+                tn_not_addr_noemit += 1
+
+    fn_addr_total = fn_addr_present + fn_addr_noemit
+    tn_not_addr_total = tn_not_addr_present + tn_not_addr_noemit
+
+    precision_denom = tn_not_addr_total + fp_not_addr
+    recall_denom = tp_addr + fn_addr_total
+    precision_on_not_addressed = (
+        tn_not_addr_total / precision_denom
+        if precision_denom > 0
+        else 0.0
+    )
+    recall_on_addressed = (
+        tp_addr / recall_denom if recall_denom > 0 else 0.0
+    )
+
+    return {
+        "n_gt_true": int(n_gt_true),
+        "n_gt_false": int(n_gt_false),
+        "n_unknown": int(n_unknown),
+        "tp_addressed": int(tp_addr),
+        "fn_addressed": int(fn_addr_total),
+        "fn_addressed_present": int(fn_addr_present),
+        "fn_addressed_noemit": int(fn_addr_noemit),
+        "tp_not_addressed": int(tn_not_addr_total),
+        "tp_not_addressed_present": int(tn_not_addr_present),
+        "tp_not_addressed_noemit": int(tn_not_addr_noemit),
+        "fp_not_addressed": int(fp_not_addr),
+        "precision_on_not_addressed": round(
+            float(precision_on_not_addressed), 6
+        ),
+        "recall_on_addressed": round(float(recall_on_addressed), 6),
+    }
+
+
+def _compute_reaction_joint_breakdown(
+    *,
+    n_joint_all_decidable: int,
+    n_joint_emit_subset: int,
+    n_joint_correct_all: int,
+    n_joint_correct_emit: int,
+) -> dict[str, object]:
+    """Compute the reaction joint-axis subset breakdown.
+
+    P1 (2026-06-09): splits the reaction joint accuracy
+    into "all decidable" (the M20.4-honest denominator,
+    includes no-emit as wrong) and "LLM-emit subset"
+    (the practical denominator, only counts cases
+    where the LLM emitted a hypothesis).
+
+    All four counts are passed in (rather than computed
+    from predictions/ground_truth) because the joint
+    correctness definition depends on the scoring mode:
+
+    - v1 mode: joint = turn_id equality.
+    - v2 by_pid mode: joint = pid equality AND
+      is_about equality.
+
+    The caller (calibrator) computes the per-mode joint
+    correctness and reports the four counts here.
+
+    Decidable / emit-subset membership:
+
+    - v1 mode: decidable = GT `reaction_to_turn_id` is
+      not None / not "unknown". Emit subset = decidable
+      AND pred.present AND pred.reaction_to_turn_id
+      is not None.
+    - v2 by_pid mode: decidable = BOTH pid and
+      is_about GT are known. Emit subset = decidable
+      AND pred.present.
+
+    Returned fields:
+
+    - `n_joint_all_decidable` / `n_joint_emit_subset`:
+      the two denominators.
+    - `n_joint_correct_all_decidable` /
+      `n_joint_correct_emit_subset`: the matching
+      correct counts.
+    - `n_joint_no_emit_wrong`: cases where the LLM
+      didn't emit on a decidable GT (counted as wrong
+      in the "all decidable" view; excluded from
+      "emit subset"). Useful for diagnose: this is
+      the count of "no-emit is the LLM's signal"
+      cases.
+    - `acc_joint_all_decidable` /
+      `acc_joint_emit_subset`: the two accuracy
+      values. 0.0 when the denominator is 0.
+    """
+    n_joint_no_emit_wrong = (
+        n_joint_all_decidable
+        - n_joint_emit_subset
+        - (
+            n_joint_correct_all
+            - n_joint_correct_emit
+        )
+    )
+    if n_joint_no_emit_wrong < 0:
+        # Defensive: the math should never underflow
+        # because "emit subset" is a subset of
+        # "all decidable" and "correct emit" is a
+        # subset of "correct all". If it does, clamp.
+        n_joint_no_emit_wrong = max(
+            0,
+            n_joint_all_decidable - n_joint_emit_subset,
+        )
+
+    acc_all = (
+        n_joint_correct_all / n_joint_all_decidable
+        if n_joint_all_decidable > 0
+        else 0.0
+    )
+    acc_emit = (
+        n_joint_correct_emit / n_joint_emit_subset
+        if n_joint_emit_subset > 0
+        else 0.0
+    )
+
+    return {
+        "n_joint_all_decidable": int(n_joint_all_decidable),
+        "n_joint_emit_subset": int(n_joint_emit_subset),
+        "n_joint_correct_all_decidable": int(
+            n_joint_correct_all
+        ),
+        "n_joint_correct_emit_subset": int(
+            n_joint_correct_emit
+        ),
+        "n_joint_no_emit_wrong": int(n_joint_no_emit_wrong),
+        "acc_joint_all_decidable": round(float(acc_all), 6),
+        "acc_joint_emit_subset": round(float(acc_emit), 6),
+    }
+
+
 # === Field-specific calibrators ===========================================
 
 
@@ -904,6 +1141,18 @@ def calibrate_addressee_field(
     drift = derive_drift_signals(bins, n_present)
     threshold_rec = recommend_thresholds(bins)
 
+    # P1 (2026-06-09): per-class confusion matrix.
+    # The breakdown is independent of the
+    # `treat_no_emit_as_not_addressed` kwarg — the raw
+    # TP/FP/FN counts are the same in v1 and v2; the
+    # scorer decides how to count `noemit + GT-False`
+    # (v1: wrong; v2 fix: correct). The breakdown
+    # exposes both views via `tp_not_addressed_present`
+    # and `tp_not_addressed_noemit`.
+    addr_breakdown = _compute_addressee_class_breakdown(
+        predictions, ground_truth
+    )
+
     return CalibrationFieldReport(
         n_total=n_total,
         n_present=n_present,
@@ -916,6 +1165,7 @@ def calibrate_addressee_field(
         reliability_bins=list(bins),
         drift_signals=drift,
         threshold_recommendation=threshold_rec,
+        addressee_class_breakdown=addr_breakdown,
     )
 
 
@@ -957,6 +1207,16 @@ def calibrate_reaction_field(
     n_unknown = 0
     n_correct = 0
     n_incorrect = 0
+    # P1 (2026-06-09): per-subset joint counters.
+    # The v1 joint is turn_id equality, the all-decidable
+    # denominator is GT turn_id is not None/unknown,
+    # and the emit-subset denominator adds
+    # `pred.present AND pred.reaction_to_turn_id is
+    # not None`. We track both correct counts inline.
+    n_joint_all_decidable = 0
+    n_joint_emit_subset = 0
+    n_joint_correct_all = 0
+    n_joint_correct_emit = 0
 
     for pred, gt in zip(predictions, ground_truth):
         if not _is_known(gt.reaction_to_turn_id):
@@ -964,11 +1224,25 @@ def calibrate_reaction_field(
             if pred.present:
                 continue
             continue
+        # Joint axis: v1 = turn_id equality. Track
+        # all-decidable membership (GT known) and
+        # emit-subset membership (GT known + pred
+        # non-empty + pred has a turn_id).
+        n_joint_all_decidable += 1
+        is_emit = bool(
+            pred.present
+            and str(pred.reaction_to_turn_id or "").strip() != ""
+        )
+        if is_emit:
+            n_joint_emit_subset += 1
         if not pred.present:
             n_incorrect += 1
             n_present += 1
             confidences.append(0.0)
             correct_flags.append(False)
+            # No emit on a decidable GT → wrong in the
+            # "all decidable" view (already counted
+            # above).
             continue
         n_present += 1
         is_correct = bool(
@@ -981,6 +1255,11 @@ def calibrate_reaction_field(
             n_incorrect += 1
             correct_flags.append(False)
         confidences.append(_bounded_float(pred.confidence))
+        if is_emit:
+            if is_correct:
+                n_joint_correct_emit += 1
+        if is_correct:
+            n_joint_correct_all += 1
 
     bins = compute_reliability_bins(confidences, correct_flags)
     accuracy = compute_accuracy(correct_flags)
@@ -988,6 +1267,18 @@ def calibrate_reaction_field(
     ece = compute_ece(bins)
     drift = derive_drift_signals(bins, n_present)
     threshold_rec = recommend_thresholds(bins)
+
+    # P1 (2026-06-09): per-subset joint breakdown.
+    # In v1 mode, the joint axis is turn_id equality;
+    # "all decidable" includes no-emit on a decidable
+    # GT (counted as wrong). The emit-subset view
+    # excludes those no-emit cases.
+    joint_breakdown = _compute_reaction_joint_breakdown(
+        n_joint_all_decidable=n_joint_all_decidable,
+        n_joint_emit_subset=n_joint_emit_subset,
+        n_joint_correct_all=n_joint_correct_all,
+        n_joint_correct_emit=n_joint_correct_emit,
+    )
 
     return CalibrationFieldReport(
         n_total=n_total,
@@ -1001,6 +1292,7 @@ def calibrate_reaction_field(
         reliability_bins=list(bins),
         drift_signals=drift,
         threshold_recommendation=threshold_rec,
+        reaction_joint_breakdown=joint_breakdown,
     )
 
 
@@ -1217,6 +1509,43 @@ def _calibrate_reaction_by_pid(
     )
     n_correct = int(sum(joint_correct_flags))
     n_incorrect = n_present - n_correct
+
+    # P1 (2026-06-09): per-subset joint breakdown.
+    # In v2 by_pid mode, the joint axis is pid + is_about
+    # equality. The "emit subset" is what the existing
+    # `calibrate_reaction_field_by_pid` already counts
+    # (BOTH axes decidable + pred.present). The
+    # "all decidable" view drops the pred.present
+    # requirement — no-emit on a decidable GT is
+    # counted as wrong in this view. We compute the
+    # all-decidable counts in a separate pass.
+    n_joint_all_decidable = 0
+    n_joint_correct_all = 0
+    for pred, gt in zip(predictions, ground_truth):
+        pid_gt_known = _is_known(gt.reaction_to_participant_id)
+        is_about_gt_known = _is_known(
+            gt.is_about_assistant_claim
+        )
+        if not (pid_gt_known and is_about_gt_known):
+            continue
+        n_joint_all_decidable += 1
+        if not pred.present:
+            # No emit on decidable joint GT → wrong
+            # in the "all decidable" view.
+            continue
+        pred_pid = normalize_pid(pred.reaction_to_participant_id)
+        gt_pid = normalize_pid(gt.reaction_to_participant_id)  # type: ignore[arg-type]
+        is_about_pred = bool(pred.is_about_assistant_claim)
+        is_about_gt = bool(gt.is_about_assistant_claim)  # type: ignore[arg-type]
+        if pred_pid == gt_pid and is_about_pred == is_about_gt:
+            n_joint_correct_all += 1
+    joint_breakdown = _compute_reaction_joint_breakdown(
+        n_joint_all_decidable=n_joint_all_decidable,
+        n_joint_emit_subset=n_present,
+        n_joint_correct_all=n_joint_correct_all,
+        n_joint_correct_emit=n_correct,
+    )
+
     return CalibrationFieldReport(
         n_total=n_total,
         n_present=n_present,
@@ -1231,6 +1560,7 @@ def _calibrate_reaction_by_pid(
         threshold_recommendation=threshold_rec,
         pid_breakdown=pid_breakdown,
         is_about_breakdown=is_about_breakdown,
+        reaction_joint_breakdown=joint_breakdown,
     )
 
 

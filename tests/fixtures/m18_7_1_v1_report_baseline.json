@@ -1,9 +1,10 @@
 {
   "_meta": {
-    "purpose": "v1 byte-identical baseline for harness v2",
+    "purpose": "v1 byte-identical baseline for harness v2 (with P1 splits)",
     "captured_at": "2026-06-09",
-    "scoring_mode": "v1_legacy",
-    "llm": "empty_m18_7_stub"
+    "scoring_mode": "v1_legacy_with_p1_splits",
+    "llm": "empty_m18_7_stub",
+    "p1": true
   },
   "report": {
     "fixture_name": "<v1_baseline_capture>",
@@ -96,6 +97,21 @@
         "candidate_admit_min": null,
         "candidate_tie_breaker_min": null,
         "caveat": "decision belongs to M20.4; M18.7.1 only surfaces"
+      },
+      "addressee_class_breakdown": {
+        "n_gt_true": 4,
+        "n_gt_false": 4,
+        "n_unknown": 4,
+        "tp_addressed": 0,
+        "fn_addressed": 4,
+        "fn_addressed_present": 0,
+        "fn_addressed_noemit": 4,
+        "tp_not_addressed": 4,
+        "tp_not_addressed_present": 0,
+        "tp_not_addressed_noemit": 4,
+        "fp_not_addressed": 0,
+        "precision_on_not_addressed": 1.0,
+        "recall_on_addressed": 0.0
       }
     },
     "reaction": {
@@ -186,6 +202,15 @@
         "candidate_admit_min": null,
         "candidate_tie_breaker_min": null,
         "caveat": "decision belongs to M20.4; M18.7.1 only surfaces"
+      },
+      "reaction_joint_breakdown": {
+        "n_joint_all_decidable": 6,
+        "n_joint_emit_subset": 0,
+        "n_joint_correct_all_decidable": 0,
+        "n_joint_correct_emit_subset": 0,
+        "n_joint_no_emit_wrong": 6,
+        "acc_joint_all_decidable": 0.0,
+        "acc_joint_emit_subset": 0.0
       }
     },
     "drift_signals": []
