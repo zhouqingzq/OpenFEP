@@ -186,13 +186,36 @@ M20_4_WRITE_PATH_SKIP_ADDRESSEE_DIRECTED_BELOW_CONFIDENCE: float = 0.9
 #   - addressee: 0.9  (calibration ECE 0.225, Brier 0.226)
 #   - reaction : 0.7  (calibration ECE 0.258, Brier 0.202)
 #
-# `_tie_breaker_engaged` dispatches by `kind` (derived from
-# `commitment.observable` at the call site). Unknown kinds
-# fall back to `_M20_4_TIE_BREAKER_DEFAULT` (the v1 0.85).
+# P0-6 (2026-06-09) — the `addressee` field is further
+# split by sub-class because P1 (bqxsmofri fresh verify)
+# surfaced `recall_on_addressed = 0.0` and a high-band
+# overconfidence drift at the 0.80-0.90 conf=0.85 bin
+# (gap 0.85, the largest single-bin gap on the run).
+# The 0.95 raised bar for `addressed_to_assistant=True`
+# is calibrated against the bqxsmofri actionable zone
+# (the 0.90-1.00 conf=0.95 bin, gap 0.283, the M20.4
+# "engaged" signal). The "not addressed" sub-class
+# (P1 precision 1.0) keeps the v1 0.9 default; the
+# bqxsmofri "not addressed" emits are reliable and the
+# v1 0.9 admits them without admitting false positives.
+#
+# The 0.95 value is **directional, not definitive**.
+# A future M18.7.1 stability rerun on the
+# `tie_breaker` axis (P2/P3) may surface a tighter
+# value. M20.4 owner can revise
+# `M20_4_TIE_BREAKER_CONFIDENCE_MIN_ADDRESSEE_DIRECTED`
+# up or down with a documented decision.
+#
+# `_tie_breaker_engaged` dispatches by `kind` (derived
+# from `commitment.observable` at the call site) AND
+# by `addressed_to_assistant` (for the `addressee` kind
+# only). Unknown kinds fall back to
+# `_M20_4_TIE_BREAKER_DEFAULT` (the v1 0.85).
 M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND: dict[str, float] = {
     "addressee": 0.9,
     "reaction": 0.7,
 }
+M20_4_TIE_BREAKER_CONFIDENCE_MIN_ADDRESSEE_DIRECTED: float = 0.95
 _M20_4_TIE_BREAKER_DEFAULT: float = 0.85
 
 # Backward-compat alias. P0-3 (2026-06-08) splits the v1
@@ -207,20 +230,50 @@ _M20_4_TIE_BREAKER_DEFAULT: float = 0.85
 M20_4_TIE_BREAKER_CONFIDENCE_MIN: float = _M20_4_TIE_BREAKER_DEFAULT
 
 
-def _tie_breaker_min_for(kind: str) -> float:
+def _tie_breaker_min_for(
+    kind: str,
+    *,
+    addressed_to_assistant: bool | None = None,
+) -> float:
     """Per-field tie-breaker confidence threshold.
 
-    Unknown kinds (e.g. a future M20.4.x field) fall back to
-    the v1 0.85 default. The fallback is intentional: a new
-    field without an explicit per-field threshold is
-    conservative (no regression from v1).
+    P0-6 (2026-06-09) — the `addressee` kind is further
+    dispatched by sub-class:
+      - `addressed_to_assistant == True`  → 0.95
+        (P1: `recall_on_addressed = 0.0`; the raised
+        bar prevents bad flips on false-positive
+        "addressed" admits)
+      - `addressed_to_assistant == False` → 0.9
+        (P1: `precision_on_not_addressed = 1.0`; the
+        v1 0.9 default is appropriate)
+      - `addressed_to_assistant is None`   → 0.9
+        (the v1 default for the `addressee` kind;
+        preserves back-compat for any caller that
+        doesn't supply the sub-class flag)
+    Other kinds (`reaction`, unknown) keep their v1
+    per-field value or the v1 0.85 default.
+
+    Unknown kinds (e.g. a future M20.4.x field) fall
+    back to `_M20_4_TIE_BREAKER_DEFAULT` (the v1 0.85).
+    The fallback is intentional: a new field without
+    an explicit per-field threshold is conservative
+    (no regression from v1).
     """
     if not isinstance(kind, str):
         return _M20_4_TIE_BREAKER_DEFAULT
-    return M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND.get(
+    base = M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND.get(
         kind.strip().lower(),
         _M20_4_TIE_BREAKER_DEFAULT,
     )
+    # P0-6: per-sub-class dispatch for the `addressee`
+    # kind only. Reaction and unknown kinds are
+    # unaffected.
+    if kind.strip().lower() == "addressee":
+        if addressed_to_assistant is True:
+            return M20_4_TIE_BREAKER_CONFIDENCE_MIN_ADDRESSEE_DIRECTED
+        # addressed_to_assistant == False or None: keep
+        # the v1 0.9 default for the addressee kind.
+    return base
 
 
 # Map M20.4 commitment observables to per-field `kind` keys.
@@ -1109,6 +1162,7 @@ def _tie_breaker_engaged(
     reply_to_turn_id: str,
     m18_5_structural_decision: str,
     kind: str = "",
+    addressed_to_assistant: bool | None = None,
 ) -> tuple[bool, str]:
     """Apply the M20.4 v1 tie-breaker engagement rule (C1 fix).
 
@@ -1117,6 +1171,15 @@ def _tie_breaker_engaged(
     0.7 for reaction, default 0.85 for unknown kinds (the
     v1 single threshold, retained as a conservative
     fallback). Strict inequality, same as v1.
+
+    P0-6 (2026-06-09) — the `addressee` kind is further
+    split by sub-class via the `addressed_to_assistant`
+    flag. When the sub-class is True, the threshold
+    is raised to 0.95 (P1: `recall_on_addressed = 0.0`).
+    When the sub-class is False or None, the v1 0.9
+    default is kept (P1: `precision_on_not_addressed = 1.0`).
+    Other kinds and the strict-inequality style are
+    unchanged.
 
     Returns (engaged, rejection_reason). When engaged,
     rejection_reason is "". When not engaged, rejection_reason
@@ -1129,7 +1192,10 @@ def _tie_breaker_engaged(
     if ambiguity_band != "high":
         return False, TIEREJECT_AMBIGUITY_NOT_HIGH
     if not (
-        confidence > _tie_breaker_min_for(kind)
+        confidence
+        > _tie_breaker_min_for(
+            kind, addressed_to_assistant=addressed_to_assistant
+        )
     ):
         return False, TIEREJECT_CONFIDENCE_LOW
     if addressed_participant_ids:
@@ -1438,6 +1504,18 @@ def emit_m20_4_tie_breaker_feedback(
         # reaction_attribution_match -> 0.7, unknown -> 0.85
         # default. The kind encoding is fixed in v1.
         kind=_kind_from_observable(str(commitment.observable or "")),
+        # P0-6: pass the addressee sub-class flag for
+        # the per-sub-class threshold. The flag is only
+        # read when `kind == "addressee"`; for
+        # `kind == "reaction"` and unknown kinds, the
+        # sub-class is None and the v1 per-field value
+        # is used.
+        addressed_to_assistant=(
+            bool(hypothesis.get("addressed_to_assistant", False))
+            if _kind_from_observable(str(commitment.observable or ""))
+            == "addressee"
+            else None
+        ),
     )
 
     if engaged:
@@ -1446,6 +1524,45 @@ def emit_m20_4_tie_breaker_feedback(
     else:
         patched_decision = None
         patched_reason = rejection_reason
+
+    # P0-6: per-sub-class tie-breaker engagement
+    # counters. Additive over the v1
+    # `tie_breaker_engaged_total` /
+    # `tie_breaker_rejected_by_reason` aggregate. The
+    # aggregate counters are preserved for back-compat.
+    kind = _kind_from_observable(str(commitment.observable or ""))
+    if engaged and kind == "addressee":
+        addressed_flag = bool(
+            hypothesis.get("addressed_to_assistant", False)
+        )
+        diag = state.get("m20_4_attribution_diagnostics")
+        if not isinstance(diag, dict):
+            diag = {}
+        bucket_key = (
+            "tie_breaker_engaged_addressee_directed_total"
+            if addressed_flag
+            else "tie_breaker_engaged_addressee_not_directed_total"
+        )
+        diag[bucket_key] = int(diag.get(bucket_key, 0)) + 1
+        state["m20_4_attribution_diagnostics"] = diag
+    elif (
+        not engaged
+        and rejection_reason == TIEREJECT_CONFIDENCE_LOW
+        and kind == "addressee"
+    ):
+        addressed_flag = bool(
+            hypothesis.get("addressed_to_assistant", False)
+        )
+        diag = state.get("m20_4_attribution_diagnostics")
+        if not isinstance(diag, dict):
+            diag = {}
+        bucket_key = (
+            "tie_breaker_rejected_confidence_low_addressee_directed_total"
+            if addressed_flag
+            else "tie_breaker_rejected_confidence_low_addressee_not_directed_total"
+        )
+        diag[bucket_key] = int(diag.get(bucket_key, 0)) + 1
+        state["m20_4_attribution_diagnostics"] = diag
 
     feedback_id = f"fb_{commitment.commit_id[:12]}_{int(commitment.created_turn or 0)}"
     return record_m18_5_attribution_feedback(
@@ -1491,6 +1608,7 @@ __all__ = [
     "M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN",
     "M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN_ADDRESSEE_DIRECTED",
     "M20_4_TIE_BREAKER_CONFIDENCE_MIN",
+    "M20_4_TIE_BREAKER_CONFIDENCE_MIN_ADDRESSEE_DIRECTED",
     "M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND",
     "M20_4_WRITE_PATH_SKIP_ADDRESSEE_DIRECTED_BELOW_CONFIDENCE",
     "REASON_ADMISSION",

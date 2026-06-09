@@ -32,6 +32,7 @@ from segmentum.dialogue.runtime.active_commitment import (
 )
 from segmentum.dialogue.runtime.m20_4_attribution import (
     M20_4_TIE_BREAKER_CONFIDENCE_MIN,
+    M20_4_TIE_BREAKER_CONFIDENCE_MIN_ADDRESSEE_DIRECTED,
     M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND,
     _kind_from_observable,
     _tie_breaker_min_for,
@@ -42,18 +43,35 @@ from segmentum.dialogue.runtime.m20_4_attribution import (
 )
 
 
-def _commitment(*, observable: str = "addressee_target_match") -> ActiveCommitment:
+def _commitment(
+    *,
+    observable: str = "addressee_target_match",
+    addressed_to_assistant: bool = True,
+    confidence: float | None = None,
+) -> ActiveCommitment:
     # P0-3 (2026-06-08): per-field thresholds. addressee
     # engages at conf > 0.9 (fixture uses 0.91); reaction
     # engages at conf > 0.7 (fixture uses 0.71). The v1 0.9
     # and 0.7 confidences from the prior fixture no longer
     # engage under strict inequality.
-    if observable == "addressee_target_match":
-        confidence = 0.91
-    elif observable == "reaction_attribution_match":
-        confidence = 0.71
-    else:
-        confidence = 0.86  # unknown observable → v1 0.85 default engages
+    #
+    # P0-6 (2026-06-09): the `addressee` kind is further
+    # split by sub-class. The default fixture uses
+    # `addressed_to_assistant=True` with conf=0.96
+    # (just above the new 0.95 P0-6 bar) so the
+    # v1-pinned "engages" tests continue to engage.
+    # The 0.95 boundary is exclusively pinned by the
+    # new P0-6 tests; `test_tie_breaker_per_field_addressee_threshold_engages_at_0_91`
+    # has been renamed to
+    # `test_p0_6_tie_breaker_addressee_directed_engages_at_0_96`
+    # and now pins the new bar.
+    if confidence is None:
+        if observable == "addressee_target_match":
+            confidence = 0.96
+        elif observable == "reaction_attribution_match":
+            confidence = 0.71
+        else:
+            confidence = 0.86  # unknown observable → v1 0.85 default engages
     return ActiveCommitment(
         commit_id="cid_tb",
         owner_id="group_addressee_graph",
@@ -63,7 +81,7 @@ def _commitment(*, observable: str = "addressee_target_match") -> ActiveCommitme
         observable=observable,
         observable_payload={
             "hypothesis": {
-                "addressed_to_assistant": True,
+                "addressed_to_assistant": addressed_to_assistant,
                 "confidence": confidence,
             } if observable == "addressee_target_match" else {
                 "is_about_assistant_claim": True,
@@ -180,13 +198,22 @@ def test_tie_breaker_min_for_dispatch() -> None:
 
 
 def test_tie_breaker_per_field_addressee_threshold_engages_at_0_91() -> None:
-    """P0-3: addressee tie-breaker engages at conf > 0.9
-    (v1 was 0.85; v3 calibration surfaced 0.9). At conf=0.91
-    the v1 0.85 threshold would engage, but the v3
-    addressee-specific 0.9 threshold also engages — this
-    test pins the new boundary."""
+    """P0-3 (now superseded by P0-6): addressee tie-breaker
+    engages at conf > 0.9. P0-6 (2026-06-09) further splits
+    the `addressee` kind by sub-class: at conf=0.91 the
+    `addressed_to_assistant=True` sub-class REJECTS (0.91 <
+    0.95 P0-6 bar); the `addressed_to_assistant=False`
+    sub-class still engages (0.91 > 0.9 v1 default). This
+    test now pins the "not addressed" sub-class engagement
+    at conf=0.91. The "addressed" sub-class engagement at
+    conf=0.91 is pinned by
+    `test_p0_6_tie_breaker_addressee_directed_rejects_at_0_91`.
+    """
     state: dict = {}
-    commitment = _commitment(observable="addressee_target_match")
+    commitment = _commitment(
+        observable="addressee_target_match",
+        addressed_to_assistant=False,  # "not addressed" sub-class
+    )
     commitment.observable_payload["hypothesis"]["confidence"] = 0.91
     row = emit_m20_4_tie_breaker_feedback(
         state=state,
@@ -641,3 +668,361 @@ def test_build_m18_5_attribution_feedback_row_shape() -> None:
     assert row["patched_reason"] == "tie_breaker_engaged"
     assert row["at"] == "2026-06-06T00:00:00Z"
     assert row["engineering_proxy_label"] == "mvp_local_group_attribution"
+
+
+# === P0-6: tie-breaker sub-class split =================================
+#
+# P0-6 (2026-06-09) further splits the `addressee` kind by
+# sub-class. The `addressed_to_assistant=True` sub-class
+# engages at conf > 0.95 (P1: `recall_on_addressed = 0.0`).
+# The `addressed_to_assistant=False` sub-class keeps the
+# v1 0.9 default (P1: `precision_on_not_addressed = 1.0`).
+# Other kinds and the strict-inequality style are unchanged.
+
+
+def test_p0_6_tie_breaker_addressee_directed_constant_is_frozen() -> None:
+    """The 0.95 / 0.9 split is the v1 → P0-6 contract."""
+    assert M20_4_TIE_BREAKER_CONFIDENCE_MIN_ADDRESSEE_DIRECTED == 0.95
+    # P0-3 per-field values preserved.
+    assert M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND["addressee"] == 0.9
+    assert M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND["reaction"] == 0.7
+
+
+def test_p0_6_tie_breaker_min_for_addressee_subclass_dispatch() -> None:
+    """P0-6 dispatch: `addressee` kind with the
+    `addressed_to_assistant` flag returns the per-sub-class
+    threshold. Other kinds and the unknown-kinds fallback
+    are unchanged.
+    """
+    # Addressee + addressed=True → 0.95 (P0-6 raise).
+    assert (
+        _tie_breaker_min_for(
+            "addressee", addressed_to_assistant=True
+        )
+        == 0.95
+    )
+    # Addressee + addressed=False → 0.9 (v1 default).
+    assert (
+        _tie_breaker_min_for(
+            "addressee", addressed_to_assistant=False
+        )
+        == 0.9
+    )
+    # Addressee + addressed=None → 0.9 (v1 default,
+    # preserves back-compat for callers that don't
+    # supply the sub-class flag).
+    assert (
+        _tie_breaker_min_for("addressee", addressed_to_assistant=None)
+        == 0.9
+    )
+    # Reaction is unaffected by the sub-class flag.
+    assert _tie_breaker_min_for("reaction") == 0.7
+    assert (
+        _tie_breaker_min_for(
+            "reaction", addressed_to_assistant=True
+        )
+        == 0.7
+    )
+    # Unknown kind → v1 0.85 default, regardless of flag.
+    assert (
+        _tie_breaker_min_for(
+            "unknown_kind", addressed_to_assistant=True
+        )
+        == 0.85
+    )
+
+
+def test_p0_6_tie_breaker_addressee_directed_engages_at_0_96() -> None:
+    """P0-6: `addressed_to_assistant=True` engages at
+    conf=0.96 (just above the new 0.95 P0-6 bar).
+    """
+    state: dict = {}
+    commitment = _commitment(
+        observable="addressee_target_match",
+        addressed_to_assistant=True,
+    )
+    commitment.observable_payload["hypothesis"]["confidence"] = 0.96
+    row = emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=commitment,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    assert row is not None
+    assert row["tie_breaker_engaged"] is True
+
+
+def test_p0_6_tie_breaker_addressee_directed_rejects_at_0_91() -> None:
+    """P0-6: `addressed_to_assistant=True` rejects at
+    conf=0.91 (would have engaged under v1 0.9 / P0-3
+    0.9 default). The new 0.95 bar prevents bad flips
+    on false-positive "addressed" admits. The
+    "not addressed" sub-class still engages at 0.91
+    (pinned by
+    `test_tie_breaker_per_field_addressee_threshold_engages_at_0_91`).
+    """
+    state: dict = {}
+    commitment = _commitment(
+        observable="addressee_target_match",
+        addressed_to_assistant=True,
+    )
+    commitment.observable_payload["hypothesis"]["confidence"] = 0.91
+    row = emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=commitment,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    assert row is not None
+    assert row["tie_breaker_engaged"] is False
+    assert row["patched_reason"] == "confidence_below_threshold"
+
+
+def test_p0_6_tie_breaker_addressee_directed_rejects_at_0_95_boundary() -> None:
+    """P0-6: `addressed_to_assistant=True` at conf=0.95
+    REJECTS (strict `>`). The 0.95 boundary is the
+    P0-6 test surface.
+    """
+    state: dict = {}
+    commitment = _commitment(
+        observable="addressee_target_match",
+        addressed_to_assistant=True,
+    )
+    commitment.observable_payload["hypothesis"]["confidence"] = 0.95
+    row = emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=commitment,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    assert row is not None
+    assert row["tie_breaker_engaged"] is False
+
+
+def test_p0_6_tie_breaker_addressee_not_directed_keeps_v1_threshold() -> None:
+    """P0-6: `addressed_to_assistant=False` keeps the
+    v1 0.9 default. At conf=0.91 (just above 0.9), the
+    tie-breaker engages. This pins the "not addressed"
+    sub-class as the precision-1.0 path that doesn't
+    need a tighter bar.
+    """
+    state: dict = {}
+    commitment = _commitment(
+        observable="addressee_target_match",
+        addressed_to_assistant=False,
+    )
+    commitment.observable_payload["hypothesis"]["confidence"] = 0.91
+    row = emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=commitment,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    assert row is not None
+    assert row["tie_breaker_engaged"] is True
+
+
+def test_p0_6_tie_breaker_reaction_observable_unaffected_by_subclass_flag() -> None:
+    """P0-6: the `reaction` kind ignores the
+    `addressed_to_assistant` flag (the flag is only
+    meaningful for the `addressee` kind). At conf=0.71,
+    the reaction tie-breaker engages.
+    """
+    state: dict = {}
+    commitment = _commitment(observable="reaction_attribution_match")
+    commitment.observable_payload["hypothesis"]["confidence"] = 0.71
+    row = emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=commitment,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    assert row is not None
+    assert row["tie_breaker_engaged"] is True
+
+
+def test_p0_6_tie_breaker_diagnostics_addressee_directed_engaged_counter() -> None:
+    """P0-6: when the `addressed_to_assistant=True`
+    sub-class engages, the new
+    `tie_breaker_engaged_addressee_directed_total`
+    counter is bumped. The aggregate
+    `tie_breaker_engaged_total` is preserved.
+    """
+    state: dict = {}
+    commitment = _commitment(
+        observable="addressee_target_match",
+        addressed_to_assistant=True,
+    )
+    commitment.observable_payload["hypothesis"]["confidence"] = 0.96
+    emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=commitment,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    diag = state.get("m20_4_attribution_diagnostics", {})
+    assert (
+        diag.get("tie_breaker_engaged_addressee_directed_total") == 1
+    )
+    # v1 aggregate is preserved.
+    assert diag.get("tie_breaker_engaged_total") == 1
+
+
+def test_p0_6_tie_breaker_diagnostics_addressee_not_directed_engaged_counter() -> None:
+    """P0-6: when the `addressed_to_assistant=False`
+    sub-class engages, the new
+    `tie_breaker_engaged_addressee_not_directed_total`
+    counter is bumped. The aggregate
+    `tie_breaker_engaged_total` is preserved.
+    """
+    state: dict = {}
+    commitment = _commitment(
+        observable="addressee_target_match",
+        addressed_to_assistant=False,
+    )
+    commitment.observable_payload["hypothesis"]["confidence"] = 0.91
+    emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=commitment,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    diag = state.get("m20_4_attribution_diagnostics", {})
+    assert (
+        diag.get("tie_breaker_engaged_addressee_not_directed_total")
+        == 1
+    )
+    # v1 aggregate is preserved.
+    assert diag.get("tie_breaker_engaged_total") == 1
+
+
+def test_p0_6_tie_breaker_diagnostics_addressee_directed_low_confidence_reject_counter() -> None:
+    """P0-6: when the `addressed_to_assistant=True`
+    sub-class rejects on confidence, the new
+    `tie_breaker_rejected_confidence_low_addressee_directed_total`
+    counter is bumped (in addition to the v1
+    `tie_breaker_rejected_total` /
+    `tie_breaker_rejected_by_reason`).
+    """
+    state: dict = {}
+    commitment = _commitment(
+        observable="addressee_target_match",
+        addressed_to_assistant=True,
+    )
+    commitment.observable_payload["hypothesis"]["confidence"] = 0.91
+    emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=commitment,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    diag = state.get("m20_4_attribution_diagnostics", {})
+    assert (
+        diag.get(
+            "tie_breaker_rejected_confidence_low_addressee_directed_total"
+        )
+        == 1
+    )
+    # v1 aggregate is preserved.
+    assert diag.get("tie_breaker_rejected_total") == 1
+    assert (
+        diag.get("tie_breaker_rejected_by_reason", {}).get(
+            "confidence_below_threshold"
+        )
+        == 1
+    )
+
+
+def test_p0_6_tie_breaker_mixed_batch_subclass_split() -> None:
+    """P0-6: mixed batch — 1 'addressed' @ 0.96 (engages),
+    1 'addressed' @ 0.91 (rejects on confidence), 1
+    'not addressed' @ 0.91 (engages). The v1 aggregate
+    `tie_breaker_engaged_total` is 2; the per-sub-class
+    counters are 1 + 1; the per-sub-class reject counter
+    is 1.
+    """
+    state: dict = {}
+    # 1. addressed @ 0.96 — engage.
+    c1 = _commitment(
+        observable="addressee_target_match",
+        addressed_to_assistant=True,
+    )
+    c1.observable_payload["hypothesis"]["confidence"] = 0.96
+    emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=c1,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    # 2. addressed @ 0.91 — reject on confidence.
+    c2 = _commitment(
+        observable="addressee_target_match",
+        addressed_to_assistant=True,
+    )
+    c2.observable_payload["hypothesis"]["confidence"] = 0.91
+    emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=c2,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    # 3. not addressed @ 0.91 — engage.
+    c3 = _commitment(
+        observable="addressee_target_match",
+        addressed_to_assistant=False,
+    )
+    c3.observable_payload["hypothesis"]["confidence"] = 0.91
+    emit_m20_4_tie_breaker_feedback(
+        state=state,
+        decision=_decision(),
+        commitment=c3,
+        settled_value=_settled_value(),
+        m18_5_structural_decision="clarify_addressee",
+        at="2026-06-06T00:00:00Z",
+    )
+    diag = state.get("m20_4_attribution_diagnostics", {})
+    # v1 aggregate.
+    assert diag.get("tie_breaker_engaged_total") == 2
+    assert diag.get("tie_breaker_rejected_total") == 1
+    # P0-6 per-sub-class.
+    assert (
+        diag.get("tie_breaker_engaged_addressee_directed_total") == 1
+    )
+    assert (
+        diag.get("tie_breaker_engaged_addressee_not_directed_total")
+        == 1
+    )
+    assert (
+        diag.get(
+            "tie_breaker_rejected_confidence_low_addressee_directed_total"
+        )
+        == 1
+    )
+    # No false-positive on the "not addressed" reject counter.
+    assert (
+        diag.get(
+            "tie_breaker_rejected_confidence_low_addressee_not_directed_total",
+            0,
+        )
+        == 0
+    )
