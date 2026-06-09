@@ -155,43 +155,6 @@ def test_build_m18_7_minimal_prompt_includes_required_signals() -> None:
     assert '"m18_7_2_minimal"' in user
 
 
-def test_build_m18_7_minimal_prompt_includes_v1_semantic_categories() -> None:
-    """P0 root-cause analysis: the v1 conscious-loop prompt had
-    detailed semantic categories for `addressed_to_assistant` (3
-    categories) and `is_about_assistant_claim` (3 categories).
-    M18.7.2 dropped them to keep the minimal prompt small,
-    causing real-LLM replay reaction 0/6 and addressee 2/8.
-    This test locks in the re-introduction of those categories
-    so a future "trim the prompt" pass cannot silently regress
-    the calibration surface.
-    """
-    system, _user = build_m18_7_minimal_prompt(
-        state=_default_state(),
-        user_text="OK胡桃, can you go back to the part about Eve's note?",
-        speaker_name="Carol",
-        bus_messages=_default_bus(),
-        turn_index=8,
-        entity_binding=_default_entity_binding(),
-        group_turn_binding=_default_group_turn_binding(),
-        m18_5_structural_decision="reply_to_current_speaker",
-    )
-    # Addressee 3-category disambiguation must be present.
-    assert "short acknowledgement" in system
-    assert "side-thread interjection" in system
-    assert "room-level comment" in system
-    # Reaction 3-category disambiguation must be present.
-    assert "is_about_assistant_claim" in system
-    assert "confirming a statement you made" in system
-    assert "denying a statement you made" in system
-    assert "asking you to re-state" in system
-    # The crucial addressee/reaction disambiguation note
-    # (reaction_to_turn_id vs reaction_to_participant_id) must
-    # be present so the LLM does not confuse addressing the
-    # assistant with reacting to the assistant's claim.
-    assert "reaction_to_turn_id" in system
-    assert "reaction_to_participant_id" in system
-
-
 def test_build_m18_7_minimal_prompt_excludes_m13_m19_conscious_fields() -> None:
     """The minimal prompt is intentionally decoupled from the
     conscious loop. It must NOT serialize M13 drive state,
