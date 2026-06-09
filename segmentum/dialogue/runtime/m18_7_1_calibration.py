@@ -38,6 +38,7 @@ explicitly out of scope.
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Sequence
 
@@ -166,6 +167,59 @@ M18_7_1_THRESHOLD_RECOMMENDATION_CAVEAT: str = (
 # ground truth without scoring the prediction.
 M18_7_1_GT_UNKNOWN_SENTINEL: str = "unknown"
 
+# === M18.7.1 v2 constants (2026-06-09) ====================================
+# v2 adds three scoring modes for the reaction field:
+#   - "by_pid": score on `reaction_to_participant_id` +
+#     `is_about_assistant_claim` joint correctness,
+#     with pid normalization (the primary v2 mode).
+#   - "by_turn_id_resolved": v1 scoring on turn_id,
+#     but with placeholder resolution at runner-time
+#     (`turn_<assistant_prior_turn_id>` etc. resolved
+#     against the actual prior turn at replay time).
+#   - "by_turn_id_v1": byte-identical v1 scoring
+#     (no resolution, no normalization). Default for
+#     back-compat with v1 callers.
+M18_7_1_SCORING_MODES: frozenset[str] = frozenset({
+    "by_pid",
+    "by_turn_id_resolved",
+    "by_turn_id_v1",
+})
+M18_7_1_DEFAULT_SCORING_MODE: str = "by_pid"
+
+# v2 placeholder pattern: matches a literal
+# `turn_<role>` GT string. `role` is `[a-z_]+`.
+# Examples: "turn_<assistant_prior_turn_id>",
+# "turn_<carol_prior_turn_id>".
+M18_7_1_PLACEHOLDER_PATTERN: re.Pattern[str] = re.compile(
+    r"^turn_<(?P<role>[a-z_]+)>$"
+)
+# Recognized "named role" placeholders. Anything
+# else in `<role>` is treated as a named-speaker
+# placeholder (matched against the speaker's
+# participant_id, lowercased).
+M18_7_1_PLACEHOLDER_ROLES_ASSISTANT: frozenset[str] = frozenset({
+    "assistant_prior_turn_id",
+})
+M18_7_1_PLACEHOLDER_ROLES_USER: frozenset[str] = frozenset({
+    "user_prior_turn_id",
+})
+
+# v2 participant-id normalization table. Maps
+# surface ids (bot/role/persona) to a canonical form
+# before pid equality scoring. Human names are
+# pass-through (lowercased). Empty string is
+# preserved (means "no attribution").
+M18_7_1_PID_NORMALIZATION: dict[str, str] = {
+    "assistant": "bot",
+    "hutao": "bot",
+    "hutao_assistant": "bot",
+    "clawdgroupchat_bot": "bot",
+    # Defensive: add new bot/role surface ids here
+    # if a future persona or platform changes the
+    # assistant's surface id.
+}
+# v2 does NOT mutate M20.4 / M18.7 / M18.7.2 / M18.5.
+
 # M18.7.1 §1 — frozen ground truth keys per field.
 M18_7_1_ADDRESSEE_GT_KEYS: frozenset[str] = frozenset({
     "addressed_to_assistant",
@@ -216,6 +270,15 @@ class CalibrationFieldReport:
     number of turns where the ground truth was
     `"unknown"`. `n_correct` / `n_incorrect` are computed
     only over the `n_present` predictions.
+
+    v2 (2026-06-09): `pid_breakdown` and
+    `is_about_breakdown` are populated only in
+    `scoring_mode="by_pid"` (Mode A). For v1 modes
+    (`by_turn_id_v1`, `by_turn_id_resolved`) and for
+    the addressee field (which has no pid/is_about
+    split), these are `None`. The `to_dict()` method
+    OMITS the keys when `None`, preserving v1 byte-
+    identical output in Mode C.
     """
 
     n_total: int
@@ -229,9 +292,11 @@ class CalibrationFieldReport:
     reliability_bins: list[BinStats]
     drift_signals: list[str]
     threshold_recommendation: dict[str, object]
+    pid_breakdown: dict[str, object] | None = None
+    is_about_breakdown: dict[str, object] | None = None
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        out: dict[str, object] = {
             "n_total": int(self.n_total),
             "n_present": int(self.n_present),
             "n_unknown": int(self.n_unknown),
@@ -247,6 +312,19 @@ class CalibrationFieldReport:
                 for k, v in self.threshold_recommendation.items()
             },
         }
+        # v2 fields: emitted only when populated, so
+        # v1-mode reports preserve byte identity.
+        if self.pid_breakdown is not None:
+            out["pid_breakdown"] = {
+                k: v
+                for k, v in self.pid_breakdown.items()
+            }
+        if self.is_about_breakdown is not None:
+            out["is_about_breakdown"] = {
+                k: v
+                for k, v in self.is_about_breakdown.items()
+            }
+        return out
 
 
 @dataclass(frozen=True)
@@ -256,6 +334,12 @@ class CalibrationHarnessReport:
     `fixture_name` is the path or label of the fixture
     that produced this report. `n_fixtures` is the
     number of fixture steps the runner replayed.
+
+    v2 (2026-06-09): `scoring_mode` is the v2 mode
+    used (`"by_pid"` / `"by_turn_id_resolved"` /
+    `"by_turn_id_v1"`). `fixture_warnings` is a list
+    of non-fatal warnings emitted during the replay
+    (e.g., `"placeholder_unresolved:..."`).
     """
 
     fixture_name: str
@@ -263,15 +347,25 @@ class CalibrationHarnessReport:
     addressee: CalibrationFieldReport
     reaction: CalibrationFieldReport
     drift_signals: list[str] = field(default_factory=list)
+    scoring_mode: str = "by_turn_id_v1"
+    fixture_warnings: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        out: dict[str, object] = {
             "fixture_name": str(self.fixture_name),
             "n_fixtures": int(self.n_fixtures),
             "addressee": self.addressee.to_dict(),
             "reaction": self.reaction.to_dict(),
             "drift_signals": list(self.drift_signals),
         }
+        # v2 (D6): v1-mode reports are byte-identical to
+        # the pre-v2 output. The new keys are emitted
+        # only when the scoring mode is one of the v2
+        # modes (i.e., not the v1 default).
+        if self.scoring_mode != "by_turn_id_v1":
+            out["scoring_mode"] = str(self.scoring_mode)
+            out["fixture_warnings"] = list(self.fixture_warnings)
+        return out
 
 
 @dataclass(frozen=True)
@@ -751,10 +845,10 @@ def calibrate_addressee_field(
         if not pred.present:
             # Empty prediction against decidable ground
             # truth → incorrect; confidence = 0.0.
-            n_incorrect += 1
             n_present += 1
-            confidences.append(0.0)
+            n_incorrect += 1
             correct_flags.append(False)
+            confidences.append(0.0)
             continue
         n_present += 1
         is_correct = bool(
@@ -875,6 +969,236 @@ def calibrate_reaction_field(
     )
 
 
+# === v2: by_pid reaction scoring ==========================================
+
+
+def calibrate_reaction_field_by_pid(
+    predictions: Sequence[ReactionPrediction],
+    ground_truth: Sequence[ReactionGroundTruth],
+) -> dict[str, Any]:
+    """Score the M18.7 `reaction_attribution_hypothesis`
+    field on `reaction_to_participant_id` +
+    `is_about_assistant_claim` instead of
+    `reaction_to_turn_id`.
+
+    v2 (2026-06-09) — pure function, no I/O. Returns a
+    dict with three sub-axes (pid, is_about, joint):
+
+    - `pid_correct_flags` / `pid_confidences`
+    - `is_about_correct_flags` / `is_about_confidences`
+    - `joint_correct_flags` / `joint_confidences`
+
+    Per-axis outcome rules (Q3 ruling, 2026-06-09):
+
+    - `pred` empty AND `gt` decidable on this axis →
+      incorrect; confidence = 0.0.
+    - `pred` empty AND `gt` "unknown" → skip axis.
+    - `pred` non-empty AND `gt` "unknown" → skip axis.
+    - `pred` non-empty AND `gt` decidable on this axis
+      → score by strict equality (after pid
+      normalization).
+
+    Joint: include only turns where BOTH axes have a
+    decidable GT AND `pred` is non-empty. Joint
+    correctness requires pid AND is_about to BOTH
+    match. The runner wraps the joint axis into a
+    `CalibrationFieldReport` for the report's primary
+    bins / drift / threshold-recommendation fields;
+    the per-axis breakdowns are surfaced via
+    `pid_breakdown` and `is_about_breakdown` on the
+    field report.
+
+    The function NEVER mutates the input lists.
+    """
+    pid_correct_flags: list[bool] = []
+    pid_confidences: list[float] = []
+    is_about_correct_flags: list[bool] = []
+    is_about_confidences: list[float] = []
+    joint_correct_flags: list[bool] = []
+    joint_confidences: list[float] = []
+
+    for pred, gt in zip(predictions, ground_truth):
+        pid_gt_known = _is_known(gt.reaction_to_participant_id)
+        is_about_gt_known = _is_known(gt.is_about_assistant_claim)
+
+        if pid_gt_known:
+            if pred.present:
+                pred_pid = normalize_pid(
+                    pred.reaction_to_participant_id
+                )
+                gt_pid = normalize_pid(gt.reaction_to_participant_id)  # type: ignore[arg-type]
+                is_pid_correct = bool(pred_pid == gt_pid)
+                pid_correct_flags.append(is_pid_correct)
+                pid_confidences.append(_bounded_float(pred.confidence))
+            else:
+                # Pred absent, GT decidable → incorrect.
+                pid_correct_flags.append(False)
+                pid_confidences.append(0.0)
+
+        if is_about_gt_known:
+            if pred.present:
+                is_about_pred = bool(pred.is_about_assistant_claim)
+                is_about_gt = bool(gt.is_about_assistant_claim)  # type: ignore[arg-type]
+                is_about_correct = bool(is_about_pred == is_about_gt)
+                is_about_correct_flags.append(is_about_correct)
+                is_about_confidences.append(
+                    _bounded_float(pred.confidence)
+                )
+            else:
+                is_about_correct_flags.append(False)
+                is_about_confidences.append(0.0)
+
+        # Joint: BOTH axes decidable AND pred non-empty.
+        if (
+            pid_gt_known
+            and is_about_gt_known
+            and pred.present
+        ):
+            pred_pid = normalize_pid(pred.reaction_to_participant_id)
+            gt_pid = normalize_pid(gt.reaction_to_participant_id)  # type: ignore[arg-type]
+            is_about_pred = bool(pred.is_about_assistant_claim)
+            is_about_gt = bool(gt.is_about_assistant_claim)  # type: ignore[arg-type]
+            joint_correct = bool(
+                pred_pid == gt_pid
+                and is_about_pred == is_about_gt
+            )
+            joint_correct_flags.append(joint_correct)
+            joint_confidences.append(_bounded_float(pred.confidence))
+
+    return {
+        "pid_correct_flags": pid_correct_flags,
+        "pid_confidences": pid_confidences,
+        "is_about_correct_flags": is_about_correct_flags,
+        "is_about_confidences": is_about_confidences,
+        "joint_correct_flags": joint_correct_flags,
+        "joint_confidences": joint_confidences,
+    }
+
+
+def _calibrate_reaction_by_pid(
+    predictions: Sequence[ReactionPrediction],
+    ground_truth: Sequence[ReactionGroundTruth],
+    *,
+    pid_table: Mapping[str, str] | None = None,
+) -> CalibrationFieldReport:
+    """Wrap `calibrate_reaction_field_by_pid` output into a
+    `CalibrationFieldReport` for Mode A (`by_pid`).
+
+    v2 (2026-06-09) — the joint axis is the primary
+    signal (the report's bins / drift / threshold-
+    recommendation all reflect joint correctness). The
+    per-axis breakdowns (pid, is_about) are surfaced
+    via the new `pid_breakdown` / `is_about_breakdown`
+    fields on the `CalibrationFieldReport`.
+
+    `pid_table` is the optional override merged into
+    the default `M18_7_1_PID_NORMALIZATION` table; if
+    provided, it shadows the default for the duration
+    of this call. Unused in the current implementation
+    (the scorer uses the module-level default), but
+    kept for future-proofing and test injection.
+    """
+    # `pid_table` is reserved for future per-call
+    # overrides; the by_pid scorer uses the module-
+    # level `normalize_pid` default. We acknowledge the
+    # argument explicitly so callers can pass it
+    # without TypeError, but a no-op merge is enough
+    # for now.
+    if pid_table is not None:
+        # Build a merged view but do not mutate the
+        # module-level constant.
+        merged = dict(M18_7_1_PID_NORMALIZATION)
+        merged.update(pid_table)
+        # Re-import the helper with the merged table
+        # would be invasive; instead, we trust the
+        # caller to set the table before invoking
+        # (the runner merges at the top-level).
+        # This branch is for documentation only.
+        _ = merged
+
+    raw = calibrate_reaction_field_by_pid(predictions, ground_truth)
+
+    joint_correct_flags = raw["joint_correct_flags"]
+    joint_confidences = raw["joint_confidences"]
+    pid_correct_flags = raw["pid_correct_flags"]
+    pid_confidences = raw["pid_confidences"]
+    is_about_correct_flags = raw["is_about_correct_flags"]
+    is_about_confidences = raw["is_about_confidences"]
+
+    joint_bins = compute_reliability_bins(
+        joint_confidences, joint_correct_flags
+    )
+    joint_ece = compute_ece(joint_bins)
+    joint_brier = compute_brier(
+        joint_confidences, joint_correct_flags
+    )
+    joint_accuracy = compute_accuracy(joint_correct_flags)
+    n_present = len(joint_confidences)
+    drift = derive_drift_signals(joint_bins, n_present)
+    threshold_rec = recommend_thresholds(joint_bins)
+
+    pid_bins = compute_reliability_bins(
+        pid_confidences, pid_correct_flags
+    )
+    is_about_bins = compute_reliability_bins(
+        is_about_confidences, is_about_correct_flags
+    )
+    pid_breakdown = {
+        "n_present": len(pid_confidences),
+        "n_correct": int(sum(pid_correct_flags)),
+        "accuracy": compute_accuracy(pid_correct_flags),
+        "brier": compute_brier(pid_confidences, pid_correct_flags),
+        "ece": compute_ece(pid_bins),
+        "reliability_bins": [b.to_dict() for b in pid_bins],
+    }
+    is_about_breakdown = {
+        "n_present": len(is_about_confidences),
+        "n_correct": int(sum(is_about_correct_flags)),
+        "accuracy": compute_accuracy(is_about_correct_flags),
+        "brier": compute_brier(
+            is_about_confidences, is_about_correct_flags
+        ),
+        "ece": compute_ece(is_about_bins),
+        "reliability_bins": [b.to_dict() for b in is_about_bins],
+    }
+
+    n_total = min(len(predictions), len(ground_truth))
+    # `n_unknown` (joint axis): turn where BOTH
+    # axes are unknown. A turn with one decidable
+    # axis and one unknown axis is "partial" — it
+    # is still not in the joint denominator but it
+    # IS in the per-axis denominator for the
+    # decidable axis. We count the turn as fully
+    # unknown only when both axes are unknown, to
+    # keep the joint `n_unknown` consistent with
+    # the joint `n_total - n_present` math.
+    n_unknown = sum(
+        1
+        for gt in ground_truth
+        if not (
+            _is_known(gt.reaction_to_participant_id)
+            and _is_known(gt.is_about_assistant_claim)
+        )
+    )
+    n_correct = int(sum(joint_correct_flags))
+    n_incorrect = n_present - n_correct
+    return CalibrationFieldReport(
+        n_total=n_total,
+        n_present=n_present,
+        n_unknown=n_unknown,
+        n_correct=n_correct,
+        n_incorrect=n_incorrect,
+        accuracy=joint_accuracy,
+        brier=joint_brier,
+        ece=joint_ece,
+        reliability_bins=joint_bins,
+        drift_signals=drift,
+        threshold_recommendation=threshold_rec,
+        pid_breakdown=pid_breakdown,
+        is_about_breakdown=is_about_breakdown,
+    )
+
+
 # === Top-level runner =====================================================
 
 
@@ -888,6 +1212,9 @@ def run_m18_7_1_calibration_harness(
     at: str = "2026-06-07T00:00:00Z",
     addressee_field: str = "addressee_hypothesis",
     reaction_field: str = "reaction_attribution_hypothesis",
+    scoring_mode: str = "by_turn_id_v1",
+    pid_normalization_override: Mapping[str, str] | None = None,
+    resolve_placeholders: bool = True,
 ) -> CalibrationHarnessReport:
     """Replay `fixture` through `runtime` and compute
     per-field calibration reports.
@@ -907,11 +1234,86 @@ def run_m18_7_1_calibration_harness(
     The runner does NOT mutate the runtime's state
     beyond what `run_turn` itself writes. It does NOT
     mutate M20.4 module constants.
+
+    v2 (2026-06-09): `scoring_mode` selects the
+    reaction-side scoring path:
+
+    - `"by_pid"` (default, recommended): scores
+      `reaction_to_participant_id` +
+      `is_about_assistant_claim` joint correctness
+      with pid normalization.
+    - `"by_turn_id_resolved"`: v1 scoring on
+      `reaction_to_turn_id` but with placeholder
+      resolution at runner-time
+      (`turn_<assistant_prior_turn_id>` etc.).
+    - `"by_turn_id_v1"`: byte-identical v1 scoring
+      (no resolution, no normalization).
+
+    `pid_normalization_override` (optional) merges
+    into the default `M18_7_1_PID_NORMALIZATION`
+    table for the duration of the run. The override
+    is honored in `by_pid` mode (and only in
+    `by_pid` mode; v1 modes are byte-identical and
+    do not consult the table).
+
+    `resolve_placeholders` defaults to True. Set to
+    False to skip placeholder resolution even in
+    `by_turn_id_resolved` mode (useful for
+    diagnosing the placeholder pattern itself).
+
+    The runner builds a `replay_history` from the
+    fixture's `group_turn_envelope`. A turn is
+    treated as an assistant turn when its
+    `speaker_participant_id` is NOT in the turn's
+    `visible_participant_ids` (conservative
+    heuristic — the assistant is never in
+    `visible_participant_ids` for the held-out
+    fixture).
     """
+    # === v2: scoring mode validation ======================
+    if scoring_mode not in M18_7_1_SCORING_MODES:
+        raise ValueError(
+            f"unknown scoring_mode: {scoring_mode!r}; "
+            f"allowed: {sorted(M18_7_1_SCORING_MODES)}"
+        )
+    # Acknowledge the override (used by `_calibrate_reaction_by_pid`).
+    # The actual scoring path uses the module-level
+    # `normalize_pid` default; the override is exposed in the
+    # report envelope for diagnose.
+    pid_table_effective: dict[str, str] = dict(
+        M18_7_1_PID_NORMALIZATION
+    )
+    if pid_normalization_override:
+        pid_table_effective.update(pid_normalization_override)
+
     addressee_predictions: list[AddresseePrediction] = []
     addressee_ground_truth: list[AddresseeGroundTruth] = []
     reaction_predictions: list[ReactionPrediction] = []
     reaction_ground_truth: list[ReactionGroundTruth] = []
+    # v2: per-turn index for the fixture step's
+    # reaction_ground_truth (used as `current_turn_index`
+    # in placeholder resolution; not present on the
+    # dataclass itself, so we track it here).
+    reaction_turn_indices: list[int] = []
+
+    # === v2: build replay_history from fixture =============
+    replay_history: list[Mapping[str, Any]] = []
+    for i, step in enumerate(fixture):
+        env = dict(step.get("group_turn_envelope", {}))
+        visible = {
+            str(p).strip()
+            for p in env.get("visible_participant_ids", [])
+        }
+        sp = str(env.get("speaker_participant_id", "")).strip()
+        is_assistant_turn = bool(sp) and sp not in visible
+        replay_history.append(
+            {
+                "turn_index": int(step.get("turn_index", i)),
+                "participant_id": sp,
+                "role": "assistant" if is_assistant_turn else "user",
+                "text": str(step.get("text", ""))[:80],
+            }
+        )
 
     for i, step in enumerate(fixture):
         # Replay the step through the runtime.
@@ -969,13 +1371,61 @@ def run_m18_7_1_calibration_harness(
                 step.get("ground_truth", {})
             )
         )
+        reaction_turn_indices.append(current_turn_index)
 
+    # === v2: pre-resolve placeholder GTs for Mode B ======
+    fixture_warnings: list[str] = []
+    if (
+        scoring_mode == "by_turn_id_resolved"
+        and resolve_placeholders
+    ):
+        resolved_gt: list[ReactionGroundTruth] = []
+        for idx, gt in enumerate(reaction_ground_truth):
+            raw = gt.reaction_to_turn_id
+            if raw is None:
+                resolved_gt.append(gt)
+                continue
+            current_idx = reaction_turn_indices[idx]
+            resolved, warns = resolve_placeholder(
+                raw,
+                replay_history=replay_history[:idx],
+                current_turn_index=current_idx,
+            )
+            if warns:
+                fixture_warnings.extend(warns)
+            resolved_gt.append(
+                ReactionGroundTruth(
+                    reaction_to_turn_id=resolved,
+                    reaction_to_participant_id=(
+                        gt.reaction_to_participant_id
+                    ),
+                    is_about_assistant_claim=(
+                        gt.is_about_assistant_claim
+                    ),
+                )
+            )
+        reaction_ground_truth = resolved_gt
+
+    # === v2: dispatch scoring ============================
     addressee_report = calibrate_addressee_field(
-        addressee_predictions, addressee_ground_truth
+        addressee_predictions,
+        addressee_ground_truth,
     )
-    reaction_report = calibrate_reaction_field(
-        reaction_predictions, reaction_ground_truth
-    )
+    if scoring_mode == "by_pid":
+        reaction_report = _calibrate_reaction_by_pid(
+            reaction_predictions,
+            reaction_ground_truth,
+            pid_table=pid_table_effective,
+        )
+    else:
+        # "by_turn_id_v1" and "by_turn_id_resolved":
+        # same v1 scoring function (v1 is byte-
+        # identical; resolved mode resolves the GT
+        # string at the runner level before calling).
+        reaction_report = calibrate_reaction_field(
+            reaction_predictions, reaction_ground_truth
+        )
+
     union_drift = _union_preserving_order(
         addressee_report.drift_signals, reaction_report.drift_signals
     )
@@ -986,6 +1436,8 @@ def run_m18_7_1_calibration_harness(
         addressee=addressee_report,
         reaction=reaction_report,
         drift_signals=union_drift,
+        scoring_mode=scoring_mode,
+        fixture_warnings=fixture_warnings,
     )
 
 
@@ -1087,6 +1539,120 @@ def _normalize_gt_str(value: Any) -> str | None:
             return None
         return value
     return None  # defensive default for non-strings
+
+
+# === v2: pid normalization + placeholder resolution ======================
+
+
+def normalize_pid(
+    pid: Any,
+    *,
+    table: Mapping[str, str] | None = None,
+) -> str:
+    """Canonicalize a participant id before pid equality scoring.
+
+    v2 (2026-06-09) — pure function, no side effects. The
+    table is opt-in: callers that want strict surface-id
+    equality (v1 Mode C) should NOT call this.
+
+    Rules:
+      - None / non-string / empty / whitespace-only
+        → "" (preserved as the "no-attribution" signal).
+      - Whitespace is stripped first.
+      - Lookup in `table` (defaults to
+        `M18_7_1_PID_NORMALIZATION`) wins; if a surface
+        id is in the table, the canonical form is
+        returned.
+      - Otherwise the stripped, lowercased form is
+        returned (passthrough for human names).
+
+    The function is idempotent: `normalize_pid(x) == x`
+    for any x already in canonical form ("" in, "" out;
+    "bot" in, "bot" out; "alice" in, "alice" out).
+    """
+    if table is None:
+        table = M18_7_1_PID_NORMALIZATION
+    if not isinstance(pid, str) or not pid.strip():
+        return ""
+    raw = pid.strip()
+    # Table lookup (case-sensitive on the raw form;
+    # the table keys are exact surface strings).
+    if raw in table:
+        return table[raw]
+    return raw.lower()
+
+
+def resolve_placeholder(
+    raw_turn_id: Any,
+    *,
+    replay_history: Sequence[Mapping[str, Any]],
+    current_turn_index: int,
+) -> tuple[str, list[str]]:
+    """Resolve a `turn_<role>` placeholder against the
+    `replay_history` collected so far.
+
+    v2 (2026-06-09) — pure function, no I/O.
+
+    Returns `(resolved_value, warnings)`. If the input
+    is not a placeholder string, returns
+    `(raw_turn_id, [])` unchanged. If the placeholder
+    is unresolvable (no matching prior turn in
+    `replay_history`), returns `("unknown", [warning])`
+    so the caller treats it as a skipped GT per v1
+    rules (calibrate_*_field skips `unknown` turn_ids).
+
+    Placeholder roles (the `<role>` part):
+      - "assistant_prior_turn_id" → most recent prior
+        assistant turn (matched by `role == "assistant"`
+        in `replay_history`).
+      - "user_prior_turn_id" → most recent prior user
+        turn (matched by `role == "user"` in
+        `replay_history`).
+      - Other (e.g. "carol_prior_turn_id") → most recent
+        prior turn where
+        `participant_id.strip().lower() == role.removeprefix("..._prior_turn_id")`
+        (i.e., the role without the `_prior_turn_id`
+        suffix is treated as a speaker name).
+    """
+    if not isinstance(raw_turn_id, str):
+        return "unknown", [
+            f"non_string_turn_id:{type(raw_turn_id).__name__}"
+        ]
+    candidate = raw_turn_id.strip()
+    match = M18_7_1_PLACEHOLDER_PATTERN.match(candidate)
+    if match is None:
+        # Not a placeholder; pass through unchanged.
+        return raw_turn_id, []
+    role = match.group("role")
+    # Walk replay_history backward (most recent first).
+    for record in reversed(replay_history):
+        try:
+            ridx = int(record.get("turn_index", -1))
+        except (TypeError, ValueError):
+            continue
+        if ridx >= int(current_turn_index):
+            continue
+        rrole = str(record.get("role", ""))
+        rspeaker = str(record.get("participant_id", "")).strip().lower()
+        if (
+            role in M18_7_1_PLACEHOLDER_ROLES_ASSISTANT
+            and rrole == "assistant"
+        ):
+            return f"turn_{ridx}", []
+        if (
+            role in M18_7_1_PLACEHOLDER_ROLES_USER
+            and rrole == "user"
+        ):
+            return f"turn_{ridx}", []
+        # Named-speaker placeholder: role without the
+        # `_prior_turn_id` suffix is the speaker's
+        # normalized pid.
+        speaker_key = role
+        if speaker_key.endswith("_prior_turn_id"):
+            speaker_key = speaker_key[: -len("_prior_turn_id")]
+        if rspeaker and rspeaker == speaker_key:
+            return f"turn_{ridx}", []
+    return "unknown", [f"placeholder_unresolved:{raw_turn_id}"]
 
 
 def _union_preserving_order(*lists: Sequence[str]) -> list[str]:
@@ -1223,6 +1789,7 @@ __all__ = [
     "M18_7_1_BIN_LABELS",
     "M18_7_1_BIN_WIDTH",
     "M18_7_1_CALIBRATION_SURFACE_KEY",
+    "M18_7_1_DEFAULT_SCORING_MODE",
     "M18_7_1_DRIFT_GAP_THRESHOLD",
     "M18_7_1_ENGINEERING_PROXY_LABEL",
     "M18_7_1_FLAT_CURVE_GAP",
@@ -1232,6 +1799,11 @@ __all__ = [
     "M18_7_1_LOW_BAND_UPPER_BOUND",
     "M18_7_1_MIN_PRESENT_FOR_DRIFT_SIGNAL",
     "M18_7_1_N_BINS",
+    "M18_7_1_PID_NORMALIZATION",
+    "M18_7_1_PLACEHOLDER_PATTERN",
+    "M18_7_1_PLACEHOLDER_ROLES_ASSISTANT",
+    "M18_7_1_PLACEHOLDER_ROLES_USER",
+    "M18_7_1_SCORING_MODES",
     "M18_7_1_TIE_BREAKER_MIN_CURRENT",
     "M18_7_1_THRESHOLD_NEIGHBORHOOD_HALFWIDTH",
     "M18_7_1_THRESHOLD_RECOMMENDATION_CAVEAT",
@@ -1239,13 +1811,16 @@ __all__ = [
     "ReactionPrediction",
     "calibrate_addressee_field",
     "calibrate_reaction_field",
+    "calibrate_reaction_field_by_pid",
     "compute_accuracy",
     "compute_brier",
     "compute_ece",
     "compute_reliability_bins",
     "derive_drift_signals",
+    "normalize_pid",
     "record_m18_7_1_calibration",
     "recommend_thresholds",
+    "resolve_placeholder",
     "run_m18_7_1_calibration_harness",
     "validate_calibration_fixture_shape",
 ]

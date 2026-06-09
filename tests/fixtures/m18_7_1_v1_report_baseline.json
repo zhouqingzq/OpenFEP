@@ -1,0 +1,193 @@
+{
+  "_meta": {
+    "purpose": "v1 byte-identical baseline for harness v2",
+    "captured_at": "2026-06-09",
+    "scoring_mode": "v1_legacy",
+    "llm": "empty_m18_7_stub"
+  },
+  "report": {
+    "fixture_name": "<v1_baseline_capture>",
+    "n_fixtures": 12,
+    "addressee": {
+      "n_total": 12,
+      "n_present": 8,
+      "n_unknown": 4,
+      "n_correct": 0,
+      "n_incorrect": 8,
+      "accuracy": 0.0,
+      "brier": 0.0,
+      "ece": 0.0,
+      "reliability_bins": [
+        {
+          "label": "0.00-0.10",
+          "count": 8,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.10-0.20",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.20-0.30",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.30-0.40",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.40-0.50",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.50-0.60",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.60-0.70",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.70-0.80",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.80-0.90",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.90-1.00",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        }
+      ],
+      "drift_signals": [],
+      "threshold_recommendation": {
+        "current_admit_min": 0.4,
+        "current_tie_breaker_min": 0.85,
+        "candidate_admit_min": null,
+        "candidate_tie_breaker_min": null,
+        "caveat": "decision belongs to M20.4; M18.7.1 only surfaces"
+      }
+    },
+    "reaction": {
+      "n_total": 12,
+      "n_present": 6,
+      "n_unknown": 6,
+      "n_correct": 0,
+      "n_incorrect": 6,
+      "accuracy": 0.0,
+      "brier": 0.0,
+      "ece": 0.0,
+      "reliability_bins": [
+        {
+          "label": "0.00-0.10",
+          "count": 6,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.10-0.20",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.20-0.30",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.30-0.40",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.40-0.50",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.50-0.60",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.60-0.70",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.70-0.80",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.80-0.90",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.90-1.00",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        }
+      ],
+      "drift_signals": [],
+      "threshold_recommendation": {
+        "current_admit_min": 0.4,
+        "current_tie_breaker_min": 0.85,
+        "candidate_admit_min": null,
+        "candidate_tie_breaker_min": null,
+        "caveat": "decision belongs to M20.4; M18.7.1 only surfaces"
+      }
+    },
+    "drift_signals": []
+  }
+}

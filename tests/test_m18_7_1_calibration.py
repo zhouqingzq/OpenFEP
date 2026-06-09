@@ -865,3 +865,580 @@ def test_assertion_kind_enum_is_closed() -> None:
         "neither",
         "probe",
     })
+
+
+# === v2: pure-function tests (T1-T7) =====================================
+
+
+# T1: calibrate_reaction_field_by_pid produces expected joint
+# accuracy on a synthetic 5-turn fixture.
+def test_v2_t1_calibrate_reaction_field_by_pid_5_turn_fixture() -> None:
+    predictions = [
+        cal.ReactionPrediction(
+            present=True, reaction_to_turn_id="turn_1",
+            reaction_to_participant_id="carol",
+            is_about_assistant_claim=True, confidence=0.9,
+        ),
+        cal.ReactionPrediction(
+            present=True, reaction_to_turn_id="turn_1",
+            reaction_to_participant_id="dave",
+            is_about_assistant_claim=False, confidence=0.4,
+        ),
+        cal.ReactionPrediction(
+            present=False, reaction_to_turn_id="",
+            reaction_to_participant_id="",
+            is_about_assistant_claim=False, confidence=0.0,
+        ),
+        cal.ReactionPrediction(
+            present=True, reaction_to_turn_id="",
+            reaction_to_participant_id="carol",
+            is_about_assistant_claim=True, confidence=0.7,
+        ),
+        cal.ReactionPrediction(
+            present=True, reaction_to_turn_id="",
+            reaction_to_participant_id="eve",
+            is_about_assistant_claim=False, confidence=0.5,
+        ),
+    ]
+    ground_truth = [
+        # pid match, is_about match -> joint correct.
+        cal.ReactionGroundTruth(
+            reaction_to_turn_id="turn_1",
+            reaction_to_participant_id="carol",
+            is_about_assistant_claim=True,
+        ),
+        # pid mismatch, is_about mismatch -> joint incorrect.
+        cal.ReactionGroundTruth(
+            reaction_to_turn_id="turn_1",
+            reaction_to_participant_id="carol",
+            is_about_assistant_claim=True,
+        ),
+        # pred absent, GT decidable on both axes -> joint incorrect.
+        cal.ReactionGroundTruth(
+            reaction_to_turn_id="turn_1",
+            reaction_to_participant_id="dave",
+            is_about_assistant_claim=False,
+        ),
+        # pid match (carol == carol), is_about match -> joint correct.
+        cal.ReactionGroundTruth(
+            reaction_to_turn_id="turn_2",
+            reaction_to_participant_id="carol",
+            is_about_assistant_claim=True,
+        ),
+        # pid mismatch (eve vs carol), is_about mismatch -> joint incorrect.
+        cal.ReactionGroundTruth(
+            reaction_to_turn_id="turn_3",
+            reaction_to_participant_id="carol",
+            is_about_assistant_claim=True,
+        ),
+    ]
+    raw = cal.calibrate_reaction_field_by_pid(
+        predictions, ground_truth
+    )
+    # All 5 turns have BOTH pid and is_about decidable,
+    # and 4 of 5 have pred present. Joint correctness:
+    # rows 0, 3 are correct (pred matches both axes);
+    # row 1 is incorrect (both axes wrong); row 2 is
+    # absent (still counted as incorrect per axis but
+    # not in joint); row 4 is incorrect (both axes
+    # wrong).
+    assert len(raw["joint_correct_flags"]) == 4  # 4 of 5 with pred present
+    assert sum(raw["joint_correct_flags"]) == 2  # rows 0 and 3
+    assert sum(raw["pid_correct_flags"]) == 2  # rows 0 (correct) and 3 (correct); row 1 wrong, row 2 absent (incorrect), row 4 wrong
+    assert sum(raw["is_about_correct_flags"]) == 2  # rows 0 and 3
+    # Confidence 0.0 for the absent prediction is recorded
+    # on both axes but NOT in joint (joint requires
+    # pred present).
+    assert 0.0 in raw["pid_confidences"]
+    assert 0.0 in raw["is_about_confidences"]
+    assert 0.0 not in raw["joint_confidences"]
+
+
+# T2: empty pid GT is skipped on pid axis, included on
+# joint axis only if is_about is decidable.
+def test_v2_t2_calibrate_reaction_field_by_pid_empty_pid_gt() -> None:
+    predictions = [
+        cal.ReactionPrediction(
+            present=True, reaction_to_turn_id="turn_0",
+            reaction_to_participant_id="alice",
+            is_about_assistant_claim=True, confidence=0.7,
+        ),
+        cal.ReactionPrediction(
+            present=True, reaction_to_turn_id="turn_1",
+            reaction_to_participant_id="bob",
+            is_about_assistant_claim=True, confidence=0.7,
+        ),
+    ]
+    ground_truth = [
+        # pid empty (unknown), is_about decidable.
+        cal.ReactionGroundTruth(
+            reaction_to_turn_id="turn_0",
+            reaction_to_participant_id=None,  # unknown
+            is_about_assistant_claim=True,
+        ),
+        # pid decidable, is_about empty (unknown).
+        cal.ReactionGroundTruth(
+            reaction_to_turn_id="turn_1",
+            reaction_to_participant_id="bob",
+            is_about_assistant_claim=None,  # unknown
+        ),
+    ]
+    raw = cal.calibrate_reaction_field_by_pid(
+        predictions, ground_truth
+    )
+    # Row 0: pid_unknown → skip pid; is_about known,
+    # pred is_about == gt is_about (True == True) → 1
+    # is_about correct.
+    # Row 1: pid known (bob), pred pid (bob) match → 1
+    # pid correct; is_about_unknown → skip is_about.
+    # Joint: BOTH axes decidable required → 0 of 2 in joint.
+    assert len(raw["pid_correct_flags"]) == 1  # row 1 only
+    assert sum(raw["pid_correct_flags"]) == 1
+    assert len(raw["is_about_correct_flags"]) == 1  # row 0 only
+    assert sum(raw["is_about_correct_flags"]) == 1
+    assert len(raw["joint_correct_flags"]) == 0
+    assert sum(raw["joint_correct_flags"]) == 0
+
+
+# T3: joint correctness requires BOTH pid and is_about
+# to match.
+def test_v2_t3_joint_requires_both_axes_to_match() -> None:
+    predictions = [
+        # pid match, is_about mismatch.
+        cal.ReactionPrediction(
+            present=True, reaction_to_turn_id="turn_0",
+            reaction_to_participant_id="alice",
+            is_about_assistant_claim=False, confidence=0.8,
+        ),
+        # pid mismatch, is_about match.
+        cal.ReactionPrediction(
+            present=True, reaction_to_turn_id="turn_1",
+            reaction_to_participant_id="bob",
+            is_about_assistant_claim=True, confidence=0.8,
+        ),
+        # both match.
+        cal.ReactionPrediction(
+            present=True, reaction_to_turn_id="turn_2",
+            reaction_to_participant_id="carol",
+            is_about_assistant_claim=True, confidence=0.8,
+        ),
+    ]
+    ground_truth = [
+        cal.ReactionGroundTruth(
+            reaction_to_turn_id="turn_0",
+            reaction_to_participant_id="alice",
+            is_about_assistant_claim=True,
+        ),
+        cal.ReactionGroundTruth(
+            reaction_to_turn_id="turn_1",
+            reaction_to_participant_id="carol",
+            is_about_assistant_claim=True,
+        ),
+        cal.ReactionGroundTruth(
+            reaction_to_turn_id="turn_2",
+            reaction_to_participant_id="carol",
+            is_about_assistant_claim=True,
+        ),
+    ]
+    raw = cal.calibrate_reaction_field_by_pid(
+        predictions, ground_truth
+    )
+    pid_flags = raw["pid_correct_flags"]
+    is_about_flags = raw["is_about_correct_flags"]
+    joint_flags = raw["joint_correct_flags"]
+    # Row 0: pid T, is_about F → joint F.
+    # Row 1: pid F, is_about T → joint F.
+    # Row 2: pid T, is_about T → joint T.
+    assert pid_flags == [True, False, True]
+    assert is_about_flags == [False, True, True]
+    assert joint_flags == [False, False, True]
+
+
+# T4: resolve_placeholder for turn_<assistant_prior_turn_id>
+# against a fixture with assistant at index 3 → returns turn_3.
+def test_v2_t4_resolve_placeholder_assistant_role() -> None:
+    replay_history = [
+        {"turn_index": 0, "participant_id": "alice",
+         "role": "user", "text": "hi"},
+        {"turn_index": 1, "participant_id": "alice",
+         "role": "user", "text": "there"},
+        {"turn_index": 2, "participant_id": "hutao",
+         "role": "assistant", "text": "reply"},
+        {"turn_index": 3, "participant_id": "alice",
+         "role": "user", "text": "more"},
+    ]
+    resolved, warns = cal.resolve_placeholder(
+        "turn_<assistant_prior_turn_id>",
+        replay_history=replay_history,
+        current_turn_index=4,
+    )
+    assert resolved == "turn_2"
+    assert warns == []
+
+
+# T5: resolve_placeholder for turn_<carol_prior_turn_id>
+# with no prior carol turn → returns ("unknown", [warning]).
+def test_v2_t5_resolve_placeholder_unresolved() -> None:
+    replay_history = [
+        {"turn_index": 0, "participant_id": "alice",
+         "role": "user", "text": "hi"},
+        {"turn_index": 1, "participant_id": "hutao",
+         "role": "assistant", "text": "reply"},
+    ]
+    resolved, warns = cal.resolve_placeholder(
+        "turn_<carol_prior_turn_id>",
+        replay_history=replay_history,
+        current_turn_index=2,
+    )
+    assert resolved == "unknown"
+    assert len(warns) == 1
+    assert "carol" in warns[0]
+    assert "unresolved" in warns[0].lower()
+
+
+# T6: normalize_pid collapses assistant / hutao /
+# clawdgroupchat_bot → bot. Empty string stays empty.
+# Unknown human names lowercase + passthrough.
+def test_v2_t6_normalize_pid_table() -> None:
+    # Bot/role surface ids collapse to "bot".
+    assert cal.normalize_pid("assistant") == "bot"
+    assert cal.normalize_pid("hutao") == "bot"
+    assert cal.normalize_pid("hutao_assistant") == "bot"
+    assert cal.normalize_pid("clawdgroupchat_bot") == "bot"
+    # Empty / None / whitespace preserved as "".
+    assert cal.normalize_pid("") == ""
+    assert cal.normalize_pid(None) == ""
+    assert cal.normalize_pid("   ") == ""
+    # Human names lowercase + passthrough.
+    assert cal.normalize_pid("Alice") == "alice"
+    assert cal.normalize_pid("carol") == "carol"
+    assert cal.normalize_pid("Carol") == "carol"
+    # Whitespace stripped.
+    assert cal.normalize_pid("  alice  ") == "alice"
+    # Non-string → "".
+    assert cal.normalize_pid(123) == ""
+    assert cal.normalize_pid(["alice"]) == ""
+
+
+# T7: normalize_pid is idempotent.
+def test_v2_t7_normalize_pid_is_idempotent() -> None:
+    for raw in ("assistant", "hutao", "carol", "Alice",
+                "", "clawdgroupchat_bot"):
+        once = cal.normalize_pid(raw)
+        twice = cal.normalize_pid(once)
+        assert once == twice, f"not idempotent: {raw!r} -> {once!r} -> {twice!r}"
+
+
+# T9 (v1 byte-identical baseline regression): replay the
+# held-out fixture with scoring_mode="by_turn_id_v1" and
+# assert the report's `to_dict()` matches the pre-v2
+# baseline JSON byte-identically.
+def test_v2_t9_v1_byte_identical_to_baseline(tmp_path: Path) -> None:
+    fixture = json.loads(_fixture_path().read_text(encoding="utf-8"))
+    runtime = _runtime(tmp_path)
+    # Use the empty LLM (matches the baseline capture
+    # script).
+    runtime.llm._responses_by_text = {}
+    report = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime,
+        fixture=fixture,
+        fixture_name="<v1_baseline_capture>",
+        scoring_mode="by_turn_id_v1",
+    )
+    report_dict = report.to_dict()
+    # Load the baseline.
+    baseline_path = (
+        Path(__file__).resolve().parent
+        / "fixtures"
+        / "m18_7_1_v1_report_baseline.json"
+    )
+    baseline_payload = json.loads(
+        baseline_path.read_text(encoding="utf-8")
+    )
+    baseline_report = baseline_payload["report"]
+    # v1 byte-identity (D6): the report's to_dict() must
+    # match the baseline exactly. The baseline was
+    # captured with the v1 (pre-v2) code; v1 mode is
+    # byte-identical, so the v2 by_turn_id_v1 report's
+    # to_dict() must equal the baseline's `report`
+    # dict.
+    assert report_dict == baseline_report, (
+        f"v1 byte-identical regression: report dict differs "
+        f"from baseline.\nReport keys: {sorted(report_dict.keys())}\n"
+        f"Baseline keys: {sorted(baseline_report.keys())}"
+    )
+
+
+# T12: v1 mode to_dict() does NOT contain scoring_mode or
+# fixture_warnings keys (D6 byte-identity for the harness
+# report's to_dict()).
+def test_v2_t12_v1_mode_to_dict_omits_v2_keys(tmp_path: Path) -> None:
+    fixture = json.loads(_fixture_path().read_text(encoding="utf-8"))[:2]
+    runtime = _runtime(tmp_path)
+    runtime.llm._responses_by_text = {}
+    report = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime,
+        fixture=fixture,
+        scoring_mode="by_turn_id_v1",
+    )
+    d = report.to_dict()
+    assert "scoring_mode" not in d
+    assert "fixture_warnings" not in d
+    # And the dataclass field is the v1 default.
+    assert report.scoring_mode == "by_turn_id_v1"
+    assert report.fixture_warnings == []
+
+
+# T13: v2 mode (by_pid) to_dict() DOES contain
+# scoring_mode and fixture_warnings keys.
+def test_v2_t13_by_pid_mode_to_dict_includes_v2_keys(tmp_path: Path) -> None:
+    fixture = json.loads(_fixture_path().read_text(encoding="utf-8"))[:2]
+    runtime = _runtime(tmp_path)
+    runtime.llm._responses_by_text = {}
+    report = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime,
+        fixture=fixture,
+        scoring_mode="by_pid",
+    )
+    d = report.to_dict()
+    assert d.get("scoring_mode") == "by_pid"
+    assert "fixture_warnings" in d
+    assert d["fixture_warnings"] == []
+    # Field-level: by_pid populates pid_breakdown and
+    # is_about_breakdown on the reaction report.
+    assert report.reaction.pid_breakdown is not None
+    assert report.reaction.is_about_breakdown is not None
+    # Addressee has no by_pid split; pid_breakdown stays None.
+    assert report.addressee.pid_breakdown is None
+    # Field-level to_dict() includes the breakdowns.
+    reaction_dict = report.reaction.to_dict()
+    assert "pid_breakdown" in reaction_dict
+    assert "is_about_breakdown" in reaction_dict
+    # Addressee's field to_dict() does NOT include the
+    # breakdowns (they are None and omitted).
+    addressee_dict = report.addressee.to_dict()
+    assert "pid_breakdown" not in addressee_dict
+    assert "is_about_breakdown" not in addressee_dict
+
+
+# T10: by_turn_id_resolved surfaces a precise
+# unresolved-warning list for the held-out fixture.
+# The fixture has 5 placeholder GTs:
+# - 3 × turn_<assistant_prior_turn_id> at turns 5, 8, 11
+#   → unresolved (the fixture contains only user turns;
+#   no assistant-role entry exists in replay_history).
+# - 2 × turn_<carol_prior_turn_id> at turns 6, 9
+#   → resolved (carol is a user; her prior turns are
+#   in the fixture's replay_history).
+# After resolution: 3 GTs become "unknown" (assistant
+# unresolved) and 2 GTs become real turn_ids (carol
+# resolved). The fixture's original 6 decidable GTs
+# (5 placeholders + 1 non-placeholder) become 3
+# decidable (2 carol + 1 non-placeholder). n_present
+# is the number of empty preds against decidable
+# GTs = 3.
+def test_v2_t10_by_turn_id_resolved_resolves_placeholders(
+    tmp_path: Path,
+) -> None:
+    fixture = json.loads(_fixture_path().read_text(encoding="utf-8"))
+    runtime = _runtime(tmp_path)
+    runtime.llm._responses_by_text = {
+        step["text"]: {
+            "addressee_hypothesis": {},
+            "reaction_attribution_hypothesis": {},
+        }
+        for step in fixture
+    }
+    report = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime,
+        fixture=fixture,
+        scoring_mode="by_turn_id_resolved",
+    )
+    # 3 unresolved warnings, all for the assistant role.
+    assert len(report.fixture_warnings) == 3, (
+        f"expected 3 unresolved assistant-role placeholders, "
+        f"got: {report.fixture_warnings}"
+    )
+    for w in report.fixture_warnings:
+        assert "assistant_prior_turn_id" in w
+        assert "unresolved" in w.lower()
+    # After resolution: 3 decidable GTs (2 carol +
+    # 1 non-placeholder). LLM returns empty predictions
+    # → all 3 are scored as incorrect.
+    assert report.reaction.n_present == 3
+    assert report.reaction.n_unknown == 9
+    assert report.reaction.n_correct == 0
+    assert report.reaction.n_incorrect == 3
+
+
+# T11: by_pid scoring on a small synthetic 3-turn fixture
+# (CLI smoke test). Replay the held-out fixture with
+# by_pid and verify joint correctness, breakdowns, and
+# accuracy.
+def test_v2_t11_by_pid_smoke_test_on_held_out_fixture(
+    tmp_path: Path,
+) -> None:
+    fixture = json.loads(_fixture_path().read_text(encoding="utf-8"))
+    runtime = _runtime(tmp_path)
+    # Program the LLM to return matching pid and
+    # is_about for ALL turns that have a decidable
+    # reaction GT.
+    runtime.llm._responses_by_text = {}
+    for step in fixture:
+        gt = step.get("ground_truth", {})
+        if (
+            gt.get("reaction_to_participant_id") not in (None, "unknown")
+            and gt.get("reaction_to_participant_id") != ""
+        ):
+            runtime.llm._responses_by_text[step["text"]] = {
+                "addressee_hypothesis": {
+                    "participant_id": "carol",
+                    "addressed_to_assistant": False,
+                    "confidence": 0.5,
+                },
+                "reaction_attribution_hypothesis": {
+                    "participant_id": gt["reaction_to_participant_id"],
+                    "reaction_to_turn_id": "turn_0",
+                    "reaction_to_participant_id": gt["reaction_to_participant_id"],
+                    "is_about_assistant_claim": (
+                        bool(gt.get("is_about_assistant_claim"))
+                        if isinstance(
+                            gt.get("is_about_assistant_claim"), bool
+                        )
+                        else False
+                    ),
+                    "confidence": 0.5,
+                },
+            }
+    report = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime,
+        fixture=fixture,
+        scoring_mode="by_pid",
+    )
+    # Reaction: 6 turns have both pid and is_about
+    # decidable; we returned matching values for all
+    # of them. Joint accuracy = 1.0 (modulo
+    # normalization).
+    assert report.reaction.n_present > 0
+    # The pid_breakdown should show non-trivial accuracy.
+    pid_bd = report.reaction.pid_breakdown
+    assert pid_bd is not None
+    assert pid_bd["n_present"] >= 1
+    # And the field-level joint accuracy should be high
+    # (we matched the GT exactly).
+    assert report.reaction.accuracy > 0.5
+
+
+# T8: by_pid and by_turn_id_v1 score differently for
+# the same fixture (sanity check that the modes
+# actually score different things).
+def test_v2_t8_by_pid_vs_v1_score_differently(tmp_path: Path) -> None:
+    fixture = json.loads(_fixture_path().read_text(encoding="utf-8"))
+    runtime_pid = _runtime(tmp_path)
+    runtime_v1 = _runtime(tmp_path / "v1")
+    # Program the LLM so that the LLM emits a
+    # reaction_to_turn_id that does NOT match the GT
+    # turn_id, but emits a matching pid. by_pid would
+    # count this as correct (pid + is_about match),
+    # but by_turn_id_v1 would count it as incorrect
+    # (string mismatch).
+    runtime_pid.llm._responses_by_text = {}
+    runtime_v1.llm._responses_by_text = {}
+    for step in fixture:
+        gt = step.get("ground_truth", {})
+        gt_pid = gt.get("reaction_to_participant_id")
+        if (
+            gt_pid not in (None, "unknown", "")
+            and isinstance(gt.get("is_about_assistant_claim"), bool)
+        ):
+            response = {
+                "addressee_hypothesis": {},
+                "reaction_attribution_hypothesis": {
+                    "participant_id": gt_pid,
+                    "reaction_to_turn_id": "turn_bogus",  # mismatch
+                    "reaction_to_participant_id": gt_pid,  # match
+                    "is_about_assistant_claim": gt["is_about_assistant_claim"],
+                    "confidence": 0.5,
+                },
+            }
+            runtime_pid.llm._responses_by_text[step["text"]] = response
+            runtime_v1.llm._responses_by_text[step["text"]] = response
+    report_pid = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime_pid,
+        fixture=fixture,
+        scoring_mode="by_pid",
+    )
+    report_v1 = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime_v1,
+        fixture=fixture,
+        scoring_mode="by_turn_id_v1",
+    )
+    # by_pid should have HIGHER accuracy than by_turn_id_v1
+    # (the LLM got the pid right but the turn_id wrong).
+    assert (
+        report_pid.reaction.accuracy
+        > report_v1.reaction.accuracy
+    )
+
+
+# T14: invalid scoring_mode raises ValueError.
+def test_v2_t14_invalid_scoring_mode_raises() -> None:
+    import pytest
+    import tempfile
+    fixture = json.loads(_fixture_path().read_text(encoding="utf-8"))[:1]
+    with tempfile.TemporaryDirectory() as tmp:
+        runtime = _runtime(Path(tmp))
+        with pytest.raises(ValueError, match="unknown scoring_mode"):
+            cal.run_m18_7_1_calibration_harness(
+                runtime=runtime,
+                fixture=fixture,
+                scoring_mode="not_a_real_mode",
+            )
+
+
+# T15: by_pid scoring with a runtime override table
+# (pid_normalization_override). The override must be
+# accepted without crashing; the merged table is
+# applied through the v2 normalize_pid default.
+def test_v2_t15_by_pid_accepts_pid_normalization_override(
+    tmp_path: Path,
+) -> None:
+    fixture = json.loads(_fixture_path().read_text(encoding="utf-8"))[:1]
+    runtime = _runtime(tmp_path)
+    runtime.llm._responses_by_text = {}
+    # Just verify that the override kwarg is accepted.
+    report = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime,
+        fixture=fixture,
+        scoring_mode="by_pid",
+        pid_normalization_override={"new_bot_surface": "bot"},
+    )
+    assert report.scoring_mode == "by_pid"
+
+
+# T16: --no-resolve-placeholders flag is honored in
+# by_turn_id_resolved mode. When set, placeholders
+# are NOT resolved (they remain literal strings in
+# the GT, which the v1 scorer then can't match).
+def test_v2_t16_no_resolve_placeholders_keeps_literal(
+    tmp_path: Path,
+) -> None:
+    fixture = json.loads(_fixture_path().read_text(encoding="utf-8"))
+    runtime = _runtime(tmp_path)
+    runtime.llm._responses_by_text = {}
+    report = cal.run_m18_7_1_calibration_harness(
+        runtime=runtime,
+        fixture=fixture,
+        scoring_mode="by_turn_id_resolved",
+        resolve_placeholders=False,
+    )
+    # With resolve_placeholders=False, the GTs remain
+    # literal placeholders ("turn_<assistant_prior_turn_id>"
+    # etc.) and the v1 scorer treats them as raw strings
+    # that no LLM output will match → all reaction
+    # n_correct = 0. This is the diagnostic mode: it
+    # surfaces the placeholder pattern in the report.
+    assert report.reaction.n_correct == 0
+    # And no warnings (because the runner didn't try to
+    # resolve).
+    assert report.fixture_warnings == []
