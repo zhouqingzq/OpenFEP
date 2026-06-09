@@ -65,6 +65,127 @@ deepseek/deepseek-v4-flash, 12-turn held-out fixture.
 | `candidate_tie_breaker_min` | 0.86 | 0.8 / 0.9 only | 5/5 in {0.8, 0.9} ✅ |
 | `candidate_admit_min` | noisy | null / 0.5 / 0.2 | do not use |
 
+## P1 precision/recall split (2026-06-09)
+
+P1 (commit pending) surfaces two new fields on
+`CalibrationFieldReport` (additive; the `n_correct`,
+`n_incorrect`, `accuracy`, `brier`, `ece` fields above
+are unchanged):
+
+- `addressee_class_breakdown` — per-class confusion
+  matrix. Cells: `tp_addressed`, `fn_addressed`
+  (with `fn_addressed_present` + `fn_addressed_noemit`
+  sub-categories), `tp_not_addressed`
+  (with `tp_not_addressed_present` +
+  `tp_not_addressed_noemit` sub-categories),
+  `fp_not_addressed`. Derived: `precision_on_not_addressed`
+  and `recall_on_addressed`.
+- `reaction_joint_breakdown` — per-subset joint
+  split. Cells: `n_joint_all_decidable` (BOTH axes
+  known), `n_joint_emit_subset` (BOTH axes known +
+  pred.present), `n_joint_correct_all_decidable`,
+  `n_joint_correct_emit_subset`, `n_joint_no_emit_wrong`.
+  Derived: `acc_joint_all_decidable` and
+  `acc_joint_emit_subset`.
+
+These are **mode-independent pure functions** of the
+(prediction, ground_truth) data — populated in v1 mode
+AND in v2 modes. The scorer decides how to count
+no-emit + GT-false (v1: wrong, v2 fix: correct), but
+the breakdown cells are the same in both views.
+
+### bqxsmofri P1 numbers (P1 fresh verify, real LLM)
+
+Direct P1 measurements from the fresh bqxsmofri replay
+(`tmp_m18_7_1_p1_real_llm_replay.output`, 2026-06-09,
+Python 3.11, 12 turns, real OpenRouter
+`deepseek/deepseek-v4-flash`). These are the
+**authoritative** P1 numbers — no inference needed.
+
+| addressee split (v2 by_pid) | bqxsmofri value | reading |
+|---|---|---|
+| `n_gt_true` / `n_gt_false` / `n_unknown` | 4 / 4 / 4 | balanced GT |
+| `tp_addressed` | **0** | LLM gets 0 of 4 "addressed" cases right |
+| `fn_addressed` (present + noemit) | 4 (3 + 1) | LLM misses ALL 4 addressed cases |
+| `tp_not_addressed` (present + noemit) | 4 (3 + 1) | LLM gets 4 of 4 "not addressed" cases right |
+| `fp_not_addressed` | 0 | LLM never claims "addressed" wrongly |
+| **`precision_on_not_addressed`** | **1.0** | LLM is **perfect** on not-addressed claims |
+| **`recall_on_addressed`** | **0.0** | LLM is **0%** recall on addressed cases |
+
+| reaction joint split (v2 by_pid) | bqxsmofri value | reading |
+|---|---|---|
+| `n_joint_all_decidable` | 6 | 6 turns have BOTH pid and is_about GT known |
+| `n_joint_emit_subset` | 3 | LLM only emits on 3 of 6 |
+| `n_joint_correct_all_decidable` | 2 | 2 of 6 decidable turns were right (incl. 1 noemit counted wrong) |
+| `n_joint_correct_emit_subset` | 2 | 2 of 3 emits were right |
+| `n_joint_no_emit_wrong` | **3** | **LLM declines on 3/6 = 50% of decidable reaction turns** |
+| `acc_joint_all_decidable` | 0.333 | of 6 decidable, 2 right |
+| `acc_joint_emit_subset` | 0.667 | of 3 emits, 2 right (in v2 stability 5-run band) |
+
+**The bqxsmofri numbers resolve the bxg45ar4h inference
+ambiguity**: the direct P1 splits show
+`precision_on_not_addressed = 1.0` (interpretation B was
+correct) and `recall_on_addressed = 0.0` (even worse than
+the 0.25 lower-bound estimate).
+
+The reaction `n_joint_no_emit_wrong = 3` (50% no-emit rate)
+is higher than the bxg45ar4h inferred 2 (33% rate), but
+both are in the same band as the 5-run v2 stability
+`n_present = 2-5` per run (variable no-emit rate).
+
+### M20.4-relevant reads from P1
+
+1. **Addressee precision/recall split is the
+   structural story — and it's a STRONGER signal
+   than the bxg45ar4h inference suggested.** The
+   LLM is **perfect on "not addressed" precision
+   (1.0)** but has **zero recall on "addressed"
+   (0.0)**. M20.4 should weight "not addressed"
+   claims more highly than "addressed" claims in
+   the settler. This is the structural asymmetry
+   the P4 Phase 2A report surfaced, made explicit
+   by P1's direct measurement.
+
+2. **Reaction joint "all decidable" accuracy is
+   the M20.4-honest signal.** The bqxsmofri emit
+   subset is 3 of 6 decidable (50% no-emit rate).
+   The 0.667 emit-subset accuracy corresponds to
+   a 0.333 all-decidable accuracy once no-emit is
+   counted as wrong. The 50% no-emit rate is the
+   structural floor on the reaction joint axis
+   — and it varies across runs (bxg45ar4h: 33%;
+   bqxsmofri: 50%).
+
+3. **High-band overconfidence drift is the
+   actionable signal.** bqxsmofri has the same
+   drift signature as bxg45ar4h
+   (`overconfidence_at_high_band` +
+   `underconfidence_at_low_band` + `bimodal`).
+   The 0.80-0.90 conf=0.85 bin has 1 wrong (gap
+   0.85 — the largest single-bin gap on this
+   run). The 0.90-1.00 conf=0.95 bin has 1
+   wrong out of 3 (gap 0.283). These are the
+   M20.4.1 trigger cases (`confidence > 0.85`).
+
+4. **The 0.20-0.30 conf=0.2 emit was CORRECT in
+   bqxsmofri** (acc=1.0 in the bin, gap 0.8).
+   The LLM expressed low confidence and was
+   right — the opposite of the bxg45ar4h
+   0.20-0.30 conf=0.3 wrong case. The
+   low-confidence band is unstable across runs;
+   M20.4.1 should respect low-conf emits and
+   not act on them.
+
+P1 does NOT change the threshold recommendation
+(`candidate_admit_min = null,
+candidate_tie_breaker_min = 0.9` for bqxsmofri,
+vs `0.8` for bxg45ar4h; both in the {0.8, 0.9}
+band surfaced in the 5-run v2 stability). P1
+makes the per-class structure that the threshold
+was based on **explicit** in the report.
+
+Full P1 report: `reports/m18_7_1_p1_precision_recall_split.md`.
+
 ## M20.4-relevant decisions (actionable)
 
 ### Decision A: `tie_breaker_min` nudge
@@ -205,11 +326,13 @@ P2 (M18.7.2 prompt turn_id enumeration) + P3
 - v2 implementation report: `reports/m18_7_1_harness_v2_implementation_summary.md`
 - v2 stability report (5 replays): `reports/m18_7_1_v2_stability_summary.md`
 - v1 calibration status: `reports/m18_7_1_calibration_summary.md`
-- v2 test surface: `tests/test_m18_7_1_calibration.py` (57 tests)
+- v2 test surface: `tests/test_m18_7_1_calibration.py` (69 tests, 61 v2 + 8 P1)
 - v1 baseline (T9 byte-identity): `tests/fixtures/m18_7_1_v1_report_baseline.json`
 - 12-turn held-out fixture: `tests/fixtures/m18_7_1_held_out_calibration.json`
 - Memory: `project_m18_7_1_v2_landed.md` +
-  `project_m18_7_1_v2_stability_landed.md`
+  `project_m18_7_1_v2_stability_landed.md` +
+  `project_m18_7_1_p4_p5_status.md` +
+  `project_m18_7_1_p1_landed.md`
 
 ## CAVEAT (frozen, binding)
 
