@@ -7371,6 +7371,33 @@ class MVPDialogueRuntime:
     llm: JSONLLMClient
     persona_name: str = ""
     path_b_field_consumer_enabled: bool = True
+    # P0-7 (2026-06-09): the M20.4 per-sub-class
+    # diagnostic counters cached from the last
+    # `run_turn` call. The counters are not in
+    # `MVPStateStore.SYSTEM_FILE_DEFAULTS`, so they
+    # are dropped on `store.save`. The runtime
+    # caches the in-memory value here so the
+    # M18.7.1 calibration harness can read it
+    # without going through the store. The value
+    # is `None` before the first `run_turn` call.
+    _last_m20_4_diagnostics: dict[str, Any] | None = None
+
+    def get_m20_4_diagnostics(self) -> dict[str, Any] | None:
+        """Return the M20.4 per-sub-class diagnostic
+        counters from the last `run_turn` call, or
+        `None` if no `run_turn` has been executed
+        or the M20.4 producer was not exercised.
+
+        P0-7 (2026-06-09) — used by the M18.7.1
+        calibration harness to surface the P0-4
+        producer / P0-5 write / P0-6 tie-breaker
+        sub-class counters without going through
+        `MVPStateStore.save` (which filters out
+        non-`SYSTEM_FILE_DEFAULTS` keys).
+        """
+        if self._last_m20_4_diagnostics is None:
+            return None
+        return dict(self._last_m20_4_diagnostics)
 
     def _episode_ledger(self) -> EpisodeLedger:
         return EpisodeLedger(self.store.root)
@@ -9680,6 +9707,20 @@ class MVPDialogueRuntime:
                 }
             )
         self.store.save(state)
+        # P0-7 (2026-06-09): cache the M20.4 per-sub-class
+        # diagnostic counters from the in-memory state
+        # before the state goes out of scope. The counters
+        # are accumulated by the M20.4 producer / write /
+        # tie-breaker during the run; the `store.save` call
+        # only persists `SYSTEM_FILE_DEFAULTS` keys, so the
+        # M20.4 diagnostics key would otherwise be lost.
+        # The cached value is what the M18.7.1 calibration
+        # harness surfaces on the report.
+        m20_4_diag = state.get("m20_4_attribution_diagnostics")
+        if isinstance(m20_4_diag, dict):
+            self._last_m20_4_diagnostics = dict(m20_4_diag)
+        else:
+            self._last_m20_4_diagnostics = None
         self._record_episode(episode)
         llm_thinking_result = thinking.get("llm_thinking_result")
         if not isinstance(llm_thinking_result, Mapping):

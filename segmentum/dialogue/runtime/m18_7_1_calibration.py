@@ -385,6 +385,20 @@ class CalibrationHarnessReport:
     drift_signals: list[str] = field(default_factory=list)
     scoring_mode: str = "by_turn_id_v1"
     fixture_warnings: list[str] = field(default_factory=list)
+    # P0-7 (2026-06-09): the M20.4 per-sub-class
+    # diagnostic counters accumulated by
+    # `runtime.run_turn` during the fixture replay.
+    # The M20.4 counters are in-memory only
+    # (`MVPStateStore.save` only iterates
+    # `SYSTEM_FILE_DEFAULTS` keys, so the M20.4
+    # diagnostics key is not persisted to disk);
+    # the harness reads the counters from the
+    # in-memory state at the end of the replay and
+    # surfaces them here for the M20.4 owner.
+    # The field is `None` for v1 / v2-mode reports
+    # that don't go through the runtime path (e.g.,
+    # test fixtures that pass a stub runtime).
+    m20_4_diagnostics: dict[str, object] | None = None
 
     def to_dict(self) -> dict[str, object]:
         out: dict[str, object] = {
@@ -401,6 +415,14 @@ class CalibrationHarnessReport:
         if self.scoring_mode != "by_turn_id_v1":
             out["scoring_mode"] = str(self.scoring_mode)
             out["fixture_warnings"] = list(self.fixture_warnings)
+        # P0-7 (2026-06-09): M20.4 sub-class
+        # diagnostic counters. Emitted only when
+        # populated (None leaves the key absent, so
+        # existing readers do not need to migrate).
+        if self.m20_4_diagnostics:
+            out["m20_4_diagnostics"] = {
+                str(k): v for k, v in self.m20_4_diagnostics.items()
+            }
         return out
 
 
@@ -1804,6 +1826,30 @@ def run_m18_7_1_calibration_harness(
         addressee_report.drift_signals, reaction_report.drift_signals
     )
 
+    # P0-7 (2026-06-09): the M20.4 producer / write /
+    # tie-breaker sub-class diagnostic counters are
+    # accumulated in `state["m20_4_attribution_diagnostics"]`
+    # by `runtime.run_turn` during the fixture replay.
+    # The state is in-memory only (the M20.4 diagnostics
+    # key is not in `MVPStateStore.SYSTEM_FILE_DEFAULTS`,
+    # so it is NOT persisted to disk). The runtime caches
+    # the in-memory value at the end of `run_turn` and
+    # exposes it via `runtime.get_m20_4_diagnostics()`. The
+    # harness reads the counters from the runtime and
+    # surfaces them on the report. The surface is what the
+    # M20.4 owner needs to validate P0-4 + P0-5 + P0-6 on
+    # a 5-run stability data set.
+    m20_4_diagnostics: dict[str, object] | None = None
+    try:
+        diag = runtime.get_m20_4_diagnostics()
+        if isinstance(diag, dict) and diag:
+            m20_4_diagnostics = {str(k): v for k, v in diag.items()}
+    except Exception:
+        # The runtime is best-effort: if the
+        # accessor fails (e.g., test stub
+        # runtime), leave the field None.
+        m20_4_diagnostics = None
+
     return CalibrationHarnessReport(
         fixture_name=fixture_name,
         n_fixtures=len(fixture),
@@ -1812,6 +1858,7 @@ def run_m18_7_1_calibration_harness(
         drift_signals=union_drift,
         scoring_mode=scoring_mode,
         fixture_warnings=fixture_warnings,
+        m20_4_diagnostics=m20_4_diagnostics,
     )
 
 

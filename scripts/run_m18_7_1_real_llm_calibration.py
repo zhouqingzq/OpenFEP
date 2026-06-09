@@ -320,6 +320,21 @@ def main() -> int:
         ]["threshold_recommendation"],
         "session_root": str(session_root),
     }
+    # P0-7 (2026-06-09) — surface the M20.4 per-sub-class
+    # diagnostic counters (P0-4 producer admit + P0-5
+    # write-path skip + P0-6 tie-breaker engagement) that
+    # `runtime.run_turn` accumulates on the state surface
+    # during the fixture replay. The harness reads the
+    # counters from the runtime's `_last_m20_4_diagnostics`
+    # cache (the M20.4 diagnostics key is in-memory only
+    # because it is not in `MVPStateStore.SYSTEM_FILE_DEFAULTS`).
+    # The surface is what the M20.4 owner needs to validate
+    # the producer / write / tie-breaker sub-class split on
+    # a 5-run stability data set.
+    if harness_report.m20_4_diagnostics:
+        summary["m20_4_attribution_diagnostics"] = dict(
+            harness_report.m20_4_diagnostics
+        )
     if reports is not None:
         summary["scoring_mode_reports"] = {
             mode: {
