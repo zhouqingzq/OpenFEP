@@ -129,6 +129,23 @@ ECE range that distinguishes "moderate_drift" from
 held-out fixture is not enough data to make a call
 on addressee. P4 is the right milestone for this.
 
+**P4 Phase 2A measurement-fix footnote (2026-06-09)**:
+the addressee acc in those 5 runs is measured under the
+v1 rule, which is biased on the "no emit + GT false"
+sub-class. The P4 Phase 2A fix (`0a42c24`) introduces
+an opt-in kwarg `treat_no_emit_as_not_addressed` that
+flips these to correct under `scoring_mode="by_pid"`.
+On the regen data this is precision on not-addressed
+0/4 → 4/4; recall on addressed is unchanged at 0/4. The
+high-band gap (turns 4 + 8 conf 0.90/0.95) and the drift
+signature (bimodal + overconfidence) are unchanged, so
+the threshold recommendation (tie_breaker=0.9) is
+unchanged. The 5-run v2 stability table above is
+addressee-M20.4-irrelevant; do not act on those numbers
+for the addressee side until P4 closes. See
+`reports/m18_7_1_p4_phase_2a_summary.md` for the
+precision/recall breakdown.
+
 ### Do NOT expect `reaction_to_turn_id` (Mode B) to work yet
 
 5/5 replays in by_turn_id_resolved mode show 0/3
