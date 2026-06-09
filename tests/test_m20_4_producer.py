@@ -168,11 +168,30 @@ def test_producer_rejects_reaction_with_confidence_below_threshold() -> None:
 
 
 def test_producer_filters_hypotheses_by_threshold() -> None:
-    """Mixed surface: one admits, one rejects."""
+    """Mixed surface: one admits, one rejects per sub-class.
+
+    P0-4 (2026-06-09): the addressee threshold is sub-class-
+    dependent. `addressed_to_assistant == False` admits at
+    0.4 (the v1 default); `addressed_to_assistant == True`
+    admits at 0.7 (P0-4 raised bar; P1 surfaced
+    recall_on_addressed = 0.0). This test pins the
+    "not addressed" sub-class behavior. The "addressed"
+    sub-class has its own dedicated tests (P0-4 series).
+    """
     state: dict = {
         "m18_7_attribution_hypotheses": [
-            _entry(kind=KIND_ADDRESSEE, turn_index=0, confidence=0.5),  # above
-            _entry(kind=KIND_ADDRESSEE, turn_index=0, confidence=0.3),  # below
+            _entry(
+                kind=KIND_ADDRESSEE,
+                turn_index=0,
+                confidence=0.5,
+                addressed_to_assistant=False,  # P0-4: "not addressed" sub-class
+            ),
+            _entry(
+                kind=KIND_ADDRESSEE,
+                turn_index=0,
+                confidence=0.3,
+                addressed_to_assistant=False,  # below
+            ),
             _entry(
                 kind=KIND_REACTION,
                 turn_index=0,
@@ -582,3 +601,288 @@ def test_no_user_text_in_observable_payload() -> None:
     )
     payload_str = str(admitted[0].observable_payload)
     assert "rationale" not in payload_str
+
+
+# === P0-4 (2026-06-09): sub-class admit threshold ====================
+# P1 (M18.7.1 v2 + P1 real-LLM calibration) surfaced
+# `precision_on_not_addressed = 1.0` and
+# `recall_on_addressed = 0.0` on the bqxsmofri held-out
+# fixture (12 turns, real OpenRouter deepseek-v4-flash).
+# The structural asymmetry drives the M20.4 P0-4 producer
+# change: raise the admit threshold for the
+# `addressed_to_assistant == True` sub-class from 0.4 to
+# 0.7. The "not addressed" sub-class keeps the v1 0.4
+# default (LLM is 100% precise there).
+# See `reports/m20_4_p0_4_subclass_admit.md`.
+
+
+def test_p0_4_subclass_threshold_constant_is_frozen() -> None:
+    """P0-4 frozen constant. The `addressee_target_match`
+    sub-class `addressed_to_assistant == True` admits at
+    0.7; the v1 default (`M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN`)
+    is preserved at 0.4 for back-compat and for the
+    "not addressed" sub-class.
+    """
+    from segmentum.dialogue.runtime.m20_4_attribution import (
+        M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN,
+        M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN_ADDRESSEE_DIRECTED,
+    )
+    assert M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN == 0.4
+    assert (
+        M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN_ADDRESSEE_DIRECTED
+        == 0.7
+    )
+    # P0-4: the directed sub-class bar is strictly above
+    # the v1 default. The 0.3 gap reflects the LLM's
+    # high-band overconfidence drift on "addressed"
+    # claims (P1: conf=0.85 bin gap 0.85, conf=0.95
+    # bin gap 0.283).
+    assert (
+        M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN_ADDRESSEE_DIRECTED
+        > M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN
+    )
+
+
+def test_p0_4_addressee_directed_admits_at_threshold_above_0_7() -> None:
+    """P0-4: an `addressee_target_match` with
+    `addressed_to_assistant == True` and conf=0.71 admits
+    (just above the new 0.7 threshold). This is the
+    boundary case the P0-4 raise creates: the 0.5-0.6
+    overconfidence band is now rejected; the 0.8-0.9
+    and 0.9-1.0 bands still admit.
+    """
+    state: dict = {
+        "m18_7_attribution_hypotheses": [
+            _entry(
+                kind=KIND_ADDRESSEE,
+                turn_index=0,
+                confidence=0.71,
+                addressed_to_assistant=True,
+            )
+        ]
+    }
+    admitted = produce_m20_4_attribution_commitments(
+        state=state,
+        bus=[],
+        current_turn_id=1,
+        inbound_excerpt="hi",
+        at="2026-06-06T00:00:00Z",
+    )
+    assert len(admitted) == 1
+    assert admitted[0].observable == "addressee_target_match"
+
+
+def test_p0_4_addressee_directed_rejects_at_0_4_under_new_rule() -> None:
+    """P0-4 regression: under the v1 uniform 0.4 threshold,
+    `addressed_to_assistant == True` at conf=0.4 admitted.
+    P0-4 raises the bar to 0.7, so the same entry now
+    rejects. This is the v1→P0-4 behavior change.
+    """
+    state: dict = {
+        "m18_7_attribution_hypotheses": [
+            _entry(
+                kind=KIND_ADDRESSEE,
+                turn_index=0,
+                confidence=0.4,  # would admit under v1
+                addressed_to_assistant=True,
+            )
+        ]
+    }
+    admitted = produce_m20_4_attribution_commitments(
+        state=state,
+        bus=[],
+        current_turn_id=1,
+        inbound_excerpt="hi",
+        at="2026-06-06T00:00:00Z",
+    )
+    # P0-4 rejects: 0.4 < 0.7.
+    assert admitted == []
+    # Diagnostic counter: per-sub-class reject bucket.
+    diag = state["m20_4_attribution_diagnostics"]
+    assert (
+        diag.get(
+            "producer_reject_low_confidence_addressee_directed_total"
+        )
+        == 1
+    )
+
+
+def test_p0_4_addressee_not_directed_admits_at_v1_threshold() -> None:
+    """P0-4: `addressed_to_assistant == False` keeps the
+    v1 0.4 admit threshold. The LLM is 100% precise on
+    "not addressed" claims (P1), so the standard bar is
+    appropriate.
+    """
+    state: dict = {
+        "m18_7_attribution_hypotheses": [
+            _entry(
+                kind=KIND_ADDRESSEE,
+                turn_index=0,
+                confidence=0.4,
+                addressed_to_assistant=False,  # not addressed
+            )
+        ]
+    }
+    admitted = produce_m20_4_attribution_commitments(
+        state=state,
+        bus=[],
+        current_turn_id=1,
+        inbound_excerpt="hi",
+        at="2026-06-06T00:00:00Z",
+    )
+    assert len(admitted) == 1
+    diag = state["m20_4_attribution_diagnostics"]
+    assert (
+        diag.get(
+            "producer_admit_addressee_not_directed_total"
+        )
+        == 1
+    )
+
+
+def test_p0_4_reaction_admit_rule_unchanged() -> None:
+    """P0-4: reaction admit rule is unchanged (0.4 across
+    the board). The reaction joint-axis asymmetry is in
+    the LLM's emit decision (50% no-emit rate, P1), not
+    in the admit calibration. P0-4 does not change the
+    reaction admit threshold.
+    """
+    state: dict = {
+        "m18_7_attribution_hypotheses": [
+            _entry(
+                kind=KIND_REACTION,
+                turn_index=0,
+                confidence=0.4,
+                reaction_to_turn_id="turn_0",
+                reaction_to_participant_id="alice",
+            ),
+            _entry(
+                kind=KIND_REACTION,
+                turn_index=0,
+                confidence=0.39,  # just below
+                reaction_to_turn_id="turn_0",
+                reaction_to_participant_id="alice",
+            ),
+        ]
+    }
+    admitted = produce_m20_4_attribution_commitments(
+        state=state,
+        bus=[],
+        current_turn_id=1,
+        inbound_excerpt="hi",
+        at="2026-06-06T00:00:00Z",
+    )
+    assert len(admitted) == 1
+    assert admitted[0].observable == "reaction_attribution_match"
+
+
+def test_p0_4_mixed_batch_subclass_split() -> None:
+    """P0-4: a mixed surface with both sub-classes admits
+    only the ones above the per-sub-class threshold.
+
+    The fixture mirrors the bqxsmofri surfaced distribution:
+    - 1 "not addressed" at conf=0.95 (admit; v1 threshold)
+    - 1 "addressed" at conf=0.95 (admit; P0-4 threshold 0.7)
+    - 1 "addressed" at conf=0.4 (reject under P0-4;
+      would have admitted under v1)
+    - 1 reaction at conf=0.4 (admit; unchanged)
+    """
+    state: dict = {
+        "m18_7_attribution_hypotheses": [
+            _entry(
+                kind=KIND_ADDRESSEE,
+                turn_index=0,
+                confidence=0.95,
+                addressed_to_assistant=False,  # admit
+            ),
+            _entry(
+                kind=KIND_ADDRESSEE,
+                turn_index=0,
+                confidence=0.95,
+                addressed_to_assistant=True,  # admit
+            ),
+            _entry(
+                kind=KIND_ADDRESSEE,
+                turn_index=0,
+                confidence=0.4,  # reject under P0-4
+                addressed_to_assistant=True,
+            ),
+            _entry(
+                kind=KIND_REACTION,
+                turn_index=0,
+                confidence=0.4,  # admit (unchanged)
+                reaction_to_turn_id="turn_0",
+                reaction_to_participant_id="alice",
+            ),
+        ]
+    }
+    admitted = produce_m20_4_attribution_commitments(
+        state=state,
+        bus=[],
+        current_turn_id=1,
+        inbound_excerpt="hi",
+        at="2026-06-06T00:00:00Z",
+    )
+    assert len(admitted) == 3
+    # Per-sub-class diagnostic counters:
+    diag = state["m20_4_attribution_diagnostics"]
+    assert diag.get("producer_admit_total") == 3
+    assert (
+        diag.get("producer_admit_addressee_directed_total")
+        == 1
+    )
+    assert (
+        diag.get("producer_admit_addressee_not_directed_total")
+        == 1
+    )
+    assert diag.get("producer_admit_reaction_total") == 1
+    assert (
+        diag.get(
+            "producer_reject_low_confidence_addressee_directed_total"
+        )
+        == 1
+    )
+
+
+def test_p0_4_admit_threshold_helper_for_kind_and_subclass() -> None:
+    """`_admit_threshold_for` returns the per-sub-class
+    threshold. The helper is the single source of truth
+    for the producer's admit calibration.
+    """
+    from segmentum.dialogue.runtime.m20_4_attribution import (
+        _admit_threshold_for,
+    )
+    # addressee + addressed_to_assistant == True: 0.7
+    assert (
+        _admit_threshold_for(
+            kind="addressee", addressed_to_assistant=True
+        )
+        == 0.7
+    )
+    # addressee + addressed_to_assistant == False: 0.4
+    assert (
+        _admit_threshold_for(
+            kind="addressee", addressed_to_assistant=False
+        )
+        == 0.4
+    )
+    # reaction (any sub-class is None for reaction): 0.4
+    assert _admit_threshold_for(kind="reaction") == 0.4
+    assert (
+        _admit_threshold_for(
+            kind="reaction", addressed_to_assistant=None
+        )
+        == 0.4
+    )
+    # unknown kind: 0.4 (no-regression fallback)
+    assert _admit_threshold_for(kind="unknown_kind") == 0.4
+    # non-string kind: 0.4 (defensive)
+    assert _admit_threshold_for(kind=None) == 0.4  # type: ignore[arg-type]
+    # Whitespace + case insensitive on the kind
+    assert (
+        _admit_threshold_for(
+            kind="  Addressee  ", addressed_to_assistant=True
+        )
+        == 0.7
+    )
+

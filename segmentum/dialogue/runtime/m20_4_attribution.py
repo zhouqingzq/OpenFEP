@@ -63,6 +63,56 @@ from segmentum.dialogue.runtime.active_commitment import (
 # Frozen at 0.4 in v1; M18.7.1 calibration may revise.
 M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN: float = 0.4
 
+# P0-4 (2026-06-09) — sub-class admit threshold for the
+# `addressee_target_match` observable when the M18.7 hypothesis
+# is `addressed_to_assistant == True` (LLM says the message
+# IS directed at the assistant).
+#
+# M18.7.1 v2 + P1 real-LLM calibration (commit 26d2157,
+# `reports/m18_7_1_p1_precision_recall_split.md`):
+#   - `precision_on_not_addressed` = 1.0 (LLM is perfect on
+#     "not addressed" claims; n=4, all correct including
+#     1 noemit counted under v2 fix).
+#   - `recall_on_addressed` = 0.0 (LLM misses ALL 4
+#     "addressed" cases; 3 fn_addressed_present +
+#     1 fn_addressed_noemit).
+#   - High-band overconfidence drift: conf=0.85 bin has
+#     1 wrong (gap 0.85, the largest single-bin gap);
+#     conf=0.95 bin has 1 wrong out of 3 (gap 0.283).
+#
+# Therefore the LLM is structurally asymmetric: its
+# "addressed" claims are unreliable even at high confidence.
+# The v1 uniform 0.4 admit threshold admits too many
+# false "addressed" claims that the settler then has to
+# process (and the LLM judge may incorrectly confirm,
+# because the LLM judge's job is "is the hypothesis
+# consistent with the inbound turn", not "is the
+# hypothesis correct" — the judge's answer depends on
+# the LLM's reading of the inbound turn, which can agree
+# with the M18.7 hypothesis for the wrong reasons).
+#
+# P0-4 raises the admit threshold for the "addressed"
+# sub-class from 0.4 to 0.7. "Not addressed" claims
+# stay at the v1 0.4 (the LLM is 100% precise on these).
+# Reaction claims are unchanged (0.4 across the board;
+# the joint-axis asymmetry is in the *decision* to emit,
+# not in the admit threshold).
+#
+# The 0.7 value is calibrated against the bqxsmofri
+# drift signature: at conf=0.7 the 0.50-0.60 band has
+# 1 wrong (gap 0.6), but the 0.80-0.90 and 0.90-1.00
+# bands (which are the M20.4 actionable signal) start
+# above 0.7. Setting the threshold at 0.7 admits the
+# 0.80-0.90 / 0.90-1.00 cases (which the settler still
+# judges) while rejecting the 0.50-0.60 case (which is
+# the high-band overconfidence drift starting point).
+#
+# M20.4.1 (same-turn gate, currently in P3 kill-switch
+# audit-only mode) and the M20.4 v1 tie-breaker (per-field
+# threshold 0.9 / 0.7) are unchanged by P0-4. P0-4 is a
+# producer-only change.
+M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN_ADDRESSEE_DIRECTED: float = 0.7
+
 # Tie-breaker engagement threshold (per M20.4 DECIDED 2).
 # Strict inequality. P0-3 (2026-06-08) splits the v1 single
 # threshold (0.85) into per-field thresholds because M18.7.1
@@ -133,6 +183,52 @@ def _kind_from_observable(observable: str) -> str:
     if not isinstance(observable, str):
         return ""
     return _M20_4_OBSERVABLE_TO_KIND.get(observable.strip().lower(), "")
+
+
+def _admit_threshold_for(
+    *,
+    kind: str,
+    addressed_to_assistant: bool | None = None,
+) -> float:
+    """Per-sub-class admit confidence threshold (P0-4, 2026-06-09).
+
+    M20.4 v1 uses a single admit threshold
+    (`M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN = 0.4`) for both
+    `addressee` and `reaction` hypotheses. P0-4 splits the
+    `addressee` admit rule by the LLM's
+    `addressed_to_assistant` boolean:
+
+    - `addressed_to_assistant == True` (LLM says the
+      message IS directed at the assistant): admit at
+      `M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN_ADDRESSEE_DIRECTED`
+      (0.7). The LLM is structurally unreliable on this
+      sub-class; raising the bar filters out the
+      high-band overconfidence drift that P1 surfaced.
+    - `addressed_to_assistant == False` (LLM says the
+      message is NOT directed at the assistant): admit at
+      `M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN` (0.4, the
+      v1 default). The LLM is 100% precise on this
+      sub-class; the standard threshold is appropriate.
+    - `kind == "reaction"`: admit at the v1 0.4 default.
+      The reaction joint-axis asymmetry (50% no-emit
+      rate) is in the LLM's emit decision, not in
+      admit calibration; P0-4 does not change the
+      reaction admit rule.
+    - Unknown kind: admit at the v1 0.4 default
+      (no-regression fallback).
+
+    The function is a pure dispatcher; it does not
+    validate the boolean or read the entry. The
+    producer is responsible for passing the right
+    `addressed_to_assistant` flag (defaults to None
+    for non-addressee kinds).
+    """
+    if not isinstance(kind, str):
+        return M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN
+    k = kind.strip().lower()
+    if k == "addressee" and addressed_to_assistant is True:
+        return M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN_ADDRESSEE_DIRECTED
+    return M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN
 
 
 # Bounded excerpt cap. Aligned with M19.x surface-consistency
@@ -580,14 +676,51 @@ def produce_m20_4_attribution_commitments(
         # Pre-admit filter (mirrored in _admit_one for safety).
         confidence = _bounded_float(entry.get("confidence", 0.0))
         participant_id = str(entry.get("participant_id", "") or "")
+        # P0-4 (2026-06-09): per-sub-class admit threshold.
+        # For `addressee` with `addressed_to_assistant == True`,
+        # the LLM is structurally unreliable (P1:
+        # recall_on_addressed = 0.0); raise the bar from
+        # 0.4 to 0.7. Other sub-classes / kinds keep the
+        # v1 0.4 default.
+        addressed_flag: bool | None = None
+        if kind == "addressee":
+            addressed_flag = bool(
+                entry.get("addressed_to_assistant", False)
+            )
+        threshold = _admit_threshold_for(
+            kind=kind, addressed_to_assistant=addressed_flag
+        )
         if (
-            confidence < M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN
+            confidence < threshold
             or not participant_id
         ):
-            if confidence < M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN:
+            if confidence < threshold:
                 _bump_diag(
                     state, producer_reject_low_confidence_total=1
                 )
+                # P0-4: per-sub-class reject histogram. The
+                # aggregate `producer_reject_low_confidence_total`
+                # is preserved for back-compat with the v1
+                # diagnostic surface; the per-sub-class
+                # buckets are additive and let M20.4
+                # diagnose distinguish "addressed" vs
+                # "not addressed" reject rates.
+                bucket_key = (
+                    "producer_reject_low_confidence_"
+                    f"{kind}_directed_total"
+                    if kind == "addressee" and addressed_flag
+                    else (
+                        "producer_reject_low_confidence_"
+                        f"{kind}_not_directed_total"
+                        if kind == "addressee" and not addressed_flag
+                        else f"producer_reject_low_confidence_{kind}_total"
+                    )
+                )
+                diag = state.get("m20_4_attribution_diagnostics")
+                if not isinstance(diag, dict):
+                    diag = {}
+                diag[bucket_key] = int(diag.get(bucket_key, 0)) + 1
+                state["m20_4_attribution_diagnostics"] = diag
             if not participant_id:
                 _bump_diag(
                     state, producer_reject_disclosure_total=1
@@ -605,6 +738,24 @@ def produce_m20_4_attribution_commitments(
         if commitment is not None:
             admitted.append(commitment)
             _bump_diag(state, producer_admit_total=1)
+            # P0-4: per-sub-class admit histogram. Additive
+            # over the v1 `producer_admit_total` aggregate.
+            admit_bucket_key = (
+                "producer_admit_addressee_directed_total"
+                if kind == "addressee" and addressed_flag
+                else (
+                    "producer_admit_addressee_not_directed_total"
+                    if kind == "addressee" and not addressed_flag
+                    else f"producer_admit_{kind}_total"
+                )
+            )
+            diag = state.get("m20_4_attribution_diagnostics")
+            if not isinstance(diag, dict):
+                diag = {}
+            diag[admit_bucket_key] = int(
+                diag.get(admit_bucket_key, 0)
+            ) + 1
+            state["m20_4_attribution_diagnostics"] = diag
     return admitted
 
 
@@ -1203,6 +1354,7 @@ __all__ = [
     "M20_4_BOUNDED_EXCERPT_CHARS",
     "M20_4_ENGINEERING_PROXY_LABEL",
     "M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN",
+    "M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN_ADDRESSEE_DIRECTED",
     "M20_4_TIE_BREAKER_CONFIDENCE_MIN",
     "M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND",
     "REASON_ADMISSION",
@@ -1212,6 +1364,7 @@ __all__ = [
     "REASON_TIE_BREAKER_ENGAGED",
     "REASON_TIE_BREAKER_REJECTED",
     "ReactionAttributionMatchLLMJudgeSettler",
+    "_admit_threshold_for",
     "build_addressee_target_match_admitted_event",
     "build_m18_5_attribution_feedback_row",
     "build_reaction_attribution_match_admitted_event",
