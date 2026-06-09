@@ -1,0 +1,129 @@
+[
+  {
+    "turn_index": 0,
+    "text": "@胡桃 我有个问题想问你",
+    "speaker_name": "小明",
+    "group_turn_envelope": {
+      "speaker_participant_id": "xiaoming",
+      "visible_participant_ids": ["xiaoming", "alan", "hutao"],
+      "mentioned_participant_ids": ["hutao"],
+      "explicit_mentions": ["胡桃"]
+    },
+    "assertion_kind": "addressee_only",
+    "ground_truth": {
+      "addressed_to_assistant": true,
+      "addressee_participant_id": "hutao",
+      "reaction_to_turn_id": "unknown",
+      "reaction_to_participant_id": "unknown",
+      "is_about_assistant_claim": "unknown"
+    },
+    "expected_confidence_band": "high",
+    "note": "Explicit @胡桃 with direct question; high confidence the LLM should produce addressed_to_assistant=true. Cross-language sanity test: the LLM should pick up the @-mention in Chinese text and recognize 'hutao' as the pid for 胡桃."
+  },
+  {
+    "turn_index": 1,
+    "text": "胡桃刚才回答得真不错",
+    "speaker_name": "阿蓝",
+    "group_turn_envelope": {
+      "speaker_participant_id": "alan",
+      "visible_participant_ids": ["xiaoming", "alan", "hutao"],
+      "mentioned_participant_ids": ["hutao"],
+      "explicit_mentions": ["胡桃"]
+    },
+    "assertion_kind": "both",
+    "ground_truth": {
+      "addressed_to_assistant": false,
+      "addressee_participant_id": "alan",
+      "reaction_to_turn_id": "turn_<assistant_prior_turn_id>",
+      "reaction_to_participant_id": "hutao",
+      "is_about_assistant_claim": true
+    },
+    "expected_confidence_band": "high",
+    "note": "阿蓝 is talking ABOUT 胡桃's prior turn to the group, not to 胡桃. addressed_to_assistant=false; reaction_to_participant_id=hutao; is_about_assistant_claim=true (胡桃's prior answer is the claim). Tests Chinese reaction attribution when the assistant is being discussed in the third person."
+  },
+  {
+    "turn_index": 2,
+    "text": "你继续说吧",
+    "speaker_name": "小明",
+    "group_turn_envelope": {
+      "speaker_participant_id": "xiaoming",
+      "visible_participant_ids": ["xiaoming", "alan", "hutao"],
+      "mentioned_participant_ids": [],
+      "explicit_mentions": []
+    },
+    "assertion_kind": "addressee_only",
+    "ground_truth": {
+      "addressed_to_assistant": true,
+      "addressee_participant_id": "hutao",
+      "reaction_to_turn_id": "unknown",
+      "reaction_to_participant_id": "unknown",
+      "is_about_assistant_claim": "unknown"
+    },
+    "expected_confidence_band": "medium",
+    "note": "Implicit continuation: '你' implicitly refers to 胡桃 (the assistant). No explicit @. The LLM must rely on context. Cross-language implicit-continuation test — Chinese implicit-pronoun resolution."
+  },
+  {
+    "turn_index": 3,
+    "text": "嗯",
+    "speaker_name": "阿蓝",
+    "group_turn_envelope": {
+      "speaker_participant_id": "alan",
+      "visible_participant_ids": ["xiaoming", "alan", "hutao"],
+      "mentioned_participant_ids": [],
+      "explicit_mentions": []
+    },
+    "assertion_kind": "addressee_only",
+    "ground_truth": {
+      "addressed_to_assistant": false,
+      "addressee_participant_id": "alan",
+      "reaction_to_turn_id": "unknown",
+      "reaction_to_participant_id": "unknown",
+      "is_about_assistant_claim": "unknown"
+    },
+    "expected_confidence_band": "low",
+    "note": "Short single-character acknowledgement in Chinese ('嗯'). M18.7 DECIDED 1(a) category. Cross-language short-ack test — the LLM must not over-confidently claim the assistant is being addressed."
+  },
+  {
+    "turn_index": 4,
+    "text": "@阿蓝 你怎么看?",
+    "speaker_name": "小明",
+    "group_turn_envelope": {
+      "speaker_participant_id": "xiaoming",
+      "visible_participant_ids": ["xiaoming", "alan", "hutao"],
+      "addressed_participant_ids": ["alan"],
+      "mentioned_participant_ids": ["alan"],
+      "explicit_mentions": ["阿蓝"]
+    },
+    "assertion_kind": "addressee_only",
+    "ground_truth": {
+      "addressed_to_assistant": false,
+      "addressee_participant_id": "alan",
+      "reaction_to_turn_id": "unknown",
+      "reaction_to_participant_id": "unknown",
+      "is_about_assistant_claim": "unknown"
+    },
+    "expected_confidence_band": "medium",
+    "note": "Side-thread interjection: 小明 is directing 阿蓝 to respond (M18.7 DECIDED 1(b) category). addressed_to_assistant=false; structural addressee is 阿蓝. Cross-language side-thread test — the LLM should NOT claim addressed_to_assistant=true when @ goes to a non-assistant participant."
+  },
+  {
+    "turn_index": 5,
+    "text": "胡桃, 我还有一个建议",
+    "speaker_name": "小明",
+    "group_turn_envelope": {
+      "speaker_participant_id": "xiaoming",
+      "visible_participant_ids": ["xiaoming", "alan", "hutao"],
+      "mentioned_participant_ids": ["hutao"],
+      "explicit_mentions": ["胡桃"]
+    },
+    "assertion_kind": "addressee_only",
+    "ground_truth": {
+      "addressed_to_assistant": true,
+      "addressee_participant_id": "hutao",
+      "reaction_to_turn_id": "unknown",
+      "reaction_to_participant_id": "unknown",
+      "is_about_assistant_claim": "unknown"
+    },
+    "expected_confidence_band": "high",
+    "note": "Mid-thought with explicit 胡桃 name (no question mark; not a direct question). Tests Chinese addressee recovery when the message is a statement, not a question. The LLM should still pick up '胡桃' as the structural addressee even without a question-mark cue."
+  }
+]
