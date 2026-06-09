@@ -113,6 +113,68 @@ M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN: float = 0.4
 # producer-only change.
 M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN_ADDRESSEE_DIRECTED: float = 0.7
 
+# P0-5 (2026-06-09) — write-path filter for the
+# `addressee_target_match` observable when the M18.7
+# hypothesis is `addressed_to_assistant == True`.
+#
+# P0-4 raises the producer admit bar for the
+# "addressed" sub-class to 0.7. P0-5 adds a *second*
+# filter at the write path: even after the producer
+# admits an "addressed" claim and the settler confirms
+# it (the M20.1 scheduler only calls the write path on
+# `microadjust + confirmed`), the write path skips
+# the persistent `state["addressee_graph"]` write when
+# the M18.7 hypothesis confidence is below 0.9.
+#
+# Why 0.9 (strict `>`):
+#   - P1 bqxsmofri: 0.85 conf bin has 1 wrong (gap
+#     0.85 — the largest single-bin gap). Rejected by
+#     0.9 (the only conf=0.85 case in this run is
+#     filtered out).
+#   - P1 bqxsmofri: 0.95 conf bin has 1 wrong out of
+#     3 (gap 0.283). Admitted by 0.9 (3 cases, 2
+#     correct + 1 wrong — 67% accuracy on this bin).
+#   - 0.9 matches the M20.4 v1 tie-breaker threshold
+#     for the addressee field (per-field 0.9, strict
+#     `>`). The write path is at least as strict as
+#     the tie-breaker; the threshold values are
+#     consistent.
+#
+# Why a write-path filter (not just the producer):
+#   - The producer admit rule filters the *first* layer
+#     of unreliable claims (P0-4). The settler is a
+#     separate LLM that judges "is the M18.7 hypothesis
+#     consistent with the inbound turn" — a different
+#     question from "is the hypothesis correct". We do
+#     not have direct settler-accuracy data; the
+#     conservative assumption is that the settler's
+#     agreement with the M18.7 hypothesis is correlated
+#     with the M18.7 hypothesis's reliability.
+#   - The write path persists data: rows in
+#     `state["addressee_graph"]` are read on later
+#     turns (M18.5 tie-breaker feedback, future
+#     retrieval). Writing an unreliable row corrupts
+#     the future. Skipping the write is reversible;
+#     the producer admit and settler judgment still
+#     run, so the tie-breaker feedback path is
+#     unaffected.
+#
+# M20.4 v1 design intent: the write path is supposed
+# to be a memory of attribution events. P0-5 narrows
+# this to "memory of *reliable* attribution events"
+# (precision 1.0 sub-class always writes; "addressed"
+# sub-class writes only at high confidence). The
+# "not addressed" path is unchanged (precision 1.0
+# per P1, so always writing is correct).
+#
+# The 0.9 value is **directional, not definitive**.
+# A future M18.7.1 stability rerun on settler
+# accuracy (P2/P3) may surface a tighter value. M20.4
+# owner can revise
+# `M20_4_WRITE_PATH_SKIP_ADDRESSEE_DIRECTED_BELOW_CONFIDENCE`
+# up or down with a documented decision.
+M20_4_WRITE_PATH_SKIP_ADDRESSEE_DIRECTED_BELOW_CONFIDENCE: float = 0.9
+
 # Tie-breaker engagement threshold (per M20.4 DECIDED 2).
 # Strict inequality. P0-3 (2026-06-08) splits the v1 single
 # threshold (0.85) into per-field thresholds because M18.7.1
@@ -231,6 +293,34 @@ def _admit_threshold_for(
     return M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN
 
 
+def _should_skip_addressee_directed_write(
+    *,
+    confidence: float,
+) -> bool:
+    """P0-5 (2026-06-09): write-path filter for the
+    `addressee_target_match` observable with
+    `addressed_to_assistant == True`.
+
+    Returns True when the write path should skip the
+    persistent `state["addressee_graph"]` write. The
+    filter applies ONLY to the "addressed" sub-class
+    (`addressed_to_assistant == True`); the caller is
+    responsible for dispatching this check to the
+    "addressed" sub-class only.
+
+    The 0.9 threshold is strict `>` (consistent with
+    the M20.4 v1 tie-breaker style). The function is
+    a pure dispatcher; it does not read state or
+    validate shapes.
+    """
+    return (
+        not isinstance(confidence, (int, float))
+        or bool(confidence != confidence)  # NaN
+        or float(confidence)
+        <= M20_4_WRITE_PATH_SKIP_ADDRESSEE_DIRECTED_BELOW_CONFIDENCE
+    )
+
+
 # Bounded excerpt cap. Aligned with M19.x surface-consistency
 # excerpt and M18.7 rationale cap. Frozen at 200 in v1.
 M20_4_BOUNDED_EXCERPT_CHARS: int = 200
@@ -251,6 +341,13 @@ REASON_TIE_BREAKER_REJECTED: str = "m20_4_attribution_tie_breaker_rejected"
 REASON_GRAPH_MICROADJUST: str = "m20_4_addressee_graph_microadjust"
 REASON_GRAPH_REVOKE: str = "m20_4_addressee_graph_revoke"
 REASON_GRAPH_NOOP: str = "m20_4_addressee_graph_noop"
+# P0-5 (2026-06-09): the write-path filter's skip reason
+# code. Emitted as part of the diagnostic counter, NOT as
+# a bus event (the write path returns None on skip; no
+# `GroupAddresseeGraphUpdated` event is emitted).
+REASON_GRAPH_SKIP_ADDRESSEE_DIRECTED_LOW_CONFIDENCE: str = (
+    "m20_4_addressee_graph_skip_addressee_directed_low_confidence"
+)
 
 # Tie-breaker rejection reasons (for the
 # `tie_breaker_rejected_by_reason` diagnostic counter).
@@ -1152,8 +1249,23 @@ def write_addressee_graph_microadjust(
       - evidence_refs (bounded handles)
     Emits a `GroupAddresseeGraphUpdated` audit event.
 
-    Returns the audit event dict (the caller is responsible
-    for appending it to the per-turn bus).
+    P0-5 (2026-06-09) — write-path filter for the
+    `addressee_target_match` observable with
+    `addressed_to_assistant == True`. When the M18.7
+    hypothesis confidence is `<= 0.9` (the bqxsmofri
+    high-band overconfidence drift zone), the function
+    returns None (no graph write, no audit event) and
+    bumps the
+    `write_path_skip_addressee_directed_low_confidence_total`
+    diagnostic counter. The "not addressed" sub-class
+    (precision 1.0) and the `reaction_attribution_match`
+    observable are unchanged. The producer admit rule
+    (P0-4) and the settler (M20.1) still run, so the
+    tie-breaker feedback path is unaffected.
+
+    Returns the audit event dict (the caller is
+    responsible for appending it to the per-turn bus),
+    or None when the write is skipped.
     """
     if not isinstance(commitment, ActiveCommitment):
         return None
@@ -1186,6 +1298,29 @@ def write_addressee_graph_microadjust(
             hypothesis.get("addressed_to_assistant", False)
         )
         confidence = float(hypothesis.get("confidence", 0.0) or 0.0)
+        # P0-5: write-path filter for the "addressed"
+        # sub-class ONLY. Skips the persistent graph
+        # write when the LLM's "addressed" claim is at
+        # high confidence but the bqxsmofri drift zone
+        # (P1: recall_on_addressed = 0.0). The "not
+        # addressed" sub-class (P1 precision 1.0) is
+        # NOT touched — its admit threshold is 0.4 (P0-4)
+        # and the v1 write path is preserved. The filter
+        # is at the write boundary, not the producer
+        # admit boundary; the producer admit (P0-4) and
+        # the settler still run, so the tie-breaker
+        # feedback path is unaffected.
+        if (
+            addressed_to_assistant
+            and _should_skip_addressee_directed_write(
+                confidence=confidence
+            )
+        ):
+            _bump_diag(
+                state,
+                write_path_skip_addressee_directed_low_confidence_total=1,
+            )
+            return None
     elif commitment.observable == "reaction_attribution_match":
         attributed_turn_id = str(hypothesis.get("reaction_to_turn_id", "") or "")
         addressed_to_assistant = bool(
@@ -1357,14 +1492,17 @@ __all__ = [
     "M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN_ADDRESSEE_DIRECTED",
     "M20_4_TIE_BREAKER_CONFIDENCE_MIN",
     "M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND",
+    "M20_4_WRITE_PATH_SKIP_ADDRESSEE_DIRECTED_BELOW_CONFIDENCE",
     "REASON_ADMISSION",
     "REASON_GRAPH_MICROADJUST",
     "REASON_GRAPH_NOOP",
     "REASON_GRAPH_REVOKE",
+    "REASON_GRAPH_SKIP_ADDRESSEE_DIRECTED_LOW_CONFIDENCE",
     "REASON_TIE_BREAKER_ENGAGED",
     "REASON_TIE_BREAKER_REJECTED",
     "ReactionAttributionMatchLLMJudgeSettler",
     "_admit_threshold_for",
+    "_should_skip_addressee_directed_write",
     "build_addressee_target_match_admitted_event",
     "build_m18_5_attribution_feedback_row",
     "build_reaction_attribution_match_admitted_event",
