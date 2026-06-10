@@ -1,0 +1,398 @@
+{
+  "ok": true,
+  "stage": "real_llm_replay_complete",
+  "scoring_mode": "by_pid",
+  "fixture_name": "E:\\workspace\\segments\\tests\\fixtures\\m18_7_1_held_out_calibration.json",
+  "n_fixtures": 12,
+  "at": "2026-06-10T08:37:00+00:00",
+  "verdict": "severe_drift_recommend_m20_4",
+  "addressee": {
+    "n_total": 12,
+    "n_present": 8,
+    "n_unknown": 4,
+    "n_correct": 6,
+    "n_incorrect": 2,
+    "accuracy": 0.75,
+    "brier": 0.262813,
+    "ece": 0.30625,
+    "reliability_bins": [
+      {
+        "label": "0.00-0.10",
+        "count": 1,
+        "mean_confidence": 0.0,
+        "accuracy": 1.0,
+        "gap": 1.0
+      },
+      {
+        "label": "0.10-0.20",
+        "count": 0,
+        "mean_confidence": 0.0,
+        "accuracy": 0.0,
+        "gap": 0.0
+      },
+      {
+        "label": "0.20-0.30",
+        "count": 1,
+        "mean_confidence": 0.2,
+        "accuracy": 0.0,
+        "gap": 0.2
+      },
+      {
+        "label": "0.30-0.40",
+        "count": 0,
+        "mean_confidence": 0.0,
+        "accuracy": 0.0,
+        "gap": 0.0
+      },
+      {
+        "label": "0.40-0.50",
+        "count": 0,
+        "mean_confidence": 0.0,
+        "accuracy": 0.0,
+        "gap": 0.0
+      },
+      {
+        "label": "0.50-0.60",
+        "count": 0,
+        "mean_confidence": 0.0,
+        "accuracy": 0.0,
+        "gap": 0.0
+      },
+      {
+        "label": "0.60-0.70",
+        "count": 1,
+        "mean_confidence": 0.65,
+        "accuracy": 1.0,
+        "gap": 0.35
+      },
+      {
+        "label": "0.70-0.80",
+        "count": 0,
+        "mean_confidence": 0.0,
+        "accuracy": 0.0,
+        "gap": 0.0
+      },
+      {
+        "label": "0.80-0.90",
+        "count": 1,
+        "mean_confidence": 0.85,
+        "accuracy": 1.0,
+        "gap": 0.15
+      },
+      {
+        "label": "0.90-1.00",
+        "count": 4,
+        "mean_confidence": 0.9375,
+        "accuracy": 0.75,
+        "gap": 0.1875
+      }
+    ],
+    "drift_signals": [
+      "overconfidence_at_high_band",
+      "underconfidence_at_low_band",
+      "bimodal"
+    ],
+    "threshold_recommendation": {
+      "current_admit_min": 0.4,
+      "current_tie_breaker_min": 0.85,
+      "candidate_admit_min": null,
+      "candidate_tie_breaker_min": 0.8,
+      "caveat": "decision belongs to M20.4; M18.7.1 only surfaces"
+    },
+    "addressee_class_breakdown": {
+      "n_gt_true": 4,
+      "n_gt_false": 4,
+      "n_unknown": 4,
+      "tp_addressed": 2,
+      "fn_addressed": 2,
+      "fn_addressed_present": 2,
+      "fn_addressed_noemit": 0,
+      "tp_not_addressed": 4,
+      "tp_not_addressed_present": 3,
+      "tp_not_addressed_noemit": 1,
+      "fp_not_addressed": 0,
+      "precision_on_not_addressed": 1.0,
+      "recall_on_addressed": 0.5
+    }
+  },
+  "reaction": {
+    "n_total": 12,
+    "n_present": 4,
+    "n_unknown": 6,
+    "n_correct": 2,
+    "n_incorrect": 2,
+    "accuracy": 0.5,
+    "brier": 0.295625,
+    "ece": 0.4625,
+    "reliability_bins": [
+      {
+        "label": "0.00-0.10",
+        "count": 0,
+        "mean_confidence": 0.0,
+        "accuracy": 0.0,
+        "gap": 0.0
+      },
+      {
+        "label": "0.10-0.20",
+        "count": 0,
+        "mean_confidence": 0.0,
+        "accuracy": 0.0,
+        "gap": 0.0
+      },
+      {
+        "label": "0.20-0.30",
+        "count": 0,
+        "mean_confidence": 0.0,
+        "accuracy": 0.0,
+        "gap": 0.0
+      },
+      {
+        "label": "0.30-0.40",
+        "count": 0,
+        "mean_confidence": 0.0,
+        "accuracy": 0.0,
+        "gap": 0.0
+      },
+      {
+        "label": "0.40-0.50",
+        "count": 0,
+        "mean_confidence": 0.0,
+        "accuracy": 0.0,
+        "gap": 0.0
+      },
+      {
+        "label": "0.50-0.60",
+        "count": 1,
+        "mean_confidence": 0.6,
+        "accuracy": 0.0,
+        "gap": 0.6
+      },
+      {
+        "label": "0.60-0.70",
+        "count": 1,
+        "mean_confidence": 0.7,
+        "accuracy": 1.0,
+        "gap": 0.3
+      },
+      {
+        "label": "0.70-0.80",
+        "count": 0,
+        "mean_confidence": 0.0,
+        "accuracy": 0.0,
+        "gap": 0.0
+      },
+      {
+        "label": "0.80-0.90",
+        "count": 1,
+        "mean_confidence": 0.85,
+        "accuracy": 0.0,
+        "gap": 0.85
+      },
+      {
+        "label": "0.90-1.00",
+        "count": 1,
+        "mean_confidence": 0.9,
+        "accuracy": 1.0,
+        "gap": 0.1
+      }
+    ],
+    "drift_signals": [
+      "insufficient_data"
+    ],
+    "threshold_recommendation": {
+      "current_admit_min": 0.4,
+      "current_tie_breaker_min": 0.85,
+      "candidate_admit_min": null,
+      "candidate_tie_breaker_min": null,
+      "caveat": "decision belongs to M20.4; M18.7.1 only surfaces"
+    },
+    "pid_breakdown": {
+      "n_present": 6,
+      "n_correct": 3,
+      "accuracy": 0.5,
+      "brier": 0.08041666666666668,
+      "ece": 0.19166666666666665,
+      "reliability_bins": [
+        {
+          "label": "0.00-0.10",
+          "count": 2,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.10-0.20",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.20-0.30",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.30-0.40",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.40-0.50",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.50-0.60",
+          "count": 1,
+          "mean_confidence": 0.6,
+          "accuracy": 0.0,
+          "gap": 0.6
+        },
+        {
+          "label": "0.60-0.70",
+          "count": 1,
+          "mean_confidence": 0.7,
+          "accuracy": 1.0,
+          "gap": 0.3
+        },
+        {
+          "label": "0.70-0.80",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.80-0.90",
+          "count": 1,
+          "mean_confidence": 0.85,
+          "accuracy": 1.0,
+          "gap": 0.15
+        },
+        {
+          "label": "0.90-1.00",
+          "count": 1,
+          "mean_confidence": 0.9,
+          "accuracy": 1.0,
+          "gap": 0.1
+        }
+      ]
+    },
+    "is_about_breakdown": {
+      "n_present": 6,
+      "n_correct": 2,
+      "accuracy": 0.3333333333333333,
+      "brier": 0.1970833333333333,
+      "ece": 0.3083333333333333,
+      "reliability_bins": [
+        {
+          "label": "0.00-0.10",
+          "count": 2,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.10-0.20",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.20-0.30",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.30-0.40",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.40-0.50",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.50-0.60",
+          "count": 1,
+          "mean_confidence": 0.6,
+          "accuracy": 0.0,
+          "gap": 0.6
+        },
+        {
+          "label": "0.60-0.70",
+          "count": 1,
+          "mean_confidence": 0.7,
+          "accuracy": 1.0,
+          "gap": 0.3
+        },
+        {
+          "label": "0.70-0.80",
+          "count": 0,
+          "mean_confidence": 0.0,
+          "accuracy": 0.0,
+          "gap": 0.0
+        },
+        {
+          "label": "0.80-0.90",
+          "count": 1,
+          "mean_confidence": 0.85,
+          "accuracy": 0.0,
+          "gap": 0.85
+        },
+        {
+          "label": "0.90-1.00",
+          "count": 1,
+          "mean_confidence": 0.9,
+          "accuracy": 1.0,
+          "gap": 0.1
+        }
+      ]
+    },
+    "reaction_joint_breakdown": {
+      "n_joint_all_decidable": 6,
+      "n_joint_emit_subset": 4,
+      "n_joint_correct_all_decidable": 2,
+      "n_joint_correct_emit_subset": 2,
+      "n_joint_no_emit_wrong": 2,
+      "acc_joint_all_decidable": 0.333333,
+      "acc_joint_emit_subset": 0.5
+    }
+  },
+  "fixture_warnings": [],
+  "drift_signals": [
+    "overconfidence_at_high_band",
+    "underconfidence_at_low_band",
+    "bimodal",
+    "insufficient_data"
+  ],
+  "threshold_recommendation": {
+    "current_admit_min": 0.4,
+    "current_tie_breaker_min": 0.85,
+    "candidate_admit_min": null,
+    "candidate_tie_breaker_min": null,
+    "caveat": "decision belongs to M20.4; M18.7.1 only surfaces"
+  },
+  "session_root": "E:\\workspace\\segments\\tmp_m18_7_2_v2_p0_8_run_4",
+  "m20_4_attribution_diagnostics": {
+    "producer_admit_total": 8,
+    "producer_admit_addressee_not_directed_total": 3,
+    "producer_admit_addressee_directed_total": 1,
+    "producer_admit_reaction_total": 4
+  }
+}
