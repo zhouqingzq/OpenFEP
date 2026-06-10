@@ -451,25 +451,19 @@ def _run_one(
 ) -> dict[str, Any]:
     """Execute one full 5-run-loop iteration.
 
-    Replay the fixture through the runtime, run the v2
-    calibration harness, then compute the 4 sub-capability
-    metrics from the final state surface.
+    The M18.7.1 v2 calibration harness drives the runtime
+    through the fixture itself (it calls
+    `runtime.run_turn` per fixture step and reads the
+    state surface at each turn). Calling `run_turn` here
+    AND letting the harness do it would double-process
+    the fixture, doubling LLM calls. We let the harness
+    drive; the 4 sub-capability metrics read the final
+    state surface after the harness returns.
     """
-    for i, step in enumerate(fixture):
-        text = str(step.get("text", ""))
-        ti = int(step.get("turn_index", i))
-        env = step.get("group_turn_envelope", {}) or {}
-        speaker_name = str(env.get("speaker_participant_id", ""))
-        now = now_base + i * time_step
-        runtime.run_turn(
-            text,
-            turn_index=ti,
-            speaker_name=speaker_name,
-            group_turn_envelope=env,
-            now=now,
-        )
-
     # v2 by_pid harness (Q1 default scoring mode).
+    # The harness internally calls `runtime.run_turn`
+    # for each fixture step and accumulates predictions
+    # from the state surface.
     harness_report = run_m18_7_1_calibration_harness(
         runtime=runtime,
         fixture=fixture,
