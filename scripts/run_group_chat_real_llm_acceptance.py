@@ -741,10 +741,15 @@ def main() -> int:
         # "OpenRouter chat completion failed" when the
         # upstream closes the connection (HTTP 10054).
         # This is intermittent on `deepseek-v4-flash`
-        # (observed twice in one evening). We retry the
-        # whole run up to 3 times with a fresh session
-        # directory per attempt.
-        max_attempts = 3
+        # (observed 3+ connection resets in one evening,
+        # with minimal 30-60s gaps between them — the
+        # upstream is flaky for sustained traffic).
+        # We retry the whole run up to 5 times with a
+        # fresh session directory per attempt, with a
+        # short sleep between attempts to let the
+        # upstream settle.
+        import time as _time
+        max_attempts = 5
         last_err: Exception | None = None
         run_summary: dict[str, Any] | None = None
         for attempt in range(1, max_attempts + 1):
@@ -786,12 +791,13 @@ def main() -> int:
                 print(
                     f"[run {i}] attempt {attempt}/{max_attempts} "
                     f"connection-reset: {msg[:200]!r}; "
-                    f"retrying...",
+                    f"sleeping 30s and retrying...",
                     file=sys.stderr,
                     flush=True,
                 )
                 if attempt >= max_attempts:
                     raise
+                _time.sleep(30)
         if run_summary is None:
             # All attempts failed.
             raise last_err  # type: ignore[misc]
