@@ -77,7 +77,14 @@ REASON_FIELD_SKIPPED_FAST_CHAT: str = "m18_7_field_skipped_fast_chat"
 # shape, with a `_m18_7_2_source` tag for traceability.
 
 M18_7_2_SOURCE_TAG: str = "m18_7_2_minimal"
-M18_7_2_MINIMAL_PROMPT_MAX_CHARS: int = 2000
+# M18.7.2 v2 (2026-06-10): bumped from 2000 to 2500 to
+# accommodate the v2 system_prompt revision (strong-signal
+# list + counter-example list + 3 inline examples for the
+# `addressed_to_assistant` axis). v1 nominal was 1647 chars
+# (within 2000); v2 nominal is 2277 chars (within 2500).
+# The MAX is still well below the 7.7-26k conscious-loop
+# prompt that motivated the M18.7.2 minimal-prompt design.
+M18_7_2_MINIMAL_PROMPT_MAX_CHARS: int = 2500
 M18_7_2_REASON_FIELD_PRESENT: str = "m18_7_2_field_present"
 M18_7_2_REASON_MINIMAL_DEGRADED: str = "m18_7_2_minimal_llm_failure"
 
@@ -883,7 +890,9 @@ def build_m18_7_minimal_prompt(
     attribution, decoupled from the conscious loop.
 
     Returns `(system_prompt, user_prompt)`. The combined length
-    is bounded at `M18_7_2_MINIMAL_PROMPT_MAX_CHARS = 2000`. The
+    is bounded at `M18_7_2_MINIMAL_PROMPT_MAX_CHARS = 2500`
+    (v2 bump from 2000 to accommodate the addressed-axis
+    strong-signal / counter-example list). The
     LLM is asked to fill a 4-key JSON:
 
     ```text
@@ -931,13 +940,46 @@ def build_m18_7_minimal_prompt(
     else:
         identity_line = "你是数字人格系统的群聊归因助手。"
 
+    # M18.7.2 v2 (2026-06-10) — system_prompt revised to
+    # lift the LLM's `addressed_to_assistant` default-to-False
+    # bias. P0-7 5-run stability (commit b030fca) showed the
+    # LLM emits `addressed_to_assistant=True` on 0-1 of 4 GT
+    # addressed cases per run (recall 0.0-0.25). Root cause:
+    # v1 system_prompt did not enumerate the strong-signal
+    # evidence the LLM should consult. v2 adds:
+    #   - Strong-signal list for `addressed_to_assistant=True`
+    #     (bot alias in mentioned_participant_ids, second-person
+    #     imperative, "OK"/continuation + bot directive, implicit
+    #     directive like "Someone is reading this").
+    #   - Counter-example list for `addressed_to_assistant=False`
+    #     (other-recipient direct address, group-wide address).
+    #   - 3 inline examples (generic; no fixture leak).
+    # The total prompt length stays under
+    # `M18_7_2_MINIMAL_PROMPT_MAX_CHARS = 2000` (v1 was 1647
+    # chars; v2 is ~1850 chars; verified by tests).
     system_prompt = (
         f"{identity_line}\n"
-        "当前轮次可能是群聊里某人对当前说话方说的一句话。\n"
-        "判断两件事：\n"
-        "1. addressee_hypothesis: 这句话是否对你说的？\n"
+        "当前轮次是群聊里某人的一句话。判断两件事：\n"
+        "\n"
+        "1. addressee_hypothesis: 这句话是否对你（bot）说的？\n"
+        "   addressed_to_assistant=True 的强信号：\n"
+        "     - @bot，或 mentioned/addressed_participant_ids 含 bot alias\n"
+        "     - entity_binding.current_interlocutor = bot\n"
+        "     - 第二人称祈使句：'can you' / 'could you' / 'do you'\n"
+        "     - 'OK' / '好的' 等接续语后接 bot 指令\n"
+        "     - 隐含指令：'Someone is reading this'（bot 是隐含收件人）\n"
+        "   addressed_to_assistant=False 的反例：\n"
+        "     - 对其他人说话：'Dave, you first'（target=Dave）\n"
+        "     - 对整个群组：'大家怎么看' / 'anyone?'\n"
+        "   简例：'Can you explain that?' → True；"
+        "'Dave, you first.' → False（target=Dave）；"
+        "'OK, can you do X?' → True。\n"
+        "\n"
         "2. reaction_attribution_hypothesis: 这句话是否对某条之前轮次的反应？\n"
-        "基于 entity_binding / group_turn_binding / 之前几轮消息的结构化信号做语义判断。\n"
+        "   - user_text 是否有 '我之前' / '你刚才' / 'that thing ... raised'\n"
+        "   - last_user_utterances 的 reply_to_turn_id / quoted_turn_ids\n"
+        "\n"
+        "基于 entity_binding / group_turn_binding / last_user_utterances 做语义判断。\n"
         "不要用关键词或正则做判断；语义判断由你做。\n"
         "不要生成回复内容；只输出 JSON。\n"
         "5-key JSON spec (the 4 below + the _m18_7_2_source marker):\n"

@@ -101,9 +101,12 @@ def _default_entity_binding() -> dict[str, Any]:
 
 def test_build_m18_7_minimal_prompt_length_under_2k_chars() -> None:
     """The combined (system + user) prompt is bounded at
-    `M18_7_2_MINIMAL_PROMPT_MAX_CHARS = 2000` for a representative
-    11-char Chinese user utterance with the full structural
-    payload (entity_binding, group_turn_binding, prior turn).
+    `M18_7_2_MINIMAL_PROMPT_MAX_CHARS` (v1: 2000; v2: 2500) for
+    a representative 11-char Chinese user utterance with the
+    full structural payload (entity_binding,
+    group_turn_binding, prior turn). The test name retains
+    `2k` for back-compat with the v1 path; the actual bound
+    is the constant.
     """
     system, user = build_m18_7_minimal_prompt(
         state=_default_state(),
@@ -916,3 +919,158 @@ def test_state_surface_cap_holds_for_m18_7_2_minimal(tmp_path: Path) -> None:
     assert len(surface) == M18_7_STATE_SURFACE_CAP
     # The cap drops the tail; the latest entry is the last turn.
     assert surface[-1]["turn_index"] == 11
+
+
+# === M18.7.2 v2 prompt revision tests (P0-7 follow-up) ====================
+# v2 (2026-06-10) — system_prompt revised to lift the LLM's
+# `addressed_to_assistant` default-to-False bias. P0-7 5-run
+# stability (commit b030fca) showed recall_on_addressed=0.0-0.25
+# in 5/5 runs. The v2 prompt adds a strong-signal list, a
+# counter-example list, and 3 inline examples. The v1 prompt
+# told the LLM "判断两件事" (judge two things) without telling
+# it what strong evidence to consult. v2 closes that gap.
+
+
+def test_v2_prompt_enumerates_addressed_true_strong_signals() -> None:
+    """The v2 system_prompt must enumerate the strong signals the
+    LLM should consult for `addressed_to_assistant=True`:
+
+    - bot alias in mentioned/addressed_participant_ids
+    - entity_binding.current_interlocutor = bot
+    - second-person imperative ('can you' / 'could you' / 'do you')
+    - 'OK' / '好的' continuation + bot directive
+    - implicit directive ('Someone is reading this' style)
+
+    The 5 signals are the v2 design's answer to P0-7's
+    `recall_on_addressed=0.25` finding.
+    """
+    system, _ = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="Can you reply?",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=0,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="reply",
+    )
+    # Strong-signal list (5 items).
+    assert "addressed_to_assistant=True" in system
+    assert "bot alias" in system or "mentioned/addressed" in system
+    assert "entity_binding.current_interlocutor" in system
+    assert "can you" in system
+    assert "OK" in system and "好的" in system
+    assert "隐含" in system or "隐含指令" in system
+    # Counter-example list (≥ 1 item).
+    assert "addressed_to_assistant=False" in system
+    assert "Dave" in system  # counter-example target
+
+
+def test_v2_prompt_has_three_inline_examples() -> None:
+    """The v2 system_prompt must include 3 inline examples of
+    `addressed_to_assistant` decisions: one True, one False, one
+    True (OK + can you). Examples are generic (no fixture
+    content) so the prompt does not leak the held-out fixture.
+    """
+    system, _ = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="x",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=0,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="reply",
+    )
+    assert "'Can you explain that?'" in system
+    assert "True" in system
+    assert "'Dave, you first.'" in system
+    assert "False" in system
+    assert "'OK, can you do X?'" in system
+
+
+def test_v2_prompt_does_not_leak_fixture_text() -> None:
+    """The v2 system_prompt examples must be GENERIC. The held-out
+    fixture text ('Can you reply to that one', 'OK, can you go
+    back to the part about Eve's note', 'Someone from the team
+    is reading this', 'Actually, my previous question still
+    stands') must NOT appear in the prompt — that would
+    constitute GT-leak and invalidate the calibration.
+    """
+    system, _ = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="x",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=0,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="reply",
+    )
+    # The fixture is tests/fixtures/m18_7_1_held_out_calibration.json
+    # These phrases are in the fixture GT; verify NONE leak:
+    fixture_phrases = [
+        "Can you reply to that one",  # turn 0
+        "Actually, my previous question",  # turn 1
+        "Someone from the team is reading this",  # turn 4
+        "Eve's note",  # turn 8
+    ]
+    for phrase in fixture_phrases:
+        assert phrase not in system, (
+            f"fixture phrase leaked into v2 prompt: {phrase!r}"
+        )
+
+
+def test_v2_prompt_emphasizes_entity_binding_and_mentioned_ids() -> None:
+    """The v2 system_prompt must explicitly tell the LLM to use
+    `entity_binding` and `mentioned_participant_ids` as evidence
+    (not raw user text / keyword cues). This is the v2 design's
+    response to P0-7's `recall_on_addressed` finding: the LLM
+    was not told to read these fields, so it defaulted to False.
+    """
+    system, _ = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="x",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=0,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="reply",
+    )
+    # Both fields must be named in the strong-signal list or
+    # in the closing evidence line.
+    assert "mentioned" in system or "addressed_participant_ids" in system
+    assert "entity_binding" in system
+    # Closing line must still be present (preserved from v1).
+    assert "不要用关键词或正则做判断" in system or "不要用" in system
+    assert "5-key JSON" in system or "4-key JSON" in system
+
+
+def test_v2_prompt_max_chars_bumped_to_2500() -> None:
+    """The M18.7.2 v2 MAX bump (2000 → 2500) is the v2 design's
+    nominal budget for the addressed-axis strong-signal /
+    counter-example list. v1 nominal was 1647; v2 nominal is
+    ~2277. The constant lives at
+    `M18_7_2_MINIMAL_PROMPT_MAX_CHARS` and is referenced by
+    3 tests; v1 docs said 2000, v2 docs say 2500.
+    """
+    assert M18_7_2_MINIMAL_PROMPT_MAX_CHARS == 2500, (
+        "v2 bumped MAX from 2000 to 2500 to accommodate the "
+        "addressed-axis strong-signal / counter-example list"
+    )
+    system, user = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="x",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=0,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="reply",
+    )
+    total = len(system) + len(user)
+    assert total <= M18_7_2_MINIMAL_PROMPT_MAX_CHARS, (
+        f"v2 prompt too long: {total} > "
+        f"{M18_7_2_MINIMAL_PROMPT_MAX_CHARS}"
+    )
