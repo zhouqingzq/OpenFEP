@@ -733,30 +733,68 @@ def main() -> int:
         run_root = base / f"run_{i}"
         # Wipe any stale state from a prior run.
         if run_root.exists():
-            for child in run_root.iterdir():
-                if child.is_file():
-                    child.unlink()
-                elif child.is_dir():
-                    for sub in child.rglob("*"):
-                        if sub.is_file():
-                            sub.unlink()
-                        elif sub.is_dir():
-                            sub.rmdir()
-                    child.rmdir()
+            import shutil as _shutil
+            _shutil.rmtree(run_root)
         run_root.mkdir(parents=True, exist_ok=True)
-        store = MVPStateStore(root=run_root)
-        runtime = MVPDialogueRuntime(store=store, llm=client)
-        at = _now_iso8601()
-        run_summary = _run_one(
-            runtime=runtime,
-            store=store,
-            fixture=fixture,
-            fixture_path=fixture_path,
-            now_base=args.now_base,
-            time_step=args.time_step,
-            at=at,
-            run_index=i,
-        )
+        # Connection-reset retry: the underlying
+        # `complete_json` raises `RuntimeError` with
+        # "OpenRouter chat completion failed" when the
+        # upstream closes the connection (HTTP 10054).
+        # This is intermittent on `deepseek-v4-flash`
+        # (observed twice in one evening). We retry the
+        # whole run up to 3 times with a fresh session
+        # directory per attempt.
+        max_attempts = 3
+        last_err: Exception | None = None
+        run_summary: dict[str, Any] | None = None
+        for attempt in range(1, max_attempts + 1):
+            if attempt > 1:
+                # Wipe and retry with a fresh session
+                # directory under run_root/retry_N/.
+                import shutil as _shutil
+                retry_root = run_root / f"retry_{attempt}"
+                if retry_root.exists():
+                    _shutil.rmtree(retry_root)
+                retry_root.mkdir(parents=True, exist_ok=True)
+                store = MVPStateStore(root=retry_root)
+                runtime = MVPDialogueRuntime(store=store, llm=client)
+            else:
+                store = MVPStateStore(root=run_root)
+                runtime = MVPDialogueRuntime(store=store, llm=client)
+            at = _now_iso8601()
+            try:
+                run_summary = _run_one(
+                    runtime=runtime,
+                    store=store,
+                    fixture=fixture,
+                    fixture_path=fixture_path,
+                    now_base=args.now_base,
+                    time_step=args.time_step,
+                    at=at,
+                    run_index=i,
+                )
+                # Success.
+                break
+            except RuntimeError as exc:
+                last_err = exc
+                msg = str(exc)
+                if "OpenRouter chat completion failed" not in msg:
+                    # Not a connection error — re-raise.
+                    raise
+                # Connection-reset retry: continue to next
+                # attempt. Print a one-line notice to stderr.
+                print(
+                    f"[run {i}] attempt {attempt}/{max_attempts} "
+                    f"connection-reset: {msg[:200]!r}; "
+                    f"retrying...",
+                    file=sys.stderr,
+                    flush=True,
+                )
+                if attempt >= max_attempts:
+                    raise
+        if run_summary is None:
+            # All attempts failed.
+            raise last_err  # type: ignore[misc]
         run_summary["session_root"] = str(run_root)
         run_summaries.append(run_summary)
 
