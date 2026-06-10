@@ -104,13 +104,17 @@ def test_sub1_fails_when_precision_below_bar():
 
 
 def test_sub2_acceptable_when_pids_match():
-    """T4: 4/4 exact matches on 4 decidable emits → acceptable."""
+    """T4: 4/4 exact matches on 4 decidable emits → acceptable.
+    Uses the on-disk flat surface schema:
+    `kind: "addressee"` entries with `participant_id` at
+    the entry root, NOT nested under `addressee_hypothesis`.
+    """
     state = {
         "m18_7_attribution_hypotheses": [
-            {"turn_index": 0, "addressee_hypothesis": {"participant_id": "carol"}},
-            {"turn_index": 1, "addressee_hypothesis": {"participant_id": "dave"}},
-            {"turn_index": 2, "addressee_hypothesis": {"participant_id": "carol"}},
-            {"turn_index": 3, "addressee_hypothesis": {"participant_id": "dave"}},
+            {"kind": "addressee", "turn_index": 0, "participant_id": "carol"},
+            {"kind": "addressee", "turn_index": 1, "participant_id": "dave"},
+            {"kind": "addressee", "turn_index": 2, "participant_id": "carol"},
+            {"kind": "addressee", "turn_index": 3, "participant_id": "dave"},
         ]
     }
     fixture = [
@@ -139,12 +143,14 @@ def test_sub2_no_emits_is_not_below_bar():
 
 
 def test_sub2_below_bar_when_mismatch():
-    """T5b: 2/3 matches (rate 0.667) below the 0.7 bar."""
+    """T5b: 2/3 matches (rate 0.667) below the 0.7 bar.
+    Surface uses flat `kind: "addressee"` entries.
+    """
     state = {
         "m18_7_attribution_hypotheses": [
-            {"turn_index": 0, "addressee_hypothesis": {"participant_id": "carol"}},
-            {"turn_index": 1, "addressee_hypothesis": {"participant_id": "dave"}},
-            {"turn_index": 2, "addressee_hypothesis": {"participant_id": "carol"}},
+            {"kind": "addressee", "turn_index": 0, "participant_id": "carol"},
+            {"kind": "addressee", "turn_index": 1, "participant_id": "dave"},
+            {"kind": "addressee", "turn_index": 2, "participant_id": "carol"},
         ]
     }
     fixture = [
@@ -156,6 +162,57 @@ def test_sub2_below_bar_when_mismatch():
     assert r["n_decidable_emits"] == 3
     assert r["n_exact_match"] == 2
     assert r["verdict"] == "below_bar", r
+
+
+def test_sub2_flat_surface_schema_is_required():
+    """T5c: the on-disk surface is FLAT entries
+    (`kind: "addressee"` discriminator), NOT nested
+    under `addressee_hypothesis`. If a future change
+    nests the surface, this test will fail and force
+    a re-write of `_subcap2_speaker_identity`.
+    """
+    state = {
+        "m18_7_attribution_hypotheses": [
+            # legacy nested — must be ignored
+            {"turn_index": 0,
+             "addressee_hypothesis": {"participant_id": "carol"}},
+            # new flat — must be counted
+            {"kind": "addressee", "turn_index": 1, "participant_id": "dave"},
+        ]
+    }
+    fixture = [
+        {"turn_index": 0, "group_turn_envelope": {"speaker_participant_id": "carol"}},
+        {"turn_index": 1, "group_turn_envelope": {"speaker_participant_id": "dave"}},
+    ]
+    r = _subcap2_speaker_identity(state, fixture)
+    # Only the flat entry counts.
+    assert r["n_decidable_emits"] == 1
+    assert r["n_exact_match"] == 1
+    assert r["speaker_pid_exact_match_rate"] == 1.0
+    assert r["verdict"] == "acceptable", r
+
+
+def test_sub2_case_insensitive_and_alias_collapse():
+    """T5d: pid normalization collapses "Carol"=="carol"
+    (case-insensitive) and "bot"=="assistant" (alias
+    via `_pid_eq`).
+    """
+    state = {
+        "m18_7_attribution_hypotheses": [
+            {"kind": "addressee", "turn_index": 0, "participant_id": "Carol"},
+            {"kind": "addressee", "turn_index": 1, "participant_id": "bot"},
+            {"kind": "addressee", "turn_index": 2, "participant_id": "Assistant"},
+        ]
+    }
+    fixture = [
+        {"turn_index": 0, "group_turn_envelope": {"speaker_participant_id": "carol"}},
+        {"turn_index": 1, "group_turn_envelope": {"speaker_participant_id": "bot"}},
+        {"turn_index": 2, "group_turn_envelope": {"speaker_participant_id": "assistant"}},
+    ]
+    r = _subcap2_speaker_identity(state, fixture)
+    assert r["n_decidable_emits"] == 3
+    assert r["n_exact_match"] == 3
+    assert r["speaker_pid_exact_match_rate"] == 1.0
 
 
 # === Sub-capability 3: bidirectional FEP (T6-T7) ===========================

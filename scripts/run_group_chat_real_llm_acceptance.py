@@ -114,6 +114,43 @@ SUB3_PER_PERSONA_CHANNELS_MIN: int = 2
 SUB4_M12_1_PROFILES_NONEMPTY_MIN: int = 1
 
 
+# === Pid normalization (sub-2) =============================================
+# The LLM emits surface ids that are role/alias-equivalent:
+# - "bot" / "assistant" / "hutao" → the assistant role
+#   (the GT speaker when the assistant speaks, but here we
+#   only score addressee pid which can include "talking to
+#   the assistant" claims).
+# - Case-insensitive: "Carol" == "carol"
+# - "speaker_n" / "person_n" → no match (LLM hallucinated
+#   a generic id; not a real persona).
+# This table is the same role-collapse as the M18.7.1 v2
+# `M18_7_1_PID_NORMALIZATION` table (kept in sync with
+# the calibration harness).
+
+_PID_NORMALIZATION_TABLE: dict[str, str] = {
+    "bot": "bot",
+    "assistant": "bot",
+    "hutao": "bot",
+    "hutao_assistant": "bot",
+    "clawdgroupchat_bot": "bot",
+}
+
+
+def _pid_eq(emit: str, gt: str) -> bool:
+    """True if two participant ids refer to the same
+    persona (case-insensitive, alias-collapsed).
+    """
+    e = str(emit or "").strip().lower()
+    g = str(gt or "").strip().lower()
+    if not e or not g:
+        return False
+    if e == g:
+        return True
+    e_norm = _PID_NORMALIZATION_TABLE.get(e, e)
+    g_norm = _PID_NORMALIZATION_TABLE.get(g, g)
+    return e_norm == g_norm
+
+
 def _now_iso8601() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
 
@@ -215,9 +252,23 @@ def _subcap2_speaker_identity(
     hypotheses = state.get("m18_7_attribution_hypotheses", [])
     if not isinstance(hypotheses, list):
         hypotheses = []
-    # Index by turn_index; the surface is a rolling
-    # window but the emit timestamps + state writes
-    # produce a 1:1 emit list across the run.
+    # The on-disk surface is a flat rolling-window list
+    # of entries with `kind: "addressee" | "reaction"`
+    # discriminator (NOT nested under
+    # `addressee_hypothesis` / `reaction_attribution_hypothesis`).
+    # Each entry is shape:
+    #   {
+    #     "kind": "addressee" | "reaction",
+    #     "turn_index": int,
+    #     "participant_id": str,  # addressee: whom the speaker
+    #                            # is addressing; reaction: whom
+    #                            # the assistant is reacting to
+    #     "addressed_to_assistant": bool,  # addressee only
+    #     "confidence": float,
+    #     ...
+    #   }
+    # We only count `kind == "addressee"` entries (the
+    # LLM's "I think the user is talking to X" claim).
     n_decidable = 0
     n_exact_match = 0
     n_close_match = 0
@@ -225,10 +276,9 @@ def _subcap2_speaker_identity(
     for entry in hypotheses:
         if not isinstance(entry, Mapping):
             continue
-        addr = entry.get("addressee_hypothesis", {})
-        if not isinstance(addr, Mapping) or not addr:
+        if str(entry.get("kind", "")) != "addressee":
             continue
-        emit_pid = str(addr.get("participant_id", "")).strip()
+        emit_pid = str(entry.get("participant_id", "")).strip()
         if not emit_pid:
             continue
         n_decidable += 1
@@ -242,12 +292,20 @@ def _subcap2_speaker_identity(
                 break
         if not gt_speaker:
             continue
-        if emit_pid == gt_speaker:
+        if _pid_eq(emit_pid, gt_speaker):
             n_exact_match += 1
             exact_pids.append(emit_pid)
-        elif emit_pid in gt_speaker or gt_speaker in emit_pid:
-            # Substring match — soft signal; e.g.
-            # LLM emits "carol" when GT is "carol".
+        elif emit_pid.lower() == gt_speaker.lower():
+            # Case-insensitive match (e.g. LLM emits
+            # "Carol" but GT is "carol") — counts as
+            # exact match for v1 (the pid is the same
+            # name; capitalization is a surface detail).
+            n_exact_match += 1
+            exact_pids.append(emit_pid)
+        elif (
+            emit_pid.lower() in gt_speaker.lower()
+            or gt_speaker.lower() in emit_pid.lower()
+        ):
             n_close_match += 1
     rate = (n_exact_match / n_decidable) if n_decidable > 0 else 0.0
     if rate >= SUB2_SPEAKER_PID_EXACT_MATCH_MIN:
