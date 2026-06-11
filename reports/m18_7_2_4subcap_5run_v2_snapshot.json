@@ -1,0 +1,331 @@
+{
+  "ok": true,
+  "stage": "group_chat_5run_acceptance_complete",
+  "n_runs": 5,
+  "fixture_name": "E:\\workspace\\segments\\tests\\fixtures\\m18_7_1_held_out_calibration.json",
+  "scoring_mode": "by_pid",
+  "sub_capability_bars": {
+    "sub1_recall_on_addressed_min": 0.6,
+    "sub1_precision_on_not_addressed_min": 0.9,
+    "sub2_speaker_pid_exact_match_min": 0.7,
+    "sub3_producer_admit_total_min": 1,
+    "sub3_p04_dir_true_admit_min": 1,
+    "sub3_per_persona_channels_min": 2,
+    "sub4_m12_1_profiles_nonempty_min": 1
+  },
+  "runs": [
+    {
+      "run_index": 1,
+      "scoring_mode": "by_pid",
+      "verdict": [
+        "overconfidence_at_high_band",
+        "underconfidence_at_low_band",
+        "bimodal",
+        "insufficient_data"
+      ],
+      "addressee_ece": 0.5,
+      "reaction_ece": 0.3,
+      "sub1_addressee_target": {
+        "n_present": 8,
+        "n_gt_true": 4,
+        "n_gt_false": 4,
+        "tp_addressed": 1,
+        "fn_addressed": 3,
+        "tp_not_addressed": 4,
+        "fp_not_addressed": 0,
+        "recall_on_addressed": 0.25,
+        "precision_on_not_addressed": 1.0,
+        "verdict": "under_recall_dir_true"
+      },
+      "sub2_speaker_identity": {
+        "n_decidable_emits": 4,
+        "n_exact_match": 0,
+        "n_close_match": 0,
+        "speaker_pid_exact_match_rate": 0.0,
+        "exact_pid_set": [],
+        "verdict": "below_bar",
+        "n_decidable_from_harness": 4,
+        "source": "harness_report"
+      },
+      "sub3_bidirectional_fep": {
+        "producer_admit_total": 7,
+        "producer_admit_dir_true": 0,
+        "producer_admit_dir_false": 4,
+        "producer_reject_total": 1,
+        "producer_reject_dir_true": 1,
+        "write_path_skip_dir_true": 0,
+        "tie_breaker_engaged_dir_true": 0,
+        "n_persona_channels": 3,
+        "persona_channels": [
+          "carol",
+          "dave",
+          "eve"
+        ],
+        "verdict": "p04_dir_true_admit_zero"
+      },
+      "sub4_persona_consistency": {
+        "n_profiles": 3,
+        "n_latest_reports": 0,
+        "low_confidence_count": 0,
+        "verdict": "surface_alive"
+      },
+      "session_root": "E:\\workspace\\segments\\tmp_group_chat_4subcap_5run_v2\\run_1"
+    },
+    {
+      "run_index": 2,
+      "scoring_mode": "by_pid",
+      "verdict": [
+        "overconfidence_at_high_band",
+        "underconfidence_at_low_band",
+        "bimodal",
+        "insufficient_data"
+      ],
+      "addressee_ece": 0.4,
+      "reaction_ece": 0.29999999999999993,
+      "sub1_addressee_target": {
+        "n_present": 8,
+        "n_gt_true": 4,
+        "n_gt_false": 4,
+        "tp_addressed": 1,
+        "fn_addressed": 3,
+        "tp_not_addressed": 4,
+        "fp_not_addressed": 0,
+        "recall_on_addressed": 0.25,
+        "precision_on_not_addressed": 1.0,
+        "verdict": "under_recall_dir_true"
+      },
+      "sub2_speaker_identity": {
+        "n_decidable_emits": 4,
+        "n_exact_match": 0,
+        "n_close_match": 0,
+        "speaker_pid_exact_match_rate": 0.0,
+        "exact_pid_set": [],
+        "verdict": "below_bar",
+        "n_decidable_from_harness": 4,
+        "source": "harness_report"
+      },
+      "sub3_bidirectional_fep": {
+        "producer_admit_total": 8,
+        "producer_admit_dir_true": 0,
+        "producer_admit_dir_false": 4,
+        "producer_reject_total": 0,
+        "producer_reject_dir_true": 0,
+        "write_path_skip_dir_true": 0,
+        "tie_breaker_engaged_dir_true": 0,
+        "n_persona_channels": 3,
+        "persona_channels": [
+          "carol",
+          "dave",
+          "eve"
+        ],
+        "verdict": "p04_dir_true_admit_zero"
+      },
+      "sub4_persona_consistency": {
+        "n_profiles": 3,
+        "n_latest_reports": 0,
+        "low_confidence_count": 0,
+        "verdict": "surface_alive"
+      },
+      "session_root": "E:\\workspace\\segments\\tmp_group_chat_4subcap_5run_v2\\run_2"
+    },
+    {
+      "run_index": 3,
+      "scoring_mode": "by_pid",
+      "verdict": [
+        "underconfidence_at_low_band",
+        "bimodal",
+        "insufficient_data"
+      ],
+      "addressee_ece": 0.4,
+      "reaction_ece": 0.41666666666666663,
+      "sub1_addressee_target": {
+        "n_present": 8,
+        "n_gt_true": 4,
+        "n_gt_false": 4,
+        "tp_addressed": 1,
+        "fn_addressed": 3,
+        "tp_not_addressed": 4,
+        "fp_not_addressed": 0,
+        "recall_on_addressed": 0.25,
+        "precision_on_not_addressed": 1.0,
+        "verdict": "under_recall_dir_true"
+      },
+      "sub2_speaker_identity": {
+        "n_decidable_emits": 4,
+        "n_exact_match": 0,
+        "n_close_match": 0,
+        "speaker_pid_exact_match_rate": 0.0,
+        "exact_pid_set": [],
+        "verdict": "below_bar",
+        "n_decidable_from_harness": 4,
+        "source": "harness_report"
+      },
+      "sub3_bidirectional_fep": {
+        "producer_admit_total": 8,
+        "producer_admit_dir_true": 1,
+        "producer_admit_dir_false": 3,
+        "producer_reject_total": 0,
+        "producer_reject_dir_true": 0,
+        "write_path_skip_dir_true": 0,
+        "tie_breaker_engaged_dir_true": 0,
+        "n_persona_channels": 3,
+        "persona_channels": [
+          "carol",
+          "dave",
+          "eve"
+        ],
+        "verdict": "acceptable"
+      },
+      "sub4_persona_consistency": {
+        "n_profiles": 3,
+        "n_latest_reports": 0,
+        "low_confidence_count": 0,
+        "verdict": "surface_alive"
+      },
+      "session_root": "E:\\workspace\\segments\\tmp_group_chat_4subcap_5run_v2\\run_3"
+    },
+    {
+      "run_index": 4,
+      "scoring_mode": "by_pid",
+      "verdict": [
+        "overconfidence_at_high_band",
+        "underconfidence_at_low_band",
+        "bimodal",
+        "insufficient_data"
+      ],
+      "addressee_ece": 0.5125,
+      "reaction_ece": 0.28750000000000003,
+      "sub1_addressee_target": {
+        "n_present": 8,
+        "n_gt_true": 4,
+        "n_gt_false": 4,
+        "tp_addressed": 0,
+        "fn_addressed": 4,
+        "tp_not_addressed": 4,
+        "fp_not_addressed": 0,
+        "recall_on_addressed": 0.0,
+        "precision_on_not_addressed": 1.0,
+        "verdict": "under_recall_dir_true"
+      },
+      "sub2_speaker_identity": {
+        "n_decidable_emits": 3,
+        "n_exact_match": 0,
+        "n_close_match": 0,
+        "speaker_pid_exact_match_rate": 0.0,
+        "exact_pid_set": [],
+        "verdict": "below_bar",
+        "n_decidable_from_harness": 3,
+        "source": "harness_report"
+      },
+      "sub3_bidirectional_fep": {
+        "producer_admit_total": 7,
+        "producer_admit_dir_true": 0,
+        "producer_admit_dir_false": 3,
+        "producer_reject_total": 0,
+        "producer_reject_dir_true": 0,
+        "write_path_skip_dir_true": 0,
+        "tie_breaker_engaged_dir_true": 0,
+        "n_persona_channels": 3,
+        "persona_channels": [
+          "carol",
+          "dave",
+          "eve"
+        ],
+        "verdict": "p04_dir_true_admit_zero"
+      },
+      "sub4_persona_consistency": {
+        "n_profiles": 3,
+        "n_latest_reports": 0,
+        "low_confidence_count": 0,
+        "verdict": "surface_alive"
+      },
+      "session_root": "E:\\workspace\\segments\\tmp_group_chat_4subcap_5run_v2\\run_4"
+    },
+    {
+      "run_index": 5,
+      "scoring_mode": "by_pid",
+      "verdict": [
+        "overconfidence_at_high_band",
+        "underconfidence_at_low_band",
+        "bimodal",
+        "insufficient_data"
+      ],
+      "addressee_ece": 0.59375,
+      "reaction_ece": 0.45,
+      "sub1_addressee_target": {
+        "n_present": 8,
+        "n_gt_true": 4,
+        "n_gt_false": 4,
+        "tp_addressed": 1,
+        "fn_addressed": 3,
+        "tp_not_addressed": 4,
+        "fp_not_addressed": 0,
+        "recall_on_addressed": 0.25,
+        "precision_on_not_addressed": 1.0,
+        "verdict": "under_recall_dir_true"
+      },
+      "sub2_speaker_identity": {
+        "n_decidable_emits": 3,
+        "n_exact_match": 0,
+        "n_close_match": 0,
+        "speaker_pid_exact_match_rate": 0.0,
+        "exact_pid_set": [],
+        "verdict": "below_bar",
+        "n_decidable_from_harness": 3,
+        "source": "harness_report"
+      },
+      "sub3_bidirectional_fep": {
+        "producer_admit_total": 4,
+        "producer_admit_dir_true": 0,
+        "producer_admit_dir_false": 2,
+        "producer_reject_total": 2,
+        "producer_reject_dir_true": 1,
+        "write_path_skip_dir_true": 0,
+        "tie_breaker_engaged_dir_true": 0,
+        "n_persona_channels": 3,
+        "persona_channels": [
+          "carol",
+          "dave",
+          "eve"
+        ],
+        "verdict": "p04_dir_true_admit_zero"
+      },
+      "sub4_persona_consistency": {
+        "n_profiles": 3,
+        "n_latest_reports": 0,
+        "low_confidence_count": 0,
+        "verdict": "surface_alive"
+      },
+      "session_root": "E:\\workspace\\segments\\tmp_group_chat_4subcap_5run_v2\\run_5"
+    }
+  ],
+  "aggregate_5run": {
+    "n_runs": 5,
+    "sub1_means": {
+      "recall_on_addressed": 0.2,
+      "precision_on_not_addressed": 1.0,
+      "tp_addressed_total": 4,
+      "fn_addressed_total": 16,
+      "tp_not_addressed_total": 20,
+      "fp_not_addressed_total": 0
+    },
+    "sub2_means": {
+      "n_decidable_emits_total": 18,
+      "n_exact_match_total": 0,
+      "speaker_pid_exact_match_rate_mean": 0.0
+    },
+    "sub3_means": {
+      "producer_admit_total": 34,
+      "producer_admit_dir_true_total": 1,
+      "producer_reject_total": 3,
+      "write_path_skip_dir_true_total": 0,
+      "tie_breaker_engaged_dir_true_total": 0,
+      "n_persona_channels_max": 3
+    },
+    "sub4_means": {
+      "n_profiles_max": 3,
+      "n_latest_reports_max": 0
+    }
+  },
+  "verdict": "failed:sub1+sub2+sub3"
+}
