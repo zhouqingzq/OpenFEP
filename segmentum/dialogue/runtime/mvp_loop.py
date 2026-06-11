@@ -251,6 +251,7 @@ from segmentum.dialogue.runtime.m18_7_attribution import (
 from segmentum.dialogue.runtime.m20_4_attribution import (
     AddresseeTargetMatchLLMJudgeSettler as _AddresseeTargetMatchLLMJudgeSettler,
     ReactionAttributionMatchLLMJudgeSettler as _ReactionAttributionMatchLLMJudgeSettler,
+    append_bundle_memory as _append_bundle_memory,
     build_addressee_target_match_admitted_event as _emit_addressee_target_match_admitted_event,
     build_reaction_attribution_match_admitted_event as _emit_reaction_attribution_match_admitted_event,
     produce_m20_4_attribution_commitments as _produce_m20_4_attribution_commitments,
@@ -8160,6 +8161,33 @@ class MVPDialogueRuntime:
             turn_index=turn_index,
             at=now,
         )
+        # M20.4 v2 (2026-06-11): mirror addressee-
+        # directed M18.7 surface entries into the
+        # M20.4 bundle memory. The bundle memory is
+        # a separate M20.4 owner (independent of the
+        # M18.7 state surface cap=8); the mirror is
+        # the only place that writes to it. Per
+        # M20.4 v2 D6: only `addressed_to_assistant
+        # == True` entries are mirrored. Per D5:
+        # only `kind == "addressee"` (reaction is
+        # single-emit only).
+        for _m20_4_bundle_entry in state.get(
+            "m18_7_attribution_hypotheses", []
+        ):
+            if not isinstance(_m20_4_bundle_entry, Mapping):
+                continue
+            if str(_m20_4_bundle_entry.get("kind", "")) != "addressee":
+                continue
+            if not bool(
+                _m20_4_bundle_entry.get(
+                    "addressed_to_assistant", False
+                )
+            ):
+                continue
+            _append_bundle_memory(
+                state=state,
+                entry=_m20_4_bundle_entry,
+            )
         # M20.4.1 §1 — same-turn addressee hypothesis gate. Pure
         # rule, no LLM. Runs at "step 3" (immediately after the
         # M18.7 orchestrator, before the M20.4 producer and the
@@ -8206,10 +8234,27 @@ class MVPDialogueRuntime:
             )
         )
         for commitment in m20_4_attribution_admitted:
+            # v2 (2026-06-11): the producer stamps
+            # `aggregation_kind` onto the commitment's
+            # observable_payload for bundle admits
+            # (`"bundle_weak"`). v1 single-strong admits
+            # do NOT have the key set; the event
+            # builder falls back to its
+            # `"single_strong"` default. The consumer
+            # is a pass-through; the producer is the
+            # only legitimate source of the kind label.
+            commit_payload = dict(
+                commitment.observable_payload or {}
+            )
+            commit_agg_kind = str(
+                commit_payload.get("aggregation_kind", "")
+                or "single_strong"
+            )
             event = _emit_addressee_target_match_admitted_event(
                 turn_index=turn_index,
                 commitment=commitment,
                 at=now,
+                aggregation_kind=commit_agg_kind,
             )
             if event:
                 bus.append(event)

@@ -22,7 +22,17 @@ from segmentum.dialogue.runtime.m18_7_attribution import (
     build_state_entry,
 )
 from segmentum.dialogue.runtime.m20_4_attribution import (
+    M20_4_AGGREGATION_BUNDLE_WEAK,
+    M20_4_AGGREGATION_SINGLE_STRONG,
+    M20_4_BUNDLE_AGGREGATED_THRESHOLD,
+    M20_4_BUNDLE_DECAY_BASE,
+    M20_4_BUNDLE_MAX_SINGLE_THRESHOLD,
+    M20_4_BUNDLE_MEMORY_CAP,
+    M20_4_BUNDLE_UNIQUE_COUNT_MIN,
     M20_4_PRODUCER_ADMIT_CONFIDENCE_MIN,
+    _bundle_aggregated_support,
+    append_bundle_memory,
+    build_addressee_target_match_admitted_event,
     produce_m20_4_attribution_commitments,
 )
 
@@ -885,4 +895,342 @@ def test_p0_4_admit_threshold_helper_for_kind_and_subclass() -> None:
         )
         == 0.7
     )
+
+
+# === Bundle aggregation (M20.4 v2, 2026-06-11) ==============
+#
+# The bundle aggregation path is a second admit
+# route in the M20.4 producer. The bundle memory
+# is a separate M20.4 owner (cap 24) that mirrors
+# addressee-directed M18.7 surface entries. The
+# producer dispatches bundle admit when the
+# decayed `aggregated_support` is >= 0.85 AND
+# `max_single_support` < 0.7 AND
+# `unique_emit_count` >= 2.
+#
+# Tests cover:
+#  - T1-T3: append_bundle_memory contract (no-op
+#    on bad input, cap at 24).
+#  - T4-T5: _bundle_aggregated_support math
+#    (empty, decay, dedup by commit_id).
+#  - T6-T8: bundle admit fires / rejects per
+#    rule (synthetic 12-turn fixtures).
+#  - T9: bundle is for the `addressee` kind only
+#    (reaction does not trigger).
+#  - T10: v1 admission event byte-identity
+#    (default `aggregation_kind="single_strong"`).
+
+
+def test_t1_append_bundle_memory_skips_not_addressed_entry() -> None:
+    """T1: append_bundle_memory no-ops on
+    `addressed_to_assistant=False` (D6).
+    """
+    state: dict = {}
+    not_addressed = _entry(
+        kind=KIND_ADDRESSEE,
+        turn_index=0,
+        confidence=0.55,
+        addressed_to_assistant=False,
+    )
+    append_bundle_memory(state=state, entry=not_addressed)
+    assert state.get("m20_4_bundle_memory", []) == []
+
+
+def test_t2_append_bundle_memory_skips_empty_commit_id() -> None:
+    """T2: append_bundle_memory no-ops on empty
+    `commit_id` (M18.7 contract violation).
+    """
+    state: dict = {}
+    entry = _entry(
+        kind=KIND_ADDRESSEE,
+        turn_index=0,
+        confidence=0.55,
+        addressed_to_assistant=True,
+    )
+    entry["commit_id"] = ""  # simulate contract violation
+    append_bundle_memory(state=state, entry=entry)
+    assert state.get("m20_4_bundle_memory", []) == []
+
+
+def test_t3_append_bundle_memory_caps_at_24_oldest_evicted() -> None:
+    """T3: bundle memory caps at 24; oldest evicted."""
+    state: dict = {}
+    for i in range(30):
+        entry = _entry(
+            kind=KIND_ADDRESSEE,
+            turn_index=i,
+            confidence=0.5,
+            addressed_to_assistant=True,
+        )
+        append_bundle_memory(state=state, entry=entry)
+    memory = state.get("m20_4_bundle_memory", [])
+    assert len(memory) == M20_4_BUNDLE_MEMORY_CAP
+    # The first 6 (i=0..5) were evicted; the kept
+    # entries are i=6..29.
+    assert memory[0]["turn_index"] == 6
+    assert memory[-1]["turn_index"] == 29
+
+
+def test_t4_bundle_aggregated_support_empty_memory_returns_zero() -> None:
+    """T4: empty memory → (0.0, 0.0, 0)."""
+    agg, max_single, unique = _bundle_aggregated_support(
+        bundle_memory=[],
+        current_turn_index=10,
+    )
+    assert agg == 0.0
+    assert max_single == 0.0
+    assert unique == 0
+
+
+def test_t5_bundle_aggregated_support_decay_and_dedup() -> None:
+    """T5: decayed sum + dedup by commit_id + max_single.
+
+    3 unique emits at confidence 0.55, turns 0/1/2,
+    current_turn=3:
+      emit_turn=2: weight = 0.85**1 = 0.85
+      emit_turn=1: weight = 0.85**2 = 0.7225
+      emit_turn=0: weight = 0.85**3 = 0.614125
+      agg ≈ 0.55 * (0.85 + 0.7225 + 0.614125)
+        ≈ 0.55 * 2.186625 ≈ 1.2026
+      max_single = 0.55
+      unique = 3
+    """
+    memory = [
+        {"turn_index": 0, "commit_id": "c0",
+         "confidence": 0.55, "participant_id": "alice"},
+        {"turn_index": 1, "commit_id": "c1",
+         "confidence": 0.55, "participant_id": "alice"},
+        {"turn_index": 2, "commit_id": "c2",
+         "confidence": 0.55, "participant_id": "alice"},
+        # Duplicate commit_id (the redundancy guard):
+        {"turn_index": 2, "commit_id": "c2",
+         "confidence": 0.55, "participant_id": "alice"},
+    ]
+    agg, max_single, unique = _bundle_aggregated_support(
+        bundle_memory=memory, current_turn_index=3
+    )
+    expected_weight = sum(
+        M20_4_BUNDLE_DECAY_BASE ** (3 - t) for t in (0, 1, 2)
+    )
+    assert abs(agg - 0.55 * expected_weight) < 1e-9
+    assert max_single == 0.55
+    assert unique == 3  # the duplicate was deduped
+
+
+def test_t6_bundle_admit_fires_on_three_weak_addressed_emits() -> None:
+    """T6: 3 emits at conf 0.55 (each below 0.7) +
+    max_single 0.55 (< 0.7) + unique 3 (>= 2) →
+    bundle admit fires.
+    """
+    state: dict = {
+        "m18_7_attribution_hypotheses": [
+            _entry(
+                kind=KIND_ADDRESSEE, turn_index=0,
+                confidence=0.55, addressed_to_assistant=True,
+            ),
+            _entry(
+                kind=KIND_ADDRESSEE, turn_index=1,
+                confidence=0.55, addressed_to_assistant=True,
+            ),
+            _entry(
+                kind=KIND_ADDRESSEE, turn_index=2,
+                confidence=0.55, addressed_to_assistant=True,
+            ),
+        ],
+    }
+    for entry in state["m18_7_attribution_hypotheses"]:
+        append_bundle_memory(state=state, entry=entry)
+    admitted = produce_m20_4_attribution_commitments(
+        state=state,
+        bus=[],
+        current_turn_id=3,
+    )
+    diag = state.get("m20_4_attribution_diagnostics", {})
+    # The v1 single-strong path admits ZERO (0.55
+    # < 0.7). The bundle path admits ONE.
+    assert diag.get("producer_admit_single_strong_total", 0) == 0
+    assert diag.get("producer_admit_bundle_weak_total", 0) == 1
+    assert diag.get("producer_admit_total", 0) == 1
+    # The admitted commitment has the
+    # `aggregation_kind` stamped on its payload.
+    assert len(admitted) == 1
+    payload = admitted[0].observable_payload or {}
+    assert payload.get("aggregation_kind") == M20_4_AGGREGATION_BUNDLE_WEAK
+
+
+def test_t7_bundle_admit_rejects_when_max_single_not_below_threshold() -> None:
+    """T7: when any single emit >= 0.7, the v1
+    single-strong path takes over and the bundle
+    path does NOT fire (D7).
+    """
+    state: dict = {
+        "m18_7_attribution_hypotheses": [
+            # Below 0.7: weak
+            _entry(
+                kind=KIND_ADDRESSEE, turn_index=0,
+                confidence=0.55, addressed_to_assistant=True,
+            ),
+            # Below 0.7: weak
+            _entry(
+                kind=KIND_ADDRESSEE, turn_index=1,
+                confidence=0.55, addressed_to_assistant=True,
+            ),
+            # >= 0.7: strong (this one is admitted by v1)
+            _entry(
+                kind=KIND_ADDRESSEE, turn_index=2,
+                confidence=0.9, addressed_to_assistant=True,
+            ),
+        ],
+    }
+    for entry in state["m18_7_attribution_hypotheses"]:
+        append_bundle_memory(state=state, entry=entry)
+    admitted = produce_m20_4_attribution_commitments(
+        state=state,
+        bus=[],
+        current_turn_id=3,
+    )
+    diag = state.get("m20_4_attribution_diagnostics", {})
+    # The v1 single-strong path admitted the 0.9
+    # emit; the bundle path did NOT fire (max_single
+    # is 0.9, >= 0.7).
+    assert diag.get("producer_admit_single_strong_total", 0) == 1
+    assert diag.get("producer_admit_bundle_weak_total", 0) == 0
+    assert diag.get("producer_admit_total", 0) == 1
+    # No bundle rejection counter bumps because
+    # the bundle dispatch doesn't run when v1
+    # already admitted — actually it does run
+    # (always runs on the producer), and the
+    # max_single gate fires.
+    assert diag.get("producer_bundle_reject_total", 0) == 1
+    by_gate = diag.get("producer_bundle_reject_by_gate", {})
+    assert by_gate.get("max_single_not_below_threshold", 0) == 1
+
+
+def test_t8_bundle_admit_rejects_when_unique_count_below_min() -> None:
+    """T8: only 1 unique emit → bundle rule fails
+    the unique_count gate.
+    """
+    state: dict = {
+        "m18_7_attribution_hypotheses": [
+            _entry(
+                kind=KIND_ADDRESSEE, turn_index=0,
+                confidence=0.55, addressed_to_assistant=True,
+            ),
+        ],
+    }
+    for entry in state["m18_7_attribution_hypotheses"]:
+        append_bundle_memory(state=state, entry=entry)
+    admitted = produce_m20_4_attribution_commitments(
+        state=state,
+        bus=[],
+        current_turn_id=1,
+    )
+    diag = state.get("m20_4_attribution_diagnostics", {})
+    assert diag.get("producer_admit_bundle_weak_total", 0) == 0
+    assert diag.get("producer_bundle_reject_total", 0) == 1
+    by_gate = diag.get("producer_bundle_reject_by_gate", {})
+    # With 1 emit at conf 0.55, current_turn=1,
+    # emit_turn=0, decay weight 0.85 → agg ≈
+    # 0.4675, which is below the 0.85 threshold.
+    # The `aggregated_below_threshold` gate is the
+    # binding constraint.
+    assert by_gate.get("aggregated_below_threshold", 0) == 1
+    assert admitted == []
+
+
+def test_t9_bundle_does_not_fire_for_reaction_kind() -> None:
+    """T9: bundle admit is for the `addressee` kind
+    only (D5). Reaction emits do NOT enter the
+    bundle memory and do NOT trigger bundle admit.
+    """
+    state: dict = {
+        "m18_7_attribution_hypotheses": [
+            # 3 reaction emits at conf 0.55 — must
+            # NOT trigger bundle admit
+            _entry(
+                kind=KIND_REACTION, turn_index=0,
+                confidence=0.55, is_about_assistant_claim=True,
+            ),
+            _entry(
+                kind=KIND_REACTION, turn_index=1,
+                confidence=0.55, is_about_assistant_claim=True,
+            ),
+            _entry(
+                kind=KIND_REACTION, turn_index=2,
+                confidence=0.55, is_about_assistant_claim=True,
+            ),
+        ],
+    }
+    for entry in state["m18_7_attribution_hypotheses"]:
+        append_bundle_memory(state=state, entry=entry)
+    admitted = produce_m20_4_attribution_commitments(
+        state=state,
+        bus=[],
+        current_turn_id=3,
+    )
+    diag = state.get("m20_4_attribution_diagnostics", {})
+    # Reaction emits are filtered out at the
+    # append_bundle_memory boundary (D5: only
+    # `kind == "addressee"` is mirrored). The
+    # bundle memory is empty.
+    assert state.get("m20_4_bundle_memory", []) == []
+    # v1 single-strong path admits 0 (reaction at
+    # 0.55 < 0.4 wait no — 0.55 > 0.4 so v1 admits).
+    # Actually reaction admit threshold is 0.4
+    # (not 0.7 — that's only for addressee-directed).
+    # So v1 admits all 3.
+    assert diag.get("producer_admit_single_strong_total", 0) == 3
+    assert diag.get("producer_admit_bundle_weak_total", 0) == 0
+    # All 3 admits are reaction.
+    assert len(admitted) == 3
+
+
+def test_t10_v1_admission_event_default_aggregation_kind_is_single_strong() -> None:
+    """T10: v1 byte-identity — the admission event
+    builder's default `aggregation_kind` is
+    `"single_strong"`, so v1 callers see no
+    observable change.
+    """
+    from segmentum.dialogue.runtime.active_commitment import (
+        ActiveCommitment,
+    )
+    commitment = ActiveCommitment(
+        commit_id="abc",
+        owner_id="group_addressee_graph",
+        source_kind="state",
+        source_ref="m18_7_addressee_0",
+        layer="B_per_turn_commitment",
+        observable="addressee_target_match",
+        observable_payload={},
+        target={"m18_7_commit_id": "c0"},
+        due_at={"kind": "next_turn"},
+        priority=0.9,
+        confidence=0.9,
+        evidence_refs=(),
+        created_turn=0,
+        created_at="2026-06-11T00:00:00Z",
+        reason_codes=("m20_4_attribution",),
+        engineering_proxy_label="mvp_local_group_attribution",
+        horizon="next_turn",
+    )
+    # Default kwarg → `"single_strong"`.
+    event = build_addressee_target_match_admitted_event(
+        turn_index=0,
+        commitment=commitment,
+        at="2026-06-11T00:00:00Z",
+    )
+    assert event["aggregation_kind"] == M20_4_AGGREGATION_SINGLE_STRONG
+    # The new field is present (additive) but the
+    # rest of the event shape is unchanged.
+    assert event["type"] == "AddresseeTargetMatchAdmitted"
+    assert event["commit_id"] == "abc"
+    # Explicit kwarg overrides the default.
+    event_bundle = build_addressee_target_match_admitted_event(
+        turn_index=0,
+        commitment=commitment,
+        at="2026-06-11T00:00:00Z",
+        aggregation_kind=M20_4_AGGREGATION_BUNDLE_WEAK,
+    )
+    assert event_bundle["aggregation_kind"] == M20_4_AGGREGATION_BUNDLE_WEAK
+
 

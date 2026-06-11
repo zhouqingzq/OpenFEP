@@ -454,6 +454,29 @@ def _subcap3_bidirectional_fep(
     tie_breaker_engaged = _safe_count(
         diag, "tie_breaker_engaged_addressee_directed_total"
     )
+    # M20.4 v2 (2026-06-11) — bundle aggregation.
+    # New diag counters. The bundle path is the
+    # v2 second admit route; bundle admits bump
+    # the v1 `producer_admit_total` aggregate
+    # (preserved for back-compat) AND the new
+    # per-kind `producer_admit_bundle_weak_total`
+    # counter. The bundle rule only fires for the
+    # addressee + `addressed_to_assistant=True`
+    # sub-class (D6) so bundle admits are all
+    # dir_true.
+    producer_admit_single_strong = _safe_count(
+        diag, "producer_admit_single_strong_total"
+    )
+    producer_admit_bundle_weak = _safe_count(
+        diag, "producer_admit_bundle_weak_total"
+    )
+    producer_admit_bundle_weak_dir_true = _safe_count(
+        diag,
+        "producer_admit_bundle_weak_addressee_directed_total",
+    )
+    producer_bundle_reject_total = _safe_count(
+        diag, "producer_bundle_reject_total"
+    )
     # M11 user-models per-persona coverage.
     m11_models = state.get("m11_user_models", {}) or {}
     if not isinstance(m11_models, Mapping):
@@ -461,11 +484,19 @@ def _subcap3_bidirectional_fep(
     persona_channels = sorted(str(k) for k in m11_models.keys() if str(k).strip())
     n_persona_channels = len(persona_channels)
     # Verdict: producer alive + at least one dir=True
-    # admit + >=2 persona channels.
+    # admit (single OR bundle) + >=2 persona channels.
+    # M20.4 v2: dir_true admit count is now
+    # single-strong + bundle-weak. The bar
+    # (SUB3_P04_DIR_TRUE_ADMIT_MIN) is unchanged;
+    # the change is whether the producer can
+    # reach it for conservative models (deepseek).
+    dir_true_total = int(producer_admit_dir_true) + int(
+        producer_admit_bundle_weak_dir_true
+    )
     failures: list[str] = []
     if producer_admit_total < SUB3_PRODUCER_ADMIT_TOTAL_MIN:
         failures.append("producer_dormant")
-    if producer_admit_dir_true < SUB3_P04_DIR_TRUE_ADMIT_MIN:
+    if dir_true_total < SUB3_P04_DIR_TRUE_ADMIT_MIN:
         failures.append("p04_dir_true_admit_zero")
     if n_persona_channels < SUB3_PER_PERSONA_CHANNELS_MIN:
         failures.append("per_persona_channels_too_few")
@@ -478,6 +509,18 @@ def _subcap3_bidirectional_fep(
         "producer_reject_dir_true": int(producer_reject_dir_true),
         "write_path_skip_dir_true": int(write_path_skip),
         "tie_breaker_engaged_dir_true": int(tie_breaker_engaged),
+        # M20.4 v2: bundle aggregation counters.
+        "producer_admit_single_strong": int(
+            producer_admit_single_strong
+        ),
+        "producer_admit_bundle_weak": int(producer_admit_bundle_weak),
+        "producer_admit_bundle_weak_dir_true": int(
+            producer_admit_bundle_weak_dir_true
+        ),
+        "producer_bundle_reject_total": int(
+            producer_bundle_reject_total
+        ),
+        "dir_true_total": int(dir_true_total),
         "n_persona_channels": int(n_persona_channels),
         "persona_channels": persona_channels,
         "verdict": verdict,
@@ -662,8 +705,22 @@ def _aggregate_runs(run_summaries: list[dict[str, Any]]) -> dict[str, Any]:
             "producer_admit_dir_true_total": _total(
                 ["sub3_bidirectional_fep", "producer_admit_dir_true"]
             ),
+            "producer_admit_bundle_weak_total": _total(
+                ["sub3_bidirectional_fep", "producer_admit_bundle_weak"]
+            ),
+            "producer_admit_bundle_weak_dir_true_total": _total(
+                ["sub3_bidirectional_fep",
+                 "producer_admit_bundle_weak_dir_true"]
+            ),
+            "dir_true_total": _total(
+                ["sub3_bidirectional_fep", "dir_true_total"]
+            ),
             "producer_reject_total": _total(
                 ["sub3_bidirectional_fep", "producer_reject_total"]
+            ),
+            "producer_bundle_reject_total": _total(
+                ["sub3_bidirectional_fep",
+                 "producer_bundle_reject_total"]
             ),
             "write_path_skip_dir_true_total": _total(
                 ["sub3_bidirectional_fep", "write_path_skip_dir_true"]

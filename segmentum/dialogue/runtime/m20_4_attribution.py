@@ -47,7 +47,7 @@ gate is M20.4.1 territory.
 from __future__ import annotations
 
 import hashlib
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Mapping, Sequence
 
 from segmentum.dialogue.runtime.active_commitment import (
     ActiveCommitment,
@@ -283,6 +283,61 @@ def _tie_breaker_min_for(
 _M20_4_OBSERVABLE_TO_KIND: dict[str, str] = {
     "addressee_target_match": "addressee",
     "reaction_attribution_match": "reaction",
+}
+
+
+# === M20.4 v2 — bundle aggregation (2026-06-11) ===========
+# The bundle memory is an M20.4 owner; the M18.7
+# state surface contract (rolling cap=8) is
+# unchanged. The bundle memory is a parallel
+# longer-window surface used ONLY by the
+# `aggregated_support` admit path. Single-strong
+# admit (v1 path) reads M18.7 surface unchanged.
+#
+# v2 motivation: the 4-sub-cap 5-run v2 baseline
+# (commit 6761fe0) surfaced deepseek's
+# `dir_true_admit = 0/5` with claude's
+# `dir_true_admit = 2/5` on the same fixture +
+# same prompt. The v1 producer admits on single
+# emit confidence (P0-4 0.7 for the
+# "addressed" sub-class), which discriminates
+# by model training style rather than evidence
+# strength. v2 supplements the single-strong
+# path with a bundle-weak path that admits on
+# aggregated weak evidence (mirrors M17.2
+# §bundle-sidecar semantics; see
+# `prompts/M17.2_Work_Prompt.md:259-280`).
+M20_4_BUNDLE_MEMORY_CAP: int = 24
+# Bundle admit rule:
+# aggregated_support >= 0.85 AND
+# max_single_support < 0.7 AND
+# unique_emit_count >= 2.
+# The 0.85 cap is "two weak signals ≈ one strong";
+# the 0.7 ceiling matches the existing P0-4 single
+# threshold (the bundle path is for emits that DID
+# NOT cross the single threshold, per D7).
+M20_4_BUNDLE_AGGREGATED_THRESHOLD: float = 0.85
+M20_4_BUNDLE_MAX_SINGLE_THRESHOLD: float = 0.7
+M20_4_BUNDLE_UNIQUE_COUNT_MIN: int = 2
+# Decay: 0.85 ** (current_turn - emit_turn).
+# Recent emits weigh more; an emit 6 turns ago
+# weighs 0.85**6 ≈ 0.377.
+M20_4_BUNDLE_DECAY_BASE: float = 0.85
+# Aggregation kind labels (v2 admission event).
+M20_4_AGGREGATION_SINGLE_STRONG: str = "single_strong"
+M20_4_AGGREGATION_BUNDLE_WEAK: str = "bundle_weak"
+M20_4_AGGREGATION_REJECTED: str = "rejected"
+# Diag counter keys (additive over v1). v1's
+# `producer_admit_total` is now the SUM of
+# `producer_admit_single_strong_total` and
+# `producer_admit_bundle_weak_total`. The aggregate
+# is preserved for back-compat with v1 acceptance
+# scripts and unit tests.
+M20_4_AGGREGATION_KIND_TO_DIAG_KEY: dict[str, str] = {
+    M20_4_AGGREGATION_SINGLE_STRONG:
+        "producer_admit_single_strong_total",
+    M20_4_AGGREGATION_BUNDLE_WEAK:
+        "producer_admit_bundle_weak_total",
 }
 
 
@@ -605,7 +660,28 @@ def build_addressee_target_match_admitted_event(
     turn_index: int,
     commitment: ActiveCommitment,
     at: str,
+    aggregation_kind: str = M20_4_AGGREGATION_SINGLE_STRONG,
 ) -> dict[str, Any]:
+    """Build the `AddresseeTargetMatchAdmitted` event.
+
+    v2 (2026-06-11) adds an `aggregation_kind` field
+    (default `"single_strong"` for v1 byte-identity).
+    Values:
+      - `"single_strong"` (v1 default): the v1 single-
+        strong path admitted this commitment (single
+        emit confidence >= 0.7 for the "addressed"
+        sub-class, >= 0.4 for the "not addressed" /
+        `reaction` sub-classes).
+      - `"bundle_weak"` (v2 new): the v2 bundle path
+        admitted this commitment (no single emit
+        crossed 0.7, but the decayed bundle
+        `aggregated_support >= 0.85` with
+        `max_single_support < 0.7` and
+        `unique_emit_count >= 2`).
+    Callers that pass an explicit `aggregation_kind`
+    are responsible for the value; the default is
+    the v1 behavior.
+    """
     if not isinstance(commitment, ActiveCommitment):
         return {}
     payload = dict(commitment.observable_payload or {})
@@ -619,6 +695,14 @@ def build_addressee_target_match_admitted_event(
         "current_turn_id": payload.get("current_turn_id", ""),
         "inbound_bounded_excerpt": payload.get("inbound_bounded_excerpt", ""),
         "ambiguity_band": payload.get("ambiguity_band", ""),
+        # v2: the admission path that produced this
+        # commitment. v1 callers use the default
+        # `"single_strong"`; v2 bundle dispatch
+        # passes `"bundle_weak"`. New field is
+        # additive; v1 callers that read the event
+        # without filtering on this field see no
+        # change.
+        "aggregation_kind": str(aggregation_kind),
         "reason_codes": list(commitment.reason_codes or []),
         "engineering_proxy_label": M20_4_ENGINEERING_PROXY_LABEL,
         "at": at,
@@ -814,8 +898,18 @@ def produce_m20_4_attribution_commitments(
     if not isinstance(state, dict):
         return []
     surface = state.get("m18_7_attribution_hypotheses")
-    if not isinstance(surface, list) or not surface:
-        return []
+    if not isinstance(surface, list):
+        surface = []
+    # v2 (2026-06-11): the v1 early-return on empty
+    # surface is removed. The bundle dispatch
+    # (below) operates on `m20_4_bundle_memory`, an
+    # independent M20.4 owner; an empty M18.7
+    # surface does NOT preclude a bundle admit. The
+    # bundle dispatch is a no-op when bundle_memory
+    # is also empty; the v1 single-strong loop is a
+    # no-op when the M18.7 surface is empty. Both
+    # paths are independent and the function still
+    # returns [] on a fully-empty state.
     admitted: list[ActiveCommitment] = []
     for entry in surface:
         if not isinstance(entry, Mapping):
@@ -888,6 +982,16 @@ def produce_m20_4_attribution_commitments(
         if commitment is not None:
             admitted.append(commitment)
             _bump_diag(state, producer_admit_total=1)
+            # v2 (2026-06-11): the v1 single-strong
+            # admit path is also labeled for symmetry
+            # with the new bundle-weak path. The counter
+            # is additive; v1 `producer_admit_total`
+            # is preserved and remains the SUM of
+            # single-strong + bundle-weak.
+            _bump_diag(
+                state,
+                producer_admit_single_strong_total=1,
+            )
             # P0-4: per-sub-class admit histogram. Additive
             # over the v1 `producer_admit_total` aggregate.
             admit_bucket_key = (
@@ -906,6 +1010,227 @@ def produce_m20_4_attribution_commitments(
                 diag.get(admit_bucket_key, 0)
             ) + 1
             state["m20_4_attribution_diagnostics"] = diag
+
+    # === M20.4 v2 — bundle aggregation dispatch (2026-06-11)
+    # The v1 single-strong loop above is unchanged.
+    # The bundle dispatch fires for the
+    # `addressee` + `addressed_to_assistant=True`
+    # sub-class when NO emit in the bundle window
+    # crossed the P0-4 0.7 single threshold. Per D7
+    # this avoids double-counting emits that the v1
+    # path already admitted.
+    #
+    # Bundle admit rule (mirrors M17.2 §bundle-sidecar):
+    #   aggregated_support >= 0.85 AND
+    #   max_single_support < 0.7 AND
+    #   unique_emit_count >= 2
+    # Bundle is for the `addressee` kind only (D5;
+    # reaction is single-emit only — its joint-axis
+    # asymmetry is a metric issue, not a confidence
+    # issue). `not_addressed` is single-emit only
+    # (D6; precision 1.0 per P1).
+    #
+    # The bundle admit fires AT MOST ONCE per
+    # `produce_m20_4_attribution_commitments` call
+    # (one bundle-weak admit per turn, not per emit).
+    # The admitted commitment uses the M18.7
+    # surface's most recent addressee-directed
+    # entry as the underlying shape; the
+    # `aggregation_kind` field on the downstream
+    # admission event distinguishes it from
+    # single-strong admits.
+    if isinstance(state, dict):
+        bundle_memory = state.get("m20_4_bundle_memory")
+        if isinstance(bundle_memory, list) and bundle_memory:
+            (
+                agg,
+                max_single,
+                unique_count,
+            ) = _bundle_aggregated_support(
+                bundle_memory=bundle_memory,
+                current_turn_index=int(current_turn_id),
+            )
+            bundle_required = bool(
+                agg >= M20_4_BUNDLE_AGGREGATED_THRESHOLD
+                and max_single < M20_4_BUNDLE_MAX_SINGLE_THRESHOLD
+                and unique_count >= M20_4_BUNDLE_UNIQUE_COUNT_MIN
+            )
+            if bundle_required:
+                # Find the most recent addressee-directed
+                # M18.7 surface entry to use as the bundle
+                # admit's underlying shape. Per D7 the
+                # v1 path may have already admitted one
+                # strong emit; we still pick the
+                # surface's most recent addressee-
+                # directed entry regardless of its
+                # v1 admit status (the bundle admit is
+                # a NEW commitment on the addressee
+                # sub-class, not a duplicate of the v1
+                # strong admit).
+                most_recent_directed = None
+                for entry in reversed(surface):
+                    if not isinstance(entry, Mapping):
+                        continue
+                    if str(entry.get("kind", "")) != "addressee":
+                        continue
+                    if not bool(
+                        entry.get("addressed_to_assistant", False)
+                    ):
+                        continue
+                    most_recent_directed = entry
+                    break
+                if most_recent_directed is not None:
+                    bundle_commit = _admit_one(
+                        kind="addressee",
+                        entry=most_recent_directed,
+                        current_turn_id=current_turn_id,
+                        inbound_excerpt=inbound_excerpt,
+                        binding=group_turn_binding,
+                        bus=bus,
+                        at=at,
+                    )
+                    if bundle_commit is not None:
+                        # v2: stamp `aggregation_kind =
+                        # "bundle_weak"` onto the
+                        # commitment's observable_payload
+                        # so the consumer (mvp_loop) can
+                        # read it when building the
+                        # `AddresseeTargetMatchAdmitted`
+                        # event. The producer is the
+                        # only legitimate source of the
+                        # kind label; the consumer is a
+                        # pass-through.
+                        #
+                        # ActiveCommitment is a frozen
+                        # dataclass; we cannot mutate it
+                        # in place. We build a new
+                        # instance with the bundle_kind
+                        # stamped on the payload and the
+                        # bundle reason code appended.
+                        # The original `_admit_one`
+                        # return value is discarded (we
+                        # never appended it to `admitted`
+                        # in the first place — the v1
+                        # single-strong path was rejected
+                        # for this turn because the emit
+                        # is below the P0-4 0.7
+                        # threshold; the bundle path is
+                        # the SECOND admit route, not a
+                        # replacement).
+                        bundle_payload = dict(
+                            bundle_commit.observable_payload
+                            or {}
+                        )
+                        bundle_payload["aggregation_kind"] = (
+                            M20_4_AGGREGATION_BUNDLE_WEAK
+                        )
+                        bundle_commit = ActiveCommitment(
+                            commit_id=bundle_commit.commit_id,
+                            owner_id=bundle_commit.owner_id,
+                            source_kind=bundle_commit.source_kind,
+                            source_ref=bundle_commit.source_ref,
+                            layer=bundle_commit.layer,
+                            observable=bundle_commit.observable,
+                            observable_payload=bundle_payload,
+                            target=bundle_commit.target,
+                            due_at=bundle_commit.due_at,
+                            priority=bundle_commit.priority,
+                            confidence=bundle_commit.confidence,
+                            evidence_refs=bundle_commit.evidence_refs,
+                            created_turn=bundle_commit.created_turn,
+                            created_at=bundle_commit.created_at,
+                            reason_codes=(
+                                *bundle_commit.reason_codes,
+                                "m20_4_bundle_aggregation",
+                            ),
+                            engineering_proxy_label=(
+                                bundle_commit.engineering_proxy_label
+                            ),
+                            horizon=bundle_commit.horizon,
+                        )
+                        admitted.append(bundle_commit)
+                        # v2: bundle admit bumps the v1
+                        # aggregate (`producer_admit_total`)
+                        # AND the per-kind
+                        # (`producer_admit_bundle_weak_total`).
+                        # The v1 counter semantics are
+                        # preserved: any commit that the
+                        # producer returns counts toward
+                        # `producer_admit_total`. The new
+                        # per-kind counter is additive.
+                        _bump_diag(state, producer_admit_total=1)
+                        _bump_diag(
+                            state,
+                            producer_admit_bundle_weak_total=1,
+                        )
+                        # Per-sub-class bundle histogram
+                        # (additive over v1's
+                        # `producer_admit_addressee_directed_total`).
+                        # Bundle only fires for the
+                        # "addressed" sub-class (D6), so
+                        # the bucket key is the directed
+                        # variant unconditionally.
+                        diag = state.get(
+                            "m20_4_attribution_diagnostics"
+                        )
+                        if not isinstance(diag, dict):
+                            diag = {}
+                        diag[
+                            "producer_admit_bundle_weak_addressee_directed_total"
+                        ] = int(
+                            diag.get(
+                                "producer_admit_bundle_weak_addressee_directed_total",
+                                0,
+                            )
+                        ) + 1
+                        state[
+                            "m20_4_attribution_diagnostics"
+                        ] = diag
+            else:
+                # Bundle rule did not fire on this turn.
+                # Bump a "considered but rejected"
+                # counter for observability. Additive.
+                _bump_diag(
+                    state,
+                    producer_bundle_reject_total=1,
+                )
+                # Sub-axis breakdown: report the
+                # FIRST failing gate. Useful for the
+                # 5-run diagnose to see which gate
+                # is the binding constraint per turn.
+                #
+                # The `unique_count_below_min` gate
+                # is structurally unreachable under
+                # the current threshold design (D7
+                # + dedup-by-commit_id: any emit
+                # strong enough to push agg past
+                # 0.85 must be at conf ~0.85, which
+                # fails the max_single < 0.7 gate
+                # first). The gate is still
+                # documented in the dispatch
+                # (mirrors M17.2 §bundle-sidecar)
+                # for forward-compat if the
+                # thresholds are revised, but the
+                # reporter doesn't expect to emit
+                # it in the current setup. The
+                # 5-run snapshot may surface this
+                # gap if it shows up empirically.
+                diag = state.get("m20_4_attribution_diagnostics")
+                if not isinstance(diag, dict):
+                    diag = {}
+                bucket = diag.get(
+                    "producer_bundle_reject_by_gate"
+                )
+                if not isinstance(bucket, dict):
+                    bucket = {}
+                gate = (
+                    "aggregated_below_threshold"
+                    if agg < M20_4_BUNDLE_AGGREGATED_THRESHOLD
+                    else "max_single_not_below_threshold"
+                )
+                bucket[gate] = int(bucket.get(gate, 0)) + 1
+                diag["producer_bundle_reject_by_gate"] = bucket
+                state["m20_4_attribution_diagnostics"] = diag
     return admitted
 
 
@@ -1600,6 +1925,117 @@ def record_settler_unavailable(state: dict) -> None:
     _bump_diag(state, settler_unavailable_total=1)
 
 
+# === Bundle aggregation (M20.4 v2, 2026-06-11) ==============
+
+
+def append_bundle_memory(
+    state: dict,
+    *,
+    entry: Mapping[str, Any],
+) -> None:
+    """Append one M18.7 addressee-directed entry to the
+    M20.4 bundle memory (separate owner, longer cap).
+
+    No-op on:
+    - non-dict state
+    - non-Mapping or empty entry
+    - entry whose `kind` is not `"addressee"`
+    - entry whose `addressed_to_assistant` is False
+      (D6: bundle is for the "addressed" sub-class
+      only; `not_addressed` is precision 1.0 per P1)
+    - entry with empty `commit_id` (M18.7 contract
+      violation; engineering rejects)
+
+    The bundle memory caps at
+    `M20_4_BUNDLE_MEMORY_CAP` (24) entries; oldest
+    are evicted on overflow.
+
+    The helper is the only writer to
+    `state["m20_4_bundle_memory"]`. Call sites
+    (mvp_loop and tests) must use this helper.
+    """
+    if not isinstance(state, dict):
+        return
+    if not isinstance(entry, Mapping) or not entry:
+        return
+    if str(entry.get("kind", "")) != "addressee":
+        return
+    if not bool(entry.get("addressed_to_assistant", False)):
+        return
+    commit_id = str(entry.get("commit_id", "") or "")
+    if not commit_id:
+        return
+    memory = state.get("m20_4_bundle_memory")
+    if not isinstance(memory, list):
+        memory = []
+    memory.append(
+        {
+            "turn_index": int(entry.get("turn_index", 0) or 0),
+            "commit_id": commit_id,
+            "confidence": float(
+                entry.get("confidence", 0.0) or 0.0
+            ),
+            "participant_id": str(
+                entry.get("participant_id", "") or ""
+            ),
+        }
+    )
+    if len(memory) > M20_4_BUNDLE_MEMORY_CAP:
+        memory = memory[-M20_4_BUNDLE_MEMORY_CAP:]
+    state["m20_4_bundle_memory"] = memory
+
+
+def _bundle_aggregated_support(
+    *,
+    bundle_memory: Sequence[Mapping[str, Any]],
+    current_turn_index: int,
+) -> tuple[float, float, int]:
+    """Compute `aggregated_support`, `max_single_support`,
+    and `unique_emit_count` for the bundle admit rule.
+
+    `aggregated_support` is the decayed sum of confidences
+    over all emits in the bundle memory. Decay weight is
+    `M20_4_BUNDLE_DECAY_BASE ** (current_turn - emit_turn)`;
+    emits at the same turn weigh 1.0, emits 6 turns ago
+    weigh `0.85**6 ≈ 0.377`.
+
+    `max_single_support` is the largest raw (un-decayed)
+    confidence in the bundle memory.
+
+    `unique_emit_count` is the count of unique `commit_id`
+    values; duplicate commit_ids are deduplicated before
+    the aggregation (a robust-but-cheap redundancy guard
+    — M17.2's "redundancy penalties" are stronger, but
+    this is the minimum the producer needs).
+
+    This is a pure dispatcher; the caller decides whether
+    the admit rule (aggregated_support >= 0.85 AND
+    max_single_support < 0.7 AND unique_emit_count >= 2)
+    is satisfied.
+    """
+    if not bundle_memory:
+        return 0.0, 0.0, 0
+    agg = 0.0
+    max_single = 0.0
+    seen: set[str] = set()
+    cur = int(current_turn_index)
+    for entry in bundle_memory:
+        if not isinstance(entry, Mapping):
+            continue
+        cid = str(entry.get("commit_id", "") or "")
+        if not cid or cid in seen:
+            continue
+        seen.add(cid)
+        conf = float(entry.get("confidence", 0.0) or 0.0)
+        emit_turn = int(entry.get("turn_index", 0) or 0)
+        gap = max(cur - emit_turn, 0)
+        weight = M20_4_BUNDLE_DECAY_BASE ** gap
+        agg += conf * weight
+        if conf > max_single:
+            max_single = conf
+    return agg, max_single, len(seen)
+
+
 __all__ = [
     "AddresseeTargetMatchLLMJudgeSettler",
     "M20_4_AMBIGUITY_BANDS",
@@ -1611,6 +2047,15 @@ __all__ = [
     "M20_4_TIE_BREAKER_CONFIDENCE_MIN_ADDRESSEE_DIRECTED",
     "M20_4_TIE_BREAKER_CONFIDENCE_MIN_BY_KIND",
     "M20_4_WRITE_PATH_SKIP_ADDRESSEE_DIRECTED_BELOW_CONFIDENCE",
+    "M20_4_BUNDLE_MEMORY_CAP",
+    "M20_4_BUNDLE_AGGREGATED_THRESHOLD",
+    "M20_4_BUNDLE_MAX_SINGLE_THRESHOLD",
+    "M20_4_BUNDLE_UNIQUE_COUNT_MIN",
+    "M20_4_BUNDLE_DECAY_BASE",
+    "M20_4_AGGREGATION_SINGLE_STRONG",
+    "M20_4_AGGREGATION_BUNDLE_WEAK",
+    "M20_4_AGGREGATION_REJECTED",
+    "M20_4_AGGREGATION_KIND_TO_DIAG_KEY",
     "REASON_ADMISSION",
     "REASON_GRAPH_MICROADJUST",
     "REASON_GRAPH_NOOP",
@@ -1621,6 +2066,8 @@ __all__ = [
     "ReactionAttributionMatchLLMJudgeSettler",
     "_admit_threshold_for",
     "_should_skip_addressee_directed_write",
+    "append_bundle_memory",
+    "_bundle_aggregated_support",
     "build_addressee_target_match_admitted_event",
     "build_m18_5_attribution_feedback_row",
     "build_reaction_attribution_match_admitted_event",
