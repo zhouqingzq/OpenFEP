@@ -399,6 +399,17 @@ class CalibrationHarnessReport:
     # that don't go through the runtime path (e.g.,
     # test fixtures that pass a stub runtime).
     m20_4_diagnostics: dict[str, object] | None = None
+    # P0-8 follow-up (2026-06-11): the in-memory
+    # addressee predictions and the matching fixture
+    # turn indices. The state-surface's rolling-window
+    # cap=8 evicts early turns; the harness sees the
+    # full in-memory sequence. Consumers (e.g. the
+    # 4-sub-capability `sub-2` scoring) should prefer
+    # these over the on-disk state for the
+    # surface-vs-harness discrepancy that v2 P0-8
+    # (commit 39d2ef0) already documented.
+    addressee_predictions: tuple["AddresseePrediction", ...] = ()
+    fixture_turn_indices: tuple[int, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
         out: dict[str, object] = {
@@ -1859,6 +1870,8 @@ def run_m18_7_1_calibration_harness(
         scoring_mode=scoring_mode,
         fixture_warnings=fixture_warnings,
         m20_4_diagnostics=m20_4_diagnostics,
+        addressee_predictions=tuple(addressee_predictions),
+        fixture_turn_indices=tuple(reaction_turn_indices),
     )
 
 

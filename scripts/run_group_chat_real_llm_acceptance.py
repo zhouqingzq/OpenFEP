@@ -60,6 +60,7 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from segmentum.dialogue.runtime.m18_7_1_calibration import (
+    CalibrationHarnessReport,
     record_m18_7_1_calibration,
     run_m18_7_1_calibration_harness,
     validate_calibration_fixture_shape,
@@ -324,6 +325,96 @@ def _subcap2_speaker_identity(
     }
 
 
+def _subcap2_speaker_identity_from_harness(
+    harness_report: CalibrationHarnessReport,
+    fixture: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Sub-capability 2 — 区分说话人 (harness-source variant).
+
+    P0-8 follow-up (2026-06-11): the on-disk state
+    surface is a rolling window capped at 8 entries
+    (M18_7_STATE_SURFACE_CAP), so early turns get
+    evicted before the surface is persisted. The
+    harness's in-memory view, exposed via
+    `harness_report.addressee_predictions` +
+    `harness_report.fixture_turn_indices`, has the
+    full 1:1 per-turn sequence.
+
+    The M18.7.2 v2 P0-8 5-run stability report
+    (commit 39d2ef0) already documented this
+    surface-vs-harness discrepancy and concluded
+    "the harness's view is the **correct** one for
+    scoring — it reads the surface during each
+    turn." This function is the P0-8 follow-up that
+    re-routes sub-2 to that source.
+
+    Scoring is identical to `_subcap2_speaker_identity`
+    (the state-based variant kept for unit tests):
+    - Iterate harness predictions.
+    - For each `present=True` prediction, look up
+      GT speaker pid by turn index from the fixture.
+    - Apply `_pid_eq` (alias-collapse) +
+      case-insensitive matching.
+    - `present=False` (LLM returned `{}`) is a
+      no-emit, not a sub-2 mistake.
+    """
+    n_decidable = 0
+    n_exact_match = 0
+    n_close_match = 0
+    exact_pids: list[str] = []
+    for pred, turn_index in zip(
+        harness_report.addressee_predictions,
+        harness_report.fixture_turn_indices,
+    ):
+        if not getattr(pred, "present", False):
+            continue
+        emit_pid = str(getattr(pred, "participant_id", "") or "").strip()
+        if not emit_pid:
+            continue
+        n_decidable += 1
+        # Find the matching fixture turn.
+        gt_speaker = ""
+        for step in fixture:
+            if int(step.get("turn_index", -1)) == int(turn_index):
+                env = step.get("group_turn_envelope", {}) or {}
+                gt_speaker = str(env.get("speaker_participant_id", "")).strip()
+                break
+        if not gt_speaker:
+            continue
+        if _pid_eq(emit_pid, gt_speaker):
+            n_exact_match += 1
+            exact_pids.append(emit_pid)
+        elif emit_pid.lower() == gt_speaker.lower():
+            # Case-insensitive match (e.g. LLM emits
+            # "Carol" but GT is "carol") — counts as
+            # exact match (the pid is the same name;
+            # capitalization is a surface detail).
+            n_exact_match += 1
+            exact_pids.append(emit_pid)
+        elif (
+            emit_pid.lower() in gt_speaker.lower()
+            or gt_speaker.lower() in emit_pid.lower()
+        ):
+            n_close_match += 1
+    rate = (n_exact_match / n_decidable) if n_decidable > 0 else 0.0
+    if rate >= SUB2_SPEAKER_PID_EXACT_MATCH_MIN:
+        verdict = "acceptable"
+    elif n_decidable == 0:
+        verdict = "no_emits"
+    else:
+        verdict = "below_bar"
+    return {
+        "n_decidable_emits": int(n_decidable),
+        "n_exact_match": int(n_exact_match),
+        "n_close_match": int(n_close_match),
+        "speaker_pid_exact_match_rate": round(rate, 6),
+        "exact_pid_set": sorted(set(exact_pids)),
+        "verdict": verdict,
+        "n_decidable_from_harness": int(n_decidable),
+        "source": "harness_report",
+    }
+
+
 def _subcap3_bidirectional_fep(
     state: Mapping[str, Any],
     m20_4_diagnostics: Mapping[str, Any] | None,
@@ -481,7 +572,7 @@ def _run_one(
     m20_4_diag = runtime.get_m20_4_diagnostics() or {}
 
     sub1 = _subcap1_addressee_target(harness_report)
-    sub2 = _subcap2_speaker_identity(state, fixture)
+    sub2 = _subcap2_speaker_identity_from_harness(harness_report, fixture)
     sub3 = _subcap3_bidirectional_fep(state, m20_4_diag)
     sub4 = _subcap4_persona_consistency(state)
 
@@ -641,6 +732,64 @@ def _verdict(runs: list[dict[str, Any]], agg: dict[str, Any]) -> str:
     return f"failed:{'+'.join(sorted(failed_subs))}"
 
 
+def _init_store_and_runtime(
+    root: Path,
+    client: Any,
+) -> tuple[Any, Any]:
+    """Initialize a fresh `MVPStateStore` + `MVPDialogueRuntime`.
+
+    P0-8 follow-up (2026-06-11): the 5-run baseline
+    surfaced sub-4 = `no_m12_1_surface` because
+    `m12_1_personality_enabled` defaults to `False`
+    on a fresh store, and the runtime never sets it.
+    Without the flag, M12.1 never runs in
+    `MVPDialogueRuntime.run_turn` and the
+    `m12_1_user_personality` surface stays empty
+    (`profiles_by_user == {}`), so sub-4 reports
+    `n_profiles == 0` even when the fixture is long
+    enough for M12.1 to write a profile.
+
+    The acceptance gate's sub-4 bar is "M12.1 surface
+    alive", which is a **state-surface** check, not a
+    LLM verdict. To validate that bar we need M12.1
+    actually enabled. This helper primes the store
+    BEFORE the runtime is constructed so the runtime
+    reads the enabled flag on its first `run_turn`.
+
+    Out of scope: this is the **measurement** path
+    only. M12.1's `n_turns_threshold` and "is the
+    fixture long enough to surface a profile"
+    question is a separate investigation.
+    """
+    store = MVPStateStore(root=root)
+    # MVPStateStore.__post_init__ already wrote the
+    # default `m12_1_personality_enabled=False` file.
+    # Flip it to True so the runtime's
+    # `_m12_1_enabled_for_state` returns True on
+    # the first `run_turn`. The 4 sub-key shape of
+    # `m12_1_user_personality` matches the runtime
+    # default (mvp_loop.py:344-351) so the M12.1
+    # state loader's `to_dict()` round-trips cleanly.
+    (root / "m12_1_personality_enabled.json").write_text(
+        "true", encoding="utf-8"
+    )
+    (root / "m12_1_user_personality.json").write_text(
+        json.dumps(
+            {
+                "profiles_by_user": {},
+                "latest_reports_by_user": {},
+                "run_records_by_user": {},
+                "consecutive_step1_insufficient_by_user": {},
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    runtime = MVPDialogueRuntime(store=store, llm=client)
+    return store, runtime
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
@@ -761,11 +910,13 @@ def main() -> int:
                 if retry_root.exists():
                     _shutil.rmtree(retry_root)
                 retry_root.mkdir(parents=True, exist_ok=True)
-                store = MVPStateStore(root=retry_root)
-                runtime = MVPDialogueRuntime(store=store, llm=client)
+                store, runtime = _init_store_and_runtime(
+                    retry_root, client
+                )
             else:
-                store = MVPStateStore(root=run_root)
-                runtime = MVPDialogueRuntime(store=store, llm=client)
+                store, runtime = _init_store_and_runtime(
+                    run_root, client
+                )
             at = _now_iso8601()
             try:
                 run_summary = _run_one(

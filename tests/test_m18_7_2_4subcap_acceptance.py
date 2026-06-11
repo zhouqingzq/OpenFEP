@@ -31,9 +31,15 @@ from run_group_chat_real_llm_acceptance import (  # type: ignore[import-not-foun
     _aggregate_runs,
     _subcap1_addressee_target,
     _subcap2_speaker_identity,
+    _subcap2_speaker_identity_from_harness,
     _subcap3_bidirectional_fep,
     _subcap4_persona_consistency,
     _verdict,
+)
+from segmentum.dialogue.runtime.m18_7_1_calibration import (  # type: ignore[import-not-found]
+    AddresseePrediction,
+    CalibrationFieldReport,
+    CalibrationHarnessReport,
 )
 
 
@@ -388,3 +394,174 @@ def test_verdict_lists_failing_subs():
     agg = _aggregate_runs([bad_run])
     v = _verdict([bad_run], agg)
     assert v == "failed:sub1+sub2", v
+
+
+# === Sub-2: harness-source variant (P0-8 follow-up) =====================
+
+
+def _make_stub_harness_report(
+    *,
+    addressee_preds: list,
+    turn_indices: list[int],
+) -> CalibrationHarnessReport:
+    """Build a minimal CalibrationHarnessReport for sub-2 tests.
+
+    Only `addressee_predictions` + `fixture_turn_indices` matter
+    to `_subcap2_speaker_identity_from_harness`; the addressee
+    and reaction reports can be empty placeholders. We pass
+    `threshold_recommendation={}` and `reliability_bins=[]` to
+    satisfy the CalibrationFieldReport required fields.
+    """
+    empty_field = CalibrationFieldReport(
+        n_total=0, n_present=0, n_unknown=0,
+        n_correct=0, n_incorrect=0,
+        accuracy=0.0, brier=0.0, ece=0.0,
+        reliability_bins=[],
+        drift_signals=[],
+        threshold_recommendation={},
+    )
+    return CalibrationHarnessReport(
+        fixture_name="<test>",
+        n_fixtures=len(turn_indices),
+        addressee=empty_field,
+        reaction=empty_field,
+        drift_signals=[],
+        scoring_mode="by_pid",
+        addressee_predictions=tuple(addressee_preds),
+        fixture_turn_indices=tuple(turn_indices),
+    )
+
+
+def test_sub2_from_harness_sees_full_in_memory_sequence():
+    """T5e: harness report exposes in-memory predictions, so
+    `_subcap2_speaker_identity_from_harness` sees the full
+    sequence (e.g. 4/4 emits) — even when the on-disk
+    state has been evicted by the rolling-window cap=8.
+
+    The state-based variant would see only the last 2
+    entries; the harness variant sees all 4.
+    """
+    fixture = [
+        {"turn_index": 0, "group_turn_envelope": {"speaker_participant_id": "carol"}},
+        {"turn_index": 1, "group_turn_envelope": {"speaker_participant_id": "dave"}},
+        {"turn_index": 2, "group_turn_envelope": {"speaker_participant_id": "carol"}},
+        {"turn_index": 3, "group_turn_envelope": {"speaker_participant_id": "dave"}},
+    ]
+    preds = [
+        AddresseePrediction(present=True, addressed_to_assistant=False,
+                            participant_id="carol", confidence=0.8),
+        AddresseePrediction(present=True, addressed_to_assistant=True,
+                            participant_id="dave", confidence=0.7),
+        AddresseePrediction(present=True, addressed_to_assistant=False,
+                            participant_id="dave", confidence=0.6),  # wrong: carol speaker, dave emit
+        AddresseePrediction(present=True, addressed_to_assistant=False,
+                            participant_id="dave", confidence=0.9),
+    ]
+    report = _make_stub_harness_report(
+        addressee_preds=preds, turn_indices=[0, 1, 2, 3]
+    )
+    r = _subcap2_speaker_identity_from_harness(report, fixture)
+    assert r["n_decidable_emits"] == 4  # all 4 emits
+    assert r["n_exact_match"] == 3      # turn 2 mismatch
+    assert r["speaker_pid_exact_match_rate"] == 0.75
+    assert r["source"] == "harness_report"
+    assert r["verdict"] == "acceptable", r
+
+
+def test_sub2_from_harness_no_emits_is_not_below_bar():
+    """T5f: harness report with zero `present=True` emits
+    → verdict `no_emits` (not `below_bar`); the LLM
+    chose not to attribute rather than being wrong.
+    """
+    fixture: list[dict] = []
+    preds = [
+        AddresseePrediction(present=False, addressed_to_assistant=False,
+                            participant_id="", confidence=0.0),
+        AddresseePrediction(present=False, addressed_to_assistant=False,
+                            participant_id="", confidence=0.0),
+    ]
+    report = _make_stub_harness_report(
+        addressee_preds=preds, turn_indices=[0, 1]
+    )
+    r = _subcap2_speaker_identity_from_harness(report, fixture)
+    assert r["n_decidable_emits"] == 0
+    assert r["verdict"] == "no_emits", r
+
+
+def test_sub2_from_harness_uses_pid_normalization():
+    """T5g: harness-source sub-2 still applies the
+    `_pid_eq` alias-collapse + case-insensitive
+    normalization (e.g. 'Carol' == 'carol',
+    'bot' == 'assistant').
+    """
+    fixture = [
+        {"turn_index": 0, "group_turn_envelope": {"speaker_participant_id": "carol"}},
+        {"turn_index": 1, "group_turn_envelope": {"speaker_participant_id": "bot"}},
+    ]
+    preds = [
+        AddresseePrediction(present=True, addressed_to_assistant=False,
+                            participant_id="Carol", confidence=0.8),
+        AddresseePrediction(present=True, addressed_to_assistant=True,
+                            participant_id="assistant", confidence=0.7),
+    ]
+    report = _make_stub_harness_report(
+        addressee_preds=preds, turn_indices=[0, 1]
+    )
+    r = _subcap2_speaker_identity_from_harness(report, fixture)
+    assert r["n_decidable_emits"] == 2
+    assert r["n_exact_match"] == 2
+    assert r["speaker_pid_exact_match_rate"] == 1.0
+    assert r["verdict"] == "acceptable", r
+
+
+# === M12.1 enable in group chat acceptance path (P0-8 fix #2) ============
+
+
+def test_init_store_and_runtime_enables_m12_1():
+    """T5h: `_init_store_and_runtime` primes
+    `m12_1_personality_enabled=True` + the 4-key
+    `m12_1_user_personality` shape BEFORE the
+    runtime is constructed. The runtime's
+    `_m12_1_enabled_for_state` reads `True` on the
+    first `run_turn`, and the M12.1 state loader
+    sees a 4-sub-key dict (matching the runtime
+    default at mvp_loop.py:344-351).
+
+    Without this prime, sub-4 reports
+    `no_m12_1_surface` 5/5 because the runtime
+    never enables M12.1 (the persona-init path is
+    the only one that flips the flag, and the
+    acceptance script does not call it).
+    """
+    import json
+    import tempfile
+    from pathlib import Path
+    from run_group_chat_real_llm_acceptance import (  # type: ignore[import-not-found]
+        _init_store_and_runtime,
+    )
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        root = Path(tmpdir) / "test_run"
+        # Use a dummy LLM client (the runtime is
+        # constructed but `run_turn` is not called
+        # in this test).
+        class _DummyClient:
+            pass
+        store, _runtime = _init_store_and_runtime(root, _DummyClient())
+        state = store.load()
+        assert state["m12_1_personality_enabled"] is True, state
+        m12_1 = state["m12_1_user_personality"]
+        # The 4-sub-key shape must match the runtime
+        # default exactly (mvp_loop.py:344-351).
+        assert set(m12_1.keys()) == {
+            "profiles_by_user",
+            "latest_reports_by_user",
+            "run_records_by_user",
+            "consecutive_step1_insufficient_by_user",
+        }, m12_1
+        # And the persona dicts must be empty
+        # initially (no profiles written yet).
+        assert m12_1["profiles_by_user"] == {}
+        assert m12_1["latest_reports_by_user"] == {}
+        assert m12_1["run_records_by_user"] == {}
+        assert m12_1["consecutive_step1_insufficient_by_user"] == {}
