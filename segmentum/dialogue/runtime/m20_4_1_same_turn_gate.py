@@ -1,22 +1,19 @@
 """M20.4.1 v1: Same-Turn Addressee Hypothesis Gate.
 
-Closes the G1 cross-turn-only gap from M20.4 v1. The
-conscious loop runs AFTER `_decide_group_reply_policy` in
-`mvp_loop.run_turn` (the existing v1 ordering). M18.5's
-structural decision is made before the M18.7 hypothesis is
-even available. M20.4 v1 ships a cross-turn feedback row
-that flips the M18.5 outcome on T+1+. M20.4.1 adds a
-same-turn gate that runs immediately after the conscious
-loop and may override the M18.5 outcome in T0.
+Closes the G1 cross-turn-only gap from M20.4 v1. M18.5's
+structural decision is made before the M18.7.2 minimal
+attribution result is available. M20.4 v1 ships a
+cross-turn feedback row that flips the M18.5 outcome on
+T+1+. M20.4.1 adds a same-turn gate that runs immediately
+after M18.7.2 and may override the M18.5 outcome in T0.
 
 Frozen v1 design (per `prompts/M20.4.1_Work_Prompt.md`):
 
 - Pure rule (no LLM). Engineering deterministic, in line
   with CLAUDE.md "no keyword / regex" red line.
-- Engagement rule (matches M20.4 v1 tie-breaker, the C1
-  fix): `confidence > 0.85` AND `ambiguity_band == "high"`
-  AND `addressed_participant_ids` empty AND
-  `mentioned_participant_ids` empty AND `reply_to_turn_id`
+- Engagement rule: `confidence > 0.7` AND
+  `ambiguity_band == "high"` AND
+  `addressed_participant_ids` empty AND `reply_to_turn_id`
   None AND `m18_5_structural_decision in
   {clarify_addressee, no_reply}`.
 - The gate is in-line (a function call), not a M20.1
@@ -32,12 +29,12 @@ Frozen v1 design (per `prompts/M20.4.1_Work_Prompt.md`):
   stays on the M20.4 v1 T+1 path.
 
 Architecture position (M20.4.1 wiring slot 3, immediately
-after the conscious loop):
+after M18.7.2 attribution):
 
 ```text
 1. _decide_group_reply_policy     <- M18.5 structural (T0)
-2. conscious loop (LLM)            <- M18.7 fields produced
-3. <NEW> same_turn_addressee_      <- pure rule, may override
+2. M18.7.2 minimal attribution     <- M18.7 fields produced
+3. same_turn_addressee_            <- pure rule, may override
        hypothesis_gate              action in T0
 4. PolicyProducer (M20.3) post-
    conscious + M20.4 producer
@@ -66,9 +63,15 @@ from typing import Any, Mapping
 
 # === Frozen v1 constants =================================================
 
-# Tie-breaker confidence threshold (matches M20.4 v1, the
-# DECIDED 2 / DECIDED 6 rule). Strict inequality.
-M20_4_1_TIE_BREAKER_CONFIDENCE_MIN: float = 0.85
+# Same-turn override confidence threshold. Strict inequality.
+#
+# 2026-06-12 product-loop revision: M18.7.2 v3 real-LLM replay
+# showed correct addressee-directed hypotheses consistently in
+# the 0.75-0.90 band. M20.4.1 is intentionally independent of
+# M20.4 P0-6, which owns the cross-turn tie-breaker threshold.
+# The same-turn gate remains conservative through the structural
+# explicit-addressee block and the narrow overridable-decision set.
+M20_4_1_TIE_BREAKER_CONFIDENCE_MIN: float = 0.7
 
 # Allowed ambiguity_band values. Aligned with the M18.2 v1
 # frozen string and the M20.4 v1 ambiguity bands.
@@ -81,17 +84,14 @@ M20_4_1_OVERRIDABLE_DECISIONS: frozenset[str] = frozenset(
     {"clarify_addressee", "no_reply"}
 )
 
-# === P3 kill-switch (2026-06-08) ==========================================
-# Real-LLM calibration on the M18.7.1 held-out fixture
-# (see reports/m18_7_2_implementation_summary.md) shows
-# LLM accuracy in the override band (conf >= 0.85) is
-# 0.5 on addressee and 0.0 on reaction. Strict-inequality
-# is not enough: the gate still fires in the high band
-# and overrides the M18.5 structural decision visible
-# to the user.
+# === Product-loop override switch =========================================
+# P3 originally held the override in audit-only mode. The
+# 2026-06-12 product-loop revision enables the handoff after
+# M18.7.2 v3 achieved precision 1.0 on the held-out explicit
+# not-addressed cases and the gate was narrowed to structural
+# explicit-addressee blocking.
 #
-# P3 holds the override in **audit-only** mode. When
-# M20_4_1_OVERRIDE_ENABLED is False (default):
+# When M20_4_1_OVERRIDE_ENABLED is False:
 #   - The gate still runs (rule check, verdict build,
 #     bounded state-surface append, bus event emit).
 #   - The override handoff to M18.5 is NOT written. M18.5
@@ -101,10 +101,9 @@ M20_4_1_OVERRIDABLE_DECISIONS: frozenset[str] = frozenset(
 #     `m20_4_1_audit_only: True` so the production
 #     diagnose surface can count "would-have-fired"
 #     cases even though no override was applied.
-# This is a safety gate, not a removal. Re-enable by
-# editing the constant to True (explicit, not env-flag,
-# so the override path is never live-by-default).
-M20_4_1_OVERRIDE_ENABLED: bool = False
+# This remains an explicit code-owned switch rather than an
+# environment flag so activation changes stay reviewable.
+M20_4_1_OVERRIDE_ENABLED: bool = True
 
 # State surface cap. Frozen at 8 in v1 (rolling window).
 M20_4_1_STATE_SURFACE_LIMIT: int = 8
@@ -233,7 +232,7 @@ def _append_outcome(state: dict, row: dict[str, Any]) -> None:
 def _set_pending_override(state: dict, verdict: SameTurnAddresseeHypothesisGateVerdict) -> None:
     if not isinstance(state, dict):
         return
-    state[STATE_PENDING_OVERRIDE_KEY] = verdict
+    state[STATE_PENDING_OVERRIDE_KEY] = build_same_turn_gate_verdict_event(verdict)
 
 
 def clear_pending_override(state: dict) -> None:
@@ -260,6 +259,28 @@ def get_pending_override(state: dict) -> SameTurnAddresseeHypothesisGateVerdict 
     verdict = state.get(STATE_PENDING_OVERRIDE_KEY)
     if isinstance(verdict, SameTurnAddresseeHypothesisGateVerdict):
         return verdict
+    if isinstance(verdict, Mapping) and verdict.get("type") == BUS_EVENT_TYPE:
+        return SameTurnAddresseeHypothesisGateVerdict(
+            decision=str(verdict.get("decision", "") or ""),
+            m18_5_structural_decision=str(
+                verdict.get("m18_5_structural_decision", "") or ""
+            ),
+            commit_ids=tuple(_bounded_evidence_refs(verdict.get("commit_ids"))),
+            evidence_refs=tuple(
+                _bounded_evidence_refs(verdict.get("evidence_refs"))
+            ),
+            reason_codes=tuple(
+                _bounded_evidence_refs(verdict.get("reason_codes"))
+            ),
+            engineering_proxy_label=str(
+                verdict.get("engineering_proxy_label", "") or ""
+            ),
+            turn_index=int(verdict.get("turn_index", 0) or 0),
+            at=str(verdict.get("at", "") or ""),
+            m20_4_1_audit_only=bool(
+                verdict.get("m20_4_1_audit_only", False)
+            ),
+        )
     return None
 
 
@@ -325,10 +346,9 @@ def _gate_rule_engaged(
     - `conscious_addressee` is a non-empty mapping
     - `addressed_to_assistant` is True
     - `participant_id` is non-empty (M18.4 disclosure guard)
-    - `confidence` is in (0.85, 1.0] (strict `>` 0.85)
+    - `confidence` is in (0.7, 1.0] (strict `>` 0.7)
     - `ambiguity_band` is "high"
     - `addressed_participant_ids` is empty
-    - `mentioned_participant_ids` is empty
     - `reply_to_turn_id` is empty / None
     - `m18_5_structural_decision in
       {clarify_addressee, no_reply}`
@@ -357,9 +377,6 @@ def _gate_rule_engaged(
     addressed = list(binding.get("addressed_participant_ids", []) or [])
     if addressed:
         return False
-    mentioned = list(binding.get("mentioned_participant_ids", []) or [])
-    if mentioned:
-        return False
     reply_to = _bounded_string(binding.get("reply_to_turn_id", ""))
     if reply_to:
         return False
@@ -383,9 +400,9 @@ def same_turn_addressee_hypothesis_gate(
 ) -> SameTurnAddresseeHypothesisGateVerdict | None:
     """M20.4.1 same-turn gate.
 
-    Runs immediately after the conscious loop, BEFORE the
-    reply generation stages. Reads the M18.7
-    `addressee_hypothesis` v2 attribute on `conscious_plan`
+    Runs immediately after M18.7.2 attribution, BEFORE the
+    reply generation stages. Reads the M18.7.2 minimal
+    `addressee_hypothesis` supplied as `conscious_plan`
     and the v1 group_turn_binding snapshot, applies the v1
     engagement rule, and:
 
@@ -441,7 +458,7 @@ def same_turn_addressee_hypothesis_gate(
         else []
     )
 
-    # P3 kill-switch (2026-06-08): when disabled, the gate
+    # When disabled, the gate
     # still records its verdict and bus event (audit-only
     # mode) but does NOT write the override handoff. M18.5
     # applies its structural decision unchanged on the

@@ -8200,10 +8200,12 @@ class MVPDialogueRuntime:
         # outcome is preserved in the audit envelope. fast_chat
         # safe (no LLM). Does NOT modify the M18.5 decision tree.
         _run_m20_4_1_same_turn_gate(
-            conscious_plan=conscious,
-            group_turn_binding=dict(bounded_group_turn)
-            if bounded_group_turn
-            else None,
+            # M18.7.2 is the sole source of the attribution
+            # fields. The conscious-loop plan no longer carries
+            # them, so the same-turn gate must read the minimal
+            # attribution result directly.
+            conscious_plan=_m18_7_2_plan,
+            group_turn_binding=group_turn_binding,
             m18_5_structural_decision=str(
                 group_reply_policy.get("action", "") or ""
             ),

@@ -755,6 +755,91 @@ def test_run_turn_m20_4_producer_sees_m18_7_2_fill(tmp_path: Path) -> None:
     )
 
 
+def test_run_turn_m18_7_2_true_overrides_wrong_clarify_same_turn(
+    tmp_path: Path,
+) -> None:
+    """The live same-turn gate consumes the M18.7.2 minimal result."""
+    llm = _M187_2FakeLLM()
+    llm._responses_by_turn[0] = {
+        "addressee_hypothesis": {
+            "participant_id": "assistant",
+            "addressed_to_assistant": True,
+            "confidence": 0.8,
+            "rationale": "the current speaker is asking the assistant",
+        },
+        "reaction_attribution_hypothesis": {},
+    }
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "same_turn_override"),
+        llm=llm,
+        persona_name="hutao",
+    )
+    result = runtime.run_turn(
+        "Can you reply to that one?",
+        turn_index=0,
+        speaker_name="Carol",
+        group_turn_envelope={
+            "speaker_participant_id": "carol",
+            "visible_participant_ids": ["carol", "dave", "hutao"],
+            "mentioned_participant_ids": ["carol", "dave"],
+            "explicit_mentions": ["Carol", "Dave"],
+        },
+        now=1000,
+    )
+    bus = result.diagnostics.get("bus_messages", [])
+    gate_events = [
+        event
+        for event in bus
+        if event.get("type") == "SameTurnAddresseeHypothesisGateVerdict"
+    ]
+    assert gate_events
+    assert gate_events[-1]["m20_4_1_audit_only"] is False
+    assert result.action == "reply_to_current_speaker"
+    assert result.reply
+
+
+def test_run_turn_explicit_other_recipient_never_overrides(
+    tmp_path: Path,
+) -> None:
+    """Structured explicit-recipient evidence blocks a false True."""
+    llm = _M187_2FakeLLM()
+    llm._responses_by_turn[0] = {
+        "addressee_hypothesis": {
+            "participant_id": "assistant",
+            "addressed_to_assistant": True,
+            "confidence": 1.0,
+            "rationale": "incorrect test hypothesis",
+        },
+        "reaction_attribution_hypothesis": {},
+    }
+    runtime = MVPDialogueRuntime(
+        store=MVPStateStore(tmp_path / "explicit_other_no_override"),
+        llm=llm,
+        persona_name="hutao",
+    )
+    result = runtime.run_turn(
+        "Dave, can you reply to that one?",
+        turn_index=0,
+        speaker_name="Carol",
+        group_turn_envelope={
+            "speaker_participant_id": "carol",
+            "visible_participant_ids": ["carol", "dave", "hutao"],
+            "addressed_participant_ids": ["dave"],
+            "mentioned_participant_ids": ["dave"],
+            "explicit_mentions": ["Dave"],
+        },
+        now=1000,
+    )
+    bus = result.diagnostics.get("bus_messages", [])
+    gate_events = [
+        event
+        for event in bus
+        if event.get("type") == "SameTurnAddresseeHypothesisGateVerdict"
+    ]
+    assert not gate_events
+    assert result.action != "reply_to_current_speaker"
+
+
 def test_run_turn_calibration_runner_sees_m18_7_2_fill(tmp_path: Path) -> None:
     """The M18.7.1 calibration runner reads
     `state["m18_7_attribution_hypotheses"]`. After `run_turn`

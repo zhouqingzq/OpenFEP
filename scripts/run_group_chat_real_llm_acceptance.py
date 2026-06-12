@@ -415,9 +415,131 @@ def _subcap2_speaker_identity_from_harness(
     }
 
 
+def _subcap2_speaker_identity_from_turn_log(
+    turn_log: Sequence[Mapping[str, Any]],
+    fixture: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Score speaker identity from the structured ingress surface.
+
+    Sub-2 owns speaker identity, not semantic addressee
+    attribution. The prior metric compared M18.7's predicted
+    addressee pid to the fixture speaker pid, which asks two
+    different questions. The product-honest source is the
+    structured turn log written by Path B.
+    """
+    gt_by_turn: dict[int, str] = {}
+    for step in fixture:
+        env = step.get("group_turn_envelope", {}) or {}
+        gt_by_turn[int(step.get("turn_index", -1))] = str(
+            env.get("speaker_participant_id", "") or ""
+        ).strip()
+
+    n_decidable = 0
+    n_exact_match = 0
+    exact_pids: list[str] = []
+    for row in turn_log:
+        if not isinstance(row, Mapping) or row.get("event") != "turn":
+            continue
+        turn_index = int(row.get("turn_index", -1))
+        gt_speaker = gt_by_turn.get(turn_index, "")
+        binding = row.get("group_turn_binding", {}) or {}
+        ingress_speaker = str(
+            row.get("speaker_participant_id", "")
+            or (
+                binding.get("current_speaker_participant_id", "")
+                if isinstance(binding, Mapping)
+                else ""
+            )
+            or ""
+        ).strip()
+        if not gt_speaker or not ingress_speaker:
+            continue
+        n_decidable += 1
+        if _pid_eq(ingress_speaker, gt_speaker):
+            n_exact_match += 1
+            exact_pids.append(ingress_speaker)
+
+    rate = (n_exact_match / n_decidable) if n_decidable > 0 else 0.0
+    if rate >= SUB2_SPEAKER_PID_EXACT_MATCH_MIN:
+        verdict = "acceptable"
+    elif n_decidable == 0:
+        verdict = "no_emits"
+    else:
+        verdict = "below_bar"
+    return {
+        "n_decidable_emits": int(n_decidable),
+        "n_exact_match": int(n_exact_match),
+        "n_close_match": 0,
+        "speaker_pid_exact_match_rate": round(rate, 6),
+        "exact_pid_set": sorted(set(exact_pids)),
+        "verdict": verdict,
+        "source": "structured_turn_log",
+    }
+
+
+def _extract_bus_messages_from_turn_log(
+    turn_log: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    out: list[Mapping[str, Any]] = []
+    for row in turn_log:
+        if not isinstance(row, Mapping) or row.get("event") != "turn":
+            continue
+        diagnostics = row.get("diagnostics", {}) or {}
+        if not isinstance(diagnostics, Mapping):
+            continue
+        messages = diagnostics.get("bus_messages", []) or []
+        if not isinstance(messages, list):
+            continue
+        out.extend(
+            message for message in messages if isinstance(message, Mapping)
+        )
+    return out
+
+
+def _producer_admits_from_bus_messages(
+    bus_messages: Sequence[Mapping[str, Any]],
+) -> dict[str, int]:
+    """Count M20.4 producer admits from their audit envelopes."""
+    admits = [
+        message
+        for message in bus_messages
+        if str(message.get("type", "")) == "AddresseeTargetMatchAdmitted"
+    ]
+    directed = 0
+    not_directed = 0
+    bundle_weak = 0
+    bundle_weak_directed = 0
+    for message in admits:
+        hypothesis = message.get("hypothesis", {}) or {}
+        is_directed = bool(
+            hypothesis.get("addressed_to_assistant", False)
+            if isinstance(hypothesis, Mapping)
+            else False
+        )
+        if is_directed:
+            directed += 1
+        else:
+            not_directed += 1
+        if str(message.get("aggregation_kind", "")) == "bundle_weak":
+            bundle_weak += 1
+            if is_directed:
+                bundle_weak_directed += 1
+    return {
+        "producer_admit_total": len(admits),
+        "producer_admit_addressee_directed_total": directed,
+        "producer_admit_addressee_not_directed_total": not_directed,
+        "producer_admit_single_strong_total": len(admits) - bundle_weak,
+        "producer_admit_bundle_weak_total": bundle_weak,
+        "producer_admit_bundle_weak_addressee_directed_total": (
+            bundle_weak_directed
+        ),
+    }
+
+
 def _subcap3_bidirectional_fep(
     state: Mapping[str, Any],
     m20_4_diagnostics: Mapping[str, Any] | None,
+    bus_messages: Sequence[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Sub-capability 3 — 双向自由能评估渠道.
 
@@ -435,6 +557,10 @@ def _subcap3_bidirectional_fep(
     is a future M-side work item.
     """
     diag = dict(m20_4_diagnostics or {})
+    source = "m20_4_diagnostics"
+    if bus_messages is not None:
+        diag.update(_producer_admits_from_bus_messages(bus_messages))
+        source = "turn_log_bus_events"
     producer_admit_total = _safe_count(diag, "producer_admit_total")
     producer_admit_dir_true = _safe_count(
         diag, "producer_admit_addressee_directed_total"
@@ -524,7 +650,23 @@ def _subcap3_bidirectional_fep(
         "n_persona_channels": int(n_persona_channels),
         "persona_channels": persona_channels,
         "verdict": verdict,
+        "source": source,
     }
+
+
+def _load_turn_log(store: MVPStateStore) -> list[Mapping[str, Any]]:
+    path = store.root / "conversation_log.jsonl"
+    if not path.exists():
+        return []
+    rows: list[Mapping[str, Any]] = []
+    for line in path.read_text(encoding="utf-8-sig").splitlines():
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(row, Mapping):
+            rows.append(row)
+    return rows
 
 
 def _subcap4_persona_consistency(
@@ -613,10 +755,14 @@ def _run_one(
     store.save(state)
 
     m20_4_diag = runtime.get_m20_4_diagnostics() or {}
+    turn_log = _load_turn_log(store)
+    bus_messages = _extract_bus_messages_from_turn_log(turn_log)
 
     sub1 = _subcap1_addressee_target(harness_report)
-    sub2 = _subcap2_speaker_identity_from_harness(harness_report, fixture)
-    sub3 = _subcap3_bidirectional_fep(state, m20_4_diag)
+    sub2 = _subcap2_speaker_identity_from_turn_log(turn_log, fixture)
+    sub3 = _subcap3_bidirectional_fep(
+        state, m20_4_diag, bus_messages=bus_messages
+    )
     sub4 = _subcap4_persona_consistency(state)
 
     return {

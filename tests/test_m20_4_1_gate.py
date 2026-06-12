@@ -20,10 +20,9 @@ AND not OR):
 - `conscious.addressee_hypothesis` non-empty
 - `addressed_to_assistant` is True
 - `participant_id` non-empty (M18.4 disclosure guard)
-- `confidence > 0.85` (strict)
+- `confidence > 0.7` (strict)
 - `ambiguity_band == "high"`
 - `addressed_participant_ids` empty
-- `mentioned_participant_ids` empty
 - `reply_to_turn_id` empty / None
 - `m18_5_structural_decision in {clarify_addressee, no_reply}`
 """
@@ -97,13 +96,9 @@ def _binding(
 
 
 def test_constants_are_frozen() -> None:
-    assert M20_4_1_TIE_BREAKER_CONFIDENCE_MIN == 0.85
+    assert M20_4_1_TIE_BREAKER_CONFIDENCE_MIN == 0.7
     assert M20_4_1_STATE_SURFACE_LIMIT == 8
-    # P3 kill-switch default is OFF (audit-only). Real-LLM
-    # calibration (P0, 2026-06-08) shows LLM acc in the
-    # override band is 0.5 addr / 0.0 react; override path
-    # is held in audit-only mode until calibration improves.
-    assert M20_4_1_OVERRIDE_ENABLED is False
+    assert M20_4_1_OVERRIDE_ENABLED is True
     assert M20_4_1_ENGINEERING_PROXY_LABEL == "mvp_local_group_attribution"
     assert M20_4_1_AMBIGUITY_BANDS == frozenset({"low", "medium", "high"})
     assert M20_4_1_OVERRIDABLE_DECISIONS == frozenset(
@@ -247,10 +242,7 @@ def test_gate_fires_with_participant_id_as_commit_id() -> None:
 
 
 def test_gate_fires_writes_override_handoff() -> None:
-    """P3 default: kill-switch OFF, gate fires but does NOT
-    write the override handoff. M18.5 applies its structural
-    decision unchanged. See the audit-only tests below for
-    the full default-mode semantics."""
+    """The enabled conservative gate writes the T0 handoff."""
     state: dict = {}
     bus: list = []
     verdict = same_turn_addressee_hypothesis_gate(
@@ -263,17 +255,12 @@ def test_gate_fires_writes_override_handoff() -> None:
         now="2026-06-07T00:00:00Z",
     )
     assert verdict is not None
-    # P3 default: handoff is NOT written (kill-switch off).
-    assert get_pending_override(state) is None
-    # But the bus event and surface row ARE recorded
-    # (audit-only mode).
+    assert get_pending_override(state) == verdict
     assert any(e["type"] == BUS_EVENT_TYPE for e in bus)
     assert STATE_OUTCOMES_KEY in state
-    # And the verdict's audit-only flag is True.
-    assert verdict.m20_4_1_audit_only is True
-    # And the audit envelope carries the flag.
+    assert verdict.m20_4_1_audit_only is False
     bus_event = next(e for e in bus if e["type"] == BUS_EVENT_TYPE)
-    assert bus_event["m20_4_1_audit_only"] is True
+    assert bus_event["m20_4_1_audit_only"] is False
 
 
 # === Gate does NOT fire (12 tests) =======================================
@@ -299,12 +286,12 @@ def test_gate_does_not_fire_when_confidence_below_threshold() -> None:
 
 
 def test_gate_does_not_fire_when_confidence_at_threshold() -> None:
-    """Strict `> 0.85` inequality."""
+    """Strict `> 0.7` inequality."""
     state: dict = {}
     bus: list = []
     verdict = same_turn_addressee_hypothesis_gate(
         conscious_plan=_conscious_plan(
-            addressee=_addressee_hypothesis(confidence=0.85)
+            addressee=_addressee_hypothesis(confidence=0.7)
         ),
         group_turn_binding=_binding(),
         m18_5_structural_decision="no_reply",
@@ -362,8 +349,8 @@ def test_gate_does_not_fire_when_addressed_participant_ids_non_empty() -> None:
     assert verdict is None
 
 
-def test_gate_does_not_fire_when_mentioned_participant_ids_non_empty() -> None:
-    """C1 fix: explicit mention of another → gate stays no-op."""
+def test_gate_can_fire_when_mentioned_participant_ids_non_empty() -> None:
+    """Topic mentions alone do not prove another recipient."""
     state: dict = {}
     bus: list = []
     verdict = same_turn_addressee_hypothesis_gate(
@@ -375,7 +362,52 @@ def test_gate_does_not_fire_when_mentioned_participant_ids_non_empty() -> None:
         turn_index=0,
         now="2026-06-07T00:00:00Z",
     )
+    assert verdict is not None
+
+
+def test_v3_true_at_0_8_writes_override_handoff() -> None:
+    state: dict = {}
+    verdict = same_turn_addressee_hypothesis_gate(
+        conscious_plan=_conscious_plan(
+            addressee=_addressee_hypothesis(
+                confidence=0.8,
+                participant_id="assistant",
+            )
+        ),
+        group_turn_binding=_binding(
+            mentioned_participant_ids=["carol", "dave"]
+        ),
+        m18_5_structural_decision="clarify_addressee",
+        bus=[],
+        state=state,
+        turn_index=0,
+        now="2026-06-12T00:00:00Z",
+    )
+    assert verdict is not None
+    assert get_pending_override(state) == verdict
+
+
+def test_explicit_other_recipient_never_writes_override() -> None:
+    state: dict = {}
+    verdict = same_turn_addressee_hypothesis_gate(
+        conscious_plan=_conscious_plan(
+            addressee=_addressee_hypothesis(
+                confidence=1.0,
+                participant_id="assistant",
+            )
+        ),
+        group_turn_binding=_binding(
+            addressed_participant_ids=["dave"],
+            mentioned_participant_ids=["dave"],
+        ),
+        m18_5_structural_decision="no_reply",
+        bus=[],
+        state=state,
+        turn_index=3,
+        now="2026-06-12T00:00:00Z",
+    )
     assert verdict is None
+    assert get_pending_override(state) is None
 
 
 def test_gate_does_not_fire_when_reply_to_turn_id_set() -> None:
@@ -772,11 +804,10 @@ def test_gate_runs_after_conscious_loop_before_reply_generation() -> None:
         now="2026-06-07T00:00:00Z",
     )
     assert verdict is not None
-    # P3 default: gate emits bus + state-surface row, but
-    # the override handoff is held back (audit-only).
+    # The enabled product-loop gate emits the verdict and handoff.
     assert len(bus) == 1
-    assert verdict.m20_4_1_audit_only is True
-    assert get_pending_override(state) is None
+    assert verdict.m20_4_1_audit_only is False
+    assert get_pending_override(state) == verdict
 
 
 def test_gate_does_not_block_run_turn_when_not_fired() -> None:
@@ -908,16 +939,14 @@ def test_master_fixture_T0_reply_present_when_gate_fires() -> None:
         now="2026-06-07T00:00:00Z",
     )
     assert verdict is not None
-    assert verdict.m20_4_1_audit_only is True
-    # Override handoff is NOT in state (P3 default).
+    assert verdict.m20_4_1_audit_only is False
     override = get_pending_override(state)
-    assert override is None
-    # Bus event present (audit-only row).
+    assert override == verdict
     bus_event = next(
         (e for e in bus if e["type"] == BUS_EVENT_TYPE), None
     )
     assert bus_event is not None
-    assert bus_event["m20_4_1_audit_only"] is True
+    assert bus_event["m20_4_1_audit_only"] is False
 
 
 def test_master_fixture_T0_reply_absent_when_gate_does_not_fire() -> None:
@@ -1050,21 +1079,21 @@ def test_master_fixture_T0_uses_overridden_action() -> None:
     assert event["decision"] == DECISION_OVERRIDE
     # Audit-only flag is True; M18.5 does not apply the
     # override handoff (it's empty).
-    assert event["m20_4_1_audit_only"] is True
-    assert get_pending_override(state) is None
+    assert event["m20_4_1_audit_only"] is False
+    assert get_pending_override(state) is not None
 
 
 # === P3 kill-switch (audit-only default, 2026-06-08) =====================
 
 
-def test_p3_default_kill_switch_is_off() -> None:
+def test_product_loop_override_is_enabled() -> None:
     """P3 default: M20_4_1_OVERRIDE_ENABLED is False. The
     override path is held in audit-only mode until real-LLM
     calibration improves in the high-confidence band."""
-    assert M20_4_1_OVERRIDE_ENABLED is False
+    assert M20_4_1_OVERRIDE_ENABLED is True
 
 
-def test_p3_audit_only_emits_verdict_but_no_handoff() -> None:
+def test_enabled_gate_emits_verdict_and_handoff() -> None:
     """When the kill-switch is OFF (P3 default), the gate
     fires, the bus event is emitted, the bounded state
     surface gets the verdict row, but the override handoff
@@ -1083,22 +1112,21 @@ def test_p3_audit_only_emits_verdict_but_no_handoff() -> None:
     )
     assert verdict is not None
     # Audit-only flag is set on the verdict.
-    assert verdict.m20_4_1_audit_only is True
+    assert verdict.m20_4_1_audit_only is False
     # Bus event carries the flag.
     bus_event = next(
         (e for e in bus if e["type"] == BUS_EVENT_TYPE), None
     )
     assert bus_event is not None
-    assert bus_event["m20_4_1_audit_only"] is True
+    assert bus_event["m20_4_1_audit_only"] is False
     # State surface has the row.
     assert STATE_OUTCOMES_KEY in state
     assert len(state[STATE_OUTCOMES_KEY]) == 1
-    # BUT the override handoff is empty.
-    assert STATE_PENDING_OVERRIDE_KEY not in state
-    assert get_pending_override(state) is None
+    assert STATE_PENDING_OVERRIDE_KEY in state
+    assert get_pending_override(state) == verdict
 
 
-def test_p3_audit_only_applies_to_both_overridable_decisions() -> None:
+def test_enabled_handoff_applies_to_both_overridable_decisions() -> None:
     """The audit-only behavior holds for both overridable
     M18.5 decisions (`no_reply` and `clarify_addressee`).
     Real-LLM calibration (P0) showed the gate fires in the
@@ -1119,12 +1147,11 @@ def test_p3_audit_only_applies_to_both_overridable_decisions() -> None:
             now="2026-06-07T00:00:00Z",
         )
         assert verdict is not None
-        assert verdict.m20_4_1_audit_only is True
+        assert verdict.m20_4_1_audit_only is False
         # M18.5 structural decision is preserved in the
         # audit envelope regardless of audit-only mode.
         assert verdict.m18_5_structural_decision == decision
-        # Override handoff is empty in both cases.
-        assert get_pending_override(state) is None
+        assert get_pending_override(state) == verdict
 
 
 def test_p3_verdict_audit_only_field_default_is_false() -> None:

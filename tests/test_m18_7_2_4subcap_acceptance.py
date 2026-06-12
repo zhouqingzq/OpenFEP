@@ -32,7 +32,9 @@ from run_group_chat_real_llm_acceptance import (  # type: ignore[import-not-foun
     _subcap1_addressee_target,
     _subcap2_speaker_identity,
     _subcap2_speaker_identity_from_harness,
+    _subcap2_speaker_identity_from_turn_log,
     _subcap3_bidirectional_fep,
+    _producer_admits_from_bus_messages,
     _subcap4_persona_consistency,
     _verdict,
 )
@@ -221,6 +223,47 @@ def test_sub2_case_insensitive_and_alias_collapse():
     assert r["speaker_pid_exact_match_rate"] == 1.0
 
 
+def test_sub2_turn_log_scores_structured_speaker_not_addressee():
+    """Sub-2 measures the ingress speaker identity contract."""
+    fixture = [
+        {
+            "turn_index": 0,
+            "group_turn_envelope": {"speaker_participant_id": "carol"},
+        },
+        {
+            "turn_index": 1,
+            "group_turn_envelope": {"speaker_participant_id": "dave"},
+        },
+    ]
+    turn_log = [
+        {
+            "event": "turn",
+            "turn_index": 0,
+            "speaker_participant_id": "carol",
+            "diagnostics": {
+                "bus_messages": [
+                    {
+                        "type": "M18_7_2_AddresseeHypothesisAdmitted",
+                        "participant_id": "assistant",
+                    }
+                ]
+            },
+        },
+        {
+            "event": "turn",
+            "turn_index": 1,
+            "group_turn_binding": {
+                "current_speaker_participant_id": "dave",
+            },
+        },
+    ]
+    r = _subcap2_speaker_identity_from_turn_log(turn_log, fixture)
+    assert r["n_decidable_emits"] == 2
+    assert r["n_exact_match"] == 2
+    assert r["speaker_pid_exact_match_rate"] == 1.0
+    assert r["source"] == "structured_turn_log"
+
+
 # === Sub-capability 3: bidirectional FEP (T6-T7) ===========================
 
 
@@ -268,6 +311,45 @@ def test_sub3_dir_true_zero_blocks_acceptance():
     }
     r = _subcap3_bidirectional_fep(state, diag)
     assert "p04_dir_true_admit_zero" in r["verdict"], r
+
+
+def test_sub3_bus_events_override_stale_diagnostic_admit_counts():
+    """Producer admission counts match the emitted audit envelopes."""
+    bus = [
+        {
+            "type": "AddresseeTargetMatchAdmitted",
+            "hypothesis": {
+                "addressed_to_assistant": True,
+                "confidence": 0.8,
+            },
+            "aggregation_kind": "single_strong",
+        },
+        {
+            "type": "AddresseeTargetMatchAdmitted",
+            "hypothesis": {
+                "addressed_to_assistant": False,
+                "confidence": 0.95,
+            },
+            "aggregation_kind": "single_strong",
+        },
+    ]
+    counts = _producer_admits_from_bus_messages(bus)
+    assert counts["producer_admit_total"] == 2
+    assert counts["producer_admit_addressee_directed_total"] == 1
+
+    state = {"m11_user_models": {"carol": {}, "dave": {}}}
+    r = _subcap3_bidirectional_fep(
+        state,
+        {
+            "producer_admit_total": 0,
+            "producer_admit_addressee_directed_total": 0,
+        },
+        bus_messages=bus,
+    )
+    assert r["producer_admit_total"] == 2
+    assert r["producer_admit_dir_true"] == 1
+    assert r["source"] == "turn_log_bus_events"
+    assert r["verdict"] == "acceptable"
 
 
 # === Sub-capability 4: persona consistency (T8) ============================
