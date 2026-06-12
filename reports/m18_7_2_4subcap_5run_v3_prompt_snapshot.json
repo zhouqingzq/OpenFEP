@@ -1,0 +1,468 @@
+{
+  "schema": "m18_7_2_4subcap_5run_v3_prompt",
+  "model": "deepseek-v4-flash (native API; openrouter.json)",
+  "fixture": "tests/fixtures/m18_7_1_held_out_calibration.json (bqxsmofri, 12 turns x 4 personas)",
+  "code_change": "commit pending (M18.7.2 v3 system_prompt nudge)",
+  "v2_baseline_commit": "479c3e2 (M18.7.2 v2 prompt) + 6761fe0 (4-sub-cap v2 p0-8 followup)",
+  "n_runs": 5,
+  "session_root_base": "E:/workspace/segments/tmp_m18_7_2_v3_prompt_5run",
+  "runs": [
+    {
+      "run": 1,
+      "session_root": "E:/workspace/segments/tmp_m18_7_2_v3_prompt_5run/run_1",
+      "sub1": {
+        "n_addressee_bus_events": 9,
+        "n_addressee_true_emits": 2,
+        "addressee_true_rate": 0.2222,
+        "recall_on_addressed": 0.25,
+        "precision_on_not_addressed": 1.0,
+        "n_decidable": 5,
+        "n_decidable_correct": 3,
+        "n_decidable_incorrect": 2,
+        "accuracy_on_decidable": 0.6,
+        "verdict": "under_recall_dir_true"
+      },
+      "sub3": {
+        "producer_admit_total": null,
+        "dir_true_total": 0,
+        "verdict": "p04_dir_true_admit_zero",
+        "m18_7_surface_addressee_true": 0
+      },
+      "per_turn_addressee": [
+        {
+          "turn": 0,
+          "gt": "GT_TRUE",
+          "emit": "True",
+          "conf": 0.75,
+          "pid": "assistant"
+        },
+        {
+          "turn": 3,
+          "gt": "GT_FALSE",
+          "emit": "False",
+          "conf": 0.95,
+          "pid": "dave"
+        },
+        {
+          "turn": 4,
+          "gt": "GT_TRUE",
+          "emit": "False",
+          "conf": 0.9,
+          "pid": ""
+        },
+        {
+          "turn": 5,
+          "gt": "unknown",
+          "emit": "True",
+          "conf": 0.65,
+          "pid": "assistant"
+        },
+        {
+          "turn": 6,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.9,
+          "pid": "carol"
+        },
+        {
+          "turn": 8,
+          "gt": "GT_TRUE",
+          "emit": "False",
+          "conf": 0.95,
+          "pid": "hutao"
+        },
+        {
+          "turn": 9,
+          "gt": "GT_FALSE",
+          "emit": "False",
+          "conf": 0.95,
+          "pid": "dave"
+        },
+        {
+          "turn": 10,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.9,
+          "pid": "carol"
+        },
+        {
+          "turn": 11,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.2,
+          "pid": "assistant"
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "session_root": "E:/workspace/segments/tmp_m18_7_2_v3_prompt_5run/run_2",
+      "sub1": {
+        "n_addressee_bus_events": 8,
+        "n_addressee_true_emits": 3,
+        "addressee_true_rate": 0.375,
+        "recall_on_addressed": 0.5,
+        "precision_on_not_addressed": 1.0,
+        "n_decidable": 3,
+        "n_decidable_correct": 3,
+        "n_decidable_incorrect": 0,
+        "accuracy_on_decidable": 1.0,
+        "verdict": "under_recall_dir_true"
+      },
+      "sub3": {
+        "producer_admit_total": null,
+        "dir_true_total": 0,
+        "verdict": "p04_dir_true_admit_zero",
+        "m18_7_surface_addressee_true": 0
+      },
+      "per_turn_addressee": [
+        {
+          "turn": 0,
+          "gt": "GT_TRUE",
+          "emit": "True",
+          "conf": 0.8,
+          "pid": "assistant"
+        },
+        {
+          "turn": 1,
+          "gt": "GT_TRUE",
+          "emit": "True",
+          "conf": 0.7,
+          "pid": ""
+        },
+        {
+          "turn": 2,
+          "gt": "unknown",
+          "emit": "True",
+          "conf": 0.5,
+          "pid": "assistant"
+        },
+        {
+          "turn": 6,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.9,
+          "pid": ""
+        },
+        {
+          "turn": 7,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.3,
+          "pid": ""
+        },
+        {
+          "turn": 9,
+          "gt": "GT_FALSE",
+          "emit": "False",
+          "conf": 0.95,
+          "pid": "dave"
+        },
+        {
+          "turn": 10,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.9,
+          "pid": "carol"
+        },
+        {
+          "turn": 11,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.9,
+          "pid": ""
+        }
+      ]
+    },
+    {
+      "run": 3,
+      "session_root": "E:/workspace/segments/tmp_m18_7_2_v3_prompt_5run/run_3",
+      "sub1": {
+        "n_addressee_bus_events": 9,
+        "n_addressee_true_emits": 2,
+        "addressee_true_rate": 0.2222,
+        "recall_on_addressed": 0.25,
+        "precision_on_not_addressed": 1.0,
+        "n_decidable": 4,
+        "n_decidable_correct": 3,
+        "n_decidable_incorrect": 1,
+        "accuracy_on_decidable": 0.75,
+        "verdict": "under_recall_dir_true"
+      },
+      "sub3": {
+        "producer_admit_total": null,
+        "dir_true_total": 0,
+        "verdict": "p04_dir_true_admit_zero",
+        "m18_7_surface_addressee_true": 0
+      },
+      "per_turn_addressee": [
+        {
+          "turn": 0,
+          "gt": "GT_TRUE",
+          "emit": "True",
+          "conf": 0.9,
+          "pid": "assistant"
+        },
+        {
+          "turn": 2,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.3,
+          "pid": "dave"
+        },
+        {
+          "turn": 3,
+          "gt": "GT_FALSE",
+          "emit": "False",
+          "conf": 1.0,
+          "pid": "dave"
+        },
+        {
+          "turn": 5,
+          "gt": "unknown",
+          "emit": "True",
+          "conf": 0.55,
+          "pid": "assistant"
+        },
+        {
+          "turn": 6,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.95,
+          "pid": "carol"
+        },
+        {
+          "turn": 8,
+          "gt": "GT_TRUE",
+          "emit": "False",
+          "conf": 0.95,
+          "pid": "hutao"
+        },
+        {
+          "turn": 9,
+          "gt": "GT_FALSE",
+          "emit": "False",
+          "conf": 0.9,
+          "pid": "dave"
+        },
+        {
+          "turn": 10,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.95,
+          "pid": "carol"
+        },
+        {
+          "turn": 11,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.6,
+          "pid": "hutao"
+        }
+      ]
+    },
+    {
+      "run": 4,
+      "session_root": "E:/workspace/segments/tmp_m18_7_2_v3_prompt_5run/run_4",
+      "sub1": {
+        "n_addressee_bus_events": 7,
+        "n_addressee_true_emits": 2,
+        "addressee_true_rate": 0.2857,
+        "recall_on_addressed": 0.25,
+        "precision_on_not_addressed": 1.0,
+        "n_decidable": 3,
+        "n_decidable_correct": 2,
+        "n_decidable_incorrect": 1,
+        "accuracy_on_decidable": 0.6666666666666666,
+        "verdict": "under_recall_dir_true"
+      },
+      "sub3": {
+        "producer_admit_total": null,
+        "dir_true_total": 0,
+        "verdict": "p04_dir_true_admit_zero",
+        "m18_7_surface_addressee_true": 0
+      },
+      "per_turn_addressee": [
+        {
+          "turn": 0,
+          "gt": "GT_TRUE",
+          "emit": "True",
+          "conf": 0.8,
+          "pid": ""
+        },
+        {
+          "turn": 5,
+          "gt": "unknown",
+          "emit": "True",
+          "conf": 0.6,
+          "pid": "assistant"
+        },
+        {
+          "turn": 6,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.9,
+          "pid": "carol"
+        },
+        {
+          "turn": 8,
+          "gt": "GT_TRUE",
+          "emit": "False",
+          "conf": 0.95,
+          "pid": "hutao"
+        },
+        {
+          "turn": 9,
+          "gt": "GT_FALSE",
+          "emit": "False",
+          "conf": 0.95,
+          "pid": "dave"
+        },
+        {
+          "turn": 10,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.9,
+          "pid": "carol"
+        },
+        {
+          "turn": 11,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.9,
+          "pid": "hutao"
+        }
+      ]
+    },
+    {
+      "run": 5,
+      "session_root": "E:/workspace/segments/tmp_m18_7_2_v3_prompt_5run/run_5",
+      "sub1": {
+        "n_addressee_bus_events": 10,
+        "n_addressee_true_emits": 4,
+        "addressee_true_rate": 0.4,
+        "recall_on_addressed": 0.75,
+        "precision_on_not_addressed": 1.0,
+        "n_decidable": 6,
+        "n_decidable_correct": 5,
+        "n_decidable_incorrect": 1,
+        "accuracy_on_decidable": 0.8333333333333334,
+        "verdict": "acceptable"
+      },
+      "sub3": {
+        "producer_admit_total": null,
+        "dir_true_total": 0,
+        "verdict": "p04_dir_true_admit_zero",
+        "m18_7_surface_addressee_true": 0
+      },
+      "per_turn_addressee": [
+        {
+          "turn": 0,
+          "gt": "GT_TRUE",
+          "emit": "True",
+          "conf": 0.8,
+          "pid": "assistant"
+        },
+        {
+          "turn": 1,
+          "gt": "GT_TRUE",
+          "emit": "True",
+          "conf": 0.65,
+          "pid": "assistant"
+        },
+        {
+          "turn": 3,
+          "gt": "GT_FALSE",
+          "emit": "False",
+          "conf": 0.95,
+          "pid": "dave"
+        },
+        {
+          "turn": 4,
+          "gt": "GT_TRUE",
+          "emit": "True",
+          "conf": 0.8,
+          "pid": "assistant"
+        },
+        {
+          "turn": 5,
+          "gt": "unknown",
+          "emit": "True",
+          "conf": 0.6,
+          "pid": "assistant"
+        },
+        {
+          "turn": 6,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.95,
+          "pid": "carol"
+        },
+        {
+          "turn": 8,
+          "gt": "GT_TRUE",
+          "emit": "False",
+          "conf": 0.95,
+          "pid": "hutao"
+        },
+        {
+          "turn": 9,
+          "gt": "GT_FALSE",
+          "emit": "False",
+          "conf": 0.95,
+          "pid": "dave"
+        },
+        {
+          "turn": 10,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.9,
+          "pid": "carol"
+        },
+        {
+          "turn": 11,
+          "gt": "unknown",
+          "emit": "False",
+          "conf": 0.6,
+          "pid": "hutao"
+        }
+      ]
+    }
+  ],
+  "aggregate_5run": {
+    "n_runs": 5,
+    "sub1_5run": {
+      "recall_on_addressed_mean": 0.4,
+      "recall_on_addressed_per_run": [
+        0.25,
+        0.5,
+        0.25,
+        0.25,
+        0.75
+      ],
+      "precision_on_not_addressed_mean": 1.0,
+      "addressee_true_rate_mean": 0.301,
+      "addressee_true_rate_per_run": [
+        0.2222,
+        0.375,
+        0.2222,
+        0.2857,
+        0.4
+      ],
+      "accuracy_on_decidable_mean": 0.77,
+      "tp_addressed_total": 8,
+      "fn_addressed_total": 12
+    },
+    "sub3_5run": {
+      "dir_true_total_all_5_runs": 0,
+      "verdict_per_run": [
+        "p04_dir_true_admit_zero",
+        "p04_dir_true_admit_zero",
+        "p04_dir_true_admit_zero",
+        "p04_dir_true_admit_zero",
+        "p04_dir_true_admit_zero"
+      ]
+    }
+  },
+  "verdict": "sub1_unlocked:sub3_still_zero:P0-6_0.95_gate_is_bottleneck"
+}

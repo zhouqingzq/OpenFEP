@@ -1,0 +1,78 @@
+{
+  "schema": "m18_7_2_v3_prompt_2run",
+  "model": "deepseek-v4-flash (native API; openrouter.json)",
+  "fixture": "tests/fixtures/m18_7_1_held_out_calibration.json (bqxsmofri, 12 turns x 4 personas)",
+  "code_change": "commit pending (M18.7.2 v3 system_prompt nudge)",
+  "v2_baseline_commit": "479c3e2 (M18.7.2 v2 prompt) + 6761fe0 (4-sub-cap v2 p0-8 followup)",
+  "n_runs": 2,
+  "session_roots": [
+    "tmp_m18_7_1_v3_prompt",
+    "tmp_m18_7_1_v3_prompt_r2"
+  ],
+  "runs": [
+    {
+      "run": 1,
+      "session_root": "tmp_m18_7_1_v3_prompt",
+      "n_addressee_bus_events": 7,
+      "n_addressee_true_emits": 2,
+      "addressee_true_rate": 0.2857,
+      "recall_on_addressed_gt_4": 1,
+      "recall_on_addressed": 0.25,
+      "precision_on_not_addressed_gt_1": 1,
+      "precision_on_not_addressed": 1.0,
+      "n_correct_on_decidable": 3,
+      "n_incorrect_on_decidable": 2,
+      "accuracy_on_decidable": 0.6,
+      "per_turn": [
+        {"turn": 0, "gt": "True", "emit": "True", "conf": 0.8, "pid": "assistant", "result": "TP"},
+        {"turn": 1, "gt": "True", "emit": "False", "conf": 0.6, "pid": "", "result": "FN"},
+        {"turn": 3, "gt": "False", "emit": "False", "conf": 0.98, "pid": "dave", "result": "TN"},
+        {"turn": 5, "gt": "unknown", "emit": "True", "conf": 0.6, "pid": "", "result": "unknown"},
+        {"turn": 6, "gt": "unknown", "emit": "False", "conf": 0.9, "pid": "carol", "result": "unknown"},
+        {"turn": 8, "gt": "True", "emit": "False", "conf": 0.95, "pid": "hutao", "result": "FN"},
+        {"turn": 9, "gt": "False", "emit": "False", "conf": 1.0, "pid": "dave", "result": "TN"}
+      ],
+      "verdict": "above_v2_baseline"
+    },
+    {
+      "run": 2,
+      "session_root": "tmp_m18_7_1_v3_prompt_r2",
+      "n_addressee_bus_events": 10,
+      "n_addressee_true_emits": 3,
+      "addressee_true_rate": 0.3,
+      "recall_on_addressed_gt_4": 3,
+      "recall_on_addressed": 0.75,
+      "precision_on_not_addressed_gt_1": 1,
+      "precision_on_not_addressed": 1.0,
+      "n_correct_on_decidable": 5,
+      "n_incorrect_on_decidable": 1,
+      "accuracy_on_decidable": 0.833,
+      "per_turn": [
+        {"turn": 0, "gt": "True", "emit": "True", "conf": 0.6, "pid": "hutao", "result": "TP"},
+        {"turn": 1, "gt": "True", "emit": "True", "conf": 0.7, "pid": "assistant", "result": "TP"},
+        {"turn": 2, "gt": "unknown", "emit": "False", "conf": 0.2, "pid": "", "result": "unknown"},
+        {"turn": 3, "gt": "False", "emit": "False", "conf": 0.95, "pid": "dave", "result": "TN"},
+        {"turn": 4, "gt": "True", "emit": "True", "conf": 0.6, "pid": "assistant", "result": "TP"},
+        {"turn": 6, "gt": "unknown", "emit": "False", "conf": 0.95, "pid": "carol", "result": "unknown"},
+        {"turn": 8, "gt": "True", "emit": "False", "conf": 0.95, "pid": "hutao", "result": "FN"},
+        {"turn": 9, "gt": "False", "emit": "False", "conf": 1.0, "pid": "dave", "result": "TN"},
+        {"turn": 10, "gt": "unknown", "emit": "False", "conf": 0.85, "pid": "carol", "result": "unknown"},
+        {"turn": 11, "gt": "unknown", "emit": "False", "conf": 0.7, "pid": "hutao", "result": "unknown"}
+      ],
+      "verdict": "above_v2_baseline"
+    }
+  ],
+  "aggregate_2run": {
+    "n_runs": 2,
+    "recall_on_addressed_mean": 0.5,
+    "recall_on_addressed_range": [0.25, 0.75],
+    "addressee_true_rate_mean": 0.293,
+    "addressee_true_rate_range": [0.2857, 0.3],
+    "precision_on_not_addressed_mean": 1.0,
+    "accuracy_on_decidable_mean": 0.717,
+    "v2_baseline_recall_mean": 0.2,
+    "v2_baseline_recall_range": [0.0, 0.5],
+    "v2_baseline_true_rate_5run": 0.048
+  },
+  "verdict": "v3_prompt_unlocked_recall:mean_0.50_vs_v2_0.20"
+}
