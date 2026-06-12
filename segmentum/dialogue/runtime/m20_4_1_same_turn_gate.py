@@ -72,6 +72,7 @@ from typing import Any, Mapping
 # The same-turn gate remains conservative through the structural
 # explicit-addressee block and the narrow overridable-decision set.
 M20_4_1_TIE_BREAKER_CONFIDENCE_MIN: float = 0.7
+M20_4_1_SUPPRESS_CONFIDENCE_MIN: float = 0.9
 
 # Allowed ambiguity_band values. Aligned with the M18.2 v1
 # frozen string and the M20.4 v1 ambiguity bands.
@@ -82,6 +83,9 @@ M20_4_1_AMBIGUITY_BANDS: frozenset[str] = frozenset({"low", "medium", "high"})
 # leave the M18.5 path unchanged.
 M20_4_1_OVERRIDABLE_DECISIONS: frozenset[str] = frozenset(
     {"clarify_addressee", "no_reply"}
+)
+M20_4_1_SUPPRESSIBLE_DECISIONS: frozenset[str] = frozenset(
+    {"clarify_addressee", "reply_to_current_speaker"}
 )
 
 # === Product-loop override switch =========================================
@@ -127,6 +131,7 @@ BUS_EVENT_TYPE: str = "SameTurnAddresseeHypothesisGateVerdict"
 
 # Override decision label (frozen at v1).
 DECISION_OVERRIDE: str = "overridden_to_reply_to_current_speaker"
+DECISION_SUPPRESS: str = "suppressed_to_no_reply"
 
 
 # === Verdict dataclass ====================================================
@@ -310,6 +315,7 @@ def build_same_turn_gate_verdict_event(
 
 def _build_verdict(
     *,
+    decision: str,
     m18_5_structural_decision: str,
     commit_ids: list[str],
     evidence_refs: list[str],
@@ -318,7 +324,7 @@ def _build_verdict(
     m20_4_1_audit_only: bool = False,
 ) -> SameTurnAddresseeHypothesisGateVerdict:
     return SameTurnAddresseeHypothesisGateVerdict(
-        decision=DECISION_OVERRIDE,
+        decision=str(decision),
         m18_5_structural_decision=str(m18_5_structural_decision or ""),
         commit_ids=tuple(commit_ids),
         evidence_refs=tuple(evidence_refs),
@@ -333,56 +339,58 @@ def _build_verdict(
 # === Gate rule (pure) =====================================================
 
 
-def _gate_rule_engaged(
+def _gate_decision(
     *,
     conscious_addressee: Mapping[str, Any] | None,
     binding: Mapping[str, Any] | None,
     m18_5_structural_decision: str,
-) -> bool:
+) -> str:
     """Apply the M20.4.1 v1 engagement rule (pure, no side effects).
 
-    Returns True iff every condition holds:
+    Returns the bounded visible-action decision, or an empty string.
 
     - `conscious_addressee` is a non-empty mapping
-    - `addressed_to_assistant` is True
-    - `participant_id` is non-empty (M18.4 disclosure guard)
-    - `confidence` is in (0.7, 1.0] (strict `>` 0.7)
-    - `ambiguity_band` is "high"
     - `addressed_participant_ids` is empty
     - `reply_to_turn_id` is empty / None
-    - `m18_5_structural_decision in
-      {clarify_addressee, no_reply}`
-
-    This is the same rule as M20.4 v1's
-    `_tie_breaker_engaged` (C1 fix: AND not OR), with the
-    addition of `addressed_to_assistant` and
-    `participant_id` checks from the M18.7 v2 attribute.
+    - True hypotheses retain the v1 high-ambiguity override rule.
+    - False hypotheses suppress only narrow reply-producing
+      structural decisions at confidence >= 0.9 and do not
+      require identifying the non-assistant addressee.
     """
     if not isinstance(conscious_addressee, Mapping) or not conscious_addressee:
-        return False
-    if not _bounded_bool(conscious_addressee.get("addressed_to_assistant")):
-        return False
-    participant_id = _bounded_string(
-        conscious_addressee.get("participant_id", ""), default=""
-    )
-    if not participant_id:
-        return False  # M18.4 disclosure forbade the identification
+        return ""
+    addressed_to_assistant = conscious_addressee.get("addressed_to_assistant")
+    if not isinstance(addressed_to_assistant, bool):
+        return ""
     confidence = _bounded_float(conscious_addressee.get("confidence", 0.0))
-    if not (confidence > M20_4_1_TIE_BREAKER_CONFIDENCE_MIN):
-        return False
     binding = binding or {}
-    ambiguity_band = _bounded_string(binding.get("ambiguity_band", ""))
-    if ambiguity_band != "high":
-        return False
     addressed = list(binding.get("addressed_participant_ids", []) or [])
     if addressed:
-        return False
+        return ""
     reply_to = _bounded_string(binding.get("reply_to_turn_id", ""))
     if reply_to:
-        return False
-    if m18_5_structural_decision not in M20_4_1_OVERRIDABLE_DECISIONS:
-        return False
-    return True
+        return ""
+
+    if addressed_to_assistant:
+        participant_id = _bounded_string(
+            conscious_addressee.get("participant_id", ""), default=""
+        )
+        if not participant_id:
+            return ""  # M18.4 disclosure forbade the identification
+        ambiguity_band = _bounded_string(binding.get("ambiguity_band", ""))
+        if ambiguity_band != "high":
+            return ""
+        if not (confidence > M20_4_1_TIE_BREAKER_CONFIDENCE_MIN):
+            return ""
+        if m18_5_structural_decision not in M20_4_1_OVERRIDABLE_DECISIONS:
+            return ""
+        return DECISION_OVERRIDE
+
+    if confidence < M20_4_1_SUPPRESS_CONFIDENCE_MIN:
+        return ""
+    if m18_5_structural_decision not in M20_4_1_SUPPRESSIBLE_DECISIONS:
+        return ""
+    return DECISION_SUPPRESS
 
 
 # === Top-level gate function ==============================================
@@ -429,14 +437,14 @@ def same_turn_addressee_hypothesis_gate(
     # previous-turn verdict does not leak into this turn.
     clear_pending_override(state)
 
-    engaged = _gate_rule_engaged(
+    decision = _gate_decision(
         conscious_addressee=conscious_addressee
         if isinstance(conscious_addressee, Mapping)
         else None,
         binding=binding,
         m18_5_structural_decision=str(m18_5_structural_decision or ""),
     )
-    if not engaged:
+    if not decision:
         return None
 
     commit_ids = _bounded_evidence_refs(
@@ -468,6 +476,7 @@ def same_turn_addressee_hypothesis_gate(
     # cases even though no override was applied.
     audit_only = not M20_4_1_OVERRIDE_ENABLED
     verdict = _build_verdict(
+        decision=decision,
         m18_5_structural_decision=str(m18_5_structural_decision or ""),
         commit_ids=commit_ids,
         evidence_refs=evidence_refs,
@@ -497,10 +506,13 @@ def same_turn_addressee_hypothesis_gate(
 __all__ = [
     "BUS_EVENT_TYPE",
     "DECISION_OVERRIDE",
+    "DECISION_SUPPRESS",
     "M20_4_1_AMBIGUITY_BANDS",
     "M20_4_1_ENGINEERING_PROXY_LABEL",
     "M20_4_1_OVERRIDABLE_DECISIONS",
     "M20_4_1_OVERRIDE_ENABLED",
+    "M20_4_1_SUPPRESS_CONFIDENCE_MIN",
+    "M20_4_1_SUPPRESSIBLE_DECISIONS",
     "M20_4_1_STATE_SURFACE_LIMIT",
     "M20_4_1_TIE_BREAKER_CONFIDENCE_MIN",
     "REASON_GATE_FIRED",

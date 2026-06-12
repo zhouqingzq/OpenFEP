@@ -46,6 +46,7 @@ def test_gateway_session_uses_default_llm_factory(tmp_path: Path, monkeypatch) -
     gateway = M16Gateway(session_root_resolver=lambda _p, _s: tmp_path)
     handle = gateway.get_or_create_session("p", "s")
     assert isinstance(handle.bridge.runtime.llm, _LLM)
+    assert handle.bridge.runtime.persona_name == "p"
 
 
 def test_snapshot_includes_llm_runtime_hint(tmp_path: Path, monkeypatch) -> None:

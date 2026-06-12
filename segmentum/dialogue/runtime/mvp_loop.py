@@ -257,6 +257,7 @@ from segmentum.dialogue.runtime.m20_4_attribution import (
     produce_m20_4_attribution_commitments as _produce_m20_4_attribution_commitments,
 )
 from segmentum.dialogue.runtime.m20_4_1_same_turn_gate import (
+    DECISION_SUPPRESS as _M20_4_1_DECISION_SUPPRESS,
     REASON_GATE_FIRED as _M20_4_1_REASON_GATE_FIRED,
     clear_pending_override as _m20_4_1_clear_pending_override,
     get_pending_override as _m20_4_1_get_pending_override,
@@ -9246,6 +9247,13 @@ class MVPDialogueRuntime:
             reply = ""
             action = "no_reply"
             group_policy_actions.append("group_privacy_forced_refusal_silence")
+        elif (
+            m20_4_1_override is not None
+            and m20_4_1_override.decision == _M20_4_1_DECISION_SUPPRESS
+        ):
+            reply = ""
+            action = "no_reply"
+            group_policy_actions.append("m20_4_1_same_turn_suppress")
         elif m20_4_1_override is not None:
             # M20.4.1 — same-turn override fired. The visible
             # reply is unblocked: action becomes

@@ -116,7 +116,7 @@ class M16Gateway:
         root = self.resolve_session_root(persona_id, session_id)
         store = MVPStateStore(root)
         llm = _resolve_session_llm(self)
-        runtime = MVPDialogueRuntime(store=store, llm=llm)
+        runtime = MVPDialogueRuntime(store=store, llm=llm, persona_name=persona_id)
         bridge = M16SessionBridge(
             persona_id=persona_id,
             session_id=session_id,

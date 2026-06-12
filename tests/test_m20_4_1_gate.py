@@ -32,10 +32,13 @@ from __future__ import annotations
 from segmentum.dialogue.runtime.m20_4_1_same_turn_gate import (
     BUS_EVENT_TYPE,
     DECISION_OVERRIDE,
+    DECISION_SUPPRESS,
     M20_4_1_AMBIGUITY_BANDS,
     M20_4_1_ENGINEERING_PROXY_LABEL,
     M20_4_1_OVERRIDABLE_DECISIONS,
     M20_4_1_OVERRIDE_ENABLED,
+    M20_4_1_SUPPRESS_CONFIDENCE_MIN,
+    M20_4_1_SUPPRESSIBLE_DECISIONS,
     M20_4_1_STATE_SURFACE_LIMIT,
     M20_4_1_TIE_BREAKER_CONFIDENCE_MIN,
     REASON_GATE_FIRED,
@@ -97,6 +100,7 @@ def _binding(
 
 def test_constants_are_frozen() -> None:
     assert M20_4_1_TIE_BREAKER_CONFIDENCE_MIN == 0.7
+    assert M20_4_1_SUPPRESS_CONFIDENCE_MIN == 0.9
     assert M20_4_1_STATE_SURFACE_LIMIT == 8
     assert M20_4_1_OVERRIDE_ENABLED is True
     assert M20_4_1_ENGINEERING_PROXY_LABEL == "mvp_local_group_attribution"
@@ -104,10 +108,94 @@ def test_constants_are_frozen() -> None:
     assert M20_4_1_OVERRIDABLE_DECISIONS == frozenset(
         {"clarify_addressee", "no_reply"}
     )
+    assert M20_4_1_SUPPRESSIBLE_DECISIONS == frozenset(
+        {"clarify_addressee", "reply_to_current_speaker"}
+    )
     assert REASON_GATE_FIRED == "m20_4_1_same_turn_fired"
     assert REASON_GATE_SILENT == "m20_4_1_same_turn_silent"
     assert BUS_EVENT_TYPE == "SameTurnAddresseeHypothesisGateVerdict"
     assert DECISION_OVERRIDE == "overridden_to_reply_to_current_speaker"
+    assert DECISION_SUPPRESS == "suppressed_to_no_reply"
+
+
+def test_false_high_confidence_suppresses_wrong_current_speaker_reply() -> None:
+    state: dict = {}
+    verdict = same_turn_addressee_hypothesis_gate(
+        conscious_plan=_conscious_plan(
+            addressee=_addressee_hypothesis(
+                addressed_to_assistant=False,
+                confidence=0.95,
+            )
+        ),
+        group_turn_binding=_binding(),
+        m18_5_structural_decision="reply_to_current_speaker",
+        bus=[],
+        state=state,
+        turn_index=0,
+        now="2026-06-12T00:00:00Z",
+    )
+    assert verdict is not None
+    assert verdict.decision == DECISION_SUPPRESS
+    assert get_pending_override(state) == verdict
+
+
+def test_false_high_confidence_does_not_require_other_participant_identity() -> None:
+    verdict = same_turn_addressee_hypothesis_gate(
+        conscious_plan=_conscious_plan(
+            addressee=_addressee_hypothesis(
+                addressed_to_assistant=False,
+                confidence=0.95,
+                participant_id="",
+            )
+        ),
+        group_turn_binding=_binding(),
+        m18_5_structural_decision="reply_to_current_speaker",
+        bus=[],
+        state={},
+        turn_index=0,
+        now="2026-06-12T00:00:00Z",
+    )
+    assert verdict is not None
+    assert verdict.decision == DECISION_SUPPRESS
+    assert verdict.commit_ids == ()
+
+
+def test_false_high_confidence_never_suppresses_explicit_assistant_target() -> None:
+    state: dict = {}
+    verdict = same_turn_addressee_hypothesis_gate(
+        conscious_plan=_conscious_plan(
+            addressee=_addressee_hypothesis(
+                addressed_to_assistant=False,
+                confidence=1.0,
+            )
+        ),
+        group_turn_binding=_binding(addressed_participant_ids=["assistant"]),
+        m18_5_structural_decision="reply_to_current_speaker",
+        bus=[],
+        state=state,
+        turn_index=0,
+        now="2026-06-12T00:00:00Z",
+    )
+    assert verdict is None
+    assert get_pending_override(state) is None
+
+
+def test_false_below_suppress_threshold_does_not_suppress() -> None:
+    verdict = same_turn_addressee_hypothesis_gate(
+        conscious_plan=_conscious_plan(
+            addressee=_addressee_hypothesis(
+                addressed_to_assistant=False,
+                confidence=0.89,
+            )
+        ),
+        group_turn_binding=_binding(),
+        m18_5_structural_decision="reply_to_current_speaker",
+        bus=[],
+        state={},
+        turn_index=0,
+        now="2026-06-12T00:00:00Z",
+    )
+    assert verdict is None
 
 
 # === Gate fires (8 tests) ================================================
@@ -742,7 +830,7 @@ def test_gate_does_not_match_hypothesis_text() -> None:
     # Strip the module docstring (mentions rationale in
     # documentation) and check the gate rule body only.
     code_only = src.split('"""', 2)[-1]
-    rule_body = code_only.split("def _gate_rule_engaged")[1].split("def ")[0]
+    rule_body = code_only.split("def _gate_decision")[1].split("def ")[0]
     # The gate rule never accesses `rationale` from the
     # addressee_hypothesis (only `addressed_to_assistant`,
     # `participant_id`, `confidence`, `evidence_refs`).

@@ -105,10 +105,75 @@ def test_normalize_group_topic_message_captures_reply_and_mentions() -> None:
     assert normalized.session_id == "telegram:tg_main:topic:chat_-100987654321:thread_42"
     assert normalized.group_turn_envelope["speaker_participant_id"] == "telegram:tg_main:user:123"
     assert normalized.group_turn_envelope["reply_to_turn_id"].endswith(":msg:9000")
-    assert normalized.group_turn_envelope["addressed_participant_ids"] == ["telegram:tg_main:assistant:777000"]
-    assert "@hutao_bot" in normalized.group_turn_envelope["explicit_mentions"]
+    assert normalized.group_turn_envelope["addressed_participant_ids"] == [
+        "telegram:tg_main:assistant:777000",
+        "telegram:tg_main:user:456",
+    ]
+    assert normalized.group_turn_envelope["assistant_surface_label"] == "hutao_bot"
+    assert "explicit_mentions" not in normalized.group_turn_envelope
     assert "telegram:tg_main:user:456" in normalized.group_turn_envelope["visible_participant_ids"]
     assert normalized.ingress_evidence_band == "structured_partial"
+
+
+def test_normalize_group_plain_mentions_address_other_users_not_bot() -> None:
+    bot = TelegramBotIdentity(bot_user_id="777000", username="hutao_bot", account_scope="tg_main")
+    text = "@bob @carol you two decide."
+    normalized = normalize_telegram_update(
+        {
+            "update_id": 203,
+            "message": {
+                "message_id": 9002,
+                "text": text,
+                "entities": [
+                    {"type": "mention", "offset": 0, "length": 4},
+                    {"type": "mention", "offset": 5, "length": 6},
+                ],
+                "chat": {"id": -100987654321, "type": "supergroup"},
+                "from": {"id": 123, "first_name": "Alice"},
+            },
+        },
+        persona_id="hutao-prod",
+        bot=bot,
+    )
+    assert normalized is not None
+    addressed = normalized.group_turn_envelope["addressed_participant_ids"]
+    assert addressed == [
+        "telegram:tg_main:username:bob",
+        "telegram:tg_main:username:carol",
+    ]
+    assert bot.assistant_participant_id not in addressed
+    assert normalized.group_turn_envelope["mentioned_participant_ids"] == addressed
+    assert "explicit_mentions" not in normalized.group_turn_envelope
+
+
+def test_normalize_text_mention_of_bot_uses_only_assistant_identity() -> None:
+    bot = TelegramBotIdentity(bot_user_id="777000", username="hutao_bot", account_scope="tg_main")
+    normalized = normalize_telegram_update(
+        {
+            "update_id": 204,
+            "message": {
+                "message_id": 9003,
+                "text": "Hutao please answer.",
+                "entities": [
+                    {
+                        "type": "text_mention",
+                        "offset": 0,
+                        "length": 5,
+                        "user": {"id": 777000, "first_name": "Hutao"},
+                    }
+                ],
+                "chat": {"id": -100987654321, "type": "supergroup"},
+                "from": {"id": 123, "first_name": "Alice"},
+            },
+        },
+        persona_id="hutao-prod",
+        bot=bot,
+    )
+    assert normalized is not None
+    assistant_id = "telegram:tg_main:assistant:777000"
+    assert normalized.group_turn_envelope["addressed_participant_ids"] == [assistant_id]
+    assert normalized.group_turn_envelope["mentioned_participant_ids"] == [assistant_id]
+    assert "telegram:tg_main:user:777000" not in normalized.group_turn_envelope["visible_participant_ids"]
 
 
 def test_connector_ingest_update_sends_runtime_reply_back_to_telegram(tmp_path: Path) -> None:

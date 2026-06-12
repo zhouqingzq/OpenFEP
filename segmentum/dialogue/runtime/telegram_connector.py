@@ -91,6 +91,11 @@ def telegram_user_participant_id(account_scope: str, platform_user_id: str) -> s
     return f"{TELEGRAM_PLATFORM}:{account_scope}:user:{platform_user_id}"
 
 
+def telegram_username_participant_id(account_scope: str, username: str) -> str:
+    normalized = str(username or "").lstrip("@").strip().casefold()[:64]
+    return f"{TELEGRAM_PLATFORM}:{account_scope}:username:{normalized}"
+
+
 def telegram_surface_kind(chat_type: str, message_thread_id: int | None = None) -> str:
     kind = str(chat_type or "").strip().lower()
     if kind == "private":
@@ -408,10 +413,10 @@ def _collect_entity_mentions(
     text: str,
     bot: TelegramBotIdentity,
     account_scope: str,
-) -> tuple[list[str], list[str], bool]:
+) -> tuple[list[str], list[str], list[str], bool]:
     explicit_mentions: list[str] = []
     mentioned_participant_ids: list[str] = []
-    seen_mentions: set[str] = set()
+    addressed_participant_ids: list[str] = []
     seen_participants: set[str] = set()
     addressed_assistant = False
     entities = list(message.get("entities") or []) + list(message.get("caption_entities") or [])
@@ -426,27 +431,41 @@ def _collect_entity_mentions(
                 int(entity.get("offset", 0) or 0),
                 int(entity.get("length", 0) or 0),
             ).strip()
-            if mention_text and mention_text not in seen_mentions:
-                seen_mentions.add(mention_text)
-                explicit_mentions.append(mention_text[:64])
             if mention_text.lstrip("@").casefold() == bot.username.casefold():
                 addressed_assistant = True
+                participant_id = bot.assistant_participant_id
+            elif mention_text:
+                participant_id = telegram_username_participant_id(
+                    account_scope, mention_text
+                )
+            else:
+                continue
+            if participant_id not in seen_participants:
+                seen_participants.add(participant_id)
+                mentioned_participant_ids.append(participant_id)
+                addressed_participant_ids.append(participant_id)
             continue
         user = _mapping(entity.get("user"))
         user_id = str(user.get("id", "") or "").strip()
         if not user_id:
             continue
-        participant_id = telegram_user_participant_id(account_scope, user_id)
+        participant_id = (
+            bot.assistant_participant_id
+            if user_id == bot.bot_user_id
+            else telegram_user_participant_id(account_scope, user_id)
+        )
         if participant_id not in seen_participants:
             seen_participants.add(participant_id)
             mentioned_participant_ids.append(participant_id)
-        mention_name = _display_name(user)
-        if mention_name and mention_name not in seen_mentions:
-            seen_mentions.add(mention_name)
-            explicit_mentions.append(mention_name[:64])
+            addressed_participant_ids.append(participant_id)
         if user_id == bot.bot_user_id:
             addressed_assistant = True
-    return explicit_mentions[:8], mentioned_participant_ids[:8], addressed_assistant
+    return (
+        explicit_mentions[:8],
+        mentioned_participant_ids[:8],
+        addressed_participant_ids[:8],
+        addressed_assistant,
+    )
 
 
 def _extract_bot_command(message: Mapping[str, Any], text: str) -> str:
@@ -501,7 +520,12 @@ def normalize_telegram_update(
         platform_user_id=platform_user_id,
         message_thread_id=thread_id,
     )
-    explicit_mentions, mentioned_participant_ids, addressed_by_mention = _collect_entity_mentions(
+    (
+        explicit_mentions,
+        mentioned_participant_ids,
+        addressed_participant_ids,
+        addressed_by_mention,
+    ) = _collect_entity_mentions(
         message=message,
         text=text,
         bot=bot,
@@ -511,7 +535,6 @@ def normalize_telegram_update(
     visible_participant_ids: list[str] = [speaker_participant_id, bot.assistant_participant_id]
     seen_visible = set(visible_participant_ids)
     reply_to_turn_id = ""
-    addressed_participant_ids: list[str] = []
     reply_to_message = _mapping(message.get("reply_to_message"))
     if reply_to_message:
         reply_from = _mapping(reply_to_message.get("from"))
@@ -535,10 +558,11 @@ def normalize_telegram_update(
                 message_id=reply_to_message_id,
                 message_thread_id=thread_id,
             )
-        if reply_from_id == bot.bot_user_id:
-            addressed_participant_ids = [bot.assistant_participant_id]
-    if not addressed_participant_ids and (chat_type == "private" or addressed_by_mention or platform_command):
-        addressed_participant_ids = [bot.assistant_participant_id]
+        if reply_from_id and target_id not in addressed_participant_ids:
+            addressed_participant_ids.append(target_id)
+    if chat_type == "private" or addressed_by_mention or platform_command:
+        if bot.assistant_participant_id not in addressed_participant_ids:
+            addressed_participant_ids.append(bot.assistant_participant_id)
     for participant_id in mentioned_participant_ids:
         if participant_id not in seen_visible:
             seen_visible.add(participant_id)
@@ -560,6 +584,7 @@ def normalize_telegram_update(
     if platform_command:
         envelope["surface_intent"] = "bot_command"
         envelope["platform_command"] = platform_command
+    if platform_command or addressed_by_mention:
         envelope["assistant_surface_label"] = bot.username[:64]
     if chat_type == "private":
         ingress_evidence_band = "structured_full"
