@@ -1128,6 +1128,140 @@ def _decide_group_reply_policy(
     }
 
 
+def _structured_silence_fast_path_eligible(
+    *,
+    group_turn_binding: Mapping[str, Any] | None,
+    persona_name: str,
+    ingress_evidence_band: str,
+) -> bool:
+    if ingress_evidence_band not in {"structured_partial", "structured_full"}:
+        return False
+    binding = _mapping(group_turn_binding)
+    addressed = _bounded_string_list(
+        binding.get("addressed_participant_ids"), limit=8, item_max_chars=64
+    )
+    if not addressed:
+        return False
+    assistant_ids = _assistant_participant_id_candidates(persona_name)
+    return not any(_participant_id_matches(item, assistant_ids) for item in addressed)
+
+
+def _directed_fast_reply_eligible(
+    *,
+    group_turn_binding: Mapping[str, Any] | None,
+    group_reply_policy: Mapping[str, Any] | None,
+    persona_name: str,
+    proactive_turn: bool,
+    ingress_evidence_band: str,
+) -> bool:
+    if proactive_turn or ingress_evidence_band not in {
+        "structured_partial",
+        "structured_full",
+    }:
+        return False
+    binding = _mapping(group_turn_binding)
+    policy = _mapping(group_reply_policy)
+    if str(binding.get("platform_command", "") or "").strip():
+        return False
+    if not str(binding.get("assistant_surface_label", "") or "").strip():
+        return False
+    addressed = _bounded_string_list(
+        binding.get("addressed_participant_ids"), limit=8, item_max_chars=64
+    )
+    if not addressed or str(policy.get("action", "") or "") != "reply_to_current_speaker":
+        return False
+    assistant_ids = _assistant_participant_id_candidates(persona_name)
+    assistant_addressed = [
+        item for item in addressed if _participant_id_matches(item, assistant_ids)
+    ]
+    non_assistant_addressed = [
+        item for item in addressed if not _participant_id_matches(item, assistant_ids)
+    ]
+    return bool(assistant_addressed) and not non_assistant_addressed and not _bounded_string_list(
+        policy.get("third_party_targets"), limit=6, item_max_chars=64
+    )
+
+
+def build_directed_fast_reply_prompt(
+    *,
+    user_text: str,
+    speaker_name: str,
+    persona_name: str,
+    group_turn_binding: Mapping[str, Any],
+    self_basic_facts: Mapping[str, Any] | None,
+) -> tuple[str, str]:
+    facts = _mapping(self_basic_facts)
+    bounded_facts = {
+        "name": str(facts.get("name", "") or "")[:80],
+        "do_not_invent": _string_list(facts.get("do_not_invent"), limit=4),
+    }
+    bounded_binding = {
+        "current_speaker_participant_id": str(
+            group_turn_binding.get("current_speaker_participant_id", "") or ""
+        )[:64],
+        "addressed_participant_ids": _bounded_string_list(
+            group_turn_binding.get("addressed_participant_ids"),
+            limit=8,
+            item_max_chars=64,
+        ),
+        "reply_to_turn_id": str(group_turn_binding.get("reply_to_turn_id", "") or "")[:120],
+        "assistant_surface_label": str(
+            group_turn_binding.get("assistant_surface_label", "") or ""
+        )[:64],
+    }
+    system_prompt = """You are the directed fast-reply router for a group-chat assistant.
+Return strict JSON only. Choose "reply" only for a simple, self-contained request that
+can be answered safely from the current message and the bounded basic facts.
+Choose "escalate" when the request needs memory or prior conversation, third-party facts,
+privacy judgment, identity correction or role switching, scheduled/future outreach,
+multi-step or complex work, clarification, external verification, or safety judgment.
+Never invent facts. A reply must be brief, useful, and directly user-visible.
+"""
+    user_prompt = f"""assistant_persona: {persona_name}
+speaker_name: {speaker_name}
+bounded_basic_facts:
+{_json_text(bounded_facts)}
+bounded_group_binding:
+{_json_text(bounded_binding)}
+current_message:
+{user_text}
+
+Return JSON:
+{{
+  "decision": "reply|escalate",
+  "reply": "brief visible reply, empty when escalating",
+  "reply_action": "answer|ask_question|clarify|deflect",
+  "reason_codes": ["bounded_reason_code"]
+}}
+"""
+    return system_prompt, user_prompt
+
+
+def normalize_directed_fast_reply(raw: Mapping[str, Any] | None) -> dict[str, Any]:
+    payload = _mapping(raw)
+    decision = str(payload.get("decision", "") or "").strip().lower()
+    reply = str(payload.get("reply", "") or "").strip()
+    reply_action = str(payload.get("reply_action", "") or "").strip()
+    if reply_action not in {"answer", "ask_question", "clarify", "deflect"}:
+        reply_action = "answer"
+    reason_codes = _bounded_string_list(
+        payload.get("reason_codes"), limit=8, item_max_chars=64
+    )
+    if decision != "reply" or not reply:
+        return {
+            "decision": "escalate",
+            "reply": "",
+            "reply_action": reply_action,
+            "reason_codes": reason_codes or ["invalid_or_empty_fast_reply"],
+        }
+    return {
+        "decision": "reply",
+        "reply": reply[:1200],
+        "reply_action": reply_action,
+        "reason_codes": reason_codes,
+    }
+
+
 def _build_group_thread_policy_state(
     *,
     previous_group_chat_state: Mapping[str, Any] | None,
@@ -5532,7 +5666,25 @@ _AUXILIARY_LLM_STAGES = {
     "surface_consistency_verification",
     "m18_7_2_minimal",
     "m20_3_pre_send_minimal",
+    "directed_fast_reply",
 }
+
+_FAST_PATH_SKIPPED_LLM_STAGES = (
+    "m12_identity_pre",
+    "m13_settlement",
+    "m18_7_2_minimal",
+    "conscious_loop",
+    "query_planner",
+    "evidence_judge",
+    "m17_settlement_assessor",
+    "m11_user_model",
+    "m12_1_personality",
+    "m12_2_reciprocal_role",
+    "thinking_reply",
+    "surface_consistency_verification",
+    "reply_repair",
+    "post_reply_observer",
+)
 
 
 def _is_m12_1_stage(stage: str) -> bool:
@@ -5563,8 +5715,12 @@ def _call_llm_with_stage_profile(
     old_timeout = getattr(llm, timeout_attr)
     old_retries = getattr(llm, retries_attr)
     try:
-        aux_timeout = getattr(llm, aux_timeout_attr, None)
-        aux_retries = getattr(llm, aux_retries_attr, None)
+        if stage == "directed_fast_reply":
+            aux_timeout = 8.0
+            aux_retries = 0
+        else:
+            aux_timeout = getattr(llm, aux_timeout_attr, None)
+            aux_retries = getattr(llm, aux_retries_attr, None)
         if aux_timeout is not None:
             setattr(llm, timeout_attr, float(aux_timeout))
         if aux_retries is not None:
@@ -5696,6 +5852,19 @@ def _classify_turn_latency_mode(
         return {"mode": "full", "reason_codes": ["explicit_secrecy"]}
     if _prior_surface_drift_observed(state):
         return {"mode": "normal", "reason_codes": ["prior_surface_consistency_drift"]}
+    addressed = _bounded_string_list(
+        envelope.get("addressed_participant_ids"), limit=8, item_max_chars=64
+    )
+    assistant_ids = _assistant_participant_id_candidates(persona_name)
+    if (
+        addressed
+        and str(envelope.get("assistant_surface_label", "") or "").strip()
+        and all(_participant_id_matches(item, assistant_ids) for item in addressed)
+    ):
+        return {
+            "mode": "fast_chat",
+            "reason_codes": ["directed_fast_reply_candidate"],
+        }
     if assessable_pending_rows:
         reasons.append("pending_reward_settlement")
         mode = "normal"
@@ -7690,6 +7859,170 @@ class MVPDialogueRuntime:
                     break
         return self.initialize_from_persona_payload(selected)
 
+    def _finish_group_fast_path(
+        self,
+        *,
+        state: dict[str, Any],
+        user_text: str,
+        reply: str,
+        action: str,
+        mode: str,
+        reason_codes: list[str],
+        bus: list[dict[str, Any]],
+        turn_index: int,
+        now: int,
+        display_name: str,
+        user_id: str,
+        ingress_band: str,
+        bounded_group_turn: Mapping[str, Any],
+        group_turn_binding: Mapping[str, Any],
+        group_reply_policy: Mapping[str, Any],
+        entity_binding: Mapping[str, Any],
+        temporal_input: Mapping[str, Any],
+        turn_latency_trace: list[dict[str, Any]],
+        skipped_llm_stages: list[dict[str, str]],
+        turn_latency_started: float,
+        reply_validation: Mapping[str, Any] | None = None,
+        fast_path_decision: Mapping[str, Any] | None = None,
+    ) -> MVPTurnResult:
+        thread_policy_state = _build_group_thread_policy_state(
+            previous_group_chat_state=_mapping(
+                _mapping(state.get("temporal_state")).get("group_chat_state")
+            ),
+            group_turn_binding=group_turn_binding,
+            group_reply_policy=group_reply_policy,
+            now=now,
+            turn_index=turn_index,
+        )
+        group_chat_state = _build_group_chat_state(
+            state,
+            now=now,
+            turn_index=turn_index,
+            display_name=display_name,
+            user_id=user_id,
+            group_turn_envelope=bounded_group_turn,
+            group_turn_binding=group_turn_binding,
+            thread_policy_state=thread_policy_state,
+        )
+        _update_temporal_state(
+            state,
+            now=now,
+            turn_index=turn_index,
+            user_text=user_text,
+            reply=reply,
+            temporal_input=temporal_input,
+            group_chat_state=group_chat_state,
+            share_trace={
+                "user_id": user_id,
+                "speaker_name": display_name,
+                "speaker_participant_id": group_turn_binding.get(
+                    "current_speaker_participant_id", ""
+                ),
+                "visible_participant_ids": group_turn_binding.get(
+                    "visible_participant_ids", []
+                ),
+                "addressed_participant_ids": group_turn_binding.get(
+                    "addressed_participant_ids", []
+                ),
+                "mentioned_participant_ids": group_turn_binding.get(
+                    "mentioned_participant_ids", []
+                ),
+                "reply_to_turn_id": group_turn_binding.get("reply_to_turn_id", ""),
+                "group_reply_policy_action": group_reply_policy.get("action", ""),
+                "ingress_evidence_band": ingress_band,
+                "fast_path_mode": mode,
+            },
+        )
+        self.store.save(state)
+        latency_summary = _latency_trace_summary(turn_latency_trace)
+        latency_summary["turn_total_duration_ms"] = round(
+            (time.monotonic() - turn_latency_started) * 1000.0, 3
+        )
+        latency_summary["latency_mode"] = mode
+        latency_summary["latency_mode_reasons"] = list(reason_codes)[:12]
+        latency_summary["skipped_stage_count"] = len(skipped_llm_stages)
+        diagnostics = {
+            "mvp_runtime": True,
+            "proactive_turn": False,
+            "bus_messages": bus,
+            "temporal_input": dict(temporal_input),
+            "group_turn_envelope": dict(bounded_group_turn),
+            "group_turn_binding": dict(group_turn_binding),
+            "group_reply_policy": dict(group_reply_policy),
+            "group_privacy_policy": {},
+            "group_chat_state": group_chat_state,
+            "ingress_evidence_band": ingress_band,
+            "entity_binding": dict(entity_binding),
+            "latency_mode": mode,
+            "latency_mode_reasons": list(reason_codes)[:12],
+            "turn_latency_trace": [dict(item) for item in turn_latency_trace],
+            "turn_latency_summary": latency_summary,
+            "skipped_llm_stages": [dict(item) for item in skipped_llm_stages],
+            "reply_validation": dict(reply_validation or {}),
+            "fast_path_decision": dict(fast_path_decision or {}),
+            "raw_reply": reply,
+            "state_root": str(self.store.root),
+            "system_files": {
+                key: str(self.store.path_for(key)) for key in SYSTEM_FILE_DEFAULTS
+            },
+        }
+        self.store.append_log(
+            {
+                "event": "turn_latency",
+                "type": "MVPDialogTurnLatencyEvent",
+                "at": now,
+                "turn_index": turn_index,
+                "latency_mode": mode,
+                "latency_mode_reasons": list(reason_codes)[:12],
+                "blocking_llm_calls": latency_summary.get("blocking_llm_calls", 0),
+                "total_llm_duration_ms": latency_summary.get(
+                    "total_llm_duration_ms", 0.0
+                ),
+                "turn_total_duration_ms": latency_summary.get(
+                    "turn_total_duration_ms", 0.0
+                ),
+                "slowest_stage": dict(latency_summary.get("slowest_stage", {})),
+                "turn_latency_trace": [dict(item) for item in turn_latency_trace[:12]],
+                "skipped_llm_stages": [dict(item) for item in skipped_llm_stages],
+            }
+        )
+        self.store.append_log(
+            {
+                "event": "turn",
+                "at": now,
+                "turn_index": turn_index,
+                "speaker_name": display_name,
+                "speaker_participant_id": group_turn_binding.get(
+                    "current_speaker_participant_id", ""
+                ),
+                "participant_ids": group_turn_binding.get("visible_participant_ids", []),
+                "addressed_participant_ids": group_turn_binding.get(
+                    "addressed_participant_ids", []
+                ),
+                "mentioned_participant_ids": group_turn_binding.get(
+                    "mentioned_participant_ids", []
+                ),
+                "reply_to_turn_id": group_turn_binding.get("reply_to_turn_id", ""),
+                "quoted_turn_ids": group_turn_binding.get("quoted_turn_ids", []),
+                "explicit_mentions": group_turn_binding.get("explicit_mentions", []),
+                "ingress_evidence_band": ingress_band,
+                "group_turn_binding": dict(group_turn_binding),
+                "group_reply_policy": dict(group_reply_policy),
+                "group_privacy_policy": {},
+                "user_text": user_text,
+                "reply": reply,
+                "followup_replies": [],
+                "diagnostics": diagnostics,
+            }
+        )
+        _m20_4_1_clear_pending_override(state)
+        return MVPTurnResult(
+            reply=reply,
+            action=action,
+            diagnostics=diagnostics,
+            followup_replies=[],
+        )
+
     def run_turn(
         self,
         user_text: str,
@@ -7973,6 +8306,187 @@ class MVPDialogueRuntime:
             "turn_index": turn_index,
             "policy": group_reply_policy,
         })
+
+        if _structured_silence_fast_path_eligible(
+            group_turn_binding=group_turn_binding,
+            persona_name=self.persona_name,
+            ingress_evidence_band=ingress_band,
+        ):
+            addressed_participant_ids = list(
+                group_turn_binding.get("addressed_participant_ids", [])
+            )
+            policy_reason = (
+                "explicit_reply_to_other"
+                if str(group_turn_binding.get("reply_to_turn_id", "") or "").strip()
+                else "human_side_thread_only"
+            )
+            group_reply_policy = {
+                **group_reply_policy,
+                "action": "no_reply",
+                "target_participant_id": (
+                    addressed_participant_ids[0] if addressed_participant_ids else ""
+                ),
+                "reason_codes": [policy_reason],
+                "intentional_silence": True,
+                "requires_clarification": False,
+            }
+            bus[-1]["policy"] = group_reply_policy
+            reason_codes = ["platform_structured_other_addressee"]
+            bus.append(
+                {
+                    "type": "StructuredSilenceFastPathEvent",
+                    "turn_index": turn_index,
+                    "decision": "no_reply",
+                    "reason_codes": reason_codes,
+                    "addressed_participant_ids": addressed_participant_ids,
+                    "engineering_proxy_label": "mvp_local_group_fast_path",
+                    "at": now,
+                }
+            )
+            for stage in _FAST_PATH_SKIPPED_LLM_STAGES:
+                _mark_llm_skipped(stage, "structured_silence")
+            _report_progress("finalize")
+            return self._finish_group_fast_path(
+                state=state,
+                user_text=user_text,
+                reply="",
+                action="no_reply",
+                mode="structured_silence",
+                reason_codes=reason_codes,
+                bus=bus,
+                turn_index=turn_index,
+                now=now,
+                display_name=display_name,
+                user_id=user_id,
+                ingress_band=ingress_band,
+                bounded_group_turn=bounded_group_turn,
+                group_turn_binding=group_turn_binding,
+                group_reply_policy=group_reply_policy,
+                entity_binding=entity_binding,
+                temporal_input=temporal_input,
+                turn_latency_trace=turn_latency_trace,
+                skipped_llm_stages=skipped_llm_stages,
+                turn_latency_started=turn_latency_started,
+                fast_path_decision={"decision": "no_reply"},
+            )
+
+        if _directed_fast_reply_eligible(
+            group_turn_binding=group_turn_binding,
+            group_reply_policy=group_reply_policy,
+            persona_name=self.persona_name,
+            proactive_turn=proactive_turn,
+            ingress_evidence_band=ingress_band,
+        ):
+            directed_fast_result: dict[str, Any]
+            try:
+                fast_system, fast_user = build_directed_fast_reply_prompt(
+                    user_text=user_text,
+                    speaker_name=display_name,
+                    persona_name=self.persona_name,
+                    group_turn_binding=group_turn_binding,
+                    self_basic_facts=_mapping(state.get("self_basic_facts")),
+                )
+                directed_fast_result = normalize_directed_fast_reply(
+                    _complete_json_stage(
+                        "directed_fast_reply",
+                        fast_system,
+                        fast_user,
+                    )
+                )
+            except Exception as exc:
+                directed_fast_result = {
+                    "decision": "escalate",
+                    "reply": "",
+                    "reply_action": "answer",
+                    "reason_codes": [f"fast_reply_error:{type(exc).__name__}"],
+                }
+            if directed_fast_result.get("decision") == "reply":
+                fast_contract = {
+                    "conversation_mode": "casual_fast",
+                    "max_sentences": 2,
+                    "max_chars": 240,
+                    "hard_rules": [
+                        "never include diagnostics, JSON, internal reasoning, or hidden policy"
+                    ],
+                }
+                fast_reply, fast_validation = validate_visible_reply(
+                    str(directed_fast_result.get("reply", "") or ""),
+                    fast_contract,
+                )
+                if fast_reply:
+                    event = {
+                        "type": "DirectedFastReplyEvent",
+                        "turn_index": turn_index,
+                        "decision": "reply",
+                        "reply_action": str(
+                            directed_fast_result.get("reply_action", "answer") or "answer"
+                        ),
+                        "reason_codes": list(
+                            directed_fast_result.get("reason_codes", [])
+                        )[:8],
+                        "engineering_proxy_label": "mvp_local_group_fast_path",
+                        "at": now,
+                    }
+                    bus.append(event)
+                    for stage in _FAST_PATH_SKIPPED_LLM_STAGES:
+                        if stage != "directed_fast_reply":
+                            _mark_llm_skipped(stage, "directed_fast_reply")
+                    _report_progress("finalize")
+                    return self._finish_group_fast_path(
+                        state=state,
+                        user_text=user_text,
+                        reply=fast_reply,
+                        action=str(
+                            directed_fast_result.get("reply_action", "answer") or "answer"
+                        ),
+                        mode="directed_fast_reply",
+                        reason_codes=["assistant_only_structured_address"],
+                        bus=bus,
+                        turn_index=turn_index,
+                        now=now,
+                        display_name=display_name,
+                        user_id=user_id,
+                        ingress_band=ingress_band,
+                        bounded_group_turn=bounded_group_turn,
+                        group_turn_binding=group_turn_binding,
+                        group_reply_policy=group_reply_policy,
+                        entity_binding=entity_binding,
+                        temporal_input=temporal_input,
+                        turn_latency_trace=turn_latency_trace,
+                        skipped_llm_stages=skipped_llm_stages,
+                        turn_latency_started=turn_latency_started,
+                        reply_validation=fast_validation,
+                        fast_path_decision=directed_fast_result,
+                    )
+                directed_fast_result = {
+                    **directed_fast_result,
+                    "decision": "escalate",
+                    "reason_codes": [
+                        *list(directed_fast_result.get("reason_codes", []))[:7],
+                        "visible_reply_empty_after_validation",
+                    ],
+                }
+            escalation_reasons = list(
+                directed_fast_result.get("reason_codes", [])
+            )[:8] or ["model_requested_escalation"]
+            bus.append(
+                {
+                    "type": "DirectedFastReplyEscalatedEvent",
+                    "turn_index": turn_index,
+                    "decision": "escalate",
+                    "reason_codes": escalation_reasons,
+                    "engineering_proxy_label": "mvp_local_group_fast_path",
+                    "at": now,
+                }
+            )
+            latency_mode = "normal"
+            latency_mode_info = {
+                "mode": "normal",
+                "reason_codes": ["directed_fast_reply_escalated", *escalation_reasons][
+                    :12
+                ],
+                "escalated_from": "directed_fast_reply",
+            }
 
         if assessable_pending_rows and str(user_text or "").strip() and not proactive_turn:
             observation_channels = observation_channels_from_bus(bus)
