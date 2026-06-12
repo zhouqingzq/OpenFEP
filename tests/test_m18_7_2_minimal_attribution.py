@@ -1054,10 +1054,16 @@ def test_v2_prompt_max_chars_bumped_to_2500() -> None:
     ~2277. The constant lives at
     `M18_7_2_MINIMAL_PROMPT_MAX_CHARS` and is referenced by
     3 tests; v1 docs said 2000, v2 docs say 2500.
+
+    v3 bump (2026-06-11): MAX 2500 → 2600 to fit the
+    default-to-True rule + re-engaging signal + 2 more
+    inline examples. v1/v2 content preserved (existing
+    v2 tests still pass).
     """
-    assert M18_7_2_MINIMAL_PROMPT_MAX_CHARS == 2500, (
-        "v2 bumped MAX from 2000 to 2500 to accommodate the "
-        "addressed-axis strong-signal / counter-example list"
+    assert M18_7_2_MINIMAL_PROMPT_MAX_CHARS == 2600, (
+        "v3 bumped MAX from 2500 to 2600 to fit the v3 "
+        "default-to-True rule + re-engaging signal + 2 more "
+        "inline examples (v1/v2 content preserved)"
     )
     system, user = build_m18_7_minimal_prompt(
         state=_default_state(),
@@ -1073,4 +1079,202 @@ def test_v2_prompt_max_chars_bumped_to_2500() -> None:
     assert total <= M18_7_2_MINIMAL_PROMPT_MAX_CHARS, (
         f"v2 prompt too long: {total} > "
         f"{M18_7_2_MINIMAL_PROMPT_MAX_CHARS}"
+    )
+
+
+# =====================================================================
+# M18.7.2 v3 (2026-06-11) — default-to-True nudge tests
+#
+# v3 adds 3 things to the system_prompt:
+#   1. Strong-signal item 6: re-engaging ("still waiting" /
+#      "are you there?"). Targeted at deepseek's polite-request
+#      pattern where the user follows up without explicit @bot.
+#   2. "默认倾向于 True" rule for mixed/ambiguous signals.
+#      Rationale: bot 漏报 (recall 0) is worse than bot 误报
+#      (precision 0) for the M20.4 producer — admits feed
+#      context that the conscious loop can reject downstream,
+#      but missed admits erase evidence.
+#   3. Two more inline examples ("Still waiting for an answer."
+#      → True (re-engaging); "Anyone want to take this?" → False
+#      (group-wide)).
+#
+# v1/v2 content is preserved (28 existing v2 tests still pass).
+# The MAX was bumped 2500 → 2600 to fit the additions; the
+# v3 test asserts the constant value + the v3 strings are
+# present + v1/v2 strings are preserved + no fixture text
+# leaks into the prompt.
+# =====================================================================
+
+
+def test_v3_prompt_has_default_to_true_rule() -> None:
+    """v3 system_prompt must contain the explicit
+    '默认倾向于 True' / 'bot 漏报 > 误报' rule. This is the
+    core v3 nudge — it tells the LLM to default to True on
+    mixed signals rather than default to False (which is the
+    v2 emit pattern that gave 4.8% True rate in the M20.4 v2
+    bundle 5-run, commit dce23f0).
+    """
+    system, _ = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="x",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=0,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="reply",
+    )
+    assert "默认倾向于 True" in system, (
+        "v3 must include the default-to-True rule"
+    )
+    assert "bot 漏报 > 误报" in system, (
+        "v3 must include the bot-漏报-代价-更高 rationale"
+    )
+
+
+def test_v3_prompt_has_re_engaging_strong_signal() -> None:
+    """v3 strong-signal item 6 is the re-engaging pattern
+    ('still waiting' / 'are you there?'). This is the
+    deepseek-typical polite-request / follow-up pattern
+    that v2 prompt did not enumerate.
+    """
+    system, _ = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="x",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=0,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="reply",
+    )
+    assert "重新接回 bot" in system, (
+        "v3 must include the re-engaging strong-signal label"
+    )
+    assert "still waiting" in system, (
+        "v3 must include the 'still waiting' re-engaging example"
+    )
+    assert "are you there" in system, (
+        "v3 must include the 'are you there' re-engaging example"
+    )
+
+
+def test_v3_prompt_has_two_more_inline_examples() -> None:
+    """v3 adds 2 inline examples: 'Still waiting for an answer.'
+    (True, re-engaging) and 'Anyone want to take this?'
+    (False, group-wide). The v2 3 inline examples are
+    preserved (asserted in the next test).
+    """
+    system, _ = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="x",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=0,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="reply",
+    )
+    assert "Still waiting for an answer." in system, (
+        "v3 must include the 'Still waiting for an answer.' example"
+    )
+    assert "Anyone want to take this?" in system, (
+        "v3 must include the 'Anyone want to take this?' example"
+    )
+    assert "re-engaging" in system, (
+        "v3 re-engaging example must be labeled as such"
+    )
+    assert "group-wide" in system, (
+        "v3 group-wide example must be labeled as such"
+    )
+
+
+def test_v3_prompt_preserves_v2_content() -> None:
+    """v3 must NOT remove any v2 content. The v2 strong-
+    signal list (5 items), counter-example list (2 items),
+    and 3 inline examples must all still be present. This
+    is the "v1 byte-identity preserved at content level" test
+    for v3.
+    """
+    system, _ = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="x",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=0,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="reply",
+    )
+    # v2 strong-signal items 1-5
+    assert "@bot" in system
+    assert "entity_binding.current_interlocutor" in system
+    assert "第二人称祈使句" in system
+    assert "'OK' / '好的'" in system
+    assert "Someone is reading this" in system
+    # v2 counter-examples
+    assert "'Dave, you first'" in system
+    assert "'大家怎么看'" in system
+    # v2 inline examples
+    assert "'Can you explain that?'" in system
+    assert "'OK, can you do X?'" in system
+    # v2 emphatic framing on strong-signal list
+    assert "命中任一即倾向 True" in system, (
+        "v2 emphatic framing must be preserved in v3"
+    )
+
+
+def test_v3_prompt_does_not_leak_fixture_text() -> None:
+    """v3 prompt must not contain any of the 4 fixture GT
+    phrases (the v2 leak test, preserved). v3's new
+    re-engaging example uses generic phrases ('still waiting'
+    / 'are you there' / 'Still waiting for an answer.'), NOT
+    the fixture's GT phrases.
+    """
+    fixture_gt_phrases = [
+        "Can you reply to that one",  # turn 0 GT True
+        "Actually, my previous question",  # turn 1 GT True
+        "Someone from the team is reading this",  # turn 4 GT True
+        "Eve's note",  # turn 8 GT True
+    ]
+    system, _ = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="x",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=0,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="reply",
+    )
+    for phrase in fixture_gt_phrases:
+        assert phrase not in system, (
+            f"v3 prompt must not leak fixture GT phrase: {phrase!r}"
+        )
+
+
+def test_v3_prompt_length_under_2600() -> None:
+    """v3 MAX bump: 2500 → 2600. v3 prompt is ~2534 chars
+    (vs v2 ~2277, vs v1 ~1647). Stays under 2600 to keep
+    the M18.7.2 minimal-prompt design goal (vs the
+    7.7-26k conscious-loop prompt).
+    """
+    system, user = build_m18_7_minimal_prompt(
+        state=_default_state(),
+        user_text="x",
+        speaker_name="Alice",
+        bus_messages=_default_bus(),
+        turn_index=0,
+        entity_binding=_default_entity_binding(),
+        group_turn_binding=_default_group_turn_binding(),
+        m18_5_structural_decision="reply",
+    )
+    total = len(system) + len(user)
+    assert total <= M18_7_2_MINIMAL_PROMPT_MAX_CHARS, (
+        f"v3 prompt too long: {total} > "
+        f"{M18_7_2_MINIMAL_PROMPT_MAX_CHARS}"
+    )
+    assert total >= 2400, (
+        f"v3 prompt should be ~2534 chars (v2 was ~2277); "
+        f"got {total}, which is suspicious"
     )

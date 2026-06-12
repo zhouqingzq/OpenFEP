@@ -84,7 +84,9 @@ M18_7_2_SOURCE_TAG: str = "m18_7_2_minimal"
 # (within 2000); v2 nominal is 2277 chars (within 2500).
 # The MAX is still well below the 7.7-26k conscious-loop
 # prompt that motivated the M18.7.2 minimal-prompt design.
-M18_7_2_MINIMAL_PROMPT_MAX_CHARS: int = 2500
+# Bump 2000 (v1) → 2500 (v2 strong-signal list) → 2600 (v3
+# default-to-True rule + re-engaging signal + 2 more examples).
+M18_7_2_MINIMAL_PROMPT_MAX_CHARS: int = 2600
 M18_7_2_REASON_FIELD_PRESENT: str = "m18_7_2_field_present"
 M18_7_2_REASON_MINIMAL_DEGRADED: str = "m18_7_2_minimal_llm_failure"
 
@@ -942,38 +944,36 @@ def build_m18_7_minimal_prompt(
 
     # M18.7.2 v2 (2026-06-10) — system_prompt revised to
     # lift the LLM's `addressed_to_assistant` default-to-False
-    # bias. P0-7 5-run stability (commit b030fca) showed the
-    # LLM emits `addressed_to_assistant=True` on 0-1 of 4 GT
-    # addressed cases per run (recall 0.0-0.25). Root cause:
-    # v1 system_prompt did not enumerate the strong-signal
-    # evidence the LLM should consult. v2 adds:
-    #   - Strong-signal list for `addressed_to_assistant=True`
-    #     (bot alias in mentioned_participant_ids, second-person
-    #     imperative, "OK"/continuation + bot directive, implicit
-    #     directive like "Someone is reading this").
-    #   - Counter-example list for `addressed_to_assistant=False`
-    #     (other-recipient direct address, group-wide address).
-    #   - 3 inline examples (generic; no fixture leak).
-    # The total prompt length stays under
-    # `M18_7_2_MINIMAL_PROMPT_MAX_CHARS = 2000` (v1 was 1647
-    # chars; v2 is ~1850 chars; verified by tests).
+    # bias. v1 didn't enumerate strong-signal evidence; v2
+    # added a 5-item True list, 2-item False list, 3 examples.
+    #
+    # M18.7.2 v3 (2026-06-11) — bundle 5-run (dce23f0) showed
+    # True emit rate 4.8% (1/21). v3 adds 6th strong-signal
+    # (re-engaging), default-to-True rule on mixed signals
+    # (bot 漏报 > 误报), 2 more inline examples. v1/v2 content
+    # preserved. Stays under
+    # `M18_7_2_MINIMAL_PROMPT_MAX_CHARS = 2500`.
     system_prompt = (
         f"{identity_line}\n"
         "当前轮次是群聊里某人的一句话。判断两件事：\n"
         "\n"
         "1. addressee_hypothesis: 这句话是否对你（bot）说的？\n"
-        "   addressed_to_assistant=True 的强信号：\n"
+        "   addressed_to_assistant=True 的强信号（命中任一即倾向 True）：\n"
         "     - @bot，或 mentioned/addressed_participant_ids 含 bot alias\n"
         "     - entity_binding.current_interlocutor = bot\n"
         "     - 第二人称祈使句：'can you' / 'could you' / 'do you'\n"
         "     - 'OK' / '好的' 等接续语后接 bot 指令\n"
         "     - 隐含指令：'Someone is reading this'（bot 是隐含收件人）\n"
-        "   addressed_to_assistant=False 的反例：\n"
+        "     - 重新接回 bot：'still waiting' / 'are you there?'\n"
+        "   addressed_to_assistant=False 的反例（必须显式 other-recipient 才发）：\n"
         "     - 对其他人说话：'Dave, you first'（target=Dave）\n"
         "     - 对整个群组：'大家怎么看' / 'anyone?'\n"
+        "   信号混合或语义不明时，**默认倾向于 True** — bot 漏报 > 误报。\n"
         "   简例：'Can you explain that?' → True；"
         "'Dave, you first.' → False（target=Dave）；"
-        "'OK, can you do X?' → True。\n"
+        "'OK, can you do X?' → True；"
+        "'Still waiting for an answer.' → True（re-engaging）；"
+        "'Anyone want to take this?' → False（group-wide）。\n"
         "\n"
         "2. reaction_attribution_hypothesis: 这句话是否对某条之前轮次的反应？\n"
         "   - user_text 是否有 '我之前' / '你刚才' / 'that thing ... raised'\n"
