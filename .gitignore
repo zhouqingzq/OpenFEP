@@ -26,3 +26,5 @@ personas/
 personas_test_dash/
 personas_test_desc/
 personas_test_tmp/
+# Local evaluation / scratch artifacts (not part of release narrative)
+/tmp_*

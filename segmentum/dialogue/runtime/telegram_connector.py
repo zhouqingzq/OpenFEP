@@ -11,13 +11,21 @@ import argparse
 import json
 import time
 import urllib.error
-import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
-from segmentum.dialogue.runtime.m16_api import M16Gateway, M16SessionHandle
+from segmentum.connectors import (
+    ConnectorCapabilities,
+    ConnectorDeliveryReceipt,
+    ConnectorDeliveryTargetStore,
+    ConnectorRuntime,
+    NormalizedConnectorInput,
+    connector_participant_id,
+    connector_session_id,
+)
+from segmentum.dialogue.runtime.m16_api import M16Gateway
 
 
 TELEGRAM_PLATFORM = "telegram"
@@ -26,37 +34,8 @@ DEFAULT_ALLOWED_UPDATES = ("message", "edited_message")
 TARGET_STORE_FILE = "telegram_delivery_targets.jsonl"
 
 
-def _now(clock: Any | None = None) -> int:
-    if clock is None:
-        return int(time.time())
-    value = clock() if callable(clock) else clock
-    return int(value)
-
-
 def _mapping(raw: Any) -> dict[str, Any]:
     return dict(raw) if isinstance(raw, Mapping) else {}
-
-
-def _read_jsonl(path: Path) -> list[dict[str, Any]]:
-    if not path.is_file():
-        return []
-    rows: list[dict[str, Any]] = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        try:
-            row = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        if isinstance(row, dict):
-            rows.append(row)
-    return rows
-
-
-def _append_jsonl(path: Path, row: Mapping[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(dict(row), ensure_ascii=False) + "\n")
 
 
 def _telegram_slice(text: str, offset: int, length: int) -> str:
@@ -84,16 +63,31 @@ def _display_name(user: Mapping[str, Any]) -> str:
 
 
 def telegram_assistant_participant_id(account_scope: str, bot_user_id: str) -> str:
-    return f"{TELEGRAM_PLATFORM}:{account_scope}:assistant:{bot_user_id}"
+    return connector_participant_id(
+        platform=TELEGRAM_PLATFORM,
+        account_scope=account_scope,
+        participant_kind="assistant",
+        participant_id=bot_user_id,
+    )
 
 
 def telegram_user_participant_id(account_scope: str, platform_user_id: str) -> str:
-    return f"{TELEGRAM_PLATFORM}:{account_scope}:user:{platform_user_id}"
+    return connector_participant_id(
+        platform=TELEGRAM_PLATFORM,
+        account_scope=account_scope,
+        participant_kind="user",
+        participant_id=platform_user_id,
+    )
 
 
 def telegram_username_participant_id(account_scope: str, username: str) -> str:
     normalized = str(username or "").lstrip("@").strip().casefold()[:64]
-    return f"{TELEGRAM_PLATFORM}:{account_scope}:username:{normalized}"
+    return connector_participant_id(
+        platform=TELEGRAM_PLATFORM,
+        account_scope=account_scope,
+        participant_kind="username",
+        participant_id=normalized,
+    )
 
 
 def telegram_surface_kind(chat_type: str, message_thread_id: int | None = None) -> str:
@@ -119,10 +113,17 @@ def telegram_session_id(
 ) -> str:
     surface_kind = telegram_surface_kind(chat_type, message_thread_id)
     if surface_kind == "dm":
-        return f"{TELEGRAM_PLATFORM}:{account_scope}:dm:user_{platform_user_id}"
-    if surface_kind == "topic":
-        return f"{TELEGRAM_PLATFORM}:{account_scope}:topic:chat_{chat_id}:thread_{int(message_thread_id or 0)}"
-    return f"{TELEGRAM_PLATFORM}:{account_scope}:{surface_kind}:chat_{chat_id}"
+        surface_id = f"user_{platform_user_id}"
+    elif surface_kind == "topic":
+        surface_id = f"chat_{chat_id}:thread_{int(message_thread_id or 0)}"
+    else:
+        surface_id = f"chat_{chat_id}"
+    return connector_session_id(
+        platform=TELEGRAM_PLATFORM,
+        account_scope=account_scope,
+        surface_kind=surface_kind,
+        surface_id=surface_id,
+    )
 
 
 def telegram_turn_id(
@@ -218,17 +219,13 @@ class TelegramDeliveryTarget:
 
 
 @dataclass(frozen=True)
-class TelegramNormalizedInput:
-    persona_id: str
-    session_id: str
-    correlation_id: str
-    text: str
-    speaker_name: str
-    group_turn_envelope: dict[str, Any]
-    delivery_target: TelegramDeliveryTarget
-    update_id: int
-    platform_message_id: str
-    ingress_evidence_band: str
+class TelegramNormalizedInput(NormalizedConnectorInput):
+    @property
+    def update_id(self) -> int:
+        try:
+            return int(self.platform_event_id)
+        except (TypeError, ValueError):
+            return 0
 
 
 class TelegramApiError(RuntimeError):
@@ -308,70 +305,40 @@ class TelegramBotApiClient:
         return _mapping(raw)
 
 
-@dataclass
-class TelegramDeliveryTargetStore:
-    root: Path
+def telegram_delivery_target_from_payload(payload: Mapping[str, Any]) -> TelegramDeliveryTarget | None:
+    raw = _mapping(payload)
+    if str(raw.get("platform", "") or TELEGRAM_PLATFORM) != TELEGRAM_PLATFORM:
+        return None
+    chat_id = str(raw.get("chat_id", "") or "").strip()
+    if not chat_id:
+        return None
+    return TelegramDeliveryTarget(
+        chat_id=chat_id,
+        surface_kind=str(raw.get("surface_kind", "") or ""),
+        surface_id=str(raw.get("surface_id", "") or ""),
+        account_scope=str(raw.get("account_scope", "") or DEFAULT_ACCOUNT_SCOPE),
+        reply_to_message_id=(
+            int(raw["reply_to_message_id"])
+            if raw.get("reply_to_message_id") is not None
+            else None
+        ),
+        message_thread_id=(
+            int(raw["message_thread_id"])
+            if raw.get("message_thread_id") is not None
+            else None
+        ),
+    )
 
-    def __post_init__(self) -> None:
-        self.root = Path(self.root)
-        self.root.mkdir(parents=True, exist_ok=True)
 
-    @property
-    def path(self) -> Path:
-        return self.root / TARGET_STORE_FILE
+class TelegramDeliveryTargetStore(ConnectorDeliveryTargetStore):
+    """Compatibility wrapper over the platform-neutral target ledger."""
 
-    def record(
-        self,
-        *,
-        event_id: str,
-        correlation_id: str,
-        target: TelegramDeliveryTarget,
-        now: int | None = None,
-    ) -> None:
-        _append_jsonl(
-            self.path,
-            {
-                "record_type": "target",
-                "event_id": str(event_id),
-                "correlation_id": str(correlation_id or ""),
-                "status": "pending",
-                "at": int(now if now is not None else time.time()),
-                "target": target.to_payload(),
-            },
-        )
+    def __init__(self, root: Path) -> None:
+        super().__init__(root=root, file_name=TARGET_STORE_FILE)
 
     def load(self, event_id: str) -> TelegramDeliveryTarget | None:
-        needle = str(event_id or "").strip()
-        if not needle:
-            return None
-        latest_target: dict[str, Any] | None = None
-        delivered = False
-        for row in reversed(_read_jsonl(self.path)):
-            if str(row.get("event_id", "") or "") != needle:
-                continue
-            if str(row.get("record_type", "") or "") == "delivered":
-                delivered = True
-                break
-            if str(row.get("record_type", "") or "") == "target" and latest_target is None:
-                latest_target = _mapping(row.get("target"))
-        if delivered or latest_target is None:
-            return None
-        return TelegramDeliveryTarget(
-            chat_id=str(latest_target.get("chat_id", "") or ""),
-            surface_kind=str(latest_target.get("surface_kind", "") or ""),
-            surface_id=str(latest_target.get("surface_id", "") or ""),
-            account_scope=str(latest_target.get("account_scope", "") or DEFAULT_ACCOUNT_SCOPE),
-            reply_to_message_id=(
-                int(latest_target["reply_to_message_id"])
-                if latest_target.get("reply_to_message_id") is not None
-                else None
-            ),
-            message_thread_id=(
-                int(latest_target["message_thread_id"])
-                if latest_target.get("message_thread_id") is not None
-                else None
-            ),
-        )
+        payload = self.load_payload(event_id)
+        return telegram_delivery_target_from_payload(payload or {}) if payload is not None else None
 
     def mark_delivered(
         self,
@@ -380,14 +347,10 @@ class TelegramDeliveryTargetStore:
         telegram_message_id: str = "",
         now: int | None = None,
     ) -> None:
-        _append_jsonl(
-            self.path,
-            {
-                "record_type": "delivered",
-                "event_id": str(event_id),
-                "telegram_message_id": str(telegram_message_id or ""),
-                "at": int(now if now is not None else time.time()),
-            },
+        super().mark_delivered(
+            event_id=event_id,
+            platform_message_id=telegram_message_id,
+            now=now,
         )
 
 
@@ -607,6 +570,7 @@ def normalize_telegram_update(
     update_id = int(update.get("update_id", 0) or 0)
     correlation_id = f"tg:{bot.account_scope}:{update_id}:{message_id}"
     return TelegramNormalizedInput(
+        platform=TELEGRAM_PLATFORM,
         persona_id=persona_id,
         session_id=session_id,
         correlation_id=correlation_id[:120],
@@ -614,13 +578,71 @@ def normalize_telegram_update(
         speaker_name=speaker_name,
         group_turn_envelope=envelope,
         delivery_target=delivery_target,
-        update_id=update_id,
+        platform_event_id=str(update_id),
         platform_message_id=message_id,
         ingress_evidence_band=ingress_evidence_band,
     )
 
 
-class TelegramConnector:
+class TelegramAdapter:
+    """Telegram-specific normalization and delivery implementation."""
+
+    platform = TELEGRAM_PLATFORM
+    target_store_file = TARGET_STORE_FILE
+    capabilities = ConnectorCapabilities(
+        direct_messages=True,
+        group_messages=True,
+        threaded_messages=True,
+        explicit_mentions=True,
+        reply_links=True,
+        message_edits=True,
+        proactive_delivery=False,
+    )
+
+    def __init__(
+        self,
+        *,
+        persona_id: str,
+        account_scope: str,
+        api_client: TelegramBotApiClient | Any,
+    ) -> None:
+        self.persona_id = str(persona_id or "").strip() or "default"
+        self.account_scope = str(account_scope or DEFAULT_ACCOUNT_SCOPE).strip() or DEFAULT_ACCOUNT_SCOPE
+        self.api = api_client
+        self._bot_identity: TelegramBotIdentity | None = None
+
+    def bot_identity(self) -> TelegramBotIdentity:
+        if self._bot_identity is None:
+            self._bot_identity = _bot_identity_from_me(self.api.get_me(), account_scope=self.account_scope)
+        return self._bot_identity
+
+    def normalize_event(self, event: Mapping[str, Any]) -> TelegramNormalizedInput | None:
+        return normalize_telegram_update(event, persona_id=self.persona_id, bot=self.bot_identity())
+
+    def target_from_payload(self, payload: Mapping[str, Any]) -> TelegramDeliveryTarget | None:
+        return telegram_delivery_target_from_payload(payload)
+
+    def deliver(self, *, target: Any, text: str) -> ConnectorDeliveryReceipt:
+        if not isinstance(target, TelegramDeliveryTarget):
+            raise TypeError("TelegramAdapter requires TelegramDeliveryTarget")
+        message = self.api.send_message(
+            chat_id=target.chat_id,
+            text=text,
+            message_thread_id=target.message_thread_id,
+            reply_to_message_id=target.reply_to_message_id,
+        )
+        return ConnectorDeliveryReceipt(
+            platform=TELEGRAM_PLATFORM,
+            platform_message_id=str(message.get("message_id", "") or ""),
+            target={
+                "chat_id": target.chat_id,
+                "surface_kind": target.surface_kind,
+                "surface_id": target.surface_id,
+            },
+        )
+
+
+class TelegramConnector(ConnectorRuntime):
     def __init__(
         self,
         *,
@@ -630,100 +652,34 @@ class TelegramConnector:
         api_client: TelegramBotApiClient | Any,
         clock: Any | None = None,
     ) -> None:
-        self.persona_id = str(persona_id or "").strip() or "default"
-        self.account_scope = str(account_scope or DEFAULT_ACCOUNT_SCOPE).strip() or DEFAULT_ACCOUNT_SCOPE
-        self.gateway = gateway or M16Gateway(clock=clock)
         self.api = api_client
-        self.clock = clock
-        self._bot_identity: TelegramBotIdentity | None = None
+        self.telegram_adapter = TelegramAdapter(
+            persona_id=persona_id,
+            account_scope=account_scope,
+            api_client=api_client,
+        )
+        super().__init__(adapter=self.telegram_adapter, gateway=gateway, clock=clock)
 
     def bot_identity(self) -> TelegramBotIdentity:
-        if self._bot_identity is None:
-            self._bot_identity = _bot_identity_from_me(self.api.get_me(), account_scope=self.account_scope)
-        return self._bot_identity
+        return self.telegram_adapter.bot_identity()
 
     def normalize_update(self, update: Mapping[str, Any]) -> TelegramNormalizedInput | None:
-        return normalize_telegram_update(update, persona_id=self.persona_id, bot=self.bot_identity())
+        return self.telegram_adapter.normalize_event(update)
 
     def ingest_update(self, update: Mapping[str, Any], *, max_cycles: int = 4) -> dict[str, Any]:
-        normalized = self.normalize_update(update)
-        if normalized is None:
-            return {"accepted": False, "ignored": "unsupported_update"}
-        handle = self.gateway.get_or_create_session(normalized.persona_id, normalized.session_id)
-        target_store = TelegramDeliveryTargetStore(handle.session_root)
-        event_id = handle.bridge.append_client_input(
-            text=normalized.text,
-            correlation_id=normalized.correlation_id,
-            source="telegram_connector",
-            speaker_name=normalized.speaker_name,
-            group_turn_envelope=normalized.group_turn_envelope,
-            ingress_evidence_band=normalized.ingress_evidence_band,
-        )
-        target_store.record(
-            event_id=event_id,
-            correlation_id=normalized.correlation_id,
-            target=normalized.delivery_target,
-            now=_now(self.clock),
-        )
-        runner = self.gateway.ensure_runner(handle)
-        processed_rows: list[dict[str, Any]] = []
-        sent_messages: list[dict[str, Any]] = []
-        for _ in range(max(1, int(max_cycles))):
-            step = runner.run_once(now=_now(self.clock), max_steps=1)
-            processed_rows.extend(dict(row) for row in step.processed if isinstance(row, Mapping))
-            sent_messages.extend(self._deliver_processed_rows(handle.session_root, step.processed))
-            if handle.bridge.is_event_processed(event_id):
-                break
-        return {
-            "accepted": True,
-            "event_id": event_id,
-            "persona_id": normalized.persona_id,
-            "session_id": normalized.session_id,
-            "correlation_id": normalized.correlation_id,
-            "ingress_evidence_band": normalized.ingress_evidence_band,
-            "processed": processed_rows,
-            "sent_messages": sent_messages,
-        }
+        result = self.ingest_event(update, max_cycles=max_cycles)
+        if not result.get("accepted") and result.get("ignored") == "unsupported_event":
+            result["ignored"] = "unsupported_update"
+        return result
 
     def _deliver_processed_rows(self, session_root: Path, processed_rows: list[Mapping[str, Any]]) -> list[dict[str, Any]]:
-        target_store = TelegramDeliveryTargetStore(session_root)
-        sent: list[dict[str, Any]] = []
-        for row in processed_rows:
-            event_id = str(row.get("event_id", "") or "").strip()
-            reply = str(row.get("reply", "") or "").strip()
-            if not event_id or not reply:
-                continue
-            target = target_store.load(event_id)
-            if target is None:
-                continue
-            message = self.api.send_message(
-                chat_id=target.chat_id,
-                text=reply,
-                message_thread_id=target.message_thread_id,
-                reply_to_message_id=target.reply_to_message_id,
-            )
-            target_store.mark_delivered(
-                event_id=event_id,
-                telegram_message_id=str(message.get("message_id", "") or ""),
-                now=_now(self.clock),
-            )
-            sent.append({"event_id": event_id, "chat_id": target.chat_id, "message_id": message.get("message_id", "")})
-        return sent
+        return self.deliver_processed_rows(session_root, processed_rows)
 
-    def _telegram_handles(self) -> list[M16SessionHandle]:
-        prefix = f"{TELEGRAM_PLATFORM}:{self.account_scope}:"
-        return [
-            handle
-            for handle in self.gateway.sessions.values()
-            if handle.persona_id == self.persona_id and handle.session_id.startswith(prefix)
-        ]
+    def _telegram_handles(self) -> list[Any]:
+        return self.platform_handles()
 
     def drain_proactive_once(self, *, max_sessions: int = 8) -> dict[str, Any]:
-        return {
-            "sessions_considered": min(len(self._telegram_handles()), max(0, int(max_sessions))),
-            "sent_messages": [],
-            "results": [],
-        }
+        return super().drain_proactive_once(max_sessions=max_sessions)
 
     def poll_once(
         self,

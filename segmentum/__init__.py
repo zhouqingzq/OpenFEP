@@ -2,6 +2,8 @@
 
 import sys
 
+from .version import __version__
+
 if sys.version_info < (3, 11):
     raise RuntimeError(
         "Segmentum requires Python 3.11+; the current interpreter is "
@@ -210,6 +212,7 @@ from .dialogue import (
 from .m45_audit import write_m45_acceptance_artifacts
 
 __all__ = [
+    "__version__",
     "AgentState",
     "Strategy",
     "HeartbeatDaemon",

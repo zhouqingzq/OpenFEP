@@ -6,6 +6,8 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from segmentum.dialogue.runtime.m16_api import create_app
+from segmentum.dialogue.runtime.m16_protocol import SCHEMA_VERSION
+from segmentum.version import __version__
 from tests.m16_1_test_helpers import M16_DEV_HEADERS, build_gateway
 
 
@@ -67,6 +69,8 @@ def test_health_and_runner_status_routes(tmp_path: Path) -> None:
     with TestClient(app) as client:
         health = client.get("/health")
         assert health.status_code == 200
+        assert health.json()["version"] == __version__
+        assert health.json()["protocol_version"] == SCHEMA_VERSION
         status = client.get("/v1/personas/p/sessions/s/runner/status")
         assert status.status_code == 200
         assert status.json()["runner"]["runner_kind"] == "m16_gateway_runner"

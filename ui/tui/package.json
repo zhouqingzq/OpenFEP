@@ -1,15 +1,16 @@
 {
   "name": "@segments/consciousness-tui",
-  "version": "0.1.0-m16.4",
+  "version": "0.1.0-alpha.1",
   "private": true,
-  "description": "M16.4 terminal client for the consciousness gateway.",
+  "description": "Segmentum alpha terminal client.",
   "type": "module",
   "bin": {
     "consciousness-tui": "./dist/main.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "dev": "tsx src/main.ts",
+    "build:client": "npm --prefix ../packages/consciousness-client run build",
+    "build": "npm run build:client && tsc -p tsconfig.json",
+    "dev": "npm run build:client && tsx src/main.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

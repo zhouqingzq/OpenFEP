@@ -1,8 +1,8 @@
 {
   "name": "@segments/consciousness-web",
-  "version": "0.1.0-m16.3",
+  "version": "0.1.0-alpha.1",
   "private": true,
-  "description": "M16.3 thin web chat UI for the consciousness gateway.",
+  "description": "Segmentum alpha web chat and operator UI.",
   "type": "module",
   "scripts": {
     "dev": "vite",

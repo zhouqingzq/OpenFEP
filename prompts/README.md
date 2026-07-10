@@ -1,6 +1,11 @@
 # Prompt Directory Conventions
 
-This directory is the canonical home for milestone work prompts.
+This directory is the historical archive for milestone work prompts.
+
+Starting with product version `0.1.0-alpha.1`, new planning and releases use
+semantic versions instead of new `M*` milestones. Existing milestone names,
+schemas, tests, and reports remain unchanged where they are compatibility or
+audit identifiers.
 
 ## Naming
 

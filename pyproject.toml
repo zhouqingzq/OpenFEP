@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "segmentum"
-version = "0.1.0"
-description = "Project Segmentum survival-first predictive coding prototype"
+version = "0.1.0a1"
+description = "Segmentum alpha: persistent cognitive agent runtime"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []

@@ -1,5 +1,18 @@
 # Claude / Agent Notes
 
+## Product Versioning
+
+The current product release is `0.1.0-alpha.1`. Plan all new work by semantic
+product version, not by creating new `M*` milestones. See `ROADMAP.md`.
+
+Historical milestone names remain in module names, schemas, tests, prompts, and
+reports as compatibility and audit identifiers. Do not bulk-rename them unless
+a versioned migration explicitly requires it.
+
+External platform work must use Connector Contract `0.1` under
+`segmentum/connectors/`. Telegram is a reference adapter, not the product
+boundary. New platform adapters must reuse `ConnectorRuntime`.
+
 ## Active Product Path: Path B Only
 
 All new dialogue cognition work targets **Path B** — the MVP chat stack
@@ -121,60 +134,19 @@ channel thresholds.
 
 ---
 
-## Current Roadmap (Path B–relevant)
+## Product Roadmap
+
+Use `ROADMAP.md` as the current planning source:
 
 ```text
-M8:    Anchored Memory Contract
-M8.9:  MVP Architecture Contract Hardening
-M9.0:  Memory Dynamics Integration (mvp_loop)
-M11.0: User Generative Model And Value Memory Dynamics
-M12.0: User Identity Continuity Model
-M12.1: Mechanistic Personality Model And Plain-Language Report
-M13.0: MVP-Local Behavioral Pull
-M13.1: Boredom / Exploration Bias
-M13.2: Affective Reward Proxy And Settlement
-M13.3: UI-Level Bounded Initiative
-M13.4: UI Idle Tick And Introspection Entry Point
-M13.5: Idle Cognitive Refresh Tick (silence-period fast loop)
-M13.6: Memory-Backed Expected Free Energy Bridge (Path B advisory only)
-M14.0: Conscious Idle Reflector And Self-Cognition Patch
-M14.1: Background Self-Continuity And Persistent Idle Loop
-M14.2: Decoupled Environment Loop And Durable Overnight Outreach
-M14.3: Traceable Proactive Delivery Alignment And Safety Diagnostics
-M14.4: Streamlit Implicit Idle Proactive Delivery
-M14.5: Production Proactive Policy Hardening
-M14.6: Idle Plan And Structural Selector Alignment, Diagnose Observability
-M14.7: Path B Memory Gate, Decay, And Precision-Weighted Recall
-M15.0: Episode Ledger And Free-Energy Proxy Trajectory
-M15.1: Consolidation And Forgetting Loop
-M15.2: Meta-Control Intervention Layer (engineering scheduler)
-M15.3: Open-Item And Pending-Expectation Cleanup Meta-Control
-M16.0: Consciousness Runner Architecture And Wire Protocol
-M16.1: Python Consciousness Runner Service And Gateway
-M16.2: TypeScript Consciousness Client SDK
-M16.3: TypeScript Web Thin Frontend
-M16.4: TypeScript TUI Client And Streamlit Deprecation
+0.1 alpha: usable cognitive runtime and Connector Contract 0.1
+0.2 alpha: multiple external platform adapters
+0.3 alpha: hosted operations and multi-tenant controls
 ```
 
-Deferred or non-active for new implementation unless explicitly revived:
-
-```text
-M6–M7:  CognitiveLoop / meta-control as primary orchestrator (Path A research)
-M10.0:  Self-Initiated Exploration Agenda (superseded by M13 + conscious idle work)
-```
-
-M11 “Conscious Projection Runtime” remains deferred; M11.0 owns user modeling.
-M12 is split into M12.0 (identity continuity) and M12.1 (mechanistic personality).
-
-The M9 series ends at M9.0. Path B memory gate, decay, and precision-weighted
-recall completion lives in M14.7. The three-timescale memory-dynamics loop
-(fast idle refresh, slow consolidation, meta-control intervention) spans
-M13.5, M14.6–M14.7, and M15.0–M15.3. M16 moves Path B orchestration into a
-Python consciousness runner with FastAPI/WebSocket I/O; TypeScript Web/TUI are
-thin clients. After M16.4, Streamlit must not schedule idle or proactive ticks
-by default. M15.2 applies intervention intents on the local Streamlit demo path
-(`streamlit_open_chat`) until M16 retires that scheduler; production
-(`bounded_default`) remains detection-audit-only unless explicitly enabled.
+Historical `M*` documents explain why existing Path B modules have their current
+contracts. They are evidence and compatibility context, not containers for new
+work. Path A and M10 remain frozen unless explicitly revived.
 
 ---
 
@@ -230,14 +202,9 @@ self-thought producers) for new Hu Tao / MVP chat behavior.
 
 ## Prompt Files
 
-Milestone work prompts belong under `prompts/` and should use:
-
-```text
-M{major}.{minor}_Work_Prompt.md
-```
-
-New implementation guidance should not be added as root-level
-`M*_Implementation_Prompt.md` files.
+`prompts/` is a historical milestone archive. Do not create new `M*_Work_Prompt`
+or `M*_Implementation_Prompt` files. New release planning belongs in
+version-named release notes, issues, or product roadmap documents.
 
 
 

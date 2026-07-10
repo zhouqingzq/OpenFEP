@@ -16,6 +16,7 @@ from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconn
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
+from segmentum.version import __version__
 from segmentum.dialogue.runtime.m14_2_self_loop import default_session_root
 from segmentum.dialogue.runtime.m16_protocol import (
     ENGINEERING_PROXY_LABEL,
@@ -177,11 +178,16 @@ def create_app(gateway: M16Gateway | None = None) -> FastAPI:
         app.state.gateway = gw
         yield
 
-    app = FastAPI(title="Segmentum Consciousness Gateway", version=SCHEMA_VERSION, lifespan=lifespan)
+    app = FastAPI(title="Segmentum Gateway", version=__version__, lifespan=lifespan)
 
     @app.get("/health")
     async def health() -> dict[str, str]:
-        return {"status": "ok", "schema_version": SCHEMA_VERSION}
+        return {
+            "status": "ok",
+            "version": __version__,
+            "protocol_version": SCHEMA_VERSION,
+            "schema_version": SCHEMA_VERSION,
+        }
 
     @app.post("/v1/personas/{persona_id}/sessions")
     async def create_session(persona_id: str, body: CreateSessionBody, request: Request) -> JSONResponse:

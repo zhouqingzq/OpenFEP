@@ -1,5 +1,10 @@
 # Project OpenFEP / Segmentum
 
+Current product release: **`0.1.0-alpha.1`**. New work is planned and released
+by semantic version rather than research milestone number. See `ROADMAP.md` and
+`KNOWN_LIMITATIONS.md`. Historical `M*` documents remain as engineering and
+evaluation records.
+
 OpenFEP is a cognitive agent: a digital simulation of personality. Inspired by Karl Friston's **Free Energy Principle (FEP)** and **Active Inference**, it models cognition not as a plain input-output loop, but as a survival-oriented process. Under the constraints of survival, identity, process motivation, and limited resource budgets, OpenFEP selectively minimizes tractable prediction gaps rather than attempting to eliminate uncertainty wholesale.
 
 Its aesthetic and narrative inspiration also draws from **Il Dottore** from *Genshin Impact*: a character associated with experimentation, fractured identity, and the uneasy boundary between mind, selfhood, and constructed intelligence.
@@ -47,6 +52,30 @@ Language and writing then externalize those higher-order structures into transmi
 | Personality Analysis | `personality_analyzer.py` | **Inverse inference** from text to a personality generative model |
 | VIA Projection | `via_projection.py` | Big Five -> 24 character strengths diagnostic |
 | Web UI / API | `api.py`, `api_cli.py` | Browser-based personality analysis interface |
+| Connectors | `segmentum/connectors/` | Platform-neutral ingress, routing, and delivery contracts |
+
+## Connector Architecture
+
+External chat platforms integrate through Connector Contract `0.1`:
+
+```text
+platform event
+-> platform adapter normalize_event()
+-> NormalizedConnectorInput
+-> shared ConnectorRuntime
+-> Segmentum dialogue runtime
+-> platform adapter deliver()
+```
+
+The shared runtime owns session routing, ingestion, cognition invocation,
+delivery-target persistence, and delivery idempotency. A platform adapter owns
+only platform parsing, target reconstruction, and message delivery.
+
+Telegram is the first reference adapter, not the product boundary. Future
+Discord, Slack, Feishu, WeCom, or other adapters should implement
+`ConnectorAdapter` without copying the Telegram runtime.
+
+Use `segmentum.connectors.telegram` as the canonical Telegram import path.
 
 ## Install
 
@@ -81,9 +110,9 @@ python main.py --cycles 20 --precision-profile hair_trigger --reset-state
 
 State persists to `data/segment_v0_1_state.json`; structured JSONL trace beside it.
 
-## Path B Consciousness Chat (M16)
+## Alpha Chat Runtime
 
-Quick start with the M16 runner and web thin client:
+Quick start with the gateway and web thin client:
 
 ```bash
 # Terminal A — gateway + runner bridge

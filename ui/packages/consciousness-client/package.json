@@ -1,8 +1,8 @@
 {
   "name": "@segments/consciousness-client",
-  "version": "0.1.0-m16.2",
+  "version": "0.1.0-alpha.1",
   "private": true,
-  "description": "TypeScript client for the M16 consciousness gateway (HTTP + WebSocket).",
+  "description": "TypeScript client for the Segmentum gateway (HTTP + WebSocket).",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
